@@ -1,0 +1,206 @@
+.panel-body {
+    padding: 0;
+    background-color: transparent;
+}
+
+.panel {
+    border: none;
+}
+
+.panel-footer {
+    padding: 0
+}
+
+.control-label {
+    font-weight: normal;
+}
+
+.rct-title {
+    font-size: 12px;
+}
+
+.navbar-text {
+    margin: 8px;
+}
+
+.navbar {
+    background: rgb(48, 48, 48);
+    border: none;
+}
+
+.navbar-nav > li {
+    height: 100%;
+}
+
+.navbar-default .navbar-nav > .open > a, .navbar-default .navbar-nav > .open > a:focus, .navbar-default .navbar-nav > .open > a:hover {
+    background-color: transparent;
+    color: white;
+}
+
+.dropdown-menu > li > a {
+    font-weight: normal;
+    color: #eee;
+}
+
+.dropdown-menu {
+    background-color: rgba(0, 63, 96, 0.95);
+}
+
+.rct-title {
+    font-size: 13px;
+    font-weight: normal;
+}
+
+.rct-icon {
+    font-size: 13px;
+    font-weight: normal;
+}
+
+html {
+    height: 100%;
+}
+
+body {
+    font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
+    background-color: white;
+    height: 100%;
+}
+
+.navbar-header {
+    background-color: transparent;
+    height: 79px;
+    width: auto;
+    margin-right: 0;
+}
+
+.navbar-brand {
+    height: 100%;
+    padding: 0;
+    padding-top: 14px;
+    background-color: transparent;
+}
+
+.navbar-collapse {
+    padding-left: 0;
+}
+
+
+.footer {
+    height: 40px;
+    padding: 8px 4px 4px 10px;
+}
+
+#root {
+    height: 100%;
+}
+
+[data-reactroot] {
+    height: 100%;
+}
+
+@keyframes spinner {
+    0% {
+        transform: rotate(0deg) scale(1)
+    }
+    50% {
+        transform: rotate(180deg) scale(0.8)
+    }
+    100% {
+        transform: rotate(360deg) scale(1)
+    }
+}
+
+.no-select {
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+    -khtml-user-select: none; /* Konqueror HTML */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* Internet Explorer/Edge */
+    user-select: none;
+    /* Non-prefixed version, currently
+                                     supported by Chrome and Opera */
+}
+
+.navbar-toggle {
+    margin-top: 25px;
+    margin-right: 40px;
+}
+
+#tutorial_modal {
+    text-align: center;
+    border: none;
+    background-color: transparent;
+}
+
+#tutorial_modal > div {
+    width: 1000px;
+    height: auto;
+    padding: 0px;
+    margin: auto;
+    margin-top: 20px;
+    border: none;
+    background-color: transparent;
+}
+
+#tutorial_modal > div > div {
+    width: auto;
+    margin: auto;
+    padding: 0px;
+    border: none;
+    background-color: transparent;
+}
+
+#tutorial_modal > div > div > div {
+    padding: 0px;
+    border: none;
+    background-color: transparent;
+}
+
+video#tutorial {
+    width: 1000px;
+    height: auto;
+}
+
+#nav-examples {
+    margin-right: 30px;
+}
+
+#tutorial-nav {
+    margin-right: 30px;
+}
+
+ul.navbar-right {
+    padding-left: 0px;
+}
+
+@media only screen and (max-width: 1050px) {
+    #janelia {
+        visibility: collapse;
+        width: 0;
+        height: 0;
+        margin: 0;
+    }
+
+    .navbar-right {
+        padding-left: 20px;
+        padding-top: 0;
+    }
+
+    #nav-examples {
+        margin-right: 0;
+    }
+
+    #tutorial-nav {
+        margin-right: 0;
+    }
+}
+
+@media only screen and (max-width: 769px) {
+    .navbar-right {
+        padding-left: 20px;
+        padding-top: 0;
+    }
+    .navbar-collapse {
+        padding-left: 40px;
+    }
+}

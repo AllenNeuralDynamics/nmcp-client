@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig",
+  "compileOnSave": false,
+  "compilerOptions": {
+    "sourceMap": false,
+    "outDir": "dist"
+  },
+  "include": [
+    "server"
+  ]
+}
