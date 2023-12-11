@@ -19,10 +19,15 @@ interface IActiveTracingItemProps {
     isSelected: boolean;
 
     lookupBrainArea(id: string | number): IBrainArea;
+
     onRemoveFromHistory(neuron: NeuronViewModel): void;
+
     onToggleLoadedGeometry(id: string): void;
+
     onToggleTracing(id: string): void;
+
     onSetHighlightedNeuron(neuron: NeuronViewModel): void;
+
     onChangeNeuronViewMode(neuron: NeuronViewModel, viewMode: NeuronViewMode): void;
 }
 
@@ -41,7 +46,7 @@ class ActiveTracingItemList extends React.Component<IActiveTracingItemProps, {}>
         let somaBrainAreaLabel = null;
 
         if (soma) {
-            const somaBrainArea = this.props.lookupBrainArea(PreferencesManager.Instance.ViewerMeshVersion === ViewerMeshVersion.Janelia ? soma.brainAreaIdCcfV25 : soma.brainAreaIdCcfV30);
+            const somaBrainArea = this.props.lookupBrainArea(soma.brainStructureId);
 
             if (somaBrainArea) {
                 let somaDisplayBrainArea = somaBrainArea;
@@ -124,13 +129,21 @@ interface IViewerSelectionProps {
     cycleFocusNeuronId: string;
 
     onRemoveActiveTracing(n: NeuronViewModel): void;
+
     onToggleLoadedGeometry(id: string): void;
+
     onToggleTracing(id: string): void;
+
     onToggleLimitToHighlighted(): void;
+
     onChangeHighlightMode(): void;
+
     onSetHighlightedNeuron(neuron: NeuronViewModel): void;
+
     onCycleHighlightNeuron(direction: number): void;
+
     populateCustomPredicate(position: IPositionInput, replace: boolean): void;
+
     onChangeNeuronViewMode(neuron: NeuronViewModel, viewMode: NeuronViewMode): void;
 }
 
@@ -179,7 +192,7 @@ export class ViewerSelection extends React.Component<IViewerSelectionProps, IVie
     public renderSelection() {
         const node = this.props.selectedNode;
 
-        const brainArea = this.lookupBrainArea(PreferencesManager.Instance.ViewerMeshVersion === ViewerMeshVersion.Janelia ? node.brainAreaIdCcfV25 : node.brainAreaIdCcfV30);
+        const brainArea = this.lookupBrainArea(node.brainStructureId);
 
         let displayBrainArea = brainArea;
 
@@ -216,7 +229,7 @@ export class ViewerSelection extends React.Component<IViewerSelectionProps, IVie
         let somaBrainAreaLabel = null;
 
         if (structure.value !== StructureIdentifier.soma && this.props.selectedTracing && this.props.selectedTracing.soma) {
-            const somaBrainArea = this.lookupBrainArea(PreferencesManager.Instance.ViewerMeshVersion === ViewerMeshVersion.Janelia ? this.props.selectedTracing.soma.brainAreaIdCcfV25 : this.props.selectedTracing.soma.brainAreaIdCcfV30);
+            const somaBrainArea = this.lookupBrainArea(this.props.selectedTracing.soma.brainStructureId);
 
             let somaDisplayBrainArea = somaBrainArea;
 
@@ -230,7 +243,7 @@ export class ViewerSelection extends React.Component<IViewerSelectionProps, IVie
                 <a onClick={() => this.props.onToggleLoadedGeometry(somaBrainArea.id)}>
                     {` ${somaBrainArea.acronym}`}
                 </a>
-            ): null;
+            ) : null;
 
             const somaBrainAreaPopup = somaBrainArea ? (
                 <Popup trigger={somaBrainAreaTrigger} style={{maxHeight: "30px"}}>{somaDisplayBrainArea.name}</Popup>
@@ -246,13 +259,13 @@ export class ViewerSelection extends React.Component<IViewerSelectionProps, IVie
             );
         }
 
-        const nodeBrainAreaTrigger = displayBrainArea ?  (
+        const nodeBrainAreaTrigger = displayBrainArea ? (
             <a onClick={() => this.props.onToggleLoadedGeometry(displayBrainArea.id)}>
                 {`${brainArea.acronym}`}
             </a>
         ) : null;
 
-        const nodeBrainAreaPopup = brainArea ?  (
+        const nodeBrainAreaPopup = brainArea ? (
             <Popup trigger={nodeBrainAreaTrigger} style={{maxHeight: "30px"}}>{brainArea.name}</Popup>
         ) : null;
 

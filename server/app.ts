@@ -105,9 +105,6 @@ function devServer() {
     const compiler = Webpack(webpackConfig);
 
     return new webpackDevServer(compiler, {
-        stats: {
-            colors: true
-        },
         proxy: {
             [ServerConfiguration.graphQLService.endpoint]: {
                 target: apiUri
@@ -125,8 +122,9 @@ function devServer() {
                 target: staticUri
             }
         },
-        before: (app) => {
-            app.use(ServerConfiguration.systemEndpoint, (req, res) => {
+        allowedHosts: "all",
+        onBeforeSetupMiddleware: (devserver) => {
+            devserver.app.use(ServerConfiguration.systemEndpoint, (req, res) => {
                 res.json({
                     systemVersion: version,
                     searchScope: ServerConfiguration.searchScope,
@@ -134,11 +132,12 @@ function devServer() {
                 });
             });
         },
-        disableHostCheck: true,
-        publicPath: webpackConfig.output.publicPath,
-        historyApiFallback: true,
-        noInfo: false,
-        quiet: false
+        devMiddleware: {
+            publicPath: webpackConfig.output.publicPath,
+            stats: {
+                colors: true
+            }
+        }
     });
 }
 

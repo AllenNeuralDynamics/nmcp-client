@@ -21,10 +21,6 @@ export const NEURONS_QUERY = gql`query SearchNeurons($context: SearchContext) {
         id
         acronym
       }
-      manualSomaCompartment {
-        id
-        acronym
-      }
       sample {
         id
         idNumber
@@ -44,8 +40,7 @@ export const NEURONS_QUERY = gql`query SearchNeurons($context: SearchContext) {
           radius
           parentNumber
           sampleNumber
-          brainAreaIdCcfV25
-          brainAreaIdCcfV30
+          brainStructureId
           structureIdentifierId
         }
       }

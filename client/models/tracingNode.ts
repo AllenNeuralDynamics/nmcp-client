@@ -12,6 +12,5 @@ export interface ITracingNode extends INodeBase {
     structureIdValue: number;
     structureIdentifier: IStructureIdentifier;
     structureIdentifierId: string;
-    brainAreaIdCcfV25?: string;
-    brainAreaIdCcfV30?: string;
+    brainStructureId?: string;
 }
