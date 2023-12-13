@@ -8,9 +8,6 @@ export type ServiceLocation = {
 
 export interface IServiceOptions {
     port: number;
-    authRequired: boolean,
-    authUser: string,
-    authPassword: string,
     searchScope: SearchScope;
     systemEndpoint: string;
     graphQLService: ServiceLocation,
@@ -22,9 +19,6 @@ export interface IServiceOptions {
 
 const configuration: IServiceOptions = {
     port: 5000,
-    authRequired: true,
-    authUser: "mouselight",
-    authPassword: "auth_secret", // always override this, but in the event env is not set, don't leave completely open
     searchScope: SearchScope.Public,
     systemEndpoint: "/system",
     graphQLService: {
@@ -54,9 +48,6 @@ function loadServerConfiguration() {
     const options = Object.assign({}, configuration);
 
     options.port = parseInt(process.env.SEARCH_CLIENT_PORT) || options.port;
-    options.authRequired = process.env.SEARCH_AUTH_REQUIRED !== "false";
-    options.authUser = process.env.SEARCH_AUTH_USER || options.authUser;
-    options.authPassword = process.env.SEARCH_AUTH_PASS || options.authPassword;
     options.searchScope = process.env.SEARCH_CLIENT_SCOPE ? SearchScope[process.env.SEARCH_CLIENT_SCOPE] : options.searchScope;
     options.searchScope = options.searchScope === undefined ? SearchScope.Public : options.searchScope;
 

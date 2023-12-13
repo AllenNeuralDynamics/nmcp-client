@@ -1,12 +1,12 @@
 {
-  "name": "mnb-search-client",
-  "version": "1.7.1",
+  "name": "nmcp-search-client",
+  "version": "2.0.0",
   "main": "server/app.js",
   "private": true,
-  "repository": "https://github.com/MouseLightPipeline/mnb-search-client.git",
+  "repository": "https://github.com/AllenNeuralDynamics/nmcp-search-client",
   "author": "Patrick Edson <pedson@leapscientific.com>",
   "license": "SEE LICENSE IN LICENSE",
-  "dockerRepository": "mouselightdatabrowser",
+  "dockerRepository": "leapscientific",
   "dockerImageName": "search-client",
   "scripts": {
     "debug": "node --trace-warnings server/app.js",
@@ -20,8 +20,6 @@
   "dependencies": {
     "express": "^4.16.2",
     "express-http-proxy": "^1.5.0",
-    "passport": "^0.4.0",
-    "passport-http": "^0.3.0",
     "request": "^2.83.0"
   },
   "devDependencies": {

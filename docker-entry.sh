@@ -4,4 +4,4 @@ logName=$(date '+%Y-%m-%d_%H-%M-%S');
 
 export DEBUG=mnb*
 
-node app.js >> /var/log/mnb/${HOSTNAME}-${logName}.log 2>&1
+node app.js >> /var/log/nmcp/search-client-${logName}.log 2>&1

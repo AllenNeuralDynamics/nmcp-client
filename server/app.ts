@@ -3,8 +3,6 @@ import * as fs from "fs";
 
 const express = require("express");
 const proxy = require("express-http-proxy");
-const passport = require("passport");
-const DigestStrategy = require("passport-http").DigestStrategy;
 
 const debug = require("debug")("mnb:search-client:app");
 
@@ -24,28 +22,6 @@ let app = null;
 
 const maintainBaseUrl = req => req.baseUrl;
 
-passport.use(new DigestStrategy({qop: 'auth'},
-    function (username: any, done: any) {
-        if (username === ServerConfiguration.authUser) {
-            return done(null, {id: 1, name: username}, ServerConfiguration.authPassword);
-        } else {
-            return done("Invalid user", null);
-        }
-    },
-    function (params: any, done: any) {
-        // validate nonce as necessary
-        done(null, true)
-    }
-));
-
-passport.serializeUser(function (user: any, done: any) {
-    done(null, user.id);
-});
-
-passport.deserializeUser(function (id: any, done: any) {
-    done(null, {id: 1, name: ServerConfiguration.authUser});
-});
-
 if (process.env.NODE_ENV !== "production") {
     app = devServer();
 } else {
@@ -53,14 +29,6 @@ if (process.env.NODE_ENV !== "production") {
 
     const rootPath = path.resolve(path.join(__dirname, "public"));
     app = express();
-
-    if (ServerConfiguration.authRequired) {
-        app.use(passport.initialize());
-
-        app.get("/", passport.authenticate('digest', {session: false}), (request: any, response: any, next: any) => {
-            next();
-        });
-    }
 
     app.use(ServerConfiguration.systemEndpoint, (req, res) => {
         res.json({
@@ -71,7 +39,7 @@ if (process.env.NODE_ENV !== "production") {
     });
 
     // For most deployments the following are intercepted by an nginx instance to load balance between multiple backend
-    // instances.  However, there may be certain client instances where  directly to this
+    // instances.  However, there may be certain client instances where these endpoints are used directly.
 
     debug(`proxying ${ServerConfiguration.graphQLService.endpoint} to ${apiUri}`);
     app.use(`${ServerConfiguration.graphQLService.endpoint}`, proxy(`${apiUri}`, {proxyReqPathResolver: maintainBaseUrl}));
@@ -81,6 +49,9 @@ if (process.env.NODE_ENV !== "production") {
 
     debug(`proxying ${ServerConfiguration.staticService.endpoint} to ${staticUri}`);
     app.use(`${ServerConfiguration.staticService.endpoint}`, proxy(`${staticUri}`, {proxyReqPathResolver: req => "/static" + req.url}));
+
+    debug(`proxying /slice to ${staticUri}`);
+    app.use(`/slice`, proxy(`${staticUri}`, {proxyReqPathResolver: req => "/slice" + req.url}));
 
     debug(`proxying ${ServerConfiguration.exportService.endpoint} to ${exportUri}`);
     app.use(`${ServerConfiguration.exportService.endpoint}`, proxy(`${exportUri}`, {proxyReqPathResolver: req => "/export" + req.url}));
