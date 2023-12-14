@@ -37,5 +37,5 @@ export const headerButton = {
     border: "1px solid white"
 };
 
-export const primaryBackground = "rgb(0, 63, 96)";
-export const secondaryBackground = "rgb(0, 50, 77)";
+export const primaryBackground = "rgb(39, 128, 220)";
+export const secondaryBackground = "rgb(19, 50, 84)";

@@ -23,7 +23,7 @@ export const Footer = (props: FooterProps) => {
             padding: "10px"
         }}>
             <div style={{verticalAlign: "middle", color: "white", order: 1, flexGrow: 0, flexShrink: 0}}>
-                MouseLight Neuron Browser Copyright © 2016 - {(new Date().getFullYear())} Howard Hughes Medical Institute
+                Neuron Morphology Community Portal Copyright © 2023 - {(new Date().getFullYear())} Allen Institute
             </div>
             <div style={{order: 2, flexGrow: 1, flexShrink: 1, marginLeft: "10px"}}/>
             {props.totalCount >= 0 ?

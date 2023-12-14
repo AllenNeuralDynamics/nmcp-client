@@ -8,8 +8,9 @@ import {SearchScope} from "../../models/uiQueryPredicate";
 import {observer} from "mobx-react-lite";
 import {useViewModel} from "../app/App";
 
-const logo = require("file-loader!../../../assets/mouseLight_NB_color.svg");
-const hhmiImage = require("file-loader!../../../assets/hhmi_logo.png");
+// const logo = require("file-loader!../../../assets/mouseLight_NB_color.svg");
+// const hhmiImage = require("file-loader!../../../assets/hhmi_logo.png");
+const logo = require("../../../assets/nmcp_logo.png");
 
 interface IHeadingProps {
     searchScope: SearchScope;
@@ -56,22 +57,8 @@ export class PageHeader extends React.Component<IHeadingProps, IHeadingState> {
         let message = null;
 
         const helpItems = [
-            <Dropdown.Item key={"1"} href="https://www.janelia.org/project-team/mouselight/neuronbrowser"
-                           target="_blank">
-                About
-            </Dropdown.Item>,
             <Dropdown.Item key={"2"} onClick={() => this.onShowShortcuts()}>
                 Shortcuts
-            </Dropdown.Item>,
-            <Dropdown.Item key={"3"} href="mailto:mouselightadmin@janelia.hhmi.org">
-                Report an Issue
-            </Dropdown.Item>,
-            <Dropdown.Item key={"4"} href="mailto:mouselightadmin@hhmi.org">
-                Contact Us
-            </Dropdown.Item>,
-            <Dropdown.Item key={"5"} href="https://www.janelia.org/project-team/mouselight/neuronbrowser"
-                           target="_blank">
-                Terms of Use
             </Dropdown.Item>
         ];
 
@@ -109,28 +96,15 @@ export class PageHeader extends React.Component<IHeadingProps, IHeadingState> {
                 </Modal>
 
                 <Menu.Item fitted="horizontally" as="a" style={{maxWidth: "214px"}}
-                           href="https://www.janelia.org/project-team/mouselight/neuronbrowser">
+                           href="https://alleninstitute.org/division/neural-dynamics/">
                     <Image size="medium" src={logo}/>
                 </Menu.Item>
+
                 <Menu.Item fitted="horizontally" style={{margin: "0 40px"}}>
-                    {message ||
-                    <a href="http://www.janelia.org" target="_blank" style={{maxWidth: "214px"}}>
-                        <Image size="small" src={hhmiImage}/>
-                    </a>}
+                    {message}
                 </Menu.Item>
 
                 <Menu.Menu position="right" style={{height: "79px"}}>
-                    <MenuItem onClick={() => this.setState({showTutorial: true})}>
-                        Tutorial Video
-                    </MenuItem>
-                    <Dropdown item text="Examples - Try It Now!">
-                        <Dropdown.Menu>
-                            {exampleMenuItems}
-                        </Dropdown.Menu>
-                    </Dropdown>
-                    <MenuItem as="a" href="http://mouselight.janelia.org" target="_blank">
-                        MouseLight Home
-                    </MenuItem>
                     <Dropdown item text="Help">
                         <Dropdown.Menu>
                             {helpItems}
