@@ -1,15 +1,13 @@
 import gql from "graphql-tag";
-import {Query} from "react-apollo";
 
 import {INeuron} from "../models/neuron";
 import {IPositionInput} from "../models/queryFilter";
-import {PredicateTypeValue, PredicateType} from "../models/brainAreaFilterType";
-import {CcfVersion, SearchScope} from "../models/uiQueryPredicate";
+import {PredicateTypeValue} from "../models/brainAreaFilterType";
+import {SearchScope} from "../models/uiQueryPredicate";
 
 export const NEURONS_QUERY = gql`query SearchNeurons($context: SearchContext) {
   searchNeurons(context: $context) {
     nonce
-    ccfVersion
     queryTime
     totalCount
     
@@ -71,7 +69,6 @@ export type SearchPredicate = {
 export type SearchContext = {
     nonce: string,
     scope: SearchScope,
-    ccfVersion: CcfVersion,
     predicates: SearchPredicate[];
 }
 
@@ -89,7 +86,4 @@ export type NeuronsQueryData = {
 
 type NeuronsQueryResponse = {
     searchNeurons: NeuronsQueryData
-}
-
-export class NeuronsQuery extends Query<NeuronsQueryResponse, NeuronsQueryVariable> {
 }

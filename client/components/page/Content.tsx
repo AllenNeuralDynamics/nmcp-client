@@ -116,7 +116,6 @@ export class Content extends React.Component<IContentProps, IContentState> {
             const context = {
                 nonce: nonce || cuid(),
                 scope: this.props.searchScope,
-                ccfVersion: PreferencesManager.Instance.ViewerMeshVersion === ViewerMeshVersion.Janelia ? CcfVersion.Ccf25 : CcfVersion.Ccf30,
                 predicates: this.state.predicates.map(f => f.asFilterInput())
             };
 
