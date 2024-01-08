@@ -42,7 +42,12 @@ if (process.env.NODE_ENV !== "production") {
     // instances.  However, there may be certain client instances where these endpoints are used directly.
 
     debug(`proxying ${ServerConfiguration.graphQLService.endpoint} to ${apiUri}`);
-    app.use(`${ServerConfiguration.graphQLService.endpoint}`, proxy(`${apiUri}`, {proxyReqPathResolver: maintainBaseUrl}));
+    app.use(`${ServerConfiguration.graphQLService.endpoint}`, proxy(`${apiUri}`, {
+        proxyReqPathResolver: maintainBaseUrl, proxyReqOptDecorator: (proxyReqOpts: any) => {
+            proxyReqOpts.headers = {"Authorization": ServerConfiguration.authClientId};
+            return proxyReqOpts;
+        }
+    }));
 
     debug(`proxying ${ServerConfiguration.tracingsService.endpoint} to ${tracingsUri}`);
     app.use(`${ServerConfiguration.tracingsService.endpoint}`, proxy(`${tracingsUri}`, {proxyReqPathResolver: maintainBaseUrl}));
@@ -78,7 +83,8 @@ function devServer() {
     return new webpackDevServer(compiler, {
         proxy: {
             [ServerConfiguration.graphQLService.endpoint]: {
-                target: apiUri
+                target: apiUri,
+                headers: {"Authorization": ServerConfiguration.authClientId}
             },
             [ServerConfiguration.tracingsService.endpoint]: {
                 target: tracingsUri

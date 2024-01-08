@@ -10,11 +10,12 @@ export interface IServiceOptions {
     port: number;
     searchScope: SearchScope;
     systemEndpoint: string;
-    graphQLService: ServiceLocation,
-    tracingsService: ServiceLocation,
-    staticService: ServiceLocation,
-    exportService: ServiceLocation,
-    exportLimit: number
+    graphQLService: ServiceLocation;
+    tracingsService: ServiceLocation;
+    staticService: ServiceLocation;
+    exportService: ServiceLocation;
+    exportLimit: number;
+    authClientId: string;
 }
 
 const configuration: IServiceOptions = {
@@ -41,7 +42,8 @@ const configuration: IServiceOptions = {
         port: 5000,
         endpoint: "/export"
     },
-    exportLimit: 20
+    exportLimit: 20,
+    authClientId: ""
 };
 
 function loadServerConfiguration() {
@@ -68,6 +70,8 @@ function loadServerConfiguration() {
     options.exportService.endpoint = process.env.EXPORT_API_ENDPOINT || options.exportService.endpoint;
 
     options.exportLimit = parseInt(process.env.SEARCH_CLIENT_EXPORT_LIMIT) || options.exportLimit;
+
+    options.authClientId = process.env.AUTH_CLIENT_ID || options.exportService.endpoint;
 
     return options;
 }
