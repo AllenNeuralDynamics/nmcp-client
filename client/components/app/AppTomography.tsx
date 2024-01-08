@@ -1,6 +1,6 @@
 import * as React from "react";
-import {observer} from "mobx-react-lite";
-import {useQuery} from "react-apollo-hooks";
+import {observer} from "mobx-react-lite";;
+import {useQuery} from "@apollo/react-hooks";
 import { Message} from "semantic-ui-react";
 
 import {useStore, useViewModel} from "./App";

@@ -7,12 +7,11 @@ import {ExampleDefinition} from "../../examples";
 import {SettingsDialogContainer} from "./SettingsDialog";
 import {PageHeader} from "./Header";
 import {Footer} from "./Footer";
-import {ApolloConsumer} from "react-apollo";
+import {ApolloConsumer} from "@apollo/react-hooks";
 import {NEURONS_QUERY} from "../../graphql/neurons";
 import {ApolloError} from "apollo-client";
 import {INeuron} from "../../models/neuron";
-import {CcfVersion, SearchScope, UIQueryPredicate, UIQueryPredicates} from "../../models/uiQueryPredicate";
-import {ViewerMeshVersion} from "../../models/compartmentMeshSet";
+import {SearchScope, UIQueryPredicate, UIQueryPredicates} from "../../models/uiQueryPredicate";
 import cuid = require("cuid");
 
 interface IContentProps {

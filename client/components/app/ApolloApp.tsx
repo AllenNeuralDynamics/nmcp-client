@@ -1,9 +1,8 @@
 import * as React from "react";
-import {ApolloProvider} from "react-apollo";
-import {ApolloProvider as ApolloHooksProvider} from "react-apollo-hooks";
-import {ApolloClient} from "apollo-client";
-import {InMemoryCache} from "apollo-cache-inmemory";
-import {createHttpLink} from "apollo-link-http";
+import {ApolloClient} from "@apollo/client";
+import {InMemoryCache} from "@apollo/client";
+import {ApolloProvider} from "@apollo/client";
+import {createHttpLink} from "@apollo/react-hooks";
 
 import {AppSystemConfiguration} from "./AppSystemConfiguration";
 import {AppConstants} from "./AppConstants";
@@ -16,7 +15,6 @@ const client = new ApolloClient({
 });
 
 export const ApolloApp = () => (
-    <ApolloHooksProvider client={client}>
         <ApolloProvider client={client}>
             <AppSystemConfiguration>
                 <AppConstants>
@@ -26,5 +24,4 @@ export const ApolloApp = () => (
                 </AppConstants>
             </AppSystemConfiguration>
         </ApolloProvider>
-    </ApolloHooksProvider>
 );
