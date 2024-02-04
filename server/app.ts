@@ -28,6 +28,7 @@ if (process.env.NODE_ENV !== "production") {
     debug("configuring production express server");
 
     const rootPath = path.resolve(path.join(__dirname, "public"));
+
     app = express();
 
     app.use(ServerConfiguration.systemEndpoint, (req, res) => {
@@ -44,7 +45,7 @@ if (process.env.NODE_ENV !== "production") {
     debug(`proxying ${ServerConfiguration.graphQLService.endpoint} to ${apiUri}`);
     app.use(`${ServerConfiguration.graphQLService.endpoint}`, proxy(`${apiUri}`, {
         proxyReqPathResolver: maintainBaseUrl, proxyReqOptDecorator: (proxyReqOpts: any) => {
-            proxyReqOpts.headers = {"Authorization": ServerConfiguration.authClientId};
+            proxyReqOpts.headers.Authorization = ServerConfiguration.authClientId;
             return proxyReqOpts;
         }
     }));

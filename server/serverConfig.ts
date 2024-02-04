@@ -71,7 +71,7 @@ function loadServerConfiguration() {
 
     options.exportLimit = parseInt(process.env.SEARCH_CLIENT_EXPORT_LIMIT) || options.exportLimit;
 
-    options.authClientId = process.env.AUTH_CLIENT_ID || options.exportService.endpoint;
+    options.authClientId = process.env.AUTH_CLIENT_ID || options.authClientId;
 
     return options;
 }
