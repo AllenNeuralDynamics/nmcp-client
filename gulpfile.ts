@@ -2,6 +2,7 @@ import * as fs from "fs";
 import * as gulp from "gulp";
 import * as shell from "gulp-shell";
 import * as del from "del";
+// @ts-ignore
 import * as merge from "merge-stream";
 
 const compileTypescript = `tsc -p tsconfig.prod.json`;
