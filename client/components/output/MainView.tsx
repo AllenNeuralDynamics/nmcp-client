@@ -454,7 +454,7 @@ export class MainView extends React.Component<IOutputContainerProps, IOutputCont
     private updateNeuronViewModels(props: IOutputContainerProps, setState: boolean, example: any = null): NeuronCalc {
         let loadedModels: NeuronViewModel[] = [];
 
-        props.neurons.map((neuron, index) => {
+        props.neurons.filter(n => n != null).map((neuron, index) => {
             let viewModel = neuronViewModelMap.get(neuron.id);
 
             if (!viewModel) {
