@@ -45,8 +45,7 @@ class SettingsDialog extends React.Component<ISettingsDialogProps, ISettingsDial
             shouldAutoCollapseOnQuery: PreferencesManager.Instance.ShouldAutoCollapseOnQuery,
             shouldAlwaysShowSoma: PreferencesManager.Instance.ShouldAlwaysShowSoma,
             shouldAlwaysShowFullTracing: PreferencesManager.Instance.ShouldAlwaysShowFullTracing,
-            displayColorPicker: false,
-            compartmentMeshVersion: PreferencesManager.Instance.ViewerMeshVersion
+            displayColorPicker: false
         };
     }
 
@@ -54,8 +53,7 @@ class SettingsDialog extends React.Component<ISettingsDialogProps, ISettingsDial
         this.setState({
             shouldAutoCollapseOnQuery: PreferencesManager.Instance.ShouldAutoCollapseOnQuery,
             shouldAlwaysShowSoma: PreferencesManager.Instance.ShouldAlwaysShowSoma,
-            shouldAlwaysShowFullTracing: PreferencesManager.Instance.ShouldAlwaysShowFullTracing,
-            compartmentMeshVersion: PreferencesManager.Instance.ViewerMeshVersion
+            shouldAlwaysShowFullTracing: PreferencesManager.Instance.ShouldAlwaysShowFullTracing
         });
     }
 
@@ -92,11 +90,6 @@ class SettingsDialog extends React.Component<ISettingsDialogProps, ISettingsDial
 
     private onChangeNeuronColor(color) {
         PreferencesManager.Instance.ViewerBackgroundColor = color.hex;
-    }
-
-    private onMeshSetChanged(m: CompartmentMeshSet) {
-        PreferencesManager.Instance.ViewerMeshVersion = m.Version;
-        this.setState({compartmentMeshVersion: m.Version})
     }
 
     public render() {
@@ -140,20 +133,6 @@ class SettingsDialog extends React.Component<ISettingsDialogProps, ISettingsDial
                         <span style={styles.text}> Viewer background color</span>
                     </div>
 
-                    <Form size="small" style={{marginTop: "20px"}}>
-                        <Form.Group>
-                            <Form.Field>
-                                <label>CCF Annotations</label>
-                                <CompartmentMeshSetSelect idName="compartment-mesh-set"
-                                                         options={this.props.constants.CompartmentMeshSets}
-                                                         selectedOption={this.props.constants.findCompartmentMeshSet(this.state.compartmentMeshVersion)}
-                                                         multiSelect={false}
-                                                         searchable={false}
-                                                         onSelect={(m: CompartmentMeshSet) => this.onMeshSetChanged(m)}/>
-                            </Form.Field>
-                        </Form.Group>
-                    </Form>
-
                     {!this.props.isPublicRelease ?
                         <div style={{paddingTop: "20px"}}>
                             <label>Tracing fetch batch size (requires page refresh)</label>
@@ -170,10 +149,6 @@ class SettingsDialog extends React.Component<ISettingsDialogProps, ISettingsDial
                                         defaultValue={PreferencesManager.Instance.TracingFetchBatchSize}/>
                             </div>
                         </div> : null}
-
-                    <div>
-                        <a href="/download/2022-02-28-json.tar.gz">Download</a> the latest data (released 2022.02.28) in bulk.  It contains all neurons in CCFv2.5 (MouseLight Legacy) and CCFv3 as JSON files.
-                    </div>
                 </Modal.Content>
                 <Modal.Actions>
                     <Button onClick={this.props.onHide}>Close</Button>

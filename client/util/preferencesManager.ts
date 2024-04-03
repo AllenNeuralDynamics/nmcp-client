@@ -216,11 +216,7 @@ export class PreferencesManager {
     }
 
     public get ViewerMeshVersion(): ViewerMeshVersion {
-        if (typeof(Storage) !== undefined) {
-            return parseInt(localStorage.getItem(prefix + "viewerMeshVersion")) as ViewerMeshVersion;
-        } else {
-            return ViewerMeshVersion.Janelia;
-        }
+            return ViewerMeshVersion.AibsCcf;
     }
 
     public set ViewerMeshVersion(n: ViewerMeshVersion) {
