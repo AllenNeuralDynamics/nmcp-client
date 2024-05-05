@@ -1,0 +1,7 @@
+declare module "neuroglancer/layer/enabled_frontend_modules.js"
+declare module "neuroglancer/datasource/enabled_frontend_modules.js"
+declare module "neuroglancer/ui/default_input_event_bindings.js"
+declare module "neuroglancer/ui/disable_default_actions.js"
+declare module "neuroglancer/ui/minimal_viewer.js"
+declare module "neuroglancer/ui/url_hash_binding.js"
+declare module "neuroglancer/util/disposable.js"

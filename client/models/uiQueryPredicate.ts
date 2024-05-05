@@ -7,12 +7,7 @@ import {
 import {SearchPredicate} from "../graphql/neurons";
 import {NdbConstants} from "./constants";
 import {FilterContents, IPosition, IPositionInput} from "./queryFilter";
-import cuid = require("cuid");
-
-export enum CcfVersion {
-    Ccf25 = "CCFV25",
-    Ccf30 = "CCFV30",
-}
+import cuid from "cuid";
 
 export enum SearchScope {
     Unset = -1,

@@ -1,4 +1,4 @@
-import {SearchScope} from "./searchScope";
+import {SearchScope} from "./searchScope.js";
 
 export type ServiceLocation = {
     hostname: string;
@@ -8,7 +8,7 @@ export type ServiceLocation = {
 
 export interface IServiceOptions {
     port: number;
-    searchScope: SearchScope;
+    searchScope: number;
     systemEndpoint: string;
     graphQLService: ServiceLocation;
     tracingsService: ServiceLocation;

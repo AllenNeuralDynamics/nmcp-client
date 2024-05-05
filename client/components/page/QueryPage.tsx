@@ -12,6 +12,7 @@ import {ApolloError} from "apollo-client";
 import {UIQueryPredicate, UIQueryPredicates} from "../../models/uiQueryPredicate";
 import {BRAIN_AREA_FILTER_TYPE_SPHERE} from "../../models/brainAreaFilterType";
 import {PreferencesManager} from "../../util/preferencesManager";
+import {ViewerMeshVersion} from "../../models/compartmentMeshSet";
 
 interface IPageProps {
     constants: NdbConstants;
@@ -150,7 +151,7 @@ export class QueryPage extends React.Component<IPageProps, IPageState> {
             shouldAlwaysShowSoma: this.props.shouldAlwaysShowSoma,
             isPublicRelease: this.props.isPublicRelease,
             exportLimit: this.props.exportLimit,
-            compartmentMeshVersion: PreferencesManager.Instance.ViewerMeshVersion,
+            compartmentMeshVersion: ViewerMeshVersion.AibsCcf,
             ref: (r) => this._mainView = r,
             onToggleQueryCollapsed: () => this.setState({isQueryCollapsed: !this.state.isQueryCollapsed}),
             populateCustomPredicate: (p: IPositionInput, b: boolean) => this.populateCustomPredicate(p, b),

@@ -118,21 +118,10 @@ export const CompartmentListContainer = observer((props: ICompartmentListContain
                         margin: "auto",
                         textAlign: "left"
                     }}>
-                        <CompartmentAnnotationLabel/>
                     </h6>
                 </div>
                 <BrainCompartmentSelectionTree {...props}/>
             </div>
         </div>
     );
-});
-
-const CompartmentAnnotationLabel = observer(() => {
-    const viewModel = useViewModel();
-    const store = useStore();
-
-    return <div>
-        <Icon style={{marginRight: "10px"}} name="exchange" onClick={() => viewModel.Compartments.ToggleMeshVersion()}/>
-        {`CCF Annotations: ${store.Constants.findCompartmentMeshSet(viewModel.Compartments.MeshVersion).Name}`}
-    </div>;
 });

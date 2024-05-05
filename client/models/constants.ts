@@ -140,7 +140,6 @@ export class NdbConstants {
     }
 
     private loadCompartmentMeshSets() {
-        this._compartmentMeshSets.push(new CompartmentMeshSet(ViewerMeshVersion.Janelia));
         this._compartmentMeshSets.push(new CompartmentMeshSet(ViewerMeshVersion.AibsCcf));
     }
 

@@ -12,7 +12,7 @@ import {NEURONS_QUERY} from "../../graphql/neurons";
 import {ApolloError} from "apollo-client";
 import {INeuron} from "../../models/neuron";
 import {SearchScope, UIQueryPredicate, UIQueryPredicates} from "../../models/uiQueryPredicate";
-import cuid = require("cuid");
+import cuid from "cuid";
 
 interface IContentProps {
     constants: NdbConstants;

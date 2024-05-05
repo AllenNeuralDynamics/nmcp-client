@@ -3,15 +3,19 @@
   "compilerOptions": {
     "sourceMap": true,
     "noImplicitAny": false,
-    "strictNullChecks": false,
-    "module": "commonjs",
-    "target": "es6",
+    "allowJs": true,
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "experimentalDecorators": true,
     "jsx": "react",
     "skipLibCheck": true,
-    "experimentalDecorators": true
+    "lib": ["dom", "es2020", "dom.iterable"],
+    "typeRoots": [],
   },
   "exclude": [
     "dist",
-    "node_modules"
+    "node_modules",
+    "webpack.config.cjs"
   ]
 }

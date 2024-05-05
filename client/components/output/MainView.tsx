@@ -24,7 +24,8 @@ import {IBrainArea} from "../../models/brainArea";
 import {examples} from "../../examples";
 import {CompartmentNode} from "./compartments/CompartmentNode";
 import {Button, Message, Modal} from "semantic-ui-react";
-import {CompartmentMeshSet, ViewerMeshVersion} from "../../models/compartmentMeshSet";
+import {ViewerMeshVersion} from "../../models/compartmentMeshSet";
+import {ViewerStyle} from "../../viewer/viewerStyle";
 
 const neuronViewModelMap = new Map<string, NeuronViewModel>();
 
@@ -220,7 +221,7 @@ export class MainView extends React.Component<IOutputContainerProps, IOutputCont
                 },
                 body: JSON.stringify({
                     ids,
-                    ccfVersion: PreferencesManager.Instance.ViewerMeshVersion,
+                    ccfVersion: ViewerMeshVersion.AibsCcf,
                     format
                 })
             }).then(async (response) => {
@@ -777,7 +778,7 @@ export class MainView extends React.Component<IOutputContainerProps, IOutputCont
 
         const baseStyle = {
             position: "fixed" as "fixed",
-            zIndex: 2,
+            zIndex: 200,
             top: offset + "px",
             height: "calc(100% - " + offset + "px)",
             backgroundColor: "#ffffffdd"
@@ -787,13 +788,18 @@ export class MainView extends React.Component<IOutputContainerProps, IOutputCont
 
         const neuronListFloat = this.state.isNeuronListOpen ? (<div style={baseStyle}>  {neuronList}</div>) : null;
 
-        const compartmentListFloat = this.state.isCompartmentListOpen ? (
-            <div style={Object.assign({left: "calc(100% - 400px)"}, baseStyle)}>
-                <CompartmentListContainer {...treeProps}/>
-            </div>) : null;
+        let compartmentListFloat = null;
+        let compartmentListDock = null;
 
-        const compartmentListDock = this.state.isCompartmentListDocked ? (
-            <CompartmentListContainer {...treeProps}/>) : null;
+        if (PreferencesManager.Instance.ViewerStyle == ViewerStyle.Default) {
+            compartmentListFloat = this.state.isCompartmentListOpen ? (
+                <div style={Object.assign({left: "calc(100% - 400px)"}, baseStyle)}>
+                    <CompartmentListContainer {...treeProps}/>
+                </div>) : null;
+
+            compartmentListDock = this.state.isCompartmentListDocked ? (
+                <CompartmentListContainer {...treeProps}/>) : null;
+        }
 
         const overlay = neuronListFloat !== null || compartmentListFloat !== null ? (
             <div style={{

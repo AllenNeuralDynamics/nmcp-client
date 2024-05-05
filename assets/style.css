@@ -7,3 +7,26 @@
     border: none;
     border-radius: 0;
 }
+
+.neuroglancer-side-panel-titlebar.neuroglancer-layer-side-panel-title {
+    background-color: rgb(39, 128, 220) !important;
+}
+
+.neuroglancer-viewer-top-row {
+    background-color: rgb(39, 128, 220) !important;
+}
+
+#neuroglancer-container {
+    overflow: hidden;
+    flex: 1;
+    color: white;
+    border: 0px solid black;
+    border-radius: 4px;
+    box-shadow: 0 1px 2px 0 rgba(34, 36, 38, .1);
+    box-sizing: content-box;
+    webkit-box-sizing: content-box;
+}
+
+#neuroglancer-container input {
+    margin: 3px
+}

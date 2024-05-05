@@ -1,5 +1,5 @@
 import {UIQueryPredicate} from "../models/uiQueryPredicate";
-import { ViewerMeshVersion } from "../models/compartmentMeshSet";
+import {ViewerStyle} from "../viewer/viewerStyle";
 
 
 export interface INotificationListener {
@@ -215,18 +215,6 @@ export class PreferencesManager {
         this.notifyListeners("viewerBackgroundColor", n);
     }
 
-    public get ViewerMeshVersion(): ViewerMeshVersion {
-            return ViewerMeshVersion.AibsCcf;
-    }
-
-    public set ViewerMeshVersion(n: ViewerMeshVersion) {
-        if (typeof(Storage) !== undefined) {
-            localStorage.setItem(prefix + "viewerMeshVersion", n.valueOf().toFixed(0));
-        }
-
-        this.notifyListeners("viewerMeshVersion", n);
-    }
-
     public get TracingRadiusFactor() {
         if (typeof(Storage) !== undefined) {
             return parseInt(localStorage.getItem(prefix + "tracingRadiusFactor"));
@@ -265,6 +253,22 @@ export class PreferencesManager {
         } else {
             return false;
         }
+    }
+
+    public get ViewerStyle(): ViewerStyle {
+        if (typeof(Storage) !== undefined) {
+            return parseInt(localStorage.getItem(prefix + "viewerStyle")) as ViewerStyle;
+        } else {
+            return ViewerStyle.Default;
+        }
+    }
+
+    public set ViewerStyle(n: ViewerStyle) {
+        if (typeof(Storage) !== undefined) {
+            localStorage.setItem(prefix + "viewerStyle", n.valueOf().toFixed(0));
+        }
+
+        this.notifyListeners("viewerStyle", n);
     }
 
     private validateDefaultSettings() {
@@ -325,8 +329,8 @@ export class PreferencesManager {
                 localStorage.setItem(prefix + "zoomSpeed", "1.0");
             }
 
-            if (!localStorage.getItem(prefix + "viewerMeshVersion")) {
-                localStorage.setItem(prefix + "viewerMeshVersion", ViewerMeshVersion.Janelia.valueOf().toFixed(0));
+            if (!localStorage.getItem(prefix + "viewerStyle")) {
+                localStorage.setItem(prefix + "viewerStyle", ViewerStyle.Default.valueOf().toFixed(0));
             }
         }
     }

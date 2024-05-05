@@ -558,6 +558,7 @@ export class SharkViewer {
     private render() {
         this.renderer.render(this.scene, this.camera);
     }
+
     public loadNeuron(filename, color, nodes) {
         const neuron = this.createNeuron(nodes, color);
 
@@ -637,11 +638,7 @@ export class SharkViewer {
             object.name = id;
 
             if (that.centerPoint !== null) {
-                if (this._meshVersion.Version == ViewerMeshVersion.Janelia) {
-                    object.position.set(-that.centerPoint[0], -that.centerPoint[1], -that.centerPoint[2]);
-                } else {
-                    object.position.set(-that.centerPoint[2], -that.centerPoint[1], -that.centerPoint[0]);
-                }
+                object.position.set(-that.centerPoint[2], -that.centerPoint[1], -that.centerPoint[0]);
             }
 
             that._compartmentGroup.add(object);

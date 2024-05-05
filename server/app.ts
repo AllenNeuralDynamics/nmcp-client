@@ -1,13 +1,24 @@
 import * as path from "path";
 import * as fs from "fs";
 
-const express = require("express");
-const proxy = require("express-http-proxy");
+import express from "express";
+import proxy from "express-http-proxy";
 
-const debug = require("debug")("mnb:search-client:app");
+import {webpackConfig} from "./webpack.dev.config.js";
+import pkg from "webpack";
+const {webpack} = pkg;
+import webpackDevServer from "webpack-dev-server";
 
-import {ServerConfiguration} from "./serverConfig";
-import {SearchScope} from "./searchScope";
+import Debug from "debug";
+const debug = Debug("ndb:search-client:app");
+
+import {ServerConfiguration} from "./serverConfig.js";
+import {SearchScope} from "./searchScope.js";
+
+import { dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const version = readSystemVersion();
 
@@ -20,7 +31,7 @@ const exportUri = `http://${ServerConfiguration.exportService.hostname}:${Server
 
 let app = null;
 
-const maintainBaseUrl = req => req.baseUrl;
+const maintainBaseUrl = (req: { baseUrl: any; }) => req.baseUrl;
 
 if (process.env.NODE_ENV !== "production") {
     app = devServer();
@@ -69,19 +80,13 @@ if (process.env.NODE_ENV !== "production") {
     });
 }
 
-app.listen(ServerConfiguration.port, "0.0.0.0", () => {
-    if (process.env.NODE_ENV !== "production") {
-        debug(`listening at http://localhost:${ServerConfiguration.port}/`);
-    }
-});
-
 function devServer() {
-    const webpackConfig = require("../webpack.dev.config.js");
-    const Webpack = require("webpack");
-    const webpackDevServer = require("webpack-dev-server");
-    const compiler = Webpack(webpackConfig);
+    debug("configuring webpack dev server");
 
-    return new webpackDevServer(compiler, {
+    // @ts-ignore
+    const compiler = webpack(webpackConfig);
+
+    return new webpackDevServer({
         proxy: {
             [ServerConfiguration.graphQLService.endpoint]: {
                 target: apiUri,
@@ -116,7 +121,7 @@ function devServer() {
                 colors: true
             }
         }
-    });
+    }, compiler);
 }
 
 function readSystemVersion(): string {
@@ -129,3 +134,9 @@ function readSystemVersion(): string {
         return "";
     }
 }
+
+app.listen(ServerConfiguration.port, "0.0.0.0", () => {
+    if (process.env.NODE_ENV !== "production") {
+        debug(`listening at http://localhost:${ServerConfiguration.port}/`);
+    }
+});

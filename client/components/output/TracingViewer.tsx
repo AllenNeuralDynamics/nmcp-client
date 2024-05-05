@@ -21,8 +21,11 @@ import {SliceManager} from "../../tomography/sliceManager";
 import {TomographyViewModel} from "../../store/viewModel/tomographyViewModel";
 import {TracingStructure} from "../../models/tracingStructure";
 import {AxisViewer} from "../../viewer/axisView";
-import Color = require("color");
-import {CompartmentMeshSet} from "../../models/compartmentMeshSet";
+import * as Color from "color";
+import {CompartmentMeshSet, ViewerMeshVersion} from "../../models/compartmentMeshSet";
+import {ViewerStyle} from "../../viewer/viewerStyle";
+import {configureNeuroglancerContainer} from "../../viewer/neuroglancer/neuroglancerViewer";
+import {NeuroglancerContainer} from "./neuroglancerContainer";
 
 const ROOT_ID = 997;
 
@@ -152,6 +155,10 @@ export class TracingViewer extends React.Component<ITracingViewerProps, ITracing
         const tomography = rootViewModel.Tomography;
 
         observe(tomography.Sagittal, async (change) => {
+            if (!this._sliceManager) {
+                return;
+            }
+
             switch (change.name) {
                 case "IsEnabled":
                     await this.setSliceVisible(SlicePlane.Sagittal, tomography.Sagittal.IsEnabled);
@@ -163,6 +170,10 @@ export class TracingViewer extends React.Component<ITracingViewerProps, ITracing
         });
 
         observe(tomography.Horizontal, async (change) => {
+            if (!this._sliceManager) {
+                return;
+            }
+
             switch (change.name) {
                 case "IsEnabled":
                     await this.setSliceVisible(SlicePlane.Horizontal, tomography.Horizontal.IsEnabled);
@@ -174,6 +185,10 @@ export class TracingViewer extends React.Component<ITracingViewerProps, ITracing
         });
 
         observe(tomography.Coronal, async (change) => {
+            if (!this._sliceManager) {
+                return;
+            }
+
             switch (change.name) {
                 case "IsEnabled":
                     await this.setSliceVisible(SlicePlane.Coronal, tomography.Coronal.IsEnabled);
@@ -185,6 +200,10 @@ export class TracingViewer extends React.Component<ITracingViewerProps, ITracing
         });
 
         observe(tomography, async (change: any) => {
+            if (!this._sliceManager) {
+                return;
+            }
+
             if (change.name === "_selection") {
                 if (tomography.Selection) {
                     await this._sliceManager.setSampleId(tomography.Selection.SampleTomography.Id, tomography.CurrentLocation);
@@ -212,13 +231,13 @@ export class TracingViewer extends React.Component<ITracingViewerProps, ITracing
 
         if (tomography.Selection != null) {
             this._disposer1 = observe(tomography.Selection, async (change) => {
-                if (tomography.Selection) {
+                if (tomography.Selection && this._sliceManager) {
                     await this._sliceManager.setThreshold(tomography.Selection.UseCustomThreshold ? tomography.Selection.CustomThreshold.Values : null, tomography.CurrentLocation)
                 }
             });
 
             this._disposer2 = observe(tomography.Selection.CustomThreshold, async (change) => {
-                if (tomography.Selection) {
+                if (tomography.Selection && this._sliceManager) {
                     await this._sliceManager.setThreshold(tomography.Selection.UseCustomThreshold ? tomography.Selection.CustomThreshold.Values : null, tomography.CurrentLocation)
                 }
             });
@@ -242,8 +261,6 @@ export class TracingViewer extends React.Component<ITracingViewerProps, ITracing
             if (this._viewer) {
                 this._viewer.setBackground(parseInt(PreferencesManager.Instance.ViewerBackgroundColor.slice(1), 16));
             }
-        } else if (name === "viewerMeshVersion") {
-            this.MeshSet = new CompartmentMeshSet(PreferencesManager.Instance.ViewerMeshVersion);
         }
     }
 
@@ -267,7 +284,7 @@ export class TracingViewer extends React.Component<ITracingViewerProps, ITracing
         this.props.onToggleDisplayHighlighted();
     }
 
-    private async createViewer(width: number, height: number) {
+    private async createSharkViewer(width: number, height: number) {
         if (!this._viewer) {
             const a = new AxisViewer();
             a.dom_element = "axis-viewer-container";
@@ -309,7 +326,7 @@ export class TracingViewer extends React.Component<ITracingViewerProps, ITracing
 
             this._axisViewer = a;
 
-            this.MeshSet = new CompartmentMeshSet(PreferencesManager.Instance.ViewerMeshVersion);
+            this.MeshSet = new CompartmentMeshSet(ViewerMeshVersion.AibsCcf);
         }
     }
 
@@ -563,7 +580,9 @@ export class TracingViewer extends React.Component<ITracingViewerProps, ITracing
     private async loadTracings(props: ITracingViewerProps) {
         const {width, height} = this.calculateDimensions();
 
-        await this.createViewer(width, height);
+        if (PreferencesManager.Instance.ViewerStyle == ViewerStyle.Default) {
+            await this.createSharkViewer(width, height);
+        }
 
         this.renderCompartments(props);
 
@@ -620,6 +639,14 @@ export class TracingViewer extends React.Component<ITracingViewerProps, ITracing
             position: relative
         }, PreferencesManager.Instance.HideCursorInViewer ? {cursor: "none"} : {});
 
+        let viewerContainer = null;
+
+        if (PreferencesManager.Instance.ViewerStyle == ViewerStyle.Neuroglancer) {
+            viewerContainer = <NeuroglancerContainer elementName="neuroglancer-container" height={this.state.renderHeight} width={this.state.renderWidth}/>
+        } else {
+            viewerContainer = <div id="viewer-container" style={{height: this.state.renderHeight, width: this.state.renderWidth}}/>
+        }
+
         return (
             <div id="viewer-parent" style={style}>
                 <ViewerSelection constants={this.props.constants}
@@ -638,7 +665,7 @@ export class TracingViewer extends React.Component<ITracingViewerProps, ITracing
                                  onSetHighlightedNeuron={(n: NeuronViewModel) => this.props.onSetHighlightedNeuron(n)}
                                  onCycleHighlightNeuron={(d: number) => this.props.onCycleHighlightNeuron(d)}
                                  populateCustomPredicate={this.props.populateCustomPredicate}/>
-                <div id="viewer-container" style={{height: this.state.renderHeight, width: this.state.renderWidth}}/>
+                {viewerContainer}
                 <div id="axis-viewer-container" style={{
                     height: this._axisViewer?.HEIGHT ?? 0,
                     width: this._axisViewer?.WIDTH ?? 0,
@@ -651,6 +678,10 @@ export class TracingViewer extends React.Component<ITracingViewerProps, ITracing
     }
 
     private setSliceVisible = async (plane: SlicePlane, visible: boolean) => {
+        if (!this._sliceManager) {
+            return;
+        }
+
         if (visible) {
             await this._sliceManager.showSlice(plane);
         } else {

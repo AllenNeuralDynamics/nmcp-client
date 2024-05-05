@@ -2,7 +2,6 @@ import * as React from "react";
 import Select from "react-select";
 
 import {displayBrainArea, IBrainArea} from "../../models/brainArea";
-import {Option} from "react-select/lib/filters";
 
 const customStyles = {
     dropdownIndicator: (provided) => ({
@@ -41,7 +40,7 @@ const customStyles = {
     })
 };
 
-class CompartmentSelectOption implements Option {
+class CompartmentSelectOption {
     public label: string;
     public value: string;
     public data: IBrainArea;
@@ -84,9 +83,9 @@ export class BrainAreaMultiSelect extends React.Component<BrainAreaMultiSelectPr
     }
 
     public render() {
-        const options: Option[] = this.props.compartments.map(o => compartmentOptionMap.get(o.id));
+        const options: any[] = this.props.compartments.map(o => compartmentOptionMap.get(o.id));
 
-        const values: Option[] = this.props.selection.map(s => compartmentOptionMap.get(s.id));
+        const values: any[] = this.props.selection.map(s => compartmentOptionMap.get(s.id));
 
         const props = {
             name: `brain-area-multi-select`,
@@ -97,8 +96,8 @@ export class BrainAreaMultiSelect extends React.Component<BrainAreaMultiSelectPr
             isSearchable: true,
             isMulti: true,
             styles: customStyles,
-            filterOption: (option: Option, filter: string) => filterBrainArea(option.data.data, filter),
-            onChange: (selection: Option[]) => this.props.onSelectionChange(selection.map(s => s.data))
+            filterOption: (option: any, filter: string) => filterBrainArea(option.data.data, filter),
+            onChange: (selection: any[]) => this.props.onSelectionChange(selection.map(s => s.data))
         };
 
         return <Select {...props}/>;

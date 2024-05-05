@@ -4,7 +4,7 @@ WORKDIR /app
 
 COPY dist .
 
-RUN yarn install --production=true
+RUN npm install --production=true
 
 CMD ["./docker-entry.sh"]
 
