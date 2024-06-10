@@ -6,17 +6,19 @@ import proxy from "express-http-proxy";
 
 import {webpackConfig} from "./webpack.dev.config.js";
 import pkg from "webpack";
+
 const {webpack} = pkg;
 import webpackDevServer from "webpack-dev-server";
 
 import Debug from "debug";
+
 const debug = Debug("ndb:search-client:app");
 
 import {ServerConfiguration} from "./serverConfig.js";
 import {SearchScope} from "./searchScope.js";
 
-import { dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import {dirname} from 'node:path';
+import {fileURLToPath} from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -78,6 +80,12 @@ if (process.env.NODE_ENV !== "production") {
     app.use("/", (req, res) => {
         res.sendFile(path.join(rootPath, "index.html"));
     });
+
+    app.listen(ServerConfiguration.port, "0.0.0.0", () => {
+        if (process.env.NODE_ENV !== "production") {
+            debug(`listening at http://localhost:${ServerConfiguration.port}/`);
+        }
+    });
 }
 
 function devServer() {
@@ -86,7 +94,7 @@ function devServer() {
     // @ts-ignore
     const compiler = webpack(webpackConfig);
 
-    return new webpackDevServer({
+    const server = new webpackDevServer({
         proxy: {
             [ServerConfiguration.graphQLService.endpoint]: {
                 target: apiUri,
@@ -106,22 +114,37 @@ function devServer() {
             }
         },
         allowedHosts: "all",
-        onBeforeSetupMiddleware: (devserver) => {
-            devserver.app.use(ServerConfiguration.systemEndpoint, (req, res) => {
+        setupMiddlewares: (middlewares, devServer) => {
+            if (!devServer) {
+                throw new Error('webpack-dev-server is not defined');
+            }
+
+            devServer.app.use(ServerConfiguration.systemEndpoint, (req, res) => {
                 res.json({
                     systemVersion: version,
                     searchScope: ServerConfiguration.searchScope,
                     exportLimit: ServerConfiguration.exportLimit
                 });
             });
+
+            return middlewares;
         },
         devMiddleware: {
             publicPath: webpackConfig.output.publicPath,
             stats: {
                 colors: true
             }
-        }
+        },
+        port: ServerConfiguration.port
     }, compiler);
+
+    server.startCallback((err) => {
+        if (err) {
+            console.log(err);
+        } else {
+            debug(`listening at http://localhost:${ServerConfiguration.port}/`);
+        }
+    });
 }
 
 function readSystemVersion(): string {
@@ -134,9 +157,3 @@ function readSystemVersion(): string {
         return "";
     }
 }
-
-app.listen(ServerConfiguration.port, "0.0.0.0", () => {
-    if (process.env.NODE_ENV !== "production") {
-        debug(`listening at http://localhost:${ServerConfiguration.port}/`);
-    }
-});
