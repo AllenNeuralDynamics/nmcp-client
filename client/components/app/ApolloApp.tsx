@@ -1,27 +1,78 @@
 import * as React from "react";
-import {ApolloClient} from "@apollo/client";
-import {InMemoryCache} from "@apollo/client";
-import {ApolloProvider} from "@apollo/client";
-import {createHttpLink} from "@apollo/react-hooks";
+import {useEffect} from "react";
+import {InteractionRequiredAuthError} from "@azure/msal-browser";
+import {useAccount, useIsAuthenticated, useMsal} from "@azure/msal-react";
+import {ApolloClient, InMemoryCache, ApolloLink, ApolloProvider, concat} from "@apollo/client";
+import {createUploadLink} from "apollo-upload-client";
 
 import {AppSystemConfiguration} from "./AppSystemConfiguration";
 import {AppConstants} from "./AppConstants";
-import {AppContent} from "./AppContent";
 import {AppTomography} from "./AppTomography";
+import {loginRequest} from "../../authConfig";
+import {UserApp} from "./UserApp";
+import {AppRouter} from "./AppRouter";
+import {PageHeader} from "../page/PageHeader";
+import {Footer} from "../page/Footer";
 
-const client = new ApolloClient({
-    link: createHttpLink({uri: "/graphql"}),
-    cache: new InMemoryCache(),
-});
+export const ApolloApp = () => {
+    const {instance, accounts} = useMsal();
 
-export const ApolloApp = () => (
-        <ApolloProvider client={client}>
+    const isAuthenticated = useIsAuthenticated();
+
+    const account = useAccount(accounts[0] || {});
+
+    const uploadLink = createUploadLink({uri: "/graphql"});
+
+    const authMiddleware = new ApolloLink((operation, forward) => {
+        // add the authorization to the headers
+        operation.setContext({
+            headers: {
+                authorization: localStorage.getItem('token') || null,
+            }
+        });
+
+        return forward(operation);
+    })
+
+    const client: ApolloClient<any> = new ApolloClient({
+        link: concat(authMiddleware, uploadLink),
+        cache: new InMemoryCache(),
+    });
+
+    useEffect(() => {
+        if (!isAuthenticated) {
+            (async () => {
+                await client.resetStore() //clear Apollo cache when user logg=s off
+            })()
+        } else if (account) {
+            instance.acquireTokenSilent({
+                scopes: loginRequest.scopes,
+                account: instance.getAllAccounts()[0]
+            }).then(tokenResponse => {
+                localStorage.setItem("token", tokenResponse.accessToken);
+            }).catch(error => {
+                if (error instanceof InteractionRequiredAuthError) {
+                    // fallback to interaction when silent call fails
+                    return instance.acquireTokenRedirect({scopes: loginRequest.scopes})
+                }
+
+                // handle other errors
+            });
+
+        }
+    }, [isAuthenticated, instance, account])
+
+    return <ApolloProvider client={client}>
+        <UserApp>
             <AppSystemConfiguration>
                 <AppConstants>
                     <AppTomography>
-                        <AppContent/>
+                        <PageHeader/>
+                        <AppRouter/>
+                        <Footer/>
                     </AppTomography>
                 </AppConstants>
             </AppSystemConfiguration>
-        </ApolloProvider>
-);
+        </UserApp>
+    </ApolloProvider>
+};

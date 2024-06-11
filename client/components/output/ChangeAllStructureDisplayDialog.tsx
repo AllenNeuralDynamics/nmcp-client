@@ -2,7 +2,7 @@ import * as React from "react";
 import {Button, Modal} from "semantic-ui-react";
 
 import {NEURON_VIEW_MODES, NeuronViewMode} from "../../viewmodel/neuronViewMode";
-import {TracingViewModeSelect} from "../editors/TracingViewModeSelect";
+import {TracingViewModeSelect} from "../query/editors/TracingViewModeSelect";
 
 interface IChangeAllStructureDisplayDialogProps {
     show: boolean

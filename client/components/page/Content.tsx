@@ -3,9 +3,8 @@ import * as React from "react";
 import {QueryPage} from "./QueryPage";
 import {PreferencesManager} from "../../util/preferencesManager";
 import {NdbConstants} from "../../models/constants";
-import {ExampleDefinition} from "../../examples";
 import {SettingsDialogContainer} from "./SettingsDialog";
-import {PageHeader} from "./Header";
+import {PageHeader} from "./PageHeader";
 import {Footer} from "./Footer";
 import {ApolloConsumer} from "@apollo/react-hooks";
 import {NEURONS_QUERY} from "../../graphql/neurons";
@@ -37,7 +36,7 @@ interface IContentState {
 export class Content extends React.Component<IContentProps, IContentState> {
     private _uiPredicates: UIQueryPredicates;
 
-    private _queryPage;
+    private _queryPage: QueryPage;
 
     public constructor(props: IContentProps) {
         super(props);
@@ -70,26 +69,6 @@ export class Content extends React.Component<IContentProps, IContentState> {
         } else {
             return this.state.predicates;
         }
-    }
-
-    private onApplyExampleQuery(example: ExampleDefinition, client) {
-        this._uiPredicates.PredicateListener = null;
-
-        this._uiPredicates = new UIQueryPredicates(example.filters, this.props.constants);
-
-        this._uiPredicates.PredicateListener = () => this.setState({predicates: this._uiPredicates.Predicates});
-
-        if (example.brainAreas) {
-            this._queryPage.updateVisibleCompartments(example.brainAreas);
-        }
-
-        this._queryPage.resetView(example.viewOrientation.r1, example.viewOrientation.r2);
-
-        this.setState({
-            predicates: this._uiPredicates.Predicates,
-        }, async () => {
-            await this.onExecuteQuery(client, example.filters ? example.filters[0].id : null);
-        });
     }
 
     private onResetPage = () => {
@@ -153,10 +132,8 @@ export class Content extends React.Component<IContentProps, IContentState> {
         return (
             <ApolloConsumer>
                 {client => (
-                    <div style={{height: "calc(100vh - 112px)"}}>
+                    <div style={{height: "calc(100vh - 94px)", background: "green"}}>
                         <SettingsDialogContainer/>
-                        <PageHeader searchScope={this.props.searchScope}
-                                    onApplyExampleQuery={(f) => this.onApplyExampleQuery(f, client)}/>
                         <QueryPage constants={this.props.constants} predicates={this._uiPredicates}
                                    predicateList={this.state.predicates} neurons={this.state.neurons}
                                    totalCount={this.state.totalCount} isInQuery={this.state.isInQuery}
@@ -169,7 +146,6 @@ export class Content extends React.Component<IContentProps, IContentState> {
                                    ref={(r) => this._queryPage = r}
                                    onPerformQuery={() => this.onExecuteQuery(client)}
                                    onResetPage={() => this.onResetPage()}/>
-                        <Footer totalCount={this.props.constants.NeuronCount}/>
                     </div>
                 )}
             </ApolloConsumer>

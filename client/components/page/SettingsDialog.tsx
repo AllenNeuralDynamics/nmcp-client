@@ -8,7 +8,7 @@ const Slider = require("rc-slider").default;
 import {PreferencesManager} from "../../util/preferencesManager";
 import {CompartmentMeshSet, ViewerMeshVersion} from "../../models/compartmentMeshSet";
 import {NdbConstants} from "../../models/constants";
-import {CompartmentMeshSetSelect} from "../editors/CompartmentMeshSetSelect";
+import {CompartmentMeshSetSelect} from "../query/editors/CompartmentMeshSetSelect";
 import {useStore, useViewModel} from "../app/App";
 import {SearchScope} from "../../models/uiQueryPredicate";
 

@@ -5,17 +5,17 @@ import {IBrainArea} from "../../models/brainArea";
 
 import {BrainAreaMultiSelect} from "../editors/BrainAreaMultiSelect";
 import {IQueryOperator} from "../../models/queryOperator";
-import {QueryOperatorSelect} from "../editors/QueryOperatorSelect";
+import {QueryOperatorSelect} from "./editors/QueryOperatorSelect";
 import {FilterComposition} from "../../models/queryFilter";
 import {NeuronalStructure} from "../../models/neuronalStructure";
-import {NeuronalStructureSelect} from "../editors/NeuronalStructureSelect";
+import {NeuronalStructureSelect} from "./editors/NeuronalStructureSelect";
 import {NdbConstants} from "../../models/constants";
-import {BrainAreaFilterTypeSelect} from "../editors/BrainAreaFilterTypeSelect";
+import {BrainAreaFilterTypeSelect} from "./editors/BrainAreaFilterTypeSelect";
 import {
     BRAIN_AREA_FILTER_TYPES, BrainAreaFilterType,
     PredicateType
 } from "../../models/brainAreaFilterType";
-import {CompositionSelect} from "../editors/CompositionSelect";
+import {CompositionSelect} from "./editors/CompositionSelect";
 import {UIQueryPredicate} from "../../models/uiQueryPredicate";
 
 interface IQueryFilterProps {

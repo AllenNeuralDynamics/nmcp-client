@@ -1,7 +1,7 @@
 import * as React from "react";
 import {observe} from "mobx";
 import {observer} from "mobx-react";
-import * as _ from "lodash";
+import * as _ from "lodash-es";
 
 import {ITracingNode} from "../../models/tracingNode";
 import {TracingViewModel} from "../../viewmodel/tracingViewModel";
@@ -24,7 +24,6 @@ import {AxisViewer} from "../../viewer/axisView";
 import * as Color from "color";
 import {CompartmentMeshSet, ViewerMeshVersion} from "../../models/compartmentMeshSet";
 import {ViewerStyle} from "../../viewer/viewerStyle";
-import {configureNeuroglancerContainer} from "../../viewer/neuroglancer/neuroglancerViewer";
 import {NeuroglancerContainer} from "./neuroglancerContainer";
 
 const ROOT_ID = 997;

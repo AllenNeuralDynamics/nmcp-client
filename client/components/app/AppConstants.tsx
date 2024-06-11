@@ -1,6 +1,7 @@
 import * as React from "react";
 import {observer} from "mobx-react-lite";
 import {useQuery} from "@apollo/react-hooks";
+import {createContext} from "react";
 import {Message} from "semantic-ui-react";
 
 import {NdbConstants} from "../../models/constants";
@@ -8,10 +9,16 @@ import {CONSTANTS_QUERY, ConstantsQueryResponse, SystemSettingsVariables} from "
 import {useStore} from "./App";
 import {AppLoading} from "./AppLoading";
 
-export const AppConstants = observer((props: any) => {
-    const Store = useStore();
+export const ConstantsContext = createContext(null);
 
-    const {data, error, loading} = useQuery<ConstantsQueryResponse, SystemSettingsVariables>(CONSTANTS_QUERY, {variables: {searchScope: Store.SystemConfiguration.searchScope}});
+export const AppConstants = observer((props: any) => {
+    const systemDataStore = useStore();
+
+    const {
+        data,
+        error,
+        loading
+    } = useQuery<ConstantsQueryResponse, SystemSettingsVariables>(CONSTANTS_QUERY, {variables: {searchScope: systemDataStore.SystemConfiguration.searchScope}});
 
     if (loading) {
         return <AppLoading message="initializing system data"/>;
@@ -28,5 +35,9 @@ export const AppConstants = observer((props: any) => {
 
     NdbConstants.DefaultConstants.load(data!);
 
-    return props.children;
+    return (
+        <ConstantsContext.Provider value={NdbConstants.DefaultConstants}>
+            {props.children}
+        </ConstantsContext.Provider>
+    );
 });

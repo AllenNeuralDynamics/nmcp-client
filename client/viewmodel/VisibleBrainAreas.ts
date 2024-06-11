@@ -4,19 +4,19 @@ import {IBrainArea} from "../models/brainArea";
 
 const ROOT_ID = 997;
 
-const brainAreaViewModelMap = new Map<string, BrainCompartmentViewModel>();
 
 export class VisibleBrainAreas {
 
     private _constants: NdbConstants;
     private _brainAreasToDisplay: BrainCompartmentViewModel[] = [];
+    private brainAreaViewModelMap = new Map<string, BrainCompartmentViewModel>();
 
     public get BrainAreas(): BrainCompartmentViewModel[] {
         return this._brainAreasToDisplay.slice();
     }
 
     public initialize(constants: NdbConstants): boolean {
-        if (!constants || brainAreaViewModelMap.size > 0) {
+        if (!constants) {
             return false;
         }
 
@@ -48,7 +48,7 @@ export class VisibleBrainAreas {
 
     public mutate(added: string[], removed: string[] = []) {
         removed.map(id => {
-            const viewModel = brainAreaViewModelMap.get(id);
+            const viewModel = this.brainAreaViewModelMap.get(id);
 
             viewModel.isDisplayed = false;
         });
@@ -79,7 +79,7 @@ export class VisibleBrainAreas {
     private addIfNeeded(id: string) {
         let wasKnown = true;
 
-        let viewModel = brainAreaViewModelMap.get(id);
+        let viewModel = this.brainAreaViewModelMap.get(id);
 
         if (!viewModel) {
             const brainArea = this._constants.findBrainArea(id);
@@ -95,7 +95,7 @@ export class VisibleBrainAreas {
     private createViewModel(brainArea: IBrainArea): BrainCompartmentViewModel {
         const viewModel = new BrainCompartmentViewModel(brainArea, true);
 
-        brainAreaViewModelMap.set(brainArea.id, viewModel);
+        this.brainAreaViewModelMap.set(brainArea.id, viewModel);
 
         this._brainAreasToDisplay.push(viewModel);
 

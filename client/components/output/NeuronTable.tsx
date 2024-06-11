@@ -7,7 +7,7 @@ import {NEURON_VIEW_MODES, NeuronViewMode} from "../../viewmodel/neuronViewMode"
 import {NeuronViewModel} from "../../viewmodel/neuronViewModel";
 import {ChangeAllStructureDisplayDialog} from "./ChangeAllStructureDisplayDialog";
 import {useViewModel} from "../app/App";
-import {ConsensusStatus} from "../../models/neuron";
+import {ConsensusStatus} from "../../models/consensusStatus";
 
 type position = "initial" | "inherit" | "unset" | "relative" | "absolute" | "fixed" | "static" | "sticky";
 type zIndex = number | "initial" | "inherit" | "unset" | "auto";

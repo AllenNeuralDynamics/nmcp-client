@@ -1,5 +1,5 @@
 import * as React from "react";
-import * as _ from "lodash";
+import * as _ from "lodash-es";
 
 import {ExportFormat, ITracing} from "../../models/tracing";
 import {HighlightSelectionMode, ITiming} from "./TracingViewer";
@@ -21,7 +21,6 @@ import {PreferencesManager} from "../../util/preferencesManager";
 import {fullRowStyle} from "../../util/styles";
 import {QueryStatus} from "../query/QueryHeader";
 import {IBrainArea} from "../../models/brainArea";
-import {examples} from "../../examples";
 import {CompartmentNode} from "./compartments/CompartmentNode";
 import {Button, Message, Modal} from "semantic-ui-react";
 import {ViewerMeshVersion} from "../../models/compartmentMeshSet";
@@ -443,7 +442,7 @@ export class MainView extends React.Component<IOutputContainerProps, IOutputCont
             return;
         }
 
-        const neuronCalc = this.updateNeuronViewModels(props, true, examples.find(e => e.filters[0].id === props.nonce));
+        const neuronCalc = this.updateNeuronViewModels(props, true);
 
         this.verifyHighlighting();
 
@@ -452,7 +451,7 @@ export class MainView extends React.Component<IOutputContainerProps, IOutputCont
         }
     }
 
-    private updateNeuronViewModels(props: IOutputContainerProps, setState: boolean, example: any = null): NeuronCalc {
+    private updateNeuronViewModels(props: IOutputContainerProps, setState: boolean): NeuronCalc {
         let loadedModels: NeuronViewModel[] = [];
 
         props.neurons.filter(n => n != null).map((neuron, index) => {
@@ -509,14 +508,6 @@ export class MainView extends React.Component<IOutputContainerProps, IOutputCont
                 } else {
                     viewModel.requestViewMode(this.state.defaultStructureSelection.structure);
                     viewModel.isSelected = false;
-                }
-            }
-
-            if (example) {
-                viewModel.requestViewMode(TracingStructure.all);
-
-                if (index < example.colors.length) {
-                    viewModel.baseColor = example.colors[index];
                 }
             }
 

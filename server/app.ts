@@ -58,7 +58,9 @@ if (process.env.NODE_ENV !== "production") {
     debug(`proxying ${ServerConfiguration.graphQLService.endpoint} to ${apiUri}`);
     app.use(`${ServerConfiguration.graphQLService.endpoint}`, proxy(`${apiUri}`, {
         proxyReqPathResolver: maintainBaseUrl, proxyReqOptDecorator: (proxyReqOpts: any) => {
-            proxyReqOpts.headers.Authorization = ServerConfiguration.authClientId;
+            // if (proxyReqOpts.headers.Authorization == null) {
+                // proxyReqOpts.headers.Authorization = ServerConfiguration.authClientId;
+            // }
             return proxyReqOpts;
         }
     }));
@@ -98,7 +100,7 @@ function devServer() {
         proxy: {
             [ServerConfiguration.graphQLService.endpoint]: {
                 target: apiUri,
-                headers: {"Authorization": ServerConfiguration.authClientId}
+                // headers: {"Authorization": ServerConfiguration.authClientId}
             },
             [ServerConfiguration.tracingsService.endpoint]: {
                 target: tracingsUri
@@ -135,6 +137,7 @@ function devServer() {
                 colors: true
             }
         },
+        historyApiFallback: true,
         port: ServerConfiguration.port
     }, compiler);
 

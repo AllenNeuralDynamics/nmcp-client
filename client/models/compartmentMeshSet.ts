@@ -1,4 +1,4 @@
-import {IDynamicSelectOption} from "../components/editors/DynamicSelect";
+import {IDynamicSelectOption} from "../components/query/editors/DynamicSelect";
 
 export enum ViewerMeshVersion {
     AibsCcf

@@ -1,10 +1,11 @@
 import * as React from "react";
+import {useContext} from "react";
 
-export type FooterProps = {
-    totalCount: number;
-}
+import {ConstantsContext} from "../app/AppConstants";
 
-export const Footer = (props: FooterProps) => {
+export const Footer = () => {
+    const constants = useContext(ConstantsContext)
+
     return (
         <div style={{
             display: "flex",
@@ -26,8 +27,8 @@ export const Footer = (props: FooterProps) => {
                 Neuron Morphology Community Portal Copyright © 2023 - {(new Date().getFullYear())} Allen Institute
             </div>
             <div style={{order: 2, flexGrow: 1, flexShrink: 1, marginLeft: "10px"}}/>
-            {props.totalCount >= 0 ?
-                <div style={{verticalAlign: "middle", color: "white", order: 3, flexGrow: 0, flexShrink: 0}}>{props.totalCount} neurons
+            {constants.NeuronCount >= 0 ?
+                <div style={{verticalAlign: "middle", color: "white", order: 3, flexGrow: 0, flexShrink: 0}}>{constants.NeuronCount} reconstructions
                     available</div> : null}
 
         </div>

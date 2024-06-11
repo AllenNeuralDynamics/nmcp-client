@@ -39,7 +39,6 @@ export const CONSTANTS_QUERY = gql`query ConstantsQuery($searchScope: Int) {
     geometryFile
     geometryEnable
   }
-  systemMessage
 }`;
 
 export type SystemSettingsVariables = {

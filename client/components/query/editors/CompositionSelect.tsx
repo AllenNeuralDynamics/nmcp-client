@@ -1,5 +1,3 @@
-import * as React from "react";
-
 import {DynamicSimpleSelect} from "./DynamicSelect";
 
 export class CompositionSelect extends DynamicSimpleSelect<any> {

@@ -57,6 +57,7 @@ const compartmentOptionMap = new Map<string, CompartmentSelectOption>();
 export type BrainAreaMultiSelectProps = {
     compartments: IBrainArea[];
     selection: IBrainArea[];
+    isDisabled?: boolean;
 
     onSelectionChange(selection: IBrainArea[]): void;
 }
@@ -95,6 +96,7 @@ export class BrainAreaMultiSelect extends React.Component<BrainAreaMultiSelectPr
             isClearable: true,
             isSearchable: true,
             isMulti: true,
+            isDisabled: this.props.isDisabled,
             styles: customStyles,
             filterOption: (option: any, filter: string) => filterBrainArea(option.data.data, filter),
             onChange: (selection: any[]) => this.props.onSelectionChange(selection.map(s => s.data))
