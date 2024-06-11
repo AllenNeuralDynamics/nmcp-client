@@ -24,7 +24,7 @@ export class SharkViewer {
     //width of canvas
     public WIDTH = window.innerWidth;
 
-    public Shader: SystemShader = new StandardShader();
+    public static Shader: SystemShader = new StandardShader();
 
     //color array, nodes of type 0 show as first color, etc.
     public colors = [
@@ -76,7 +76,7 @@ export class SharkViewer {
         this._compartmentGroup.rotation.y = v.MeshRotation;
     }
 
-    private static generateParticle(node) {
+    static generateParticle(node) {
         return new THREE.Vector3(node.x, node.y, node.z);
     }
 
@@ -194,8 +194,8 @@ export class SharkViewer {
         material = new THREE.ShaderMaterial(
             {
                 uniforms: customUniforms,
-                vertexShader: this.Shader.NodeShader.VertexShader,
-                fragmentShader: this.Shader.NodeShader.FragmentShader,
+                vertexShader: SharkViewer.Shader.NodeShader.VertexShader,
+                fragmentShader: SharkViewer.Shader.NodeShader.FragmentShader,
                 transparent: true,
                 alphaTest: 0.5,  // if having transparency issues, try including: alphaTest: 0.5,
             });
@@ -387,8 +387,8 @@ export class SharkViewer {
             const coneMaterial = new THREE.ShaderMaterial(
                 {
                     uniforms: coneUniforms,
-                    vertexShader: this.Shader.PathShader.VertexShader,
-                    fragmentShader: this.Shader.PathShader.FragmentShader,
+                    vertexShader: SharkViewer.Shader.PathShader.VertexShader,
+                    fragmentShader: SharkViewer.Shader.PathShader.FragmentShader,
                     transparent: true,
                     depthTest: true,
                     side: THREE.DoubleSide,
@@ -626,8 +626,8 @@ export class SharkViewer {
                     uniforms: {
                         color: {type: 'c', value: new THREE.Color('#' + color)},
                     },
-                    vertexShader: this.Shader.CompartmentShader.VertexShader,
-                    fragmentShader: this.Shader.CompartmentShader.FragmentShader,
+                    vertexShader: SharkViewer.Shader.CompartmentShader.VertexShader,
+                    fragmentShader: SharkViewer.Shader.CompartmentShader.FragmentShader,
                     transparent: true,
                     depthTest: true,
                     depthWrite: false,

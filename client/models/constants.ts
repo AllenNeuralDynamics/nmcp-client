@@ -17,6 +17,8 @@ export class NdbConstants {
 
     private _structureIdentifierMap = new Map<string, IStructureIdentifier>();
 
+    private _tracingStructures: ITracingStructure[] = [];
+
     private _NeuronStructures: NeuronalStructure[] = [];
     private _neuronStructureMap = new Map<string, NeuronalStructure>();
 
@@ -41,7 +43,8 @@ export class NdbConstants {
 
         this.loadQueryOperators(data.queryOperators);
         this.loadBrainAreas(data.brainAreas);
-        this.loadStructureIdentifiers(data.structureIdentifiers);
+        this.loadStructureIdentifiers(data.structureIdentifiers)
+        this.loadTracingStructures(data.tracingStructures);
         this.loadNeuronalStructures(data.tracingStructures, data.structureIdentifiers);
 
         this.loadCompartmentMeshSets();
@@ -77,8 +80,12 @@ export class NdbConstants {
         return this._compartmentMeshSets;
     }
 
+    public get TracingStructures(): ITracingStructure[] {
+        return this._tracingStructures;
+    }
+
     public findBrainArea(id: string | number): IBrainArea | undefined {
-        if (typeof(id) === "string")
+        if (typeof (id) === "string")
             return this._brainAreaIdMap.get(id);
         else
             return this._brainAreaStructureIdMap.get(id);
@@ -119,6 +126,10 @@ export class NdbConstants {
 
     private loadStructureIdentifiers(structures: IStructureIdentifier[]) {
         structures.map(s => this._structureIdentifierMap.set(s.id, s));
+    }
+
+    private loadTracingStructures(tracingStructures: ITracingStructure[]) {
+        this._tracingStructures = tracingStructures;
     }
 
     private loadNeuronalStructures(ts: ITracingStructure[], si: IStructureIdentifier[]) {

@@ -4,6 +4,7 @@ import {setDefaultInputEventBindings} from "neuroglancer/ui/default_input_event_
 import {disableWheel} from "neuroglancer/ui/disable_default_actions.js";
 import {registerEventListener} from "neuroglancer/util/disposable.js";
 import {NdbConstants} from "../models/constants";
+import {UserPreferences} from "./userPreferences";
 
 export class NeuroglancerProxy {
     private _viewer: any = null;
@@ -33,9 +34,7 @@ export class NeuroglancerProxy {
         proxy._viewer.state.restoreState(s);
 
         const throttledSetUrlHash = debounce(
-            // TODO Save state
-            // () => UserPreferences.Instance.candidateViewerState = proxy._viewer.state.toJSON(),
-            () => {},
+            () => UserPreferences.Instance.candidateViewerState = proxy._viewer.state.toJSON(),
             500
         );
 

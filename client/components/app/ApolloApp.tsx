@@ -4,6 +4,7 @@ import {InteractionRequiredAuthError} from "@azure/msal-browser";
 import {useAccount, useIsAuthenticated, useMsal} from "@azure/msal-react";
 import {ApolloClient, InMemoryCache, ApolloLink, ApolloProvider, concat} from "@apollo/client";
 import {createUploadLink} from "apollo-upload-client";
+;import {ToastContainer, ToastPosition} from "react-toastify";
 
 import {AppSystemConfiguration} from "./AppSystemConfiguration";
 import {AppConstants} from "./AppConstants";
@@ -12,7 +13,12 @@ import {loginRequest} from "../../authConfig";
 import {UserApp} from "./UserApp";
 import {AppRouter} from "./AppRouter";
 import {PageHeader} from "../page/PageHeader";
-import {Footer} from "../page/Footer";
+import {Footer} from "../page/Footer"
+
+const toastStyleOverride = {
+    minWidth: "600px",
+    marginBottom: "40px"
+};
 
 export const ApolloApp = () => {
     const {instance, accounts} = useMsal();
@@ -67,6 +73,7 @@ export const ApolloApp = () => {
             <AppSystemConfiguration>
                 <AppConstants>
                     <AppTomography>
+                        <ToastContainer autoClose={6000} position={ToastPosition.BOTTOM_CENTER} style={toastStyleOverride}/>
                         <PageHeader/>
                         <AppRouter/>
                         <Footer/>
