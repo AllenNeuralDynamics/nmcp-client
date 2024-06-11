@@ -14,6 +14,7 @@ import {UserApp} from "./UserApp";
 import {AppRouter} from "./AppRouter";
 import {PageHeader} from "../page/PageHeader";
 import {Footer} from "../page/Footer"
+import {SettingsDialogContainer} from "../page/SettingsDialog";
 
 const toastStyleOverride = {
     minWidth: "600px",
@@ -73,10 +74,10 @@ export const ApolloApp = () => {
             <AppSystemConfiguration>
                 <AppConstants>
                     <AppTomography>
-                        <ToastContainer autoClose={6000} position={ToastPosition.BOTTOM_CENTER} style={toastStyleOverride}/>
                         <PageHeader/>
+                        <SettingsDialogContainer/>
+                        <ToastContainer autoClose={6000} position={ToastPosition.BOTTOM_CENTER} style={toastStyleOverride}/>
                         <AppRouter/>
-                        <Footer/>
                     </AppTomography>
                 </AppConstants>
             </AppSystemConfiguration>

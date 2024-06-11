@@ -1,15 +1,15 @@
 import * as React from "react";
+import {ApolloError} from "apollo-client";
+import {ApolloConsumer} from "@apollo/react-hooks";
+import cuid from "cuid";
 
 import {QueryPage} from "./QueryPage";
 import {NdbConstants} from "../../models/constants";
-import {SettingsDialogContainer} from "./SettingsDialog";
-import {ApolloConsumer} from "@apollo/react-hooks";
 import {SEARCH_NEURONS_QUERY} from "../../graphql/search";
-import {ApolloError} from "apollo-client";
 import {INeuron} from "../../models/neuron";
 import {SearchScope, UIQueryPredicate, UIQueryPredicates} from "../../models/uiQueryPredicate";
-import cuid from "cuid";
 import {UserPreferences} from "../../util/userPreferences";
+import {Footer} from "./Footer";
 
 interface IContentProps {
     constants: NdbConstants;
@@ -131,7 +131,6 @@ export class Content extends React.Component<IContentProps, IContentState> {
             <ApolloConsumer>
                 {client => (
                     <div style={{height: "calc(100vh - 94px)"}}>
-                        <SettingsDialogContainer/>
                         <QueryPage constants={this.props.constants} predicates={this._uiPredicates}
                                    predicateList={this.state.predicates} neurons={this.state.neurons}
                                    totalCount={this.state.totalCount} isInQuery={this.state.isInQuery}
@@ -144,6 +143,7 @@ export class Content extends React.Component<IContentProps, IContentState> {
                                    ref={(r) => this._queryPage = r}
                                    onPerformQuery={() => this.onExecuteQuery(client)}
                                    onResetPage={() => this.onResetPage()}/>
+                        <Footer/>
                     </div>
                 )}
             </ApolloConsumer>

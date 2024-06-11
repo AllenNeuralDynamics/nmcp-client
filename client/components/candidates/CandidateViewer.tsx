@@ -16,7 +16,7 @@ export const CandidatesViewer = (props: ITracingsTableProps) => {
     useEffect(() => {
         const annotations = createNeuroglancerAnnotationLayer(props.neurons);
 
-        const proxy = NeuroglancerProxy.configureNeuroglancer(UserPreferences.Instance.candidateViewerState, annotations);
+        const proxy = NeuroglancerProxy.configureNeuroglancer("neuroglancer-container", UserPreferences.Instance.candidateViewerState, annotations);
 
         setNgProxy(proxy);
 
@@ -35,7 +35,7 @@ export const CandidatesViewer = (props: ITracingsTableProps) => {
 
     const resetView = () => {
         ngProxy.resetNeuroglancerState();
-        
+
         const annotations = createNeuroglancerAnnotationLayer(props.neurons);
 
         ngProxy.updateAnnotations(annotations);
@@ -43,16 +43,11 @@ export const CandidatesViewer = (props: ITracingsTableProps) => {
 
     return (
         <div>
-            <div style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                marginBottom: "8px"
-            }}>
+            <div style={{display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px"}}>
                 <div/>
                 <Button negative icon="repeat" size="small" content="Reset View" onClick={() => resetView()}/>
             </div>
-            <div id="neuroglancer-container" style={{height: "800px", backgroundColor: "#aaaaaa"}}/>
+            <div id="neuroglancer-container" style={{minHeight: "400px", padding: "40px"}}/>
         </div>
     );
 }

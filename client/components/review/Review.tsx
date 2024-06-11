@@ -1,11 +1,12 @@
 import * as React from "react";
 import {Header, Segment} from "semantic-ui-react";
+
 import {ReviewTable} from "./ReviewTable";
 import {CreateTracing, ICreateTracingProps} from "./create/CreateTracing";
 
 export const Review = (props: ICreateTracingProps) => {
     return (
-        <div>
+        <div style={{margin: "20px"}}>
             <Segment.Group>
                 <Segment secondary>
                     <Header style={{margin: "0"}}>Review</Header>

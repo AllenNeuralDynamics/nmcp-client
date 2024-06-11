@@ -10,10 +10,14 @@ export class NeuroglancerProxy {
     private _viewer: any = null;
     private _changeHandler: any = null;
 
-    public static configureNeuroglancer(state: any, annotations: any) {
+    public static configureNeuroglancer(id: string, state: any, annotations: any) {
         const proxy = new NeuroglancerProxy()
 
-        const target = document.getElementById("neuroglancer-container")
+        const target = document.getElementById(id)
+
+        if (target == null) {
+            return;
+        }
 
         registerEventListener(target, "contextmenu", (e: Event) => {
             e.preventDefault();
