@@ -11,7 +11,7 @@ import {IPositionInput} from "../../models/queryFilter";
 import {ViewerMouseHandler} from "../../viewer/viewMouseHandler";
 import {SharkViewer} from "../../viewer/shark_viewer";
 import {ViewerSelection} from "./ViewerSelection";
-import {INotificationListener, PreferencesManager} from "../../util/preferencesManager";
+import {INotificationListener} from "../../util/preferencesManager";
 import {NeuronViewModel} from "../../viewmodel/neuronViewModel";
 import {NeuronViewMode} from "../../viewmodel/neuronViewMode";
 import {SlicePlane} from "../../services/sliceService";
@@ -25,6 +25,7 @@ import * as Color from "color";
 import {CompartmentMeshSet, ViewerMeshVersion} from "../../models/compartmentMeshSet";
 import {ViewerStyle} from "../../viewer/viewerStyle";
 import {NeuroglancerContainer} from "./neuroglancerContainer";
+import {UserPreferences} from "../../util/userPreferences";
 
 const ROOT_ID = 997;
 
@@ -100,7 +101,7 @@ export class TracingViewer extends React.Component<ITracingViewerProps, ITracing
 
     private _neuronColors = new Map<string, string>();
 
-    private _tracingRadiusFactor = PreferencesManager.Instance.TracingRadiusFactor;
+    private _tracingRadiusFactor = UserPreferences.Instance.TracingRadiusFactor;
 
     private _sliceManager = null;
 
@@ -147,7 +148,7 @@ export class TracingViewer extends React.Component<ITracingViewerProps, ITracing
 
         window.addEventListener("resize", () => this.updateDimensions());
 
-        PreferencesManager.Instance.addListener(this);
+        UserPreferences.Instance.addListener(this);
 
         this.prepareAndRenderTracings(this.props);
 
@@ -246,7 +247,7 @@ export class TracingViewer extends React.Component<ITracingViewerProps, ITracing
     public componentWillUnmount() {
         window.removeEventListener("resize", () => this.updateDimensions());
 
-        PreferencesManager.Instance.removeListener(this);
+        UserPreferences.Instance.removeListener(this);
     }
 
     public componentWillReceiveProps(props: ITracingViewerProps) {
@@ -258,7 +259,7 @@ export class TracingViewer extends React.Component<ITracingViewerProps, ITracing
     public preferenceChanged(name: string) {
         if (name === "viewerBackgroundColor") {
             if (this._viewer) {
-                this._viewer.setBackground(parseInt(PreferencesManager.Instance.ViewerBackgroundColor.slice(1), 16));
+                this._viewer.setBackground(parseInt(UserPreferences.Instance.ViewerBackgroundColor.slice(1), 16));
             }
         }
     }
@@ -305,7 +306,7 @@ export class TracingViewer extends React.Component<ITracingViewerProps, ITracing
             s.on_toggle_node = (tracingId: string) => this.props.onToggleTracing(tracingId);
 
             s.init();
-            s.setBackground(parseInt(PreferencesManager.Instance.ViewerBackgroundColor.slice(1), 16));
+            s.setBackground(parseInt(UserPreferences.Instance.ViewerBackgroundColor.slice(1), 16));
 
             s.animate();
 
@@ -386,7 +387,7 @@ export class TracingViewer extends React.Component<ITracingViewerProps, ITracing
                 } else {
                     let geometryColor = v.compartment.geometryColor;
                     if (v.compartment.structureId === ROOT_ID) {
-                        geometryColor = PreferencesManager.Instance.RootCompartmentColor;
+                        geometryColor = UserPreferences.Instance.RootCompartmentColor;
                     }
 
                     const geometryFile = `${meshPath}${v.compartment.structureId}.obj`;
@@ -416,7 +417,7 @@ export class TracingViewer extends React.Component<ITracingViewerProps, ITracing
                 } else {
                     const brainArea = this.lookupBrainArea(id);
                     if (brainArea.structureId === ROOT_ID) {
-                        brainArea.geometryColor = PreferencesManager.Instance.RootCompartmentColor;
+                        brainArea.geometryColor = UserPreferences.Instance.RootCompartmentColor;
                     }
 
                     const geometryFile = `${meshPath}${brainArea.structureId}.obj`;
@@ -539,7 +540,7 @@ export class TracingViewer extends React.Component<ITracingViewerProps, ITracing
             return;
         }
 
-        const highlightValue = PreferencesManager.Instance.TracingSelectionHiddenOpacity;
+        const highlightValue = UserPreferences.Instance.TracingSelectionHiddenOpacity;
 
         const knownAsArray = Array.from(this._knownNeurons);
 
@@ -579,7 +580,7 @@ export class TracingViewer extends React.Component<ITracingViewerProps, ITracing
     private async loadTracings(props: ITracingViewerProps) {
         const {width, height} = this.calculateDimensions();
 
-        if (PreferencesManager.Instance.ViewerStyle == ViewerStyle.Default) {
+        if (UserPreferences.Instance.ViewerStyle == ViewerStyle.Default) {
             await this.createSharkViewer(width, height);
         }
 
@@ -636,11 +637,11 @@ export class TracingViewer extends React.Component<ITracingViewerProps, ITracing
             height: "100%",
             width: "100%",
             position: relative
-        }, PreferencesManager.Instance.HideCursorInViewer ? {cursor: "none"} : {});
+        }, UserPreferences.Instance.HideCursorInViewer ? {cursor: "none"} : {});
 
         let viewerContainer = null;
 
-        if (PreferencesManager.Instance.ViewerStyle == ViewerStyle.Neuroglancer) {
+        if (UserPreferences.Instance.ViewerStyle == ViewerStyle.Neuroglancer) {
             viewerContainer = <NeuroglancerContainer elementName="neuroglancer-container" height={this.state.renderHeight} width={this.state.renderWidth}/>
         } else {
             viewerContainer = <div id="viewer-container" style={{height: this.state.renderHeight, width: this.state.renderWidth}}/>

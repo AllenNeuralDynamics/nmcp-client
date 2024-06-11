@@ -1,19 +1,22 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import {BrowserRouter} from "react-router-dom";
+import {MsalProvider} from "@azure/msal-react";
 import {AuthenticationResult, EventMessage, EventType, PublicClientApplication} from "@azure/msal-browser";
 
 import {App} from "./components/app/App";
 import {msalConfig} from "./authConfig";
 
+require("file-loader?name=index.html!../index.html");
+
+import "react-table/react-table.css"
+import "react-datepicker/dist/react-datepicker.css";
+import "react-toastify/dist/ReactToastify.min.css";
 import "rc-slider/assets/index.css";
 import "../assets/style.css";
 
-require("file-loader?name=index.html!../index.html");
-
 import "neuroglancer/layer/enabled_frontend_modules.js";
 import "neuroglancer/datasource/enabled_frontend_modules.js";
-import {MsalProvider} from "@azure/msal-react";
 
 const msalInstance = new PublicClientApplication(msalConfig);
 

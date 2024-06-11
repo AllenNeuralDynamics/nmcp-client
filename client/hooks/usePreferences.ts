@@ -1,13 +1,14 @@
 import {useEffect} from "react";
 
-import {INotificationListener, PreferencesManager} from "../util/preferencesManager";
+import {UserPreferences} from "../util/userPreferences";
+import {INotificationListener} from "../util/preferencesManager";
 
 export const usePreferences = (listener: INotificationListener) => {
     useEffect(() => {
-        PreferencesManager.Instance.addListener(listener);
+        UserPreferences.Instance.addListener(listener);
 
         return () => {
-            PreferencesManager.Instance.removeListener(listener);
+            UserPreferences.Instance.removeListener(listener);
 
         }
     }, []);

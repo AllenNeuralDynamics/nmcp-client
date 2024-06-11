@@ -49,6 +49,15 @@ export const SAMPLES_QUERY = gql`query {
 ${SAMPLE_FIELDS_FRAGMENT}
 `;
 
+export type SamplesQueryData = {
+    totalCount: number;
+    items: ISample[];
+}
+
+export type SamplesQueryResponse = {
+    samples: SamplesQueryData;
+}
+
 ///
 /// Mutation Input
 ///

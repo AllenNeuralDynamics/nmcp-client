@@ -1,41 +1,36 @@
-import {UIQueryPredicate} from "../models/uiQueryPredicate";
-import {ViewerStyle} from "../viewer/viewerStyle";
-
+export type PreferenceType = string | number | boolean | object;
 
 export interface INotificationListener {
-    preferenceChanged(name: string);
+    preferenceChanged(name: string, value: any): void;
 }
 
-const prefix = "jne:";
-
 export class PreferencesManager {
+    public readonly _haveStorage: boolean;
 
-    private static _instance = null;
+    private _notificationListeners: INotificationListener[] = []
 
-    private _notificationListeners: INotificationListener[] = [];
-
-    public static get Instance(): PreferencesManager {
-        if (!this._instance) {
-            this._instance = new PreferencesManager();
-        }
-
-        return this._instance;
-    }
+    readonly _prefix: string = "pref";
 
     public static get HavePreferences() {
         return typeof(Storage) !== undefined;
     }
 
-    public constructor() {
-        this.validateDefaultSettings();
+    public constructor(prefix: string) {
+        this._prefix = prefix;
+        this._haveStorage = typeof(Storage) !== undefined;
+        this.validateDefaultPreferences();
 
-        if (typeof(Storage) !== undefined) {
+        if (this._haveStorage) {
             window.addEventListener("storage", (e) => {
-                if (e.key && e.key.startsWith(prefix)) {
-                    this.notifyListeners(e.key.substring(prefix.length), null);
+                if (e.key && e.key.startsWith(this.Prefix)) {
+                    this.notifyListeners(e.key.substring(this.Prefix.length), null);
                 }
             });
         }
+    }
+
+    public get Prefix(): string {
+        return this._prefix;
     }
 
     public addListener(listener: INotificationListener) {
@@ -48,290 +43,90 @@ export class PreferencesManager {
         this._notificationListeners = this._notificationListeners.filter(n => n !== listener);
     }
 
-    private notifyListeners(name: string, value: any) {
+    protected notifyListeners(name: string, value: any) {
         this._notificationListeners.map(n => {
-            n.preferenceChanged(name);
+            n.preferenceChanged(name, value);
         })
     }
 
-    public get ShouldUseUpdatedLayout() {
-        if (typeof(Storage) !== undefined) {
-            return localStorage.getItem(prefix + "shouldUseUpdatedLayout") === "true";
+    protected validateDefaultPreferences() {
+    }
+
+
+    ///
+    /// Local
+    ///
+
+    protected saveLocalValue(key: string, value: PreferenceType): void {
+        if (this._haveStorage) {
+            this.writeValue(localStorage, key, value);
+        }
+    }
+
+    protected loadLocalValue<T extends PreferenceType>(key: string, defaultValue: T): T {
+        return this._haveStorage ? this.readValue<T>(localStorage, key, defaultValue) : defaultValue;
+    }
+
+    protected setDefaultLocalValue(key: string, value: PreferenceType): void {
+        if (this._haveStorage) {
+            this.writeDefaultValue(localStorage, key, value);
+        }
+    }
+
+    ///
+    /// Session
+    ///
+
+    protected saveSessionValue(key: string, value: PreferenceType): void {
+        if (this._haveStorage) {
+            this.writeValue(sessionStorage, key, value);
+        }
+    }
+
+    protected loadSessionValue<T extends PreferenceType>(key: string, defaultValue: T): T {
+        return this._haveStorage ? this.readValue<T>(sessionStorage, key, defaultValue) : defaultValue;
+    }
+
+    protected setDefaultSessionValue(key: string, value: PreferenceType): void {
+        if (this._haveStorage) {
+            this.writeDefaultValue(sessionStorage, key, value);
+        }
+    }
+
+    //
+    // Internal
+    //
+
+    private writeValue(storage: Storage, key: string, value: PreferenceType): void {
+        if (typeof value === "string") {
+            storage.setItem(this._prefix + key, value);
+        } else if (typeof value === "boolean") {
+            storage.setItem(this._prefix + key, value.toString());
+        } else if (typeof value === "number") {
+            storage.setItem(this._prefix + key, value.toFixed(10));
         } else {
-            return false;
+            storage.setItem(this._prefix + key, JSON.stringify(value));
         }
+
+        this.notifyListeners(key, value);
     }
 
-    public get ShouldAutoCollapseOnQuery() {
-        if (typeof(Storage) !== undefined) {
-            return localStorage.getItem(prefix + "shouldAutoCollapseOnQuery") === "true";
+
+    private readValue<T extends PreferenceType>(storage: Storage, key: string, defaultValue: T): T {
+        if (typeof defaultValue === "string") {
+            return storage.getItem(this._prefix + key) as T;
+        } else if (typeof defaultValue === "boolean") {
+            return (storage.getItem(this._prefix + key) === true.toString()) as T;
+        } else if (typeof defaultValue === "number") {
+            return parseFloat(storage.getItem(this._prefix + key)) as T;
         } else {
-            return false;
+            return JSON.parse(storage.getItem(this._prefix + key)) as T;
         }
     }
 
-    public set ShouldAutoCollapseOnQuery(b: boolean) {
-        if (typeof(Storage) !== undefined) {
-            localStorage.setItem(prefix + "shouldAutoCollapseOnQuery", b ? "true" : "false");
-        }
-    }
-
-    public get ShouldAlwaysShowSoma() {
-        if (typeof(Storage) !== undefined) {
-            return localStorage.getItem(prefix + "shouldAlwaysShowSoma") === "true";
-        } else {
-            return false;
-        }
-    }
-
-    public set ShouldAlwaysShowSoma(b: boolean) {
-        if (typeof(Storage) !== undefined) {
-            localStorage.setItem(prefix + "shouldAlwaysShowSoma", b ? "true" : "false");
-        }
-    }
-
-    public get ShouldAlwaysShowFullTracing() {
-        if (typeof(Storage) !== undefined) {
-            return localStorage.getItem(prefix + "shouldAlwaysShowFullTracing") === "true";
-        } else {
-            return false;
-        }
-    }
-
-    public set ShouldAlwaysShowFullTracing(b: boolean) {
-        if (typeof(Storage) !== undefined) {
-            localStorage.setItem(prefix + "shouldAlwaysShowFullTracing", b ? "true" : "false");
-        }
-    }
-
-    public get IsNeuronListDocked() {
-        if (typeof(Storage) !== undefined) {
-            return sessionStorage.getItem(prefix + "isNeuronListDocked") === "true";
-        } else {
-            return true;
-        }
-    }
-
-    public set IsNeuronListDocked(b: boolean) {
-        if (typeof(Storage) !== undefined) {
-            sessionStorage.setItem(prefix + "isNeuronListDocked", b ? "true" : "false");
-        }
-    }
-
-    public get IsCompartmentListDocked() {
-        if (typeof(Storage) !== undefined) {
-            return sessionStorage.getItem(prefix + "isCompartmentListDocked") === "true";
-        } else {
-            return true;
-        }
-    }
-
-    public set IsCompartmentListDocked(b: boolean) {
-        if (typeof(Storage) !== undefined) {
-            sessionStorage.setItem(prefix + "isCompartmentListDocked", b ? "true" : "false");
-        }
-    }
-
-    public get TracingSelectionHiddenOpacity() {
-        if (typeof(Storage) !== undefined) {
-            return parseFloat(localStorage.getItem(prefix + "tracingSelectionHiddenOpacity"));
-        } else {
-            return 0.0;
-        }
-    }
-
-    public set TracingSelectionHiddenOpacity(n: number) {
-        if (typeof(Storage) !== undefined) {
-            localStorage.setItem(prefix + "tracingSelectionHiddenOpacity", n.toFixed(2));
-        }
-    }
-
-    public get ZoomSpeed() {
-        if (typeof(Storage) !== undefined) {
-            return parseFloat(localStorage.getItem(prefix + "zoomSpeed"));
-        } else {
-            return 1.0;
-        }
-    }
-
-    public set ZoomSpeed(n: number) {
-        if (typeof(Storage) !== undefined) {
-            localStorage.setItem(prefix + "zoomSpeed", n.toFixed(1));
-        }
-    }
-
-    public get TracingFetchBatchSize() {
-        if (typeof(Storage) !== undefined) {
-            return parseInt(localStorage.getItem(prefix + "tracingFetchBatchSize"));
-        } else {
-            return 0.0;
-        }
-    }
-
-    public set TracingFetchBatchSize(n: number) {
-        if (typeof(Storage) !== undefined) {
-            localStorage.setItem(prefix + "tracingFetchBatchSize", n.toFixed(0));
-        }
-    }
-
-    public AppendQueryHistory(filters: UIQueryPredicate[]) {
-        if (typeof(Storage) !== undefined) {
-            const obj = {
-                timestamp: new Date(),
-                filters: filters.map(f => f.serialize())
-            };
-
-            localStorage.setItem(prefix + "queryHistory", JSON.stringify(obj));
-        }
-    }
-
-    public get LastQuery(): UIQueryPredicate[] {
-        if (typeof(Storage) !== undefined) {
-            const str = localStorage.getItem(prefix + "queryHistory");
-
-            if (str) {
-                const obj = JSON.parse(str);
-
-                return obj.filters;
-            }
-        }
-
-        return null;
-    }
-
-    public get ViewerBackgroundColor() {
-        if (typeof(Storage) !== undefined) {
-            return localStorage.getItem(prefix + "viewerBackgroundColor");
-        } else {
-            return "#FFFFFF";
-        }
-    }
-
-    public set ViewerBackgroundColor(n: string) {
-        if (typeof(Storage) !== undefined) {
-            localStorage.setItem(prefix + "viewerBackgroundColor", n);
-        }
-
-        this.notifyListeners("viewerBackgroundColor", n);
-    }
-
-    public get TracingRadiusFactor() {
-        if (typeof(Storage) !== undefined) {
-            return parseInt(localStorage.getItem(prefix + "tracingRadiusFactor"));
-        } else {
-            return 1.0;
-        }
-    }
-
-    public get RootCompartmentColor() {
-        if (typeof(Storage) !== undefined) {
-            return localStorage.getItem(prefix + "rootCompartmentColor");
-        } else {
-            return "FFFFFF";
-        }
-    }
-
-    public get ViewPresets(): any[] {
-        if (typeof(Storage) !== undefined) {
-            return JSON.parse(localStorage.getItem(prefix + "viewPresets"));
-        } else {
-            return [];
-        }
-    }
-
-    public get HideCursorInViewer(): boolean {
-        if (typeof(Storage) !== undefined) {
-            return localStorage.getItem(prefix + "hideCursorInViewer") === true.toString();
-        } else {
-            return false;
-        }
-    }
-
-    public get HideCursorOnPage(): boolean {
-        if (typeof(Storage) !== undefined) {
-            return localStorage.getItem(prefix + "hideCursorOnPage") === true.toString();
-        } else {
-            return false;
-        }
-    }
-
-    public get ViewerStyle(): ViewerStyle {
-        if (typeof(Storage) !== undefined) {
-            return parseInt(localStorage.getItem(prefix + "viewerStyle")) as ViewerStyle;
-        } else {
-            return ViewerStyle.Default;
-        }
-    }
-
-    public set ViewerStyle(n: ViewerStyle) {
-        if (typeof(Storage) !== undefined) {
-            localStorage.setItem(prefix + "viewerStyle", n.valueOf().toFixed(0));
-        }
-
-        this.notifyListeners("viewerStyle", n);
-    }
-
-    private validateDefaultSettings() {
-        if (typeof(Storage) !== undefined) {
-            if (!localStorage.getItem(prefix + "shouldAutoCollapseOnQuery")) {
-                localStorage.setItem(prefix + "shouldAutoCollapseOnQuery", "false");
-            }
-
-            if (!localStorage.getItem(prefix + "shouldAlwaysShowSoma")) {
-                localStorage.setItem(prefix + "shouldAlwaysShowSoma", "true");
-            }
-
-            if (!localStorage.getItem(prefix + "shouldAlwaysShowFullTracing")) {
-                localStorage.setItem(prefix + "shouldAlwaysShowFullTracing", "true");
-            }
-
-            if (!sessionStorage.getItem(prefix + "isNeuronListDocked")) {
-                sessionStorage.setItem(prefix + "isNeuronListDocked", "true");
-            }
-
-            if (!sessionStorage.getItem(prefix + "isCompartmentListDocked")) {
-                sessionStorage.setItem(prefix + "isCompartmentListDocked", "true");
-            }
-
-            if (!localStorage.getItem(prefix + "tracingFetchBatchSize")) {
-                localStorage.setItem(prefix + "tracingFetchBatchSize", "10.0");
-            }
-
-            if (!localStorage.getItem(prefix + "tracingSelectionHiddenOpacity")) {
-                localStorage.setItem(prefix + "tracingSelectionHiddenOpacity", "0.0");
-            }
-
-            if (!localStorage.getItem(prefix + "viewerBackgroundColor")) {
-                localStorage.setItem(prefix + "viewerBackgroundColor", "#FFFFFF");
-            }
-
-            if (!localStorage.getItem(prefix + "tracingRadiusFactor")) {
-                localStorage.setItem(prefix + "tracingRadiusFactor", "1.0");
-            }
-
-            if (!localStorage.getItem(prefix + "rootCompartmentColor")) {
-                localStorage.setItem(prefix + "rootCompartmentColor", "888888");
-            }
-
-            if (!localStorage.getItem(prefix + "viewPresets")) {
-                localStorage.setItem(prefix + "viewPresets", JSON.stringify([]));
-            }
-
-            if (!localStorage.getItem(prefix + "hideCursorInViewer")) {
-                localStorage.setItem(prefix + "hideCursorInViewer", false.toString());
-            }
-
-            if (!localStorage.getItem(prefix + "hideCursorOnPage")) {
-                localStorage.setItem(prefix + "hideCursorOnPage", false.toString());
-            }
-
-            if (!localStorage.getItem(prefix + "zoomSpeed")) {
-                localStorage.setItem(prefix + "zoomSpeed", "1.0");
-            }
-
-            if (!localStorage.getItem(prefix + "viewerStyle")) {
-                localStorage.setItem(prefix + "viewerStyle", ViewerStyle.Default.valueOf().toFixed(0));
-            }
+    private writeDefaultValue(storage: Storage, key: string, value: PreferenceType): void {
+        if (!storage.getItem(this._prefix + key)) {
+            this.writeValue(storage, key, value);
         }
     }
 }

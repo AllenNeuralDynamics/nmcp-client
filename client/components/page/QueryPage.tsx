@@ -11,8 +11,8 @@ import {BrainCompartmentViewModel} from "../../viewmodel/brainCompartmentViewMod
 import {ApolloError} from "apollo-client";
 import {UIQueryPredicate, UIQueryPredicates} from "../../models/uiQueryPredicate";
 import {BRAIN_AREA_FILTER_TYPE_SPHERE} from "../../models/brainAreaFilterType";
-import {PreferencesManager} from "../../util/preferencesManager";
 import {ViewerMeshVersion} from "../../models/compartmentMeshSet";
+import {UserPreferences} from "../../util/userPreferences";
 
 interface IPageProps {
     constants: NdbConstants;
@@ -55,7 +55,7 @@ export class QueryPage extends React.Component<IPageProps, IPageState> {
     }
 
     private onPerformQuery = () => {
-        if (this.state.isQueryCollapsed && !PreferencesManager.Instance.ShouldAutoCollapseOnQuery) {
+        if (this.state.isQueryCollapsed && !UserPreferences.Instance.ShouldAutoCollapseOnQuery) {
             this.setState({isQueryCollapsed: !this.state.isQueryCollapsed});
         }
 

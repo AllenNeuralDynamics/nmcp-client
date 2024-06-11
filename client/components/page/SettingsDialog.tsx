@@ -1,16 +1,15 @@
 import * as React from "react";
 import {observer} from "mobx-react-lite";
-import {Button, Form, Grid, Modal} from "semantic-ui-react";
+import {Button, Form, Modal} from "semantic-ui-react";
 import {SketchPicker} from 'react-color';
 
 const Slider = require("rc-slider").default;
 
-import {PreferencesManager} from "../../util/preferencesManager";
-import {CompartmentMeshSet, ViewerMeshVersion} from "../../models/compartmentMeshSet";
+import {ViewerMeshVersion} from "../../models/compartmentMeshSet";
 import {NdbConstants} from "../../models/constants";
-import {CompartmentMeshSetSelect} from "../query/editors/CompartmentMeshSetSelect";
 import {useStore, useViewModel} from "../app/App";
 import {SearchScope} from "../../models/uiQueryPredicate";
+import {UserPreferences} from "../../util/userPreferences";
 
 export const SettingsDialogContainer = observer(() => {
     const viewModel = useViewModel();
@@ -42,42 +41,42 @@ class SettingsDialog extends React.Component<ISettingsDialogProps, ISettingsDial
         super(props);
 
         this.state = {
-            shouldAutoCollapseOnQuery: PreferencesManager.Instance.ShouldAutoCollapseOnQuery,
-            shouldAlwaysShowSoma: PreferencesManager.Instance.ShouldAlwaysShowSoma,
-            shouldAlwaysShowFullTracing: PreferencesManager.Instance.ShouldAlwaysShowFullTracing,
+            shouldAutoCollapseOnQuery: UserPreferences.Instance.ShouldAutoCollapseOnQuery,
+            shouldAlwaysShowSoma: UserPreferences.Instance.ShouldAlwaysShowSoma,
+            shouldAlwaysShowFullTracing: UserPreferences.Instance.ShouldAlwaysShowFullTracing,
             displayColorPicker: false
         };
     }
 
     public componentWillReceiveProps(props: ISettingsDialogProps) {
         this.setState({
-            shouldAutoCollapseOnQuery: PreferencesManager.Instance.ShouldAutoCollapseOnQuery,
-            shouldAlwaysShowSoma: PreferencesManager.Instance.ShouldAlwaysShowSoma,
-            shouldAlwaysShowFullTracing: PreferencesManager.Instance.ShouldAlwaysShowFullTracing
+            shouldAutoCollapseOnQuery: UserPreferences.Instance.ShouldAutoCollapseOnQuery,
+            shouldAlwaysShowSoma: UserPreferences.Instance.ShouldAlwaysShowSoma,
+            shouldAlwaysShowFullTracing: UserPreferences.Instance.ShouldAlwaysShowFullTracing
         });
     }
 
     private onSetAutoCollapseOnQuery(b: boolean) {
-        PreferencesManager.Instance.ShouldAutoCollapseOnQuery = b;
+        UserPreferences.Instance.ShouldAutoCollapseOnQuery = b;
         this.setState({shouldAutoCollapseOnQuery: b});
     }
 
     private onSetAlwaysShowSoma(b: boolean) {
-        PreferencesManager.Instance.ShouldAlwaysShowSoma = b;
+        UserPreferences.Instance.ShouldAlwaysShowSoma = b;
         this.setState({shouldAlwaysShowSoma: b});
     }
 
     private onSetAlwaysShowFullTracing(b: boolean) {
-        PreferencesManager.Instance.ShouldAlwaysShowFullTracing = b;
+        UserPreferences.Instance.ShouldAlwaysShowFullTracing = b;
         this.setState({shouldAlwaysShowFullTracing: b});
     }
 
     private onAfterChangeOpacity(value: number) {
-        PreferencesManager.Instance.TracingSelectionHiddenOpacity = value;
+        UserPreferences.Instance.TracingSelectionHiddenOpacity = value;
     }
 
     private onSetTracingFetchBatchSize(value: number) {
-        PreferencesManager.Instance.TracingFetchBatchSize = value;
+        UserPreferences.Instance.TracingFetchBatchSize = value;
     }
 
     private handleClick() {
@@ -89,7 +88,7 @@ class SettingsDialog extends React.Component<ISettingsDialogProps, ISettingsDial
     }
 
     private onChangeNeuronColor(color) {
-        PreferencesManager.Instance.ViewerBackgroundColor = color.hex;
+        UserPreferences.Instance.ViewerBackgroundColor = color.hex;
     }
 
     public render() {
@@ -98,7 +97,7 @@ class SettingsDialog extends React.Component<ISettingsDialogProps, ISettingsDial
                 width: "16px",
                 height: "16px",
                 borderRadius: "2px",
-                background: PreferencesManager.Instance.ViewerBackgroundColor,
+                background: UserPreferences.Instance.ViewerBackgroundColor,
             }
         };
 
@@ -127,7 +126,7 @@ class SettingsDialog extends React.Component<ISettingsDialogProps, ISettingsDial
                         </div>
                         {this.state.displayColorPicker ? <div style={styles.popover}>
                             <div style={styles.cover} onClick={() => this.handleClose()}/>
-                            <SketchPicker color={PreferencesManager.Instance.ViewerBackgroundColor}
+                            <SketchPicker color={UserPreferences.Instance.ViewerBackgroundColor}
                                           onChange={(color: any) => this.onChangeNeuronColor(color)}/>
                         </div> : null}
                         <span style={styles.text}> Viewer background color</span>
@@ -146,7 +145,7 @@ class SettingsDialog extends React.Component<ISettingsDialogProps, ISettingsDial
                                         max={20}
                                         step={1}
                                         marks={{1: "1", 5: "5", 10: "10", 15: "15", 20: "20"}}
-                                        defaultValue={PreferencesManager.Instance.TracingFetchBatchSize}/>
+                                        defaultValue={UserPreferences.Instance.TracingFetchBatchSize}/>
                             </div>
                         </div> : null}
                 </Modal.Content>

@@ -59,8 +59,8 @@ export const PageHeader = () => {
                 <Menu.Item as={NavLink} exact to="/reconstructions" name="reconstructions" key="reconstructions">Reconstructions</Menu.Item> : null}
             {/*
             {isAuthenticated && userCanReview ? <Menu.Item as={NavLink} exact to="/review" name="review" key="review">Review</Menu.Item> : null}
-            {isAuthenticated && userCanEdit ? <Menu.Item as={NavLink} exact to="/samples" name="samples" key="samples">Samples</Menu.Item> : null}
             */}
+            {isAuthenticated && userCanEdit ? <Menu.Item as={NavLink} exact to="/samples" name="samples" key="samples">Samples</Menu.Item> : null}
             {isAuthenticated && userCanAdmin ? <Menu.Item as={NavLink} exact to="/admin" name="admin" key="admin">Admin</Menu.Item> : null}
             <Menu.Menu position="right">
                 <Dropdown item text="Help">

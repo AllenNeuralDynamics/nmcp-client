@@ -1,10 +1,10 @@
 import {NODE_PARTICLE_IMAGE} from "./util";
-import {PreferencesManager} from "../util/preferencesManager";
 
 import * as THREEM from "three";
 import {SystemShader} from "./shaders/shaders";
 import {StandardShader} from "./shaders/standardShader";
-import {CompartmentMeshSet, ViewerMeshVersion} from "../models/compartmentMeshSet";
+import {CompartmentMeshSet} from "../models/compartmentMeshSet";
+import {UserPreferences} from "../util/userPreferences";
 
 const THREE = require("three");
 require("three-obj-loader")(THREE);
@@ -467,7 +467,7 @@ export class SharkViewer {
         this.scene.add(this._compartmentGroup);
 
         this.trackControls = new OrbitControls(this.camera, document.getElementById(this.dom_element));
-        this.trackControls.zoomSpeed = PreferencesManager.Instance.ZoomSpeed;
+        this.trackControls.zoomSpeed = UserPreferences.Instance.ZoomSpeed;
         this.trackControls.addEventListener("change", () => {
             this.cameraObservers.forEach(c => c.cameraChanged(this.camera));
             this.render();
@@ -475,10 +475,10 @@ export class SharkViewer {
 
         this.rayCaster.params.Points.threshold = DEFAULT_POINT_THRESHOLD;
 
-        PreferencesManager.Instance.addListener({
+        UserPreferences.Instance.addListener({
             preferenceChanged: (name) => {
                 if (name === "zoomSpeed") {
-                    this.trackControls.zoomSpeed = PreferencesManager.Instance.ZoomSpeed;
+                    this.trackControls.zoomSpeed = UserPreferences.Instance.ZoomSpeed;
                 }
             }
         });

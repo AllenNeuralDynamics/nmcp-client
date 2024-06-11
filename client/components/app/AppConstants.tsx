@@ -9,7 +9,7 @@ import {CONSTANTS_QUERY, ConstantsQueryResponse, SystemSettingsVariables} from "
 import {useStore} from "./App";
 import {AppLoading} from "./AppLoading";
 
-export const ConstantsContext = createContext(null);
+export const ConstantsContext = createContext<NdbConstants>(null);
 
 export const AppConstants = observer((props: any) => {
     const systemDataStore = useStore();

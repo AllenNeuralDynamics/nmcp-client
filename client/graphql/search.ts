@@ -5,7 +5,7 @@ import {IPositionInput} from "../models/queryFilter";
 import {PredicateTypeValue} from "../models/brainAreaFilterType";
 import {SearchScope} from "../models/uiQueryPredicate";
 
-export const NEURONS_QUERY = gql`query SearchNeurons($context: SearchContext) {
+export const SEARCH_NEURONS_QUERY = gql`query SearchNeurons($context: SearchContext) {
   searchNeurons(context: $context) {
     nonce
     queryTime
@@ -72,11 +72,11 @@ export type SearchContext = {
     predicates: SearchPredicate[];
 }
 
-type NeuronsQueryVariable = {
+type SearchNeuronsQueryVariable = {
     context: SearchContext;
 }
 
-export type NeuronsQueryData = {
+export type SearchNeuronsQueryData = {
     neurons: INeuron[];
     totalCount: number;
     queryTime: number;
@@ -84,6 +84,6 @@ export type NeuronsQueryData = {
     error: Error;
 }
 
-type NeuronsQueryResponse = {
-    searchNeurons: NeuronsQueryData
+export type SearchNeuronsQueryResponse = {
+    searchNeurons: SearchNeuronsQueryData
 }

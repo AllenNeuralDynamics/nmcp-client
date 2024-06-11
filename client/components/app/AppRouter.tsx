@@ -6,18 +6,13 @@ import {useQuery} from "@apollo/react-hooks";
 // import {CANDIDATE_NEURONS_FOR_REVIEW_QUERY, CandidateNeuronsForReviewQueryResponse} from "../../graphql/neurons";
 import {AppContent} from "./AppContent";
 import {Candidates} from "../candidates/Candidates";
-// import {Reconstructions} from "../reconstructions/Reconstructions";
-// import {Samples} from "../samples/Samples";
+import {Reconstructions} from "../reconstructions/Reconstructions";
+import {Samples} from "../samples/Samples";
 // import {Review} from "../Review";
 import {Admin} from "../admin/Admin";
 import {CANDIDATE_NEURONS_FOR_REVIEW_QUERY, CandidateNeuronsForReviewQueryResponse} from "../../graphql/candidates";
-import {Reconstructions} from "../reconstructions/Reconstructions";
 
-interface IAppRouterProps {
-    // data: AppQueryQueryResponse;
-}
-
-export const AppRouter = (props: IAppRouterProps) => {
+export const AppRouter = () => {
     let shouldClearCreateContentsAfterUpload = true;
 
     if (typeof (Storage) !== "undefined") {
@@ -35,8 +30,8 @@ export const AppRouter = (props: IAppRouterProps) => {
         <Switch>
             <Route path="/candidates" render={() => (<Candidates/>)}/>
             <Route path="/reconstructions" render={() => (<Reconstructions/>)}/>
+            <Route path="/samples" render={() => (<Samples/>)}/>
             {/*
-            <Route path="/samples" render={() => (<Samples samples={props.data.samples.items}/>)}/>
             <Route path="/review" render={() => (<Review neurons={data.candidatesForReview} tracingStructures={props.data.tracingStructures}
                                                          shouldClearCreateContentsAfterUpload={shouldClearCreateContentsAfterUpload}/>)}/>
             */}

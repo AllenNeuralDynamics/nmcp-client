@@ -17,7 +17,6 @@ import {IPositionInput} from "../../models/queryFilter";
 import {NeuronListContainer} from "./NeuronListContainer";
 import {ViewerContainer} from "./ViewerContainer";
 import {CompartmentListContainer} from "./compartments/CompartmentListContainer";
-import {PreferencesManager} from "../../util/preferencesManager";
 import {fullRowStyle} from "../../util/styles";
 import {QueryStatus} from "../query/QueryHeader";
 import {IBrainArea} from "../../models/brainArea";
@@ -25,6 +24,7 @@ import {CompartmentNode} from "./compartments/CompartmentNode";
 import {Button, Message, Modal} from "semantic-ui-react";
 import {ViewerMeshVersion} from "../../models/compartmentMeshSet";
 import {ViewerStyle} from "../../viewer/viewerStyle";
+import {UserPreferences} from "../../util/userPreferences";
 
 const neuronViewModelMap = new Map<string, NeuronViewModel>();
 
@@ -104,7 +104,7 @@ export class MainView extends React.Component<IOutputContainerProps, IOutputCont
     private _queuedIds: string[] = [];
     private _isInQuery: boolean = false;
     private _colorIndex: number = 0;
-    private _fetchBatchSize = PreferencesManager.Instance.TracingFetchBatchSize;
+    private _fetchBatchSize = UserPreferences.Instance.TracingFetchBatchSize;
 
     private _viewerContainer = null;
     private _expectingFetch = false;
@@ -127,8 +127,8 @@ export class MainView extends React.Component<IOutputContainerProps, IOutputCont
             isRendering: false,
             latestTiming: null,
             isNeuronListOpen: false,
-            isNeuronListDocked: PreferencesManager.Instance.IsNeuronListDocked,
-            isCompartmentListDocked: PreferencesManager.Instance.IsCompartmentListDocked,
+            isNeuronListDocked: UserPreferences.Instance.IsNeuronListDocked,
+            isCompartmentListDocked: UserPreferences.Instance.IsCompartmentListDocked,
             isExportMessageOpen: false
         };
     }
@@ -178,14 +178,14 @@ export class MainView extends React.Component<IOutputContainerProps, IOutputCont
     private onNeuronListCloseOrPin(state: DrawerState) {
         if (state === DrawerState.Hidden) {
             // Close the docked or drawer
-            PreferencesManager.Instance.IsNeuronListDocked = false;
+            UserPreferences.Instance.IsNeuronListDocked = false;
             this.setState({isNeuronListDocked: false, isNeuronListOpen: false});
         } else if (state === DrawerState.Float) {
             // Pin the float
-            PreferencesManager.Instance.IsNeuronListDocked = false;
+            UserPreferences.Instance.IsNeuronListDocked = false;
             this.setState({isNeuronListDocked: false, isNeuronListOpen: true});
         } else {
-            PreferencesManager.Instance.IsNeuronListDocked = true;
+            UserPreferences.Instance.IsNeuronListDocked = true;
             this.setState({isNeuronListDocked: true, isNeuronListOpen: false});
         }
     }
@@ -193,14 +193,14 @@ export class MainView extends React.Component<IOutputContainerProps, IOutputCont
     private onCompartmentListCloseOrPin(state: DrawerState) {
         if (state === DrawerState.Hidden) {
             // Close the docked or drawer
-            PreferencesManager.Instance.IsCompartmentListDocked = false;
+            UserPreferences.Instance.IsCompartmentListDocked = false;
             this.setState({isCompartmentListDocked: false, isCompartmentListOpen: false});
         } else if (state === DrawerState.Float) {
             // Pin the float
-            PreferencesManager.Instance.IsCompartmentListDocked = false;
+            UserPreferences.Instance.IsCompartmentListDocked = false;
             this.setState({isCompartmentListDocked: false, isCompartmentListOpen: true});
         } else {
-            PreferencesManager.Instance.IsCompartmentListDocked = true;
+            UserPreferences.Instance.IsCompartmentListDocked = true;
             this.setState({isCompartmentListDocked: true, isCompartmentListOpen: false});
         }
     }
@@ -782,7 +782,7 @@ export class MainView extends React.Component<IOutputContainerProps, IOutputCont
         let compartmentListFloat = null;
         let compartmentListDock = null;
 
-        if (PreferencesManager.Instance.ViewerStyle == ViewerStyle.Default) {
+        if (UserPreferences.Instance.ViewerStyle == ViewerStyle.Default) {
             compartmentListFloat = this.state.isCompartmentListOpen ? (
                 <div style={Object.assign({left: "calc(100% - 400px)"}, baseStyle)}>
                     <CompartmentListContainer {...treeProps}/>

@@ -11,8 +11,8 @@ import {IBrainArea} from "../../models/brainArea";
 import {HighlightSelectionMode} from "./TracingViewer";
 import {NeuronViewModel} from "../../viewmodel/neuronViewModel";
 import {NEURON_VIEW_MODES, NeuronViewMode} from "../../viewmodel/neuronViewMode";
-import {INotificationListener, PreferencesManager} from "../../util/preferencesManager";
-import {ViewerMeshVersion} from "../../models/compartmentMeshSet";
+import {INotificationListener} from "../../util/preferencesManager";
+import {UserPreferences} from "../../util/userPreferences";
 
 interface IActiveTracingItemProps {
     viewModel: NeuronViewModel;
@@ -172,7 +172,7 @@ export class ViewerSelection extends React.Component<IViewerSelectionProps, IVie
             isDragging: false
         }
 
-        PreferencesManager.Instance.addListener(this);
+        UserPreferences.Instance.addListener(this);
     }
 
     public preferenceChanged(name: string) {

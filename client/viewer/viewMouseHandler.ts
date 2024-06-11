@@ -1,4 +1,4 @@
-import {PreferencesManager} from "../util/preferencesManager";
+import {UserPreferences} from "../util/userPreferences";
 
 const MOUSE_MOVE_THRESHOLD = 1;
 
@@ -22,9 +22,13 @@ export class ViewerMouseHandler {
             [-Math.PI / 4, Math.PI / 4]
         ];
 
-        PreferencesManager.Instance.ViewPresets.map(p => {
-            this._presets = this._presets.concat([[p[0] * Math.PI / 180, p[1] * Math.PI / 180]]);
-        });
+        const prefs = UserPreferences.Instance.ViewPresets;
+
+        if (prefs.length == 3) {
+            prefs.map(p => {
+                this._presets = this._presets.concat([[p[0] * Math.PI / 180, p[1] * Math.PI / 180]]);
+            });
+        }
     }
 
     public addListeners() {

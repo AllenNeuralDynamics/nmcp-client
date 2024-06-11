@@ -4,7 +4,7 @@ import {
     PredicateType,
     findBrainAreaFilterType
 } from "./brainAreaFilterType";
-import {SearchPredicate} from "../graphql/neurons";
+import {SearchPredicate} from "../graphql/search";
 import {NdbConstants} from "./constants";
 import {FilterContents, IPosition, IPositionInput} from "./queryFilter";
 import cuid from "cuid";
