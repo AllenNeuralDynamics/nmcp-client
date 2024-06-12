@@ -1,9 +1,16 @@
 import * as React from "react";
 import {useState} from "react";
 import {Segment} from "semantic-ui-react";
-import * as Dropzone from "react-dropzone";
+import Dropzone from "react-dropzone";
 
 import {FilePreview, SwcInputFile} from "./FilePreview";
+
+const zoneStyle = (disabled: boolean, file: any) => {
+    return {
+        order: 0,
+        backgroundColor: disabled ? "rgb(255, 246, 246)" : (file ? "white" : "rgb(255, 230, 230)")
+    };
+}
 
 export type SwcDropZoneProps = {
     isDisabled: boolean;
@@ -19,15 +26,15 @@ export const SwcDropZone = (props: SwcDropZoneProps) => {
     return (
         <Segment.Group>
             <Segment style={{padding: 0}}>
-                <Dropzone disableClick={props.isDisabled} className="dropzone-no-border"
-                          style={{
-                              order: 0,
-                              backgroundColor: props.isDisabled ? "rgb(255, 246, 246)" : (props.file ? "white" : "rgb(255, 230, 230)")
-                          }}
-                          onDrop={(accepted: File[]) => props.onFileReceived(accepted)}>
+                <Dropzone onDrop={props.onFileReceived}>
+                    {({getRootProps, getInputProps}) => (
+                        <div {...getRootProps()} className="dropzone-no-border" style={zoneStyle(props.isDisabled, props.file)}>
+                            <input {...getInputProps()} />
                             <span style={NoFileStyle(!props.file, props.isDisabled)}>
-                                {props.file ? props.file.name : "Drop a SWC file or click to browse for a file"}
-                            </span>
+                            {props.file ? props.file.name : "Drop a SWC file or click to browse for a file"}
+                        </span>
+                        </div>
+                    )}
                 </Dropzone>
             </Segment>
             <Segment style={{padding: 0}}>
