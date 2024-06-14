@@ -1,8 +1,11 @@
 import * as React from "react";
-import {Table, Button, Dropdown, Label} from "semantic-ui-react";
+import {useContext} from "react";
 import {useMutation} from "@apollo/react-hooks";
+import {Table, Button, Dropdown, Label} from "semantic-ui-react";
 import {toast} from "react-toastify";
 
+import {ConstantsContext} from "../app/AppConstants";
+import {ConsensusStatus, ConsensusStatusOptions, FindConsensusStatusOption} from "../../models/consensusStatus";
 import {FindVisibilityOption, NeuronVisibilityOptions, ShareVisibility} from "../../models/shareVisibility";
 import {formatSomaLocation, INeuron, parseSomaLocation} from "../../models/neuron";
 import {displaySample} from "../../models/sample";
@@ -11,10 +14,6 @@ import {toastCreateError, toastUpdateError} from "../editors/Toasts";
 import {BrainAreaDropdown} from "../editors/BrainAreaDropdown";
 import {UPDATE_NEURON_MUTATION, UpdateNeuronMutationData} from "../../graphql/neuron";
 import {InputPopup} from "../editors/InputPopup";
-import {ConsensusStatus, ConsensusStatusOptions, FindConsensusStatusOption} from "../../models/consensusStatus";
-import {useContext} from "react";
-import {ConstantsContext} from "../app/AppConstants";
-import {NdbConstants} from "../../models/constants";
 
 interface INeuronRowProps {
     neuron: INeuron;
@@ -94,12 +93,12 @@ export const NeuronRow = (props: INeuronRowProps) => {
                 <InputPopup value={n.idString} placeholder="(none)"
                             onAccept={v => onAcceptIdStringEdit(v, updateNeuron)}/>
             </Table.Cell>
+            <Table.Cell style={{maxWidth: "100px"}}>
+                {displaySample(n.sample)}
+            </Table.Cell>
             <Table.Cell style={{minWidth: "60px", maxWidth: "60px"}}>
                 <InputPopup value={n.tag} placeholder="(none)"
                             onAccept={v => onAcceptTagEdit(v, updateNeuron)}/>
-            </Table.Cell>
-            <Table.Cell style={{maxWidth: "100px"}}>
-                {displaySample(n.sample)}
             </Table.Cell>
             <Table.Cell>
                 <BrainAreaDropdown brainArea={n.brainArea ? constants.findBrainArea(n.brainArea.id) : null}
@@ -125,7 +124,7 @@ export const NeuronRow = (props: INeuronRowProps) => {
                 {n.doi || "(none)"}
             </Table.Cell>
             <Table.Cell style={{width: "150px"}}>
-                {count !== undefined ? (count == 0 ? <Button icon="trash" color="red" size="mini" content="None" labelPosition="left" onClick={() => props.onDeleteNeuron(n)}/>
+                {count !== undefined ? (count == 0 ? <Button icon="trash" color="red" size="mini" content="none" labelPosition="left" onClick={() => props.onDeleteNeuron(n)}/>
                     : <Label>{count}<Label.Detail>{count == 1 ? "reconstruction" : "reconstructions"}</Label.Detail></Label>) : "?"}
             </Table.Cell>
         </Table.Row>

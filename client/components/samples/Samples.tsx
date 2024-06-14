@@ -5,7 +5,7 @@ import {useQuery} from "@apollo/react-hooks";
 import {MOUSE_STRAINS_QUERY, MouseStrainsQueryResponse} from "../../graphql/mouseStrain";
 import {SAMPLES_QUERY, SamplesQueryResponse} from "../../graphql/sample";
 import {Neurons} from "../neurons/Neurons";
-import {SamplesReactTable} from "./SamplesReactTable";
+import {SamplesTable} from "./SampleTable";
 
 export const Samples = () => {
     const {loading, error, data} = useQuery<MouseStrainsQueryResponse>(MOUSE_STRAINS_QUERY, {pollInterval: 5000});
@@ -22,8 +22,8 @@ export const Samples = () => {
 
     return (
         <div style={{margin: "16px"}}>
-            <SamplesReactTable samples={dataSamples.samples.items} mouseStrains={data.mouseStrains || null}/>
-            <Divider/>
+            <SamplesTable samples={dataSamples.samples.items} mouseStrains={data.mouseStrains || null}/>
+            <p/>
             <Neurons samples={dataSamples.samples.items}/>
         </div>
     );

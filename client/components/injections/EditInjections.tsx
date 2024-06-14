@@ -93,7 +93,7 @@ export const EditInjectionsPanel = (props: IEditInjectionsPanelProps) => {
 
         return (
             <Confirm open={state.isDeleteConfirmationShowing} header="Delete Injection" dimmer="blurring"
-                     content={`Are you sure you want to delete the injection for ${state.injectionToDelete.brainArea.name}?`}
+                     content={`Are you sure you want to delete the injection for ${state.injectionToDelete.brainArea.name}?  This action can not be undone.`}
                      confirmButton="Delete" onCancel={() => onClearDeleteConfirmation()}
                      onConfirm={async () => {
                          await deleteInjection({variables: {id: state.injectionToDelete.id}})

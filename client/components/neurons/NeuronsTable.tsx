@@ -10,6 +10,9 @@ interface INeuronTableProps {
     neurons: INeuron[];
     activePage: number;
     pageCount: number;
+    start: number;
+    end: number;
+    totalCount: number;
 
     onDeleteNeuron(neuron: INeuron): void;
     onManageNeuronAnnotations(neuron: INeuron): void;
@@ -34,12 +37,12 @@ export const NeuronsTable = (props: INeuronTableProps) => {
     });
 
     return (
-        <Table attached="bottom" compact="very" style={{borderBottom: "none", borderTop: "none"}}>
+        <Table attached compact="very" size="small" style={{borderBottom: "none", borderTop: "none"}}>
             <Table.Header>
                 <Table.Row>
                     <Table.HeaderCell>Id</Table.HeaderCell>
-                    <Table.HeaderCell>Tag</Table.HeaderCell>
                     <Table.HeaderCell>Sample</Table.HeaderCell>
+                    <Table.HeaderCell>Subject Id</Table.HeaderCell>
                     <Table.HeaderCell>Soma Brain Area</Table.HeaderCell>
                     <Table.HeaderCell>Soma Sample Location</Table.HeaderCell>
                     <Table.HeaderCell>Visibility</Table.HeaderCell>
@@ -51,6 +54,19 @@ export const NeuronsTable = (props: INeuronTableProps) => {
             <Table.Body>
                 {rows}
             </Table.Body>
+            <Table.Footer fullWidth>
+                <Table.Row>
+                    <Table.HeaderCell colSpan={3}>
+                        {props.totalCount >= 0 ? (props.totalCount > 0 ? `Showing ${props.start} to ${props.end} of ${props.totalCount} neurons` : "There are no neurons") : ""}
+                    </Table.HeaderCell>
+                    <Table.HeaderCell colSpan={3} textAlign="center">
+                        <i>Click a value to edit.</i>
+                    </Table.HeaderCell>
+                    <Table.HeaderCell colSpan={3} textAlign="right">
+                        {`Page ${props.activePage} of ${props.pageCount}`}
+                    </Table.HeaderCell>
+                </Table.Row>
+            </Table.Footer>
         </Table>
     );
 }

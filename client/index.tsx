@@ -9,7 +9,6 @@ import {msalConfig} from "./authConfig";
 
 require("file-loader?name=index.html!../index.html");
 
-import "react-table/react-table.css"
 import "react-datepicker/dist/react-datepicker.css";
 import "react-toastify/dist/ReactToastify.min.css";
 import "rc-slider/assets/index.css";

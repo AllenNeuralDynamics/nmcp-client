@@ -172,7 +172,7 @@ export const Neurons = (props: INeuronsProps) => {
 
         return <Confirm open={true} dimmer="blurring"
                         header="Delete Neuron?"
-                        content={`Are you sure you want to delete the neuron ${displayNeuron(state.requestedNeuronForDelete)}?`}
+                        content={`Are you sure you want to delete the neuron ${displayNeuron(state.requestedNeuronForDelete)}?  This action can not be undone.`}
                         confirmButton="Delete"
                         onCancel={() => setState({...state, requestedNeuronForDelete: null})}
                         onConfirm={async () => {
@@ -212,28 +212,9 @@ export const Neurons = (props: INeuronsProps) => {
                                       onUpdateLimitForPage={onUpdateLimit}
                                       onUpdateOffsetForPage={onUpdateOffsetForPage}/>
                 </Segment>
-                <Segment style={{padding: 0}}>
-                    <NeuronsTable neurons={data.neurons ? data.neurons.items : []}
-                                  pageCount={pageCount}
-                                  activePage={activePage}
-                                  onDeleteNeuron={(n) => setState({...state, requestedNeuronForDelete: n})}
-                                  onManageNeuronAnnotations={(n) => setState({...state, requestedNeuronForAnnotations: n})}/>
-                </Segment>
-                <Segment secondary>
-                    <Grid columns={3}>
-                        <Grid.Row>
-                            <Grid.Column>
-                                {totalCount >= 0 ? (totalCount > 0 ? `Showing ${start} to ${end} of ${totalCount} neurons` : "It's a clean slate - upload the first neurons!") : ""}
-                            </Grid.Column>
-                            <Grid.Column style={{textAlign: "center"}}>
-                                <i>Click a value to edit</i>
-                            </Grid.Column>
-                            <Grid.Column style={{textAlign: "right"}}>
-                                {`Page ${activePage} of ${pageCount}`}
-                            </Grid.Column>
-                        </Grid.Row>
-                    </Grid>
-                </Segment>
+                <NeuronsTable neurons={data.neurons ? data.neurons.items : []} pageCount={pageCount} activePage={activePage} start={start} end={end}
+                              totalCount={totalCount} onDeleteNeuron={(n) => setState({...state, requestedNeuronForDelete: n})}
+                              onManageNeuronAnnotations={(n) => setState({...state, requestedNeuronForAnnotations: n})}/>
             </Segment.Group>
         </div>
     );

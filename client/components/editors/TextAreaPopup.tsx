@@ -5,6 +5,7 @@ type TextAreaPProps = {
     header?: string;
     value?: string;
     placeholder?: string;
+    limit?: number;
 
     onAccept?(value: string): void;
 }
@@ -41,11 +42,13 @@ export class TextAreaPopup extends React.Component<TextAreaPProps, TextAreaPStat
     };
 
     public render() {
+        const str = this.props.limit ? this.props.value?.substring(0, this.props.limit) || null : this.props.value;
+
         return (
             <Popup open={this.state.isOpen} onOpen={() => this.setState({isOpen: true})}
                    onClose={this.onClose} on="click" flowing
                    header={this.props.header || ""}
-                   trigger={<span>{this.props.value || "(none)"}</span>}
+                   trigger={<span>{str || "(none)"}</span>}
                    content={
                        <Form>
                            <Form.TextArea size="mini" placeholder={this.props.placeholder || ""}
