@@ -56,7 +56,7 @@ export class AxisViewer implements ICameraObserver {
 
         document.getElementById(this.dom_element).appendChild(this.renderer.domElement);
 
-        // create a scene
+        // upload a scene
         this.scene = new THREE.Scene();
 
         // put a camera in the scene

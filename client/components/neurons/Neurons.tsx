@@ -223,7 +223,7 @@ export const Neurons = (props: INeuronsProps) => {
                     <Grid columns={3}>
                         <Grid.Row>
                             <Grid.Column>
-                                {totalCount >= 0 ? (totalCount > 0 ? `Showing ${start} to ${end} of ${totalCount} neurons` : "It's a clean slate - create the first neurons!") : ""}
+                                {totalCount >= 0 ? (totalCount > 0 ? `Showing ${start} to ${end} of ${totalCount} neurons` : "It's a clean slate - upload the first neurons!") : ""}
                             </Grid.Column>
                             <Grid.Column style={{textAlign: "center"}}>
                                 <i>Click a value to edit</i>

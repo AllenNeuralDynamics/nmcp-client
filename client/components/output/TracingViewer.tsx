@@ -547,7 +547,7 @@ export class TracingViewer extends React.Component<ITracingViewerProps, ITracing
         // On screen, but should not be.
         const toHide = _.differenceWith(this._loadedNeurons, tracings, (id, tracing) => id === tracing.id);
 
-        // Never seen and must create and show
+        // Never seen and must upload and show
         const toCreate = _.differenceWith(tracings, knownAsArray, (tracing, id) => id === tracing.id);
 
         // Known, but may have changed.

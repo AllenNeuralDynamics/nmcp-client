@@ -15,18 +15,19 @@ import {displayNeuron} from "../../models/neuron";
 import {displayBrainArea} from "../../models/brainArea";
 import {AnnotationStatus, annotationStatusColor, displayAnnotationStatus} from "../../models/annotationStatus";
 
-export const ReviewTable = () => {
-    const {loading, error, data} = useQuery<ReviewableAnnotationsResponse>(REVIEWABLE_ANNOTATIONS_QUERY);
+export type ReviewTableProps = {
+    reconstructions: IReconstruction[]
+    selected: IReconstruction;
 
-    if (loading) {
-        return (<div/>)
-    }
+    onRowClick(id: IReconstruction): void;
+}
 
-    const rows = data.reviewableReconstructions.map((t: IReconstruction) => {
-        return <ReviewRow key={`tt_${t.id}`} annotation={t}/>
+export const ReviewTable = (props: ReviewTableProps) => {
+    const rows = props.reconstructions.map((r: IReconstruction) => {
+        return <ReviewRow key={`tt_${r.id}`} reconstruction={r} isSelected={r == props.selected} onRowClick={props.onRowClick}/>
     });
 
-    const totalCount = data.reviewableReconstructions.length;
+    const totalCount = props.reconstructions.length;
 
     let totalMessage = "There are no reconstructions awaiting review";
 
@@ -39,12 +40,13 @@ export const ReviewTable = () => {
     }
 
     return (
-        <Table attached="bottom" compact="very" size="small" celled structured>
+        <Table attached="bottom" compact="very" size="small" celled structured selectable>
             <Table.Header>
                 <Table.Row>
                     <Table.HeaderCell rowSpan={2}>Neuron</Table.HeaderCell>
                     <Table.HeaderCell rowSpan={2}>Subject</Table.HeaderCell>
                     <Table.HeaderCell colSpan={4} textAlign="center">Soma</Table.HeaderCell>
+                    <Table.HeaderCell rowSpan={2}>Annotator</Table.HeaderCell>
                     <Table.HeaderCell rowSpan={2}>Status</Table.HeaderCell>
                     <Table.HeaderCell rowSpan={2}>Actions</Table.HeaderCell>
                 </Table.Row>
@@ -60,7 +62,7 @@ export const ReviewTable = () => {
             </Table.Body>
             <Table.Footer fullwidth="true">
                 <Table.Row>
-                    <Table.HeaderCell colSpan={8}>
+                    <Table.HeaderCell colSpan={9}>
                         {totalMessage}
                     </Table.HeaderCell>
                 </Table.Row>
@@ -69,11 +71,14 @@ export const ReviewTable = () => {
     );
 }
 
-interface IReviewRowProps {
-    annotation: IReconstruction;
+export type ReviewRowProps = {
+    isSelected: boolean;
+    reconstruction: IReconstruction;
+
+    onRowClick(id: IReconstruction): void;
 }
 
-const ReviewRow = (props: IReviewRowProps) => {
+const ReviewRow = (props: ReviewRowProps) => {
     const [approveAnnotation, {data: approveData}] = useMutation<ApproveAnnotationResponse, ApproveAnnotationVariables>(APPROVE_ANNOTATION_MUTATION,
         {
             refetchQueries: ["ReviewableReconstructions", "CandidatesForReview"]
@@ -93,31 +98,34 @@ const ReviewRow = (props: IReviewRowProps) => {
     let approveButton = null;
     let completeButton = null;
 
-    if (props.annotation.status != AnnotationStatus.Approved) {
+    if (props.reconstruction.status != AnnotationStatus.Approved) {
         approveButton = (
-            <Button icon="check" size="mini" color='green' content="Approve" onClick={() => approveAnnotation({variables: {id: props.annotation.id}})}/>)
+            <Button icon="check" size="mini" color='green' content="Approve" onClick={() => approveAnnotation({variables: {id: props.reconstruction.id}})}/>)
     } else {
         decline = "Rescind"
     }
 
-    if (props.annotation.status == AnnotationStatus.Approved && props.annotation.axon != null && props.annotation.dendrite != null) {
+    if (props.reconstruction.status == AnnotationStatus.Approved && props.reconstruction.axon != null && props.reconstruction.dendrite != null) {
         completeButton = (<Button icon="cancel" size="mini" color='blue' content="Mark as Complete"
-                                  onClick={() => completeReconstruction({variables: {id: props.annotation.id}})}/>)
+                                  onClick={() => completeReconstruction({variables: {id: props.reconstruction.id}})}/>)
     }
 
-    return (<TableRow>
-            <TableCell>{displayNeuron(props.annotation.neuron)}</TableCell>
-            <TableCell>{displayBrainArea(props.annotation.neuron.brainArea, "(unspecified)")}</TableCell>
-            <TableCell>{props.annotation.neuron.x}</TableCell>
-            <TableCell>{props.annotation.neuron.y}</TableCell>
-            <TableCell>{props.annotation.neuron.z}</TableCell>
-            <TableCell>{props.annotation.annotator.firstName} {props.annotation.annotator.lastName}</TableCell>
-            <TableCell><Label color={annotationStatusColor(props.annotation.status)}>{displayAnnotationStatus(props.annotation.status)}</Label></TableCell>
+    return (
+        <TableRow onClick={() => props.onRowClick(props.reconstruction)} active={props.isSelected}>
+            <TableCell>{displayNeuron(props.reconstruction.neuron)}</TableCell>
+            <TableCell>{props.reconstruction.neuron.sample.animalId}</TableCell>
+            <TableCell>{displayBrainArea(props.reconstruction.neuron.brainArea, "(unspecified)")}</TableCell>
+            <TableCell>{props.reconstruction.neuron.x}</TableCell>
+            <TableCell>{props.reconstruction.neuron.y}</TableCell>
+            <TableCell>{props.reconstruction.neuron.z}</TableCell>
+            <TableCell>{props.reconstruction.annotator.firstName} {props.reconstruction.annotator.lastName}</TableCell>
+            <TableCell><Label
+                color={annotationStatusColor(props.reconstruction.status)}>{displayAnnotationStatus(props.reconstruction.status)}</Label></TableCell>
             <TableCell>
                 <Button icon="eye" size="mini" color='blue' content="View"/>
                 {completeButton}
                 {approveButton}
-                <Button icon="cancel" size="mini" color='red' content={decline} onClick={() => declineAnnotation({variables: {id: props.annotation.id}})}/>
+                <Button icon="cancel" size="mini" color='red' content={decline} onClick={() => declineAnnotation({variables: {id: props.reconstruction.id}})}/>
             </TableCell>
         </TableRow>
     );

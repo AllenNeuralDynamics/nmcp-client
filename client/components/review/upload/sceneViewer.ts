@@ -1,5 +1,5 @@
 import {SceneManager, SwcData, SwcNodeData} from "./sceneManager";
-import {SwcInputFile} from "../create/FilePreview";
+import {SwcInputFile} from ".//FilePreview";
 
 export class SceneViewer {
     private _sceneManager: SceneManager;

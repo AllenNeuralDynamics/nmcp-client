@@ -5,6 +5,10 @@ import {INeuron} from "../models/neuron";
 export const ReconstructionFieldsFragment = gql`fragment ReconstructionFields on Reconstruction {
     id
     status
+    notes
+    checks
+    durationHours
+    lengthMillimeters
     startedAt
     completedAt
     annotatorId
@@ -149,6 +153,20 @@ export type RequestAnnotationReviewVariables = {
 export type RequestAnnotationReviewResponse = {
     requestReconstructionReview: ErrorOutput;
 }
+
+//
+// Request Review Mutation
+//
+export const UPDATE_RECONSTRUCTION_MUTATION = gql`mutation UpdateReconstruction($id: String!, $duration: Float!, $length: Float!, $notes: String!, $checks: String!) {
+    updateReconstruction(id: $id, duration: $duration, length: $length, notes: $notes, checks: $checks) {
+        message
+        name
+    }
+}`;
+
+export type UpdateReconstructionVariables = RequestAnnotationReviewVariables;
+
+export type UpdateReconstructionResponse = RequestAnnotationReviewResponse;
 
 //
 // Request Review Mutation

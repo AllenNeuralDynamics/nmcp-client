@@ -338,7 +338,7 @@ export const SamplesReactTable = (props: ISamplesProps) => {
                 </Segment>
                 <Segment secondary style={{display: "flex", justifyContent: "space-between"}}>
                     <div style={{order: 0}}>
-                        {totalCount >= 0 ? (totalCount > 0 ? `Showing ${start} to ${end} of ${totalCount} samples` : "It's a clean slate - create the first sample!") : ""}
+                        {totalCount >= 0 ? (totalCount > 0 ? `Showing ${start} to ${end} of ${totalCount} samples` : "It's a clean slate - upload the first sample!") : ""}
                     </div>
                     <div style={{order: 1}}>
                         <i>Click a value to edit. Expand to view additional injections (if applicable).</i>

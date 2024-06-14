@@ -11,6 +11,7 @@ export type CompleteReconstructionData = {
 export type CompleteReconstructionPanelProps = {
     id: string;
     data: CompleteReconstructionData;
+    showId?: boolean;
 
     updateDuration(value: string): void;
     updateLength(value: string): void;
@@ -77,11 +78,13 @@ export const CompleteReconstructionPanel = (props: CompleteReconstructionPanelPr
                     </Form>
                 </Grid.Column>
             </Grid.Row>
-            <Grid.Row>
-                <Grid.Column Width={16}>
-                    <small>{`reference id: ${props.id}`}</small>
-                </Grid.Column>
-            </Grid.Row>
+            {props.showId ?
+                <Grid.Row>
+                    <Grid.Column Width={16}>
+                        <small>{`reference id: ${props.id}`}</small>
+                    </Grid.Column>
+                </Grid.Row>
+                : null}
         </Grid>
     )
 }

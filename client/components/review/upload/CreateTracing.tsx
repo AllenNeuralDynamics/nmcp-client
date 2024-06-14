@@ -1,4 +1,6 @@
 import * as React from "react";
+import {useState} from "react";
+import {useMutation} from "@apollo/react-hooks";
 import {ApolloError} from "apollo-client";
 import {Grid, Header, Segment, Button, Confirm} from "semantic-ui-react";
 import {toast} from "react-toastify";
@@ -8,14 +10,10 @@ import {ITracingStructure} from "../../../models/tracingStructure";
 import {ISwcUploadOutput} from "../../../models/swcTracing";
 import {UPLOAD_TRACING_MUTATION, UploadTracingMutationResponse, UploadTracingVariables} from "../../../graphql/tracings";
 import {SwcDropZone} from "./SwcDropZone";
-import {TracingInput} from "./TracingInput";
-import {useState} from "react";
-import {useMutation} from "@apollo/react-hooks";
 
 export interface ICreateTracingProps {
-    neurons: INeuron[];
+    neuron: INeuron;
     tracingStructures: ITracingStructure[];
-    shouldClearCreateContentsAfterUpload: boolean;
 }
 
 interface ICreateTracingState {
@@ -24,7 +22,6 @@ interface ICreateTracingState {
     isSwcFile: boolean;
     file: File;
     structure: ITracingStructure;
-    neuron: INeuron;
 }
 
 export const CreateTracing = (props: ICreateTracingProps) => {
@@ -33,7 +30,6 @@ export const CreateTracing = (props: ICreateTracingProps) => {
         invalidFileName: "",
         isSwcFile: false,
         file: null,
-        neuron: null,
         structure: null,
     });
 
@@ -43,12 +39,6 @@ export const CreateTracing = (props: ICreateTracingProps) => {
             onError: (error: any) => onUploadError(error)
         });
 
-    function onNeuronChange(neuron: INeuron) {
-        if (neuron !== state.neuron) {
-            setState({...state, neuron, structure: null});
-        }
-    }
-
     function onTracingStructureChange(structureId: string) {
         if (!state.structure || structureId !== state.structure.id) {
             setState({...state, structure: props.tracingStructures.find(t => t.id === structureId)});
@@ -56,7 +46,7 @@ export const CreateTracing = (props: ICreateTracingProps) => {
     }
 
     function canUploadTracing(): boolean {
-        return state.neuron && (state.structure || !state.isSwcFile) && state.file !== null;
+        return props.neuron && (state.structure || !state.isSwcFile) && state.file !== null;
     }
 
     function setSwcFile(acceptedFiles: File[]) {
@@ -69,14 +59,6 @@ export const CreateTracing = (props: ICreateTracingProps) => {
 
     function resetUploadState() {
         setState({...state, file: null});
-
-        if (props.shouldClearCreateContentsAfterUpload) {
-            setState({
-                ...state,
-                structure: null,
-                neuron: null,
-            });
-        }
     }
 
     async function tryUploadSwc() {
@@ -84,7 +66,7 @@ export const CreateTracing = (props: ICreateTracingProps) => {
             try {
                 await uploadSwc({
                     variables: {
-                        neuronId: state.neuron.id,
+                        neuronId: props.neuron.id,
                         structureId: state.structure ? state.structure.id : null,
                         file: state.file
                     }
@@ -112,52 +94,31 @@ export const CreateTracing = (props: ICreateTracingProps) => {
 
     return (
         <div>
-            <Confirm content={`${state.invalidFileName} does not appear to contain SWC data.`}
+            <Confirm content={`${state.invalidFileName} does not appear to contain SWC or reconstruction JSON data.`}
                      open={state.isFileAlertOpen} cancelButton={null}
                      onConfirm={() => setState({...state, isFileAlertOpen: false})}/>
-            <div>
-                <Segment secondary attached="top"
-                         style={{
-                             display: "flex",
-                             alignItems: "center",
-                             justifyContent: "space-between"
-                         }}>
-                    <Header content="Upload Reconstruction" style={{margin: "0"}}/>
-                    <Button content="Upload" icon="upload" size="tiny" labelPosition="right"
-                            color="blue"
-                            disabled={!canUploadTracing() || loading}
-                            onClick={() => tryUploadSwc()}/>
-                </Segment>
-                <Segment attached="bottom">
-                    <Grid fluid="true">
-                        <Grid.Row style={{paddingBottom: 10}}>
-                            <Grid.Column width={8}>
-                                <Grid fluid="true">
-                                    <Grid.Row>
-                                        <Grid.Column width={16}>
-                                            <SwcDropZone isDisabled={loading} file={state.file}
-                                                         onFileReceived={files => setSwcFile(files)}
-                                                         onFileIsInvalid={() => {
-                                                             setState({
-                                                                 ...state,
-                                                                 isFileAlertOpen: true,
-                                                                 invalidFileName: state.file ? state.file.name : ""
-                                                             });
-                                                             setSwcFile(null)
-                                                         }}/>
-                                        </Grid.Column>
-                                    </Grid.Row>
-                                </Grid>
-                            </Grid.Column>
-                            <Grid.Column width={8}>
-                                <TracingInput isLoading={loading} isSwcFile={state.isSwcFile} selectedNeuron={state.neuron} selectedTracingStructure={state.structure}
-                                              neurons={props.neurons} tracingStructures={props.tracingStructures}
-                                              onNeuronChanged={n => onNeuronChange(n)} onTracingStructureChanged={(s) => onTracingStructureChange(s)}/>
-                            </Grid.Column>
-                        </Grid.Row>
-                    </Grid>
-                </Segment>
-            </div>
+
+            <Grid fluid="true">
+                <Grid.Row>
+                    <Grid.Column width={16}>
+                        <SwcDropZone isLoading={loading} isSwcFile={state.isSwcFile}
+                                     isDisabled={loading} file={state.file}
+                                     selectedTracingStructure={state.structure}
+                                     tracingStructures={props.tracingStructures}
+                                     onTracingStructureChanged={(s) => onTracingStructureChange(s)}
+                                     onFileReceived={files => setSwcFile(files)}
+                                     tryUploadSwc={tryUploadSwc}
+                                     onFileIsInvalid={() => {
+                                         setState({
+                                             ...state,
+                                             isFileAlertOpen: true,
+                                             invalidFileName: state.file ? state.file.name : ""
+                                         });
+                                         setSwcFile(null)
+                                     }}/>
+                    </Grid.Column>
+                </Grid.Row>
+            </Grid>
         </div>
     );
 }

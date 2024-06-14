@@ -33,8 +33,7 @@ export const AppRouter = () => {
             <Route path="/candidates" render={() => (<Candidates/>)}/>
             <Route path="/reconstructions" render={() => (<Reconstructions/>)}/>
             <Route path="/samples" render={() => (<Samples/>)}/>
-            <Route path="/review" render={() => (<Review neurons={data.candidatesForReview} tracingStructures={constants.TracingStructures}
-                                                         shouldClearCreateContentsAfterUpload={shouldClearCreateContentsAfterUpload}/>)}/>
+            <Route path="/review" render={() => (<Review/>)}/>
             <Route path="/admin" render={() => (<Admin/>)}/>
             <Route path="/" render={() => (<AppContent/>)}/>
         </Switch>

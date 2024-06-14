@@ -6,6 +6,10 @@ import {ISwcTracing} from "./swcTracing";
 export interface IReconstruction {
     id: string;
     status: number;
+    notes: string;
+    checks: string;
+    durationHours: number;
+    lengthMillimeters: number;
     startedAt: Date;
     completedAt: Date;
     annotatorId: string;
