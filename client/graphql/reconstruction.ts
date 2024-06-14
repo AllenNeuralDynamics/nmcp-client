@@ -35,6 +35,10 @@ export const ReconstructionFieldsFragment = gql`fragment ReconstructionFields on
             id
             name
         }
+        sample {
+            id
+            animalId
+        }
     }
     axon {
         id

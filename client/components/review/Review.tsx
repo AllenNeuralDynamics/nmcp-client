@@ -9,7 +9,7 @@ export const Review = (props: ICreateTracingProps) => {
         <div style={{margin: "20px"}}>
             <Segment.Group>
                 <Segment secondary>
-                    <Header style={{margin: "0"}}>Review</Header>
+                    <Header style={{margin: "0"}}>Reconstructions Submitted for Review</Header>
                 </Segment>
                 <ReviewTable/>
             </Segment.Group>

@@ -32,9 +32,9 @@ export const CandidateTracingRow = (props: ICandidateRowProps) => {
             <TableCell>{displayNeuron(props.neuron)}</TableCell>
             <TableCell>{props.neuron.sample.animalId}</TableCell>
             <TableCell>{displayBrainArea(props.neuron.brainArea, "(unspecified)")}</TableCell>
-            <TableCell>{props.neuron.x.toFixed(3)}</TableCell>
-            <TableCell>{props.neuron.y.toFixed(3)}</TableCell>
-            <TableCell>{props.neuron.z.toFixed(3)}</TableCell>
+            <TableCell>{props.neuron.x.toFixed(1)}</TableCell>
+            <TableCell>{props.neuron.y.toFixed(1)}</TableCell>
+            <TableCell>{props.neuron.z.toFixed(1)}</TableCell>
             <TableCell><AnnotatorList annotations={props.neuron.reconstructions} showCompleteOnly={false} showStatus={true} showProofreader={false}/></TableCell>
             <TableCell>
                 {button}

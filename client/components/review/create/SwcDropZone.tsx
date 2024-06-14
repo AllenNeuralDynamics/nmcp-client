@@ -31,7 +31,7 @@ export const SwcDropZone = (props: SwcDropZoneProps) => {
                         <div {...getRootProps()} className="dropzone-no-border" style={zoneStyle(props.isDisabled, props.file)}>
                             <input {...getInputProps()} />
                             <span style={NoFileStyle(!props.file, props.isDisabled)}>
-                            {props.file ? props.file.name : "Drop a SWC file or click to browse for a file"}
+                            {props.file ? props.file.name : "Drop a JSON file or click to browse for a file"}
                         </span>
                         </div>
                     )}

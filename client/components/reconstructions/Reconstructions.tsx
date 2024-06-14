@@ -134,22 +134,27 @@ export const Reconstructions = () => {
                                       onUpdateLimitForPage={onUpdateLimit}
                                       onUpdateOffsetForPage={onUpdateOffsetForPage}/>
                 </Segment>
-                <Table attached="bottom" compact="very">
+                <Table attached="bottom" compact="very" size="small" celled structured>
                     <Table.Header>
                         <Table.Row>
-                            <Table.HeaderCell>Neuron</Table.HeaderCell>
-                            <Table.HeaderCell>Soma Structure</Table.HeaderCell>
-                            <Table.HeaderCell>Soma X</Table.HeaderCell>
-                            <Table.HeaderCell>Soma Y</Table.HeaderCell>
-                            <Table.HeaderCell>Soma Z</Table.HeaderCell>
+                            <Table.HeaderCell rowSpan={2}>Neuron</Table.HeaderCell>
+                            <Table.HeaderCell rowSpan={2}>Subject</Table.HeaderCell>
+                            <Table.HeaderCell colSpan={4} textAlign="center">Soma</Table.HeaderCell>
+                            <Table.HeaderCell colSpan={2} textAlign="center">Node Count</Table.HeaderCell>
+                            <Table.HeaderCell rowSpan={2}>Annotator</Table.HeaderCell>
+                            <Table.HeaderCell rowSpan={2}>Proofreader</Table.HeaderCell>
+                            <Table.HeaderCell rowSpan={2}>Started</Table.HeaderCell>
+                            <Table.HeaderCell rowSpan={2}>Completed</Table.HeaderCell>
+                            <Table.HeaderCell rowSpan={2}>Status</Table.HeaderCell>
+                            <Table.HeaderCell rowSpan={2}>Actions</Table.HeaderCell>
+                        </Table.Row>
+                        <Table.Row>
+                            <Table.HeaderCell>Structure</Table.HeaderCell>
+                            <Table.HeaderCell>X</Table.HeaderCell>
+                            <Table.HeaderCell>Y</Table.HeaderCell>
+                            <Table.HeaderCell>Z</Table.HeaderCell>
                             <Table.HeaderCell>Axon</Table.HeaderCell>
                             <Table.HeaderCell>Dendrite</Table.HeaderCell>
-                            <Table.HeaderCell>Annotator</Table.HeaderCell>
-                            <Table.HeaderCell>Proofreader</Table.HeaderCell>
-                            <Table.HeaderCell>Started</Table.HeaderCell>
-                            <Table.HeaderCell>Completed</Table.HeaderCell>
-                            <Table.HeaderCell>Status</Table.HeaderCell>
-                            <Table.HeaderCell>Actions</Table.HeaderCell>
                         </Table.Row>
                     </Table.Header>
                     <Table.Body>
@@ -157,7 +162,7 @@ export const Reconstructions = () => {
                     </Table.Body>
                     <Table.Footer fullwidth="true">
                         <Table.Row>
-                            <Table.HeaderCell colSpan={6}>
+                            <Table.HeaderCell colSpan={7}>
                                 {totalCount >= 0 ? (totalCount > 0 ? `Showing ${start} to ${end} of ${totalCount} reconstructions` : noReconstructionsText(state.userOnly, filters.length > 0)) : ""}
                             </Table.HeaderCell>
                             <Table.HeaderCell colSpan={7} textAlign="right">
@@ -221,10 +226,11 @@ const ReconstructionRow = (props: IReconstructionRowProps) => {
 
     return (<TableRow>
             <TableCell>{displayNeuron(props.annotation.neuron)}</TableCell>
+            <TableCell>{props.annotation.neuron.sample.animalId}</TableCell>
             <TableCell>{displayBrainArea(props.annotation.neuron.brainArea, "(unspecified)")}</TableCell>
-            <TableCell>{props.annotation.neuron.x}</TableCell>
-            <TableCell>{props.annotation.neuron.y}</TableCell>
-            <TableCell>{props.annotation.neuron.z}</TableCell>
+            <TableCell>{props.annotation.neuron.x.toFixed(1)}</TableCell>
+            <TableCell>{props.annotation.neuron.y.toFixed(1)}</TableCell>
+            <TableCell>{props.annotation.neuron.z.toFixed(1)}</TableCell>
             <TableCell>{props.annotation.axon ? props.annotation.axon.nodeCount : "N/A"}</TableCell>
             <TableCell>{props.annotation.dendrite ? props.annotation.dendrite.nodeCount : "N/A"}</TableCell>
             <TableCell><AnnotatorList annotations={[props.annotation]} showCompleteOnly={false} showStatus={false} showProofreader={false}/></TableCell>

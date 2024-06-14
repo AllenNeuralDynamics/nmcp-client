@@ -122,7 +122,7 @@ export const CreateTracing = (props: ICreateTracingProps) => {
                              alignItems: "center",
                              justifyContent: "space-between"
                          }}>
-                    <Header content="Upload Tracing" style={{margin: "0"}}/>
+                    <Header content="Upload Reconstruction" style={{margin: "0"}}/>
                     <Button content="Upload" icon="upload" size="tiny" labelPosition="right"
                             color="blue"
                             disabled={!canUploadTracing() || loading}

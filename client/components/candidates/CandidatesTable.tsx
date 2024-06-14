@@ -23,17 +23,20 @@ export const CandidateTracingsTable = (props: ITracingsTableProps) => {
 
     return (
         <div>
-            <Table attached="bottom" compact="very">
+            <Table attached="bottom" compact="very" size="small" structured celled>
                 <Table.Header>
                     <Table.Row>
-                        <Table.HeaderCell>Neuron</Table.HeaderCell>
-                        <Table.HeaderCell>Sample</Table.HeaderCell>
-                        <Table.HeaderCell>Soma Structure</Table.HeaderCell>
-                        <Table.HeaderCell>Soma X</Table.HeaderCell>
-                        <Table.HeaderCell>Soma Y</Table.HeaderCell>
-                        <Table.HeaderCell>Soma Z</Table.HeaderCell>
-                        <Table.HeaderCell>Annotator(s)</Table.HeaderCell>
-                        <Table.HeaderCell>Actions</Table.HeaderCell>
+                        <Table.HeaderCell rowSpan={2}>Neuron</Table.HeaderCell>
+                        <Table.HeaderCell rowSpan={2}>Subject</Table.HeaderCell>
+                        <Table.HeaderCell colSpan={4} textAlign="center">Soma</Table.HeaderCell>
+                        <Table.HeaderCell rowSpan={2}>Annotator(s)</Table.HeaderCell>
+                        <Table.HeaderCell rowSpan={2}>Actions</Table.HeaderCell>
+                    </Table.Row>
+                    <Table.Row>
+                        <Table.HeaderCell>Structure</Table.HeaderCell>
+                        <Table.HeaderCell>X</Table.HeaderCell>
+                        <Table.HeaderCell>Y</Table.HeaderCell>
+                        <Table.HeaderCell>Z</Table.HeaderCell>
                     </Table.Row>
                 </Table.Header>
                 <Table.Body>
