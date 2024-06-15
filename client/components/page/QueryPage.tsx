@@ -26,7 +26,6 @@ interface IPageProps {
     neurons: INeuron[];
     shouldAlwaysShowFullTracing: boolean;
     shouldAlwaysShowSoma: boolean;
-    isPublicRelease: boolean;
     exportLimit: number;
 
     onPerformQuery(): void;
@@ -149,7 +148,6 @@ export class QueryPage extends React.Component<IPageProps, IPageState> {
             nonce: this.props.queryNonce,
             shouldAlwaysShowFullTracing: this.props.shouldAlwaysShowFullTracing,
             shouldAlwaysShowSoma: this.props.shouldAlwaysShowSoma,
-            isPublicRelease: this.props.isPublicRelease,
             exportLimit: this.props.exportLimit,
             compartmentMeshVersion: ViewerMeshVersion.AibsCcf,
             ref: (r) => this._mainView = r,

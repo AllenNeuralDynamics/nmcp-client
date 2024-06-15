@@ -8,7 +8,6 @@ const Slider = require("rc-slider").default;
 import {ViewerMeshVersion} from "../../models/compartmentMeshSet";
 import {NdbConstants} from "../../models/constants";
 import {useStore, useViewModel} from "../app/App";
-import {SearchScope} from "../../models/uiQueryPredicate";
 import {UserPreferences} from "../../util/userPreferences";
 
 export const SettingsDialogContainer = observer(() => {
@@ -16,7 +15,7 @@ export const SettingsDialogContainer = observer(() => {
     const {SystemConfiguration, Constants} = useStore();
 
     return <SettingsDialog show={viewModel.Settings.IsSettingsWindowOpen} constants={Constants}
-                           isPublicRelease={SystemConfiguration.searchScope >= SearchScope.Public}
+                           isPublicRelease={true}
                            onHide={() => viewModel.Settings.closeSettingsDialog()}/>;
 });
 

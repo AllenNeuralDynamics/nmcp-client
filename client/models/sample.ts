@@ -27,7 +27,7 @@ export function displaySample(sample: ISample) {
         return "(none)";
     }
 
-    return `${("000" + sample.idNumber).slice(-4)} (${moment(sample.sampleDate).format("YYYY-MM-DD")})`
+    return `${sample.animalId} (${moment(sample.sampleDate).format("YYYY-MM-DD")})`
 }
 
 export function displaySampleAnimal(sample: ISample) {

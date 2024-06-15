@@ -42,9 +42,9 @@ export const NeuronsTable = (props: INeuronTableProps) => {
                 <Table.Row>
                     <Table.HeaderCell>Id</Table.HeaderCell>
                     <Table.HeaderCell>Sample</Table.HeaderCell>
-                    <Table.HeaderCell>Subject Id</Table.HeaderCell>
+                    <Table.HeaderCell>Tag</Table.HeaderCell>
                     <Table.HeaderCell>Soma Brain Area</Table.HeaderCell>
-                    <Table.HeaderCell>Soma Sample Location</Table.HeaderCell>
+                    <Table.HeaderCell>Soma Location</Table.HeaderCell>
                     <Table.HeaderCell>Visibility</Table.HeaderCell>
                     <Table.HeaderCell>Consensus</Table.HeaderCell>
                     <Table.HeaderCell>DOI</Table.HeaderCell>

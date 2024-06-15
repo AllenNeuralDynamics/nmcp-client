@@ -5,7 +5,7 @@ import cuid from "cuid";
 
 import {QueryPage} from "./QueryPage";
 import {NdbConstants} from "../../models/constants";
-import {SEARCH_NEURONS_QUERY} from "../../graphql/search";
+import {SEARCH_NEURONS_QUERY, SearchContext, SearchNeuronsQueryResponse, SearchNeuronsQueryVariables} from "../../graphql/search";
 import {INeuron} from "../../models/neuron";
 import {SearchScope, UIQueryPredicate, UIQueryPredicates} from "../../models/uiQueryPredicate";
 import {UserPreferences} from "../../util/userPreferences";
@@ -13,7 +13,6 @@ import {Footer} from "./Footer";
 
 interface IContentProps {
     constants: NdbConstants;
-    searchScope?: SearchScope;
     systemVersion?: string;
     exportLimit?: number;
 }
@@ -89,9 +88,8 @@ export class Content extends React.Component<IContentProps, IContentState> {
         try {
             UserPreferences.Instance.AppendQueryHistory(this.state.predicates);
 
-            const context = {
+            const context: SearchContext = {
                 nonce: nonce || cuid(),
-                scope: this.props.searchScope,
                 predicates: this.state.predicates.map(f => f.asFilterInput())
             };
 
@@ -138,7 +136,6 @@ export class Content extends React.Component<IContentProps, IContentState> {
                                    queryNonce={this.state.queryNonce}
                                    shouldAlwaysShowFullTracing={this.state.shouldAlwaysShowFullTracing}
                                    shouldAlwaysShowSoma={this.state.shouldAlwaysShowSoma}
-                                   isPublicRelease={this.props.searchScope >= SearchScope.Public}
                                    exportLimit={this.props.exportLimit}
                                    ref={(r) => this._queryPage = r}
                                    onPerformQuery={() => this.onExecuteQuery(client)}

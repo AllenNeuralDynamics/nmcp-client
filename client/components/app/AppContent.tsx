@@ -7,6 +7,5 @@ import {Content} from "../page/Content";
 export const AppContent = observer(() => {
     const {SystemConfiguration, Constants} = useStore();
 
-    return <Content constants={Constants} searchScope={SystemConfiguration.searchScope}
-                    systemVersion={SystemConfiguration.systemVersion} exportLimit={SystemConfiguration.exportLimit}/>;
+    return <Content constants={Constants} systemVersion={SystemConfiguration.systemVersion} exportLimit={SystemConfiguration.exportLimit}/>;
 });

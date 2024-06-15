@@ -1,5 +1,3 @@
-import {SearchScope} from "./searchScope.js";
-
 export type ServiceLocation = {
     hostname: string;
     port: number;
@@ -8,7 +6,6 @@ export type ServiceLocation = {
 
 export interface IServiceOptions {
     port: number;
-    searchScope: number;
     systemEndpoint: string;
     graphQLService: ServiceLocation;
     tracingsService: ServiceLocation;
@@ -20,7 +17,6 @@ export interface IServiceOptions {
 
 const configuration: IServiceOptions = {
     port: 5000,
-    searchScope: SearchScope.Public,
     systemEndpoint: "/system",
     graphQLService: {
         hostname: "search-api",
@@ -50,8 +46,6 @@ function loadServerConfiguration() {
     const options = Object.assign({}, configuration);
 
     options.port = parseInt(process.env.SEARCH_CLIENT_PORT) || options.port;
-    options.searchScope = process.env.SEARCH_CLIENT_SCOPE ? SearchScope[process.env.SEARCH_CLIENT_SCOPE] : options.searchScope;
-    options.searchScope = options.searchScope === undefined ? SearchScope.Public : options.searchScope;
 
     options.graphQLService.hostname = process.env.SEARCH_API_HOST || process.env.CORE_SERVICES_ENDPOINT || options.graphQLService.hostname;
     options.graphQLService.port = parseInt(process.env.SEARCH_API_PORT) || options.graphQLService.port;

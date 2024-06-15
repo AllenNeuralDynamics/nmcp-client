@@ -5,10 +5,9 @@ import {IStructureIdentifier} from "../models/structureIdentifier";
 import {IQueryOperator} from "../models/queryOperator";
 import {IBrainArea} from "../models/brainArea";
 
-export const CONSTANTS_QUERY = gql`query ConstantsQuery($searchScope: Int) {
-  systemSettings(searchScope: $searchScope) {
+export const CONSTANTS_QUERY = gql`query ConstantsQuery {
+  systemSettings {
     apiVersion
-    apiRelease
     neuronCount
   }
   tracingStructures {
@@ -41,13 +40,8 @@ export const CONSTANTS_QUERY = gql`query ConstantsQuery($searchScope: Int) {
   }
 }`;
 
-export type SystemSettingsVariables = {
-    searchScope: number;
-}
-
 export interface ISystemSettings {
     apiVersion: string;
-    apiRelease: string;
     neuronCount: number;
 }
 

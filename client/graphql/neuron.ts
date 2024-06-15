@@ -14,6 +14,7 @@ const NEURON_RELATIONSHIP_FIELDS_FRAGMENT = gql`fragment NeuronRelationshipField
     sample {
         id
         idNumber
+        animalId
         sampleDate
     }
 }`;

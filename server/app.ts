@@ -15,7 +15,6 @@ import Debug from "debug";
 const debug = Debug("ndb:search-client:app");
 
 import {ServerConfiguration} from "./serverConfig.js";
-import {SearchScope} from "./searchScope.js";
 
 import {dirname} from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -23,8 +22,6 @@ import {fileURLToPath} from 'node:url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const version = readSystemVersion();
-
-debug(`search scope will limited to ${SearchScope[ServerConfiguration.searchScope]}`);
 
 const apiUri = `http://${ServerConfiguration.graphQLService.hostname}:${ServerConfiguration.graphQLService.port}`;
 const tracingsUri = `http://${ServerConfiguration.tracingsService.hostname}:${ServerConfiguration.tracingsService.port}`;
@@ -47,7 +44,6 @@ if (process.env.NODE_ENV !== "production") {
     app.use(ServerConfiguration.systemEndpoint, (req, res) => {
         res.json({
             systemVersion: version,
-            searchScope: ServerConfiguration.searchScope,
             exportLimit: ServerConfiguration.exportLimit
         });
     });
@@ -124,7 +120,6 @@ function devServer() {
             devServer.app.use(ServerConfiguration.systemEndpoint, (req, res) => {
                 res.json({
                     systemVersion: version,
-                    searchScope: ServerConfiguration.searchScope,
                     exportLimit: ServerConfiguration.exportLimit
                 });
             });

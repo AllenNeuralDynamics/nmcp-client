@@ -4,16 +4,14 @@ import {InteractionRequiredAuthError} from "@azure/msal-browser";
 import {useAccount, useIsAuthenticated, useMsal} from "@azure/msal-react";
 import {ApolloClient, InMemoryCache, ApolloLink, ApolloProvider, concat} from "@apollo/client";
 import {createUploadLink} from "apollo-upload-client";
-;import {ToastContainer, ToastPosition} from "react-toastify";
+import {ToastContainer, ToastPosition} from "react-toastify";
 
-import {AppSystemConfiguration} from "./AppSystemConfiguration";
 import {AppConstants} from "./AppConstants";
 import {AppTomography} from "./AppTomography";
 import {loginRequest} from "../../authConfig";
 import {UserApp} from "./UserApp";
 import {AppRouter} from "./AppRouter";
 import {PageHeader} from "../page/PageHeader";
-import {Footer} from "../page/Footer"
 import {SettingsDialogContainer} from "../page/SettingsDialog";
 
 const toastStyleOverride = {
@@ -71,16 +69,14 @@ export const ApolloApp = () => {
 
     return <ApolloProvider client={client}>
         <UserApp>
-            <AppSystemConfiguration>
-                <AppConstants>
-                    <AppTomography>
-                        <PageHeader/>
-                        <SettingsDialogContainer/>
-                        <ToastContainer autoClose={6000} position={ToastPosition.BOTTOM_CENTER} style={toastStyleOverride}/>
-                        <AppRouter/>
-                    </AppTomography>
-                </AppConstants>
-            </AppSystemConfiguration>
+            <AppConstants>
+                <AppTomography>
+                    <PageHeader/>
+                    <SettingsDialogContainer/>
+                    <ToastContainer autoClose={6000} position={ToastPosition.BOTTOM_CENTER} style={toastStyleOverride}/>
+                    <AppRouter/>
+                </AppTomography>
+            </AppConstants>
         </UserApp>
     </ApolloProvider>
 };

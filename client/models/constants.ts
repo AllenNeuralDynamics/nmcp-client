@@ -24,6 +24,8 @@ export class NdbConstants {
 
     private _compartmentMeshSets: CompartmentMeshSet[] = [];
 
+    private _apiVersion: string = "";
+
     private _neuronCount = -1;
 
     private _isLoaded: boolean;
@@ -39,6 +41,7 @@ export class NdbConstants {
             return;
         }
 
+        this._apiVersion = data.systemSettings.apiVersion;
         this._neuronCount = data.systemSettings.neuronCount;
 
         this.loadQueryOperators(data.queryOperators);
@@ -58,6 +61,10 @@ export class NdbConstants {
 
     public get NeuronCount(): number {
         return this._neuronCount;
+    }
+
+    public get ApiVersion(): string {
+        return this._apiVersion;
     }
 
     public get QueryOperators(): IQueryOperator[] {

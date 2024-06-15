@@ -63,7 +63,6 @@ interface IOutputContainerProps {
     nonce: string;
     shouldAlwaysShowFullTracing: boolean;
     shouldAlwaysShowSoma: boolean;
-    isPublicRelease: boolean;
     exportLimit: number;
     compartmentMeshVersion?: ViewerMeshVersion;
 
@@ -699,7 +698,6 @@ export class MainView extends React.Component<IOutputContainerProps, IOutputCont
             isAllTracingsSelected,
             defaultStructureSelection: this.state.defaultStructureSelection,
             neuronViewModels: this.state.neuronViewModels,
-            isPublicRelease: this.props.isPublicRelease,
             exportLimit: this.props.exportLimit,
             onRequestExport: (f) => this.onExportSelectedTracings(f),
             onChangeSelectTracing: (id: string, b: boolean) => this.onChangeSelectTracing(id, b),

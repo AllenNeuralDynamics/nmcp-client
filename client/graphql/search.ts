@@ -3,7 +3,6 @@ import gql from "graphql-tag";
 import {INeuron} from "../models/neuron";
 import {IPositionInput} from "../models/queryFilter";
 import {PredicateTypeValue} from "../models/brainAreaFilterType";
-import {SearchScope} from "../models/uiQueryPredicate";
 
 export const SEARCH_NEURONS_QUERY = gql`query SearchNeurons($context: SearchContext) {
   searchNeurons(context: $context) {
@@ -68,11 +67,10 @@ export type SearchPredicate = {
 
 export type SearchContext = {
     nonce: string,
-    scope: SearchScope,
     predicates: SearchPredicate[];
 }
 
-type SearchNeuronsQueryVariable = {
+export type SearchNeuronsQueryVariables = {
     context: SearchContext;
 }
 

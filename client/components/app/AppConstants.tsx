@@ -5,7 +5,7 @@ import {createContext} from "react";
 import {Message} from "semantic-ui-react";
 
 import {NdbConstants} from "../../models/constants";
-import {CONSTANTS_QUERY, ConstantsQueryResponse, SystemSettingsVariables} from "../../graphql/constants";
+import {CONSTANTS_QUERY, ConstantsQueryResponse} from "../../graphql/constants";
 import {useStore} from "./App";
 import {AppLoading} from "./AppLoading";
 
@@ -18,7 +18,7 @@ export const AppConstants = observer((props: any) => {
         data,
         error,
         loading
-    } = useQuery<ConstantsQueryResponse, SystemSettingsVariables>(CONSTANTS_QUERY, {variables: {searchScope: systemDataStore.SystemConfiguration.searchScope}});
+    } = useQuery<ConstantsQueryResponse>(CONSTANTS_QUERY);
 
     if (loading) {
         return <AppLoading message="initializing system data"/>;

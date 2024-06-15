@@ -10,7 +10,6 @@ import {ExportFormat} from "../../models/tracing";
 interface INeuronListContainerProps extends INeuronTableProps {
     isDocked: boolean;
     queryStatus: QueryStatus;
-    isPublicRelease: boolean;
     exportLimit: number;
 
     onClickCloseOrPin(state: DrawerState): void;
@@ -44,7 +43,7 @@ export class NeuronListContainer extends React.Component<INeuronListContainerPro
 
         let options = null;
 
-        if (count <= (this.props.isPublicRelease ? this.props.exportLimit : Infinity)) {
+        if (count <= this.props.exportLimit) {
             options = [
                 <Dropdown.Item key="1" text="Export SWC" onClick={() => this.props.onRequestExport(ExportFormat.SWC)}/>,
                 <Dropdown.Item key="2" text="Export JSON"
