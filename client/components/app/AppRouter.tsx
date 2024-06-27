@@ -8,19 +8,9 @@ import {Candidates} from "../candidates/Candidates";
 import {Reconstructions} from "../reconstructions/Reconstructions";
 import {Samples} from "../samples/Samples";
 import {Admin} from "../admin/Admin";
-import {useContext} from "react";
-import {ConstantsContext} from "./AppConstants";
 import {Review} from "../review/Review";
 
 export const AppRouter = () => {
-    let shouldClearCreateContentsAfterUpload = true;
-
-    if (typeof (Storage) !== "undefined") {
-        shouldClearCreateContentsAfterUpload = localStorage.getItem("shouldClearCreateContentsAfterUpload") === "true";
-    }
-
-    const constants = useContext(ConstantsContext);
-
     // TODO This should be in CreateTracing, however it is still class based and cannot use useQuery
     const {loading, error, data} = useQuery<CandidateNeuronsForReviewQueryResponse>(CANDIDATE_NEURONS_FOR_REVIEW_QUERY);
 

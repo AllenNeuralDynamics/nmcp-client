@@ -3,7 +3,7 @@ import {observer} from "mobx-react-lite";;
 import {useQuery} from "@apollo/react-hooks";
 import { Message} from "semantic-ui-react";
 
-import {useStore, useViewModel} from "./App";
+import {useStore} from "./App";
 import {TOMOGRAPHY_QUERY, TomographyApiResponse} from "../../graphql/tomography";
 import {AppLoading} from "./AppLoading";
 

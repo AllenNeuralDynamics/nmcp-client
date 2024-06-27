@@ -70,12 +70,10 @@ export const ApolloApp = () => {
     return <ApolloProvider client={client}>
         <UserApp>
             <AppConstants>
-                <AppTomography>
-                    <PageHeader/>
-                    <SettingsDialogContainer/>
-                    <ToastContainer autoClose={6000} position={ToastPosition.BOTTOM_CENTER} style={toastStyleOverride}/>
-                    <AppRouter/>
-                </AppTomography>
+                <PageHeader/>
+                <SettingsDialogContainer/>
+                <ToastContainer autoClose={6000} position={ToastPosition.BOTTOM_CENTER} style={toastStyleOverride}/>
+                <AppRouter/>
             </AppConstants>
         </UserApp>
     </ApolloProvider>
