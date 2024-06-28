@@ -12,7 +12,7 @@ interface IAnnotatorListProps {
 }
 
 export const AnnotatorList = (props: IAnnotatorListProps) => {
-    const annotations  =  props.showCompleteOnly ?
+    const annotations = props.showCompleteOnly ?
         props.annotations.filter(a => a.status == AnnotationStatus.Complete || a.status == AnnotationStatus.Approved) :
         props.annotations;
 
@@ -26,19 +26,25 @@ export const AnnotatorList = (props: IAnnotatorListProps) => {
         return (<div>{displayFunction(annotations[0], props.showStatus)}</div>);
     }
 
+    const first = {"marginTop": "0px"}
+    const other = {"marginTop": "4px"}
+
     return (
-        <ul>
-            {annotations.map(a => {
+        <div>
+            {annotations.map((a, idx) => {
                 return (
-                    <li>{displayFunction(a, props.showStatus)}</li>
+                    <div style={idx == 0 ? first : other} key={idx}>
+                        {displayFunction(a, props.showStatus)}
+                    </div>
                 );
             })}
-        </ul>
+        </div>
     )
 }
 
 function displayAnnotation(a: IReconstruction, showStatus: boolean) {
-    const label = showStatus ? <Label basic size="tiny" style={{marginRight: "8px"}} color={annotationStatusColor(a.status)}>{displayAnnotationStatus(a.status)}</Label> : null;
+    const label = showStatus ?
+        <Label basic size="tiny" style={{marginRight: "8px"}} color={annotationStatusColor(a.status)}>{displayAnnotationStatus(a.status)}</Label> : null;
 
     return (
         <div>
@@ -51,7 +57,7 @@ function displayAnnotation(a: IReconstruction, showStatus: boolean) {
 function displayProofreader(a: IReconstruction, showStatus: boolean) {
 
     if (!a.proofreader) {
-        return <div>N/A</div>;
+        return <div>n/a</div>;
     }
 
     return (

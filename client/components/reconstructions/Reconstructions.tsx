@@ -41,7 +41,7 @@ const statusFilterOptions = [
 ]
 
 function noReconstructionsText(userOnly: boolean, haveFilters: boolean) {
-    return userOnly || haveFilters ? "There are no reconstructions that match the criteria" : "There are no reconstructions";
+    return userOnly || haveFilters ? "There are no reconstructions that match the filters" : "There are no reconstructions";
 }
 
 export const Reconstructions = () => {

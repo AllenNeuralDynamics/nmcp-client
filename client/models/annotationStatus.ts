@@ -29,7 +29,7 @@ export function displayAnnotationStatus(status: AnnotationStatus): string {
         case AnnotationStatus.Cancelled:
             return "Cancelled";
         case AnnotationStatus.Complete:
-            return "Complete";
+            return "Published";
         default:
             return "Unknown";
     }
