@@ -6,7 +6,6 @@ import {toast} from "react-toastify";
 
 import {ConstantsContext} from "../app/AppConstants";
 import {ConsensusStatus, ConsensusStatusOptions, FindConsensusStatusOption} from "../../models/consensusStatus";
-import {FindVisibilityOption, NeuronVisibilityOptions, ShareVisibility} from "../../models/shareVisibility";
 import {formatSomaLocation, INeuron, parseSomaLocation} from "../../models/neuron";
 import {displaySample} from "../../models/sample";
 import {IBrainArea} from "../../models/brainArea";
@@ -36,12 +35,6 @@ export const NeuronRow = (props: INeuronRowProps) => {
     const onAcceptIdStringEdit = async (value: string, updateFn: any) => {
         if (value !== props.neuron.idString) {
             await updateFn({variables: {neuron: {id: props.neuron.id, idString: value}}});
-        }
-    }
-
-    const onAcceptVisibility = async (value: ShareVisibility, updateFn: any) => {
-        if (value !== props.neuron.visibility) {
-            await updateFn({variables: {neuron: {id: props.neuron.id, visibility: value}}});
         }
     }
 
@@ -109,11 +102,6 @@ export const NeuronRow = (props: INeuronRowProps) => {
                 <InputPopup value={formatSomaLocation(n)} placeholder="(undefined)"
                             onAccept={v => onAcceptSomaLocationEdit(v, updateNeuron)}
                             isValidValueFcn={v => !parseSomaLocation(v).error}/>
-            </Table.Cell>
-            <Table.Cell style={{width: "110px"}}>
-                <Dropdown search fluid inline options={NeuronVisibilityOptions}
-                          value={FindVisibilityOption(n.visibility).value}
-                          onChange={(_, {value}) => onAcceptVisibility(value as ShareVisibility, updateNeuron)}/>
             </Table.Cell>
             <Table.Cell style={{width: "110px"}}>
                 <Dropdown search fluid inline options={ConsensusStatusOptions}

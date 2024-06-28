@@ -45,7 +45,6 @@ export const NeuronsTable = (props: INeuronTableProps) => {
                     <Table.HeaderCell>Tag</Table.HeaderCell>
                     <Table.HeaderCell>Soma Brain Area</Table.HeaderCell>
                     <Table.HeaderCell>Soma Location</Table.HeaderCell>
-                    <Table.HeaderCell>Visibility</Table.HeaderCell>
                     <Table.HeaderCell>Consensus</Table.HeaderCell>
                     <Table.HeaderCell>DOI</Table.HeaderCell>
                     <Table.HeaderCell>Reconstructions</Table.HeaderCell>

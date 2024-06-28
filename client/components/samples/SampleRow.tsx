@@ -4,7 +4,6 @@ import ReactDatePicker from "react-datepicker";
 import moment from "moment/moment";
 
 import {ISample} from "../../models/sample";
-import {FindVisibilityOption, SampleVisibilityOptions, ShareVisibility} from "../../models/shareVisibility";
 import {InputPopup} from "../editors/InputPopup";
 import {AutoSuggestPopup} from "../editors/AutoSuggestPopup";
 import {IMouseStrain} from "../../models/mouseStrain";
@@ -62,12 +61,6 @@ export const SampleRow = (props: SampleRowProps) => {
         }
     }
 
-    const onAcceptVisibility = async (sample: ISample, visibility: ShareVisibility, updateFn: any) => {
-        if (visibility !== sample.visibility) {
-            await updateFn({id: sample.id, visibility: visibility});
-        }
-    }
-
     return (
         <Table.Row>
             <Table.Cell>
@@ -102,11 +95,6 @@ export const SampleRow = (props: SampleRowProps) => {
             <Table.Cell>
                 <TextAreaPopup value={sample.tomography} limit={30} placeholder="Update tomography..."
                                onAccept={(value) => onAcceptTomographyEdit(sample, value, props.updateFcn)}/>
-            </Table.Cell>
-            <Table.Cell>
-                <Dropdown search fluid inline options={SampleVisibilityOptions}
-                          value={FindVisibilityOption(sample.visibility).value}
-                          onChange={(_, {value}) => onAcceptVisibility(sample, value as ShareVisibility, props.updateFcn)}/>
             </Table.Cell>
             <Table.Cell>
                 {sample.neuronCount === 0 ?

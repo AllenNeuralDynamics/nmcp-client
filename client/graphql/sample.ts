@@ -9,7 +9,6 @@ export const SAMPLE_FIELDS_FRAGMENT = gql`fragment SampleFields on Sample {
     tag
     comment
     sampleDate
-    visibility
     tomography
     neuronCount
     mouseStrain {
@@ -70,7 +69,6 @@ type SampleVariables = {
     aliases?: string[];
     comment?: string;
     sampleDate?: number;
-    visibility?: number;
     mouseStrainId?: string;
     mouseStrainName?: string;
 }

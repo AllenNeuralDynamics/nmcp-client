@@ -28,7 +28,6 @@ export const NEURON_BASE_FIELDS_FRAGMENT = gql`fragment NeuronBaseFields on Neur
     x
     y
     z
-    visibility
     doi
     consensus
     metadata
@@ -116,7 +115,6 @@ type NeuronVariables = {
     x?: number;
     y?: number;
     z?: number;
-    visibility?: number;
     consensus?: ConsensusStatus;
     sampleId?: string;
     brainStructureId?: string;

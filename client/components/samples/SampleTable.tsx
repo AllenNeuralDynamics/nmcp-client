@@ -186,7 +186,6 @@ export const SamplesTable = (props: SamplesTableProps) => {
                             <Table.HeaderCell>Genotype</Table.HeaderCell>
                             <Table.HeaderCell>Injections</Table.HeaderCell>
                             <Table.HeaderCell>Tomography</Table.HeaderCell>
-                            <Table.HeaderCell>Visibility</Table.HeaderCell>
                             <Table.HeaderCell>Neurons</Table.HeaderCell>
                         </Table.Row>
                     </Table.Header>

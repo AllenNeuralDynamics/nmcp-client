@@ -12,7 +12,6 @@ export interface ISample {
     tag: string;
     comment: string;
     sampleDate: Date;
-    visibility: number;
     tomography: string;
     neuronCount: number;
     mouseStrain: IMouseStrain;

@@ -14,7 +14,6 @@ export interface INeuron {
     x: number;
     y: number;
     z: number;
-    visibility: number;
     doi: string;
     consensus: ConsensusStatus;
     metadata?: string;
