@@ -7,7 +7,6 @@ import {createUploadLink} from "apollo-upload-client";
 import {ToastContainer, ToastPosition} from "react-toastify";
 
 import {AppConstants} from "./AppConstants";
-import {AppTomography} from "./AppTomography";
 import {loginRequest} from "../../authConfig";
 import {UserApp} from "./UserApp";
 import {AppRouter} from "./AppRouter";
@@ -32,7 +31,7 @@ export const ApolloApp = () => {
         // add the authorization to the headers
         operation.setContext({
             headers: {
-                authorization: localStorage.getItem('token') || null,
+                authorization: localStorage.getItem("token") || null,
             }
         });
 
@@ -60,10 +59,8 @@ export const ApolloApp = () => {
                     // fallback to interaction when silent call fails
                     return instance.acquireTokenRedirect({scopes: loginRequest.scopes})
                 }
-
                 // handle other errors
             });
-
         }
     }, [isAuthenticated, instance, account])
 
