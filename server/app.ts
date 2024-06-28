@@ -53,6 +53,7 @@ if (process.env.NODE_ENV !== "production") {
 
     debug(`proxying ${ServerConfiguration.graphQLService.endpoint} to ${apiUri}`);
     app.use(`${ServerConfiguration.graphQLService.endpoint}`, proxy(`${apiUri}`, {
+        limit: "100mb",
         proxyReqPathResolver: maintainBaseUrl, proxyReqOptDecorator: (proxyReqOpts: any) => {
             // if (proxyReqOpts.headers.Authorization == null) {
                 // proxyReqOpts.headers.Authorization = ServerConfiguration.authClientId;
