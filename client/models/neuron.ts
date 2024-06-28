@@ -61,9 +61,9 @@ export function displayNeuronWithBrainStructure(neuron: INeuron): string {
 }
 
 export function formatSomaCoords(x: number, y: number, z: number) {
-    const nx = !isNullOrUndefined(x) ? x.toFixed(2) : "n/a";
-    const ny = !isNullOrUndefined(y) ? y.toFixed(2) : "n/a";
-    const nz = !isNullOrUndefined(z) ? z.toFixed(2) : "n/a";
+    const nx = !isNullOrUndefined(x) ? x.toFixed(1) : "n/a";
+    const ny = !isNullOrUndefined(y) ? y.toFixed(1) : "n/a";
+    const nz = !isNullOrUndefined(z) ? z.toFixed(1) : "n/a";
 
     return `(${nx}, ${ny}, ${nz})`;
 }

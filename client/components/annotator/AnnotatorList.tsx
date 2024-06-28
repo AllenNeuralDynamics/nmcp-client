@@ -38,7 +38,7 @@ export const AnnotatorList = (props: IAnnotatorListProps) => {
 }
 
 function displayAnnotation(a: IReconstruction, showStatus: boolean) {
-    const label = showStatus ? <Label style={{marginRight: "8px"}} color={annotationStatusColor(a.status)}>{displayAnnotationStatus(a.status)}</Label> : null;
+    const label = showStatus ? <Label basic size="tiny" style={{marginRight: "8px"}} color={annotationStatusColor(a.status)}>{displayAnnotationStatus(a.status)}</Label> : null;
 
     return (
         <div>

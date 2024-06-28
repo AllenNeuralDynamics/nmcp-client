@@ -1,4 +1,4 @@
-import {Button, Label, Table, TableCell, TableRow} from "semantic-ui-react";
+import {Button, Icon, Label, Table, TableCell, TableRow} from "semantic-ui-react";
 import * as React from "react";
 import {useMutation, useQuery} from "@apollo/react-hooks";
 
@@ -46,6 +46,7 @@ export const ReviewTable = (props: ReviewTableProps) => {
                     <Table.HeaderCell rowSpan={2}>Neuron</Table.HeaderCell>
                     <Table.HeaderCell rowSpan={2}>Subject</Table.HeaderCell>
                     <Table.HeaderCell colSpan={4} textAlign="center">Soma</Table.HeaderCell>
+                    <Table.HeaderCell colSpan={2} textAlign="center">Nodes</Table.HeaderCell>
                     <Table.HeaderCell rowSpan={2}>Annotator</Table.HeaderCell>
                     <Table.HeaderCell rowSpan={2}>Status</Table.HeaderCell>
                     <Table.HeaderCell rowSpan={2}>Actions</Table.HeaderCell>
@@ -55,6 +56,8 @@ export const ReviewTable = (props: ReviewTableProps) => {
                     <Table.HeaderCell>X</Table.HeaderCell>
                     <Table.HeaderCell>Y</Table.HeaderCell>
                     <Table.HeaderCell>Z</Table.HeaderCell>
+                    <Table.HeaderCell>Axon</Table.HeaderCell>
+                    <Table.HeaderCell>Dendrite</Table.HeaderCell>
                 </Table.Row>
             </Table.Header>
             <Table.Body>
@@ -62,7 +65,7 @@ export const ReviewTable = (props: ReviewTableProps) => {
             </Table.Body>
             <Table.Footer fullwidth="true">
                 <Table.Row>
-                    <Table.HeaderCell colSpan={9}>
+                    <Table.HeaderCell colSpan={11}>
                         {totalMessage}
                     </Table.HeaderCell>
                 </Table.Row>
@@ -94,33 +97,44 @@ const ReviewRow = (props: ReviewRowProps) => {
             refetchQueries: ["ReviewableReconstructions", "CandidatesForReview"]
         });
 
-    let decline = "Decline";
+    let decline = "Reject";
     let approveButton = null;
     let completeButton = null;
 
-    if (props.reconstruction.status != AnnotationStatus.Approved) {
+    if (props.reconstruction.status != AnnotationStatus.Approved && props.reconstruction.axon != null && props.reconstruction.dendrite != null) {
         approveButton = (
             <Button icon="check" size="mini" color='green' content="Approve" onClick={() => approveAnnotation({variables: {id: props.reconstruction.id}})}/>)
-    } else {
+    }
+
+    if (props.reconstruction.status == AnnotationStatus.Approved) {
         decline = "Rescind"
     }
 
     if (props.reconstruction.status == AnnotationStatus.Approved && props.reconstruction.axon != null && props.reconstruction.dendrite != null) {
-        completeButton = (<Button icon="cancel" size="mini" color='blue' content="Mark as Complete"
+        completeButton = (<Button icon="cancel" size="mini" color='teal' content="Publish"
                                   onClick={() => completeReconstruction({variables: {id: props.reconstruction.id}})}/>)
     }
+
+    const haveAxon = props.reconstruction.axon != null
+    const haveDendrite = props.reconstruction.dendrite != null
+
+    const axonIcon = haveAxon ? null : <Icon name="attention"/>
+    const dendriteIcon = haveDendrite ? null : <Icon name="attention"/>
 
     return (
         <TableRow onClick={() => props.onRowClick(props.reconstruction)} active={props.isSelected}>
             <TableCell>{displayNeuron(props.reconstruction.neuron)}</TableCell>
             <TableCell>{props.reconstruction.neuron.sample.animalId}</TableCell>
             <TableCell>{displayBrainArea(props.reconstruction.neuron.brainArea, "(unspecified)")}</TableCell>
-            <TableCell>{props.reconstruction.neuron.x}</TableCell>
-            <TableCell>{props.reconstruction.neuron.y}</TableCell>
-            <TableCell>{props.reconstruction.neuron.z}</TableCell>
+            <TableCell>{props.reconstruction.neuron.x.toFixed(1)}</TableCell>
+            <TableCell>{props.reconstruction.neuron.y.toFixed(1)}</TableCell>
+            <TableCell>{props.reconstruction.neuron.z.toFixed(1)}</TableCell>
+            <TableCell warning={!haveAxon}>{axonIcon}{props.reconstruction.axon ? props.reconstruction.axon.nodeCount : "upload"}</TableCell>
+            <TableCell warning={!haveDendrite}>{dendriteIcon}{props.reconstruction.dendrite ? props.reconstruction.dendrite.nodeCount : "upload"}</TableCell>
             <TableCell>{props.reconstruction.annotator.firstName} {props.reconstruction.annotator.lastName}</TableCell>
-            <TableCell><Label
-                color={annotationStatusColor(props.reconstruction.status)}>{displayAnnotationStatus(props.reconstruction.status)}</Label></TableCell>
+            <TableCell>
+                <Label basic size="tiny" color={annotationStatusColor(props.reconstruction.status)}>{displayAnnotationStatus(props.reconstruction.status)}</Label>
+            </TableCell>
             <TableCell>
                 <Button icon="eye" size="mini" color='blue' content="View"/>
                 {completeButton}

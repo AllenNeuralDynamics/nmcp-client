@@ -47,10 +47,12 @@ export const ReconstructionFieldsFragment = gql`fragment ReconstructionFields on
     axon {
         id
         nodeCount
+        filename
     }
     dendrite {
         id
         nodeCount
+        filename
     }
 }`;
 

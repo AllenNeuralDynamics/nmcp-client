@@ -1,7 +1,7 @@
 import * as React from "react";
 import {useContext, useState} from "react";
 import {useMutation} from "@apollo/react-hooks";
-import {Button, Grid, Header, Icon, Placeholder, PlaceholderHeader, PlaceholderLine, Segment} from "semantic-ui-react";
+import {Button, Grid, GridRow, Header, Icon, Placeholder, PlaceholderHeader, PlaceholderLine, Segment} from "semantic-ui-react";
 import {toast} from "react-toastify";
 
 import {IReconstruction} from "../../models/reconstruction";
@@ -51,6 +51,9 @@ export const SelectedReconstruction = (props: SelectedReconstructionProps) => {
         await updateReconstruction({variables: {id: props.reconstruction.id, duration: duration, length: length, notes: state.notes, checks: state.checks}});
     }
 
+    const axonIcon = props.reconstruction.axon ? <Icon name="check" color="green"/> : <Icon name="attention" color="red"/>
+    const dendriteIcon = props.reconstruction.dendrite ? <Icon name="check" color="green"/> : <Icon name="attention" color="red"/>
+
     return (
         <Grid fluid="true">
             <Grid.Row style={{paddingBottom: 10}}>
@@ -69,6 +72,18 @@ export const SelectedReconstruction = (props: SelectedReconstructionProps) => {
                             </div>
                         </Segment>
                         <Segment>
+                            <Grid columns={2}>
+                                <GridRow>
+                                    <Grid.Column>
+                                        <Header as="h5">Axon Source</Header>
+                                        {axonIcon}{props.reconstruction.axon ? props.reconstruction.axon.filename : "(requires upload)"}
+                                    </Grid.Column>
+                                    <Grid.Column>
+                                        <Header as="h5">Dendrite Source</Header>
+                                        {dendriteIcon}{props.reconstruction.dendrite ? props.reconstruction.dendrite.filename : "(requires upload)"}
+                                    </Grid.Column>
+                                </GridRow>
+                            </Grid>
                             <CompleteReconstructionPanel id={props.reconstruction.id} data={state} updateChecks={updateChecks} updateLength={updateLength}
                                                          updateNotes={updateNotes} updateDuration={updateDuration}/>
                         </Segment>

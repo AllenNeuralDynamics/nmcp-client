@@ -40,17 +40,17 @@ export function annotationStatusColor(status: AnnotationStatus): SemanticCOLORS 
         case AnnotationStatus.InProgress:
             return "green";
         case AnnotationStatus.OnHold:
-            return "yellow";
+            return "orange";
         case AnnotationStatus.InReview:
             return "blue";
         case AnnotationStatus.Returned:
             return "orange";
         case AnnotationStatus.Approved:
-            return "violet";
+            return "purple";
         case AnnotationStatus.Rejected:
             return "red";
         case AnnotationStatus.Cancelled:
-            return null;
+            return "red";
         case AnnotationStatus.Complete:
             return "teal";
         default:

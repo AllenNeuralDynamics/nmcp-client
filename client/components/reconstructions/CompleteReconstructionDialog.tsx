@@ -50,7 +50,7 @@ export const CompleteReconstructionDialog = (props: CompleteReconstructionDialog
                 <CompleteReconstructionPanel id={props.id} data={state} updateDuration={updateDuration} updateLength={updateLength} updateNotes={updateNotes} updateChecks={updateChecks}/>
             </Modal.Content>
             <Modal.Actions>
-                <Button color="blue" content="Mark for Review" disabled={!canMarkAsComplete} onClick={markAsComplete}/>
+                <Button color="blue" content="Request Review" disabled={!canMarkAsComplete} onClick={markAsComplete}/>
                 <Button content="Cancel" onClick={props.onClose}/>
             </Modal.Actions>
         </Modal>

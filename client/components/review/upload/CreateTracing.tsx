@@ -36,7 +36,8 @@ export const CreateTracing = (props: ICreateTracingProps) => {
     const [uploadSwc, {loading}] = useMutation<UploadTracingMutationResponse, UploadTracingVariables>(UPLOAD_TRACING_MUTATION,
         {
             onCompleted: (data: any) => onUploadComplete(data),
-            onError: (error: any) => onUploadError(error)
+            onError: (error: any) => onUploadError(error),
+            refetchQueries: ["ReviewableReconstructions", "CandidatesForReview"]
         });
 
     function onTracingStructureChange(structureId: string) {

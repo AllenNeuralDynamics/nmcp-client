@@ -77,7 +77,8 @@ export const Reconstructions = () => {
     });
 
 
-    const completeDialog = isCompleteDialogVisible ? (<CompleteReconstructionDialog id={markCompleteId} show={true} onClose={() => setIsCompleteDialogVisible(false)}/>) : null;
+    const completeDialog = isCompleteDialogVisible ? (
+        <CompleteReconstructionDialog id={markCompleteId} show={true} onClose={() => setIsCompleteDialogVisible(false)}/>) : null;
 
     const onUpdateOffsetForPage = (page: number) => {
         const offset = state.limit * (page - 1);
@@ -122,10 +123,13 @@ export const Reconstructions = () => {
                 </Segment>
                 <Segment secondary>
                     <Header as="h4">Filters</Header>
-                    <Checkbox toggle label="My reconstructions only" checked={state.userOnly} onChange={(e, data) => setState({...state, userOnly: data.checked})}/>
+                    <Checkbox toggle label="My reconstructions only" checked={state.userOnly}
+                              onChange={(e, data) => setState({...state, userOnly: data.checked})}/>
                     <p/>
-                    <Checkbox toggle label="Limit status to " checked={state.limitStatus} onChange={(e, data) => setState({...state, limitStatus: data.checked})}/>
-                    <Dropdown placeholder="Status" style={{marginLeft: "8px"}} multiple selection options={statusFilterOptions} value={state.statusFilter} disabled={!state.limitStatus}
+                    <Checkbox toggle label="Limit status to " checked={state.limitStatus}
+                              onChange={(e, data) => setState({...state, limitStatus: data.checked})}/>
+                    <Dropdown placeholder="Status" style={{marginLeft: "8px"}} multiple selection options={statusFilterOptions} value={state.statusFilter}
+                              disabled={!state.limitStatus}
                               onChange={(e, d) => onStatusFilterChange(d.value as number[])}/>
                 </Segment>
                 <Segment>
@@ -211,16 +215,20 @@ const ReconstructionRow = (props: IReconstructionRowProps) => {
 
     if (props.annotation.annotatorId == props.userId) {
         if (props.annotation.status != AnnotationStatus.Cancelled && props.annotation.status != AnnotationStatus.Complete) {
-            cancelButton = (<Button icon="cancel" size="mini" color='red' content="Cancel" onClick={() => cancelAnnotation({variables: {id: props.annotation.id}})}/>)
+            cancelButton = (
+                <Button icon="cancel" size="mini" color='red' content="Cancel" onClick={() => cancelAnnotation({variables: {id: props.annotation.id}})}/>)
         }
 
         if (props.annotation.status == AnnotationStatus.Cancelled || props.annotation.status == AnnotationStatus.InReview || props.annotation.status == AnnotationStatus.OnHold) {
-            reopenButton = (<Button icon="folder open outline" color="green" size="mini" content="Reopen" onClick={() => requestAnnotation({variables: {id: props.annotation.neuron.id}})}/>)
+            reopenButton = (<Button icon="folder open outline" color="green" size="mini" content="Reopen"
+                                    onClick={() => requestAnnotation({variables: {id: props.annotation.neuron.id}})}/>)
         }
 
         if (props.annotation.status == AnnotationStatus.InProgress) {
-            reviewButton = (<Button icon="check circle outline" size="mini" color="violet" content="Request Review" onClick={() => props.showCompleteDialog(props.annotation.id)}/>)
-            holdButton = (<Button icon="pause" size="mini" color="yellow" content="Hold" onClick={() => requestAnnotationHold({variables: {id: props.annotation.id}})}/>)
+            reviewButton = (<Button icon="check circle outline" size="mini" color="violet" content="Request Review"
+                                    onClick={() => props.showCompleteDialog(props.annotation.id)}/>)
+            holdButton = (
+                <Button icon="pause" size="mini" color="yellow" content="Hold" onClick={() => requestAnnotationHold({variables: {id: props.annotation.id}})}/>)
         }
     }
 
@@ -237,7 +245,9 @@ const ReconstructionRow = (props: IReconstructionRowProps) => {
             <TableCell><AnnotatorList annotations={[props.annotation]} showCompleteOnly={false} showStatus={false} showProofreader={true}/></TableCell>
             <TableCell>{props.annotation.startedAt ? moment(props.annotation.startedAt).format("YYYY-MM-DD") : "N/A"}</TableCell>
             <TableCell>{props.annotation.completedAt ? moment(props.annotation.completedAt).format("YYYY-MM-DD") : "N/A"}</TableCell>
-            <TableCell><Label color={annotationStatusColor(props.annotation.status)}>{displayAnnotationStatus(props.annotation.status)}</Label></TableCell>
+            <TableCell>
+                <Label basic size="tiny" color={annotationStatusColor(props.annotation.status)}>{displayAnnotationStatus(props.annotation.status)}</Label>
+            </TableCell>
             <TableCell>
                 {reviewButton}
                 {holdButton}
