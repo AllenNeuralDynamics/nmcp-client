@@ -2,7 +2,7 @@ import * as React from "react";
 import * as _ from "lodash-es";
 
 import {ExportFormat, ITracing} from "../../models/tracing";
-import {HighlightSelectionMode, ITiming} from "./TracingViewer";
+import {HighlightSelectionMode} from "./TracingViewer";
 
 import "../../util/override.css";
 import {INeuron} from "../../models/neuron";
@@ -88,7 +88,6 @@ interface IOutputContainerState {
     wasDisplayHighlightedOnly?: boolean;
     cycleFocusNeuronId?: string;
     highlightSelectionMode?: HighlightSelectionMode;
-    latestTiming?: ITiming;
     fetchState?: FetchState;
     fetchCount?: number;
     isRendering?: boolean;
@@ -124,7 +123,6 @@ export class MainView extends React.Component<IOutputContainerProps, IOutputCont
             fetchCount: 0,
             cycleFocusNeuronId: null,
             isRendering: false,
-            latestTiming: null,
             isNeuronListOpen: false,
             isNeuronListDocked: UserPreferences.Instance.IsNeuronListDocked,
             isCompartmentListDocked: UserPreferences.Instance.IsCompartmentListDocked,
@@ -606,9 +604,7 @@ export class MainView extends React.Component<IOutputContainerProps, IOutputCont
 
         this._isInQuery = true;
 
-        this.setState({fetchCount: this._queuedIds.length, latestTiming: null});
-
-        let timing: ITiming = null;
+        this.setState({fetchCount: this._queuedIds.length});
 
         fetch('/tracings', {
             method: 'POST',
@@ -640,9 +636,7 @@ export class MainView extends React.Component<IOutputContainerProps, IOutputCont
                     }
                 });
 
-                timing = Object.assign({}, tracingsData.timing, {transfer: (arrive.valueOf() - tracingsData.timing.sent) / 1000});
-
-                this.setState({fetchCount: this._queuedIds.length, tracingsToDisplay, latestTiming: timing});
+                this.setState({fetchCount: this._queuedIds.length, tracingsToDisplay});
 
                 this._isInQuery = false;
             } else {
@@ -656,8 +650,7 @@ export class MainView extends React.Component<IOutputContainerProps, IOutputCont
 
                 this.setState({
                     neuronViewModels: this.state.neuronViewModels.slice(),
-                    fetchCount: this._queuedIds.length,
-                    latestTiming: null
+                    fetchCount: this._queuedIds.length
                 });
 
                 this._isInQuery = false;
@@ -677,8 +670,7 @@ export class MainView extends React.Component<IOutputContainerProps, IOutputCont
 
             this.setState({
                 neuronViewModels: this.state.neuronViewModels.slice(),
-                fetchCount: this._queuedIds.length,
-                latestTiming: null
+                fetchCount: this._queuedIds.length
             });
 
             console.log(err);

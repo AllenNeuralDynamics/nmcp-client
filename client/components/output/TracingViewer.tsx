@@ -36,13 +36,6 @@ export enum HighlightSelectionMode {
     Cycle
 }
 
-export interface ITiming {
-    total: number;
-    load: number;
-    map: number;
-    transfer: number;
-}
-
 export interface ITracingViewerBaseProps {
     constants: NdbConstants;
     compartments: BrainCompartmentViewModel[];

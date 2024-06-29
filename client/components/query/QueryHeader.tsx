@@ -28,10 +28,11 @@ export interface IQueryHeaderBaseProps {
     neuronSystemCount: number;
     neuronMatchCount: number;
     queryDuration: number;
-    isPublicRelease: boolean;
 
     onToggleCollapsed(): void;
+
     onPerformQuery(): void;
+
     onResetPage(): void;
 }
 
@@ -79,12 +80,10 @@ export class QueryHeader extends React.Component<IQueryHeaderBaseProps, {}> {
             if (this.props.queryDuration >= 0) {
                 const duration = (this.props.queryDuration / 1000);
 
-                let matched = `Matched ${this.props.neuronMatchCount} of ${this.props.neuronSystemCount} neurons`;
+                let matched = `Matched ${this.props.neuronMatchCount} of ${this.props.neuronSystemCount} reconstructions`;
 
-                if (!this.props.isPublicRelease) {
-                    matched += ` in ${duration.toFixed(3)} ${duration === 1 ? "second" : "seconds"}`;
-                }
-
+                matched += ` in ${duration.toFixed(3)} ${duration === 1 ? "second" : "seconds"}`;
+                console.log(matched)
                 return (<span>{matched}</span>);
             } else {
                 return null;

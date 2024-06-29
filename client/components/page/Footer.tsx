@@ -6,6 +6,16 @@ import {ConstantsContext} from "../app/AppConstants";
 export const Footer = () => {
     const constants = useContext(ConstantsContext)
 
+    let totalMessage = "There are no reconstructions available";
+
+    if (constants.NeuronCount > 0) {
+        if (constants.NeuronCount > 1) {
+            totalMessage = `There are ${constants.NeuronCount} reconstructions available`
+        } else {
+            totalMessage = `There is 1 reconstruction available`
+        }
+    }
+
     return (
         <div style={{
             display: "flex",
@@ -27,10 +37,7 @@ export const Footer = () => {
                 Neuron Morphology Community Portal Copyright © 2023 - {(new Date().getFullYear())} Allen Institute (v{constants.ApiVersion})
             </div>
             <div style={{order: 2, flexGrow: 1, flexShrink: 1, marginLeft: "10px"}}/>
-            {constants.NeuronCount >= 0 ?
-                <div style={{verticalAlign: "middle", color: "white", order: 3, flexGrow: 0, flexShrink: 0}}>{constants.NeuronCount} reconstructions
-                    available</div> : null}
-
+            <div style={{verticalAlign: "middle", color: "white", order: 3, flexGrow: 0, flexShrink: 0}}>{totalMessage}</div>
         </div>
     )
 };
