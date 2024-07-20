@@ -4,7 +4,7 @@ version: '3'
 
 vars:
   REPOSITORY: leapscientific
-  IMAGE: search-client
+  IMAGE: nmcp-client
   REPOIMAGE: "{{.REPOSITORY}}/{{.IMAGE}}"
   VERSION:
     sh: jq -r .version package.json

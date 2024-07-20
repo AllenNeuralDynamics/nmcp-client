@@ -12,7 +12,7 @@ export class CompartmentMeshSet implements IDynamicSelectOption {
     }
 
     public get MeshPath(): string {
-        return "/static/ccf-2017/obj/";
+        return "/static/ccfv3/obj/";
     }
 
     public get MeshRotation(): number {
