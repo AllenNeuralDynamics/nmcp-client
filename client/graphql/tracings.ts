@@ -1,5 +1,4 @@
 import gql from "graphql-tag";
-import { Mutation } from '@apollo/client/react/components';
 
 import {ISwcTracing} from "../models/swcTracing";
 
@@ -63,53 +62,4 @@ export type UploadTracingMutationData = {
 
 export type UploadTracingMutationResponse = {
     uploadSwc: UploadTracingMutationData;
-}
-
-//
-// Apply Transform Mutation
-//
-export const APPLY_TRANSFORM_MUTATION = gql`mutation applyTransform($id: String!) {
-    applyTransform(id: $id) {
-        tracing {
-            id
-        }
-        error
-    }
-}`;
-
-type ApplyTransformVariables = {
-    id: string;
-}
-
-type ApplyTransformMutationData = {
-    tracing: ISwcTracing;
-    error: string;
-}
-
-type ApplyTransformMutationResponse = {
-    applyTransform: ApplyTransformMutationData;
-}
-
-//
-// Delete Tracing Mutation
-//
-
-export const DELETE_TRACING_MUTATION = gql`mutation deleteTracing($id: String!) {
-    deleteTracing(id: $id) {
-        id
-        error
-    }
-}`;
-
-type DeleteTracingVariables = {
-    id: string;
-}
-
-type DeleteTracingMutationData = {
-    id: string;
-    error: string;
-}
-
-type DeleteTracingMutationResponse = {
-    deleteTracing: DeleteTracingMutationData;
 }

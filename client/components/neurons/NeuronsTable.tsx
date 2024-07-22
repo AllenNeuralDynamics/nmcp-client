@@ -1,10 +1,8 @@
 import * as React from "react";
 import {Table} from "semantic-ui-react";
-import { useQuery} from "@apollo/react-hooks";
 
 import {INeuron} from "../../models/neuron";
 import {NeuronRow} from "./NeuronRow";
-import {NEURON_TRACING_COUNT_QUERY, NeuronTracingCountResponse, NeuronTracingCountVariables} from "../../graphql/neuron";
 
 interface INeuronTableProps {
     neurons: INeuron[];
@@ -19,21 +17,8 @@ interface INeuronTableProps {
 }
 
 export const NeuronsTable = (props: INeuronTableProps) => {
-    const {loading, error, data} = useQuery<NeuronTracingCountResponse, NeuronTracingCountVariables>(NEURON_TRACING_COUNT_QUERY,
-        {
-            pollInterval: 30000,
-            skip: props.neurons.length == 0,
-            variables: {ids: props.neurons.map(n => n.id)}
-        });
-
-    const counts = new Map<string, number>();
-
-    if (!error && data && data.reconstructionCountsForNeurons) {
-        data.reconstructionCountsForNeurons.counts.map(c => counts.set(c.id, c.count));
-    }
-
     const rows = props.neurons.map(n => {
-        return <NeuronRow key={n.id} neuron={n} tracingCount={counts.get(n.id)} onDeleteNeuron={props.onDeleteNeuron} onManageNeuronAnnotations={props.onManageNeuronAnnotations}/>
+        return <NeuronRow key={n.id} neuron={n} onDeleteNeuron={props.onDeleteNeuron} onManageNeuronAnnotations={props.onManageNeuronAnnotations}/>
     });
 
     return (

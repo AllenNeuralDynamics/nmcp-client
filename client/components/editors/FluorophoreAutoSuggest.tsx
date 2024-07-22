@@ -1,7 +1,5 @@
-import * as React from "react";
-
 import {IFluorophore} from "../../models/fluorophore";
-import {DynamicAutoSuggest} from "../editors/DynamicAutoSuggest";
+import {DynamicAutoSuggest} from "./DynamicAutoSuggest";
 
 export class FluorophoreAutoSuggest extends DynamicAutoSuggest<IFluorophore> {
 }

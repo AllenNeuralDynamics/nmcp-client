@@ -1,7 +1,5 @@
 import {action, observable} from "mobx";
 
-import {ViewerMeshVersion} from "../../models/compartmentMeshSet";
-
 export class SettingsViewModel {
     @observable public IsSettingsWindowOpen: boolean = false;
 

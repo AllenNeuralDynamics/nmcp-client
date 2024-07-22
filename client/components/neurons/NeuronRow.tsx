@@ -11,12 +11,11 @@ import {displaySample} from "../../models/sample";
 import {IBrainArea} from "../../models/brainArea";
 import {toastCreateError, toastUpdateError} from "../editors/Toasts";
 import {BrainAreaDropdown} from "../editors/BrainAreaDropdown";
-import {UPDATE_NEURON_MUTATION, UpdateNeuronMutationData} from "../../graphql/neuron";
+import {UPDATE_NEURON_MUTATION, UpdateNeuronMutationData, UpdateNeuronMutationResponse, UpdateNeuronVariables} from "../../graphql/neuron";
 import {InputPopup} from "../editors/InputPopup";
 
 interface INeuronRowProps {
     neuron: INeuron;
-    tracingCount: number;
 
     onDeleteNeuron(neuron: INeuron): void;
 
@@ -72,9 +71,9 @@ export const NeuronRow = (props: INeuronRowProps) => {
         return null;
     }
 
-    const count = props.tracingCount;
+    const count = props.neuron.reconstructions.length;
 
-    const [updateNeuron] = useMutation(UPDATE_NEURON_MUTATION,
+    const [updateNeuron] = useMutation<UpdateNeuronMutationResponse, UpdateNeuronVariables>(UPDATE_NEURON_MUTATION,
         {
             onCompleted: (data) => onNeuronUpdated(data.updateNeuron),
             onError: (error) => toast.error(toastUpdateError(error), {autoClose: false})
@@ -112,7 +111,8 @@ export const NeuronRow = (props: INeuronRowProps) => {
                 {n.doi || "(none)"}
             </Table.Cell>
             <Table.Cell style={{width: "150px"}}>
-                {count !== undefined ? (count == 0 ? <Button icon="trash" color="red" size="mini" content="none" labelPosition="left" onClick={() => props.onDeleteNeuron(n)}/>
+                {count !== undefined ? (count == 0 ?
+                    <Button icon="trash" color="red" size="mini" content="none" labelPosition="left" onClick={() => props.onDeleteNeuron(n)}/>
                     : <Label>{count}<Label.Detail>{count == 1 ? "reconstruction" : "reconstructions"}</Label.Detail></Label>) : "?"}
             </Table.Cell>
         </Table.Row>

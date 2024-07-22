@@ -4,7 +4,7 @@ The Search Client service is the user-facing front end to the denormalized neuro
 
 
 ### Authentication
-By default the service requires basic authentication when `NODE_ENV` is set to `production`.  The authentication is
+By default, the service requires basic authentication when `NODE_ENV` is set to `production`.  The authentication is
 not designed for multi-user, public instances.  It is simply intended to prevent inadvertent use by internal users
 prior to data being fully vetted and ready for internal consumption.
 

@@ -56,7 +56,7 @@ if (process.env.NODE_ENV !== "production") {
         limit: "100mb",
         proxyReqPathResolver: maintainBaseUrl, proxyReqOptDecorator: (proxyReqOpts: any) => {
             // if (proxyReqOpts.headers.Authorization == null) {
-                // proxyReqOpts.headers.Authorization = ServerConfiguration.authClientId;
+            // proxyReqOpts.headers.Authorization = ServerConfiguration.authClientId;
             // }
             return proxyReqOpts;
         }
@@ -144,6 +144,8 @@ function devServer() {
             debug(`listening at http://localhost:${ServerConfiguration.port}/`);
         }
     });
+
+    return server;
 }
 
 function readSystemVersion(): string {

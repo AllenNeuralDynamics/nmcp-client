@@ -2,7 +2,7 @@ import * as React from "react";
 import {useState} from "react";
 import {useMutation} from "@apollo/react-hooks";
 import {ApolloError} from "apollo-client";
-import {Grid, Header, Segment, Button, Confirm} from "semantic-ui-react";
+import {Grid, Confirm} from "semantic-ui-react";
 import {toast} from "react-toastify";
 
 import {INeuron} from "../../../models/neuron";

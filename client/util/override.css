@@ -75,8 +75,7 @@ body {
 
 .navbar-brand {
     height: 100%;
-    padding: 0;
-    padding-top: 14px;
+    padding: 14px 0 0;
     background-color: transparent;
 }
 
@@ -135,9 +134,8 @@ body {
 #tutorial_modal > div {
     width: 1000px;
     height: auto;
-    padding: 0px;
-    margin: auto;
-    margin-top: 20px;
+    padding: 0;
+    margin: 20px auto auto;
     border: none;
     background-color: transparent;
 }
@@ -145,13 +143,13 @@ body {
 #tutorial_modal > div > div {
     width: auto;
     margin: auto;
-    padding: 0px;
+    padding: 0;
     border: none;
     background-color: transparent;
 }
 
 #tutorial_modal > div > div > div {
-    padding: 0px;
+    padding: 0;
     border: none;
     background-color: transparent;
 }
@@ -170,7 +168,7 @@ video#tutorial {
 }
 
 ul.navbar-right {
-    padding-left: 0px;
+    padding-left: 0;
 }
 
 @media only screen and (max-width: 1050px) {

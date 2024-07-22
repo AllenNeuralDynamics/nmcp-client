@@ -19,9 +19,14 @@ import {IBrainArea} from "../../models/brainArea";
 import {VirusAutoSuggest} from "../editors/VirusAutoSuggest";
 import {IFluorophore} from "../../models/fluorophore";
 import {IInjectionVirus} from "../../models/injectionVirus";
-import {DELETE_INJECTION_MUTATION, DeleteInjectionMutationData, UPDATE_INJECTION_MUTATION, UpdateInjectionMutationData} from "../../graphql/injection";
+import {
+    DELETE_INJECTION_MUTATION,
+    DeleteInjectionMutationData, DeleteInjectionMutationResponse, DeleteInjectionVariables,
+    UPDATE_INJECTION_MUTATION,
+    UpdateInjectionMutationData,
+    UpdateInjectionMutationResponse, UpdateInjectionVariables
+} from "../../graphql/injection";
 import {ConstantsContext} from "../app/AppConstants";
-import {NdbConstants} from "../../models/constants";
 
 function onInjectionUpdated(data: UpdateInjectionMutationData) {
     if (!data.source || data.error) {
@@ -48,14 +53,14 @@ export const EditInjectionsPanel = (props: IEditInjectionsPanelProps) => {
 
     const constants = useContext(ConstantsContext)
 
-    const [updateInjection, {data: updateData}] = useMutation(UPDATE_INJECTION_MUTATION,
+    const [updateInjection] = useMutation<UpdateInjectionMutationResponse, UpdateInjectionVariables>(UPDATE_INJECTION_MUTATION,
         {
             refetchQueries: ["AppQuery"],
             onCompleted: (updateData) => onInjectionUpdated(updateData.updateInjection),
             onError: (error) => toast.error(toastUpdateError(error), {autoClose: false})
         });
 
-    const [deleteInjection, {data: deleteData}] = useMutation(DELETE_INJECTION_MUTATION,
+    const [deleteInjection] = useMutation<DeleteInjectionMutationResponse, DeleteInjectionVariables>(DELETE_INJECTION_MUTATION,
         {
             refetchQueries: ["AppQuery"],
             onCompleted: (deleteData) => onInjectionDelete(deleteData.deleteInjection),

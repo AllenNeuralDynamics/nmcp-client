@@ -22,7 +22,7 @@ export const SAMPLE_FIELDS_FRAGMENT = gql`fragment SampleFields on Sample {
             name
         }
     }
-    neurons{
+    neurons {
         id
         idString
         idNumber
@@ -68,7 +68,7 @@ type SampleVariables = {
     tag?: string;
     aliases?: string[];
     comment?: string;
-    sampleDate?: number;
+    sampleDate?: Date;
     mouseStrainId?: string;
     mouseStrainName?: string;
 }

@@ -90,20 +90,6 @@ export type ReconstructionsResponse = {
 }
 
 //
-// Reconstructions for User
-//
-export const RECONSTRUCTIONS_FOR_USER_QUERY = gql`query ReconstructionsForUser {
-    reconstructionsForUser {
-        ...ReconstructionFields
-    }
-}
-${ReconstructionFieldsFragment}`;
-
-export type ReconstructionsForUserResponse = {
-    reconstructionsForUser: IReconstruction[];
-}
-
-//
 // Reviewable Annotations
 //
 export const REVIEWABLE_ANNOTATIONS_QUERY = gql`query ReviewableReconstructions {

@@ -1,5 +1,5 @@
 import * as React from "react";
-import {Button, Dropdown, Label, Table} from "semantic-ui-react";
+import {Button, Label, Table} from "semantic-ui-react";
 import ReactDatePicker from "react-datepicker";
 import moment from "moment/moment";
 

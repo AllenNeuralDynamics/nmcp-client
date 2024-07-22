@@ -84,7 +84,7 @@ export class SampleTomographyViewModel {
 
 /**
  * The collection of all known tomography view models and general tomography user interface status (are controls
- * collapsed or shown, etc).
+ * collapsed or shown, etc.).
  */
 export class TomographyViewModel {
     @observable private readonly _tomographyDataStore: TomographyCollection;

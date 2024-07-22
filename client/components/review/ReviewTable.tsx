@@ -1,14 +1,10 @@
 import {Button, Icon, Label, Table, TableCell, TableRow} from "semantic-ui-react";
 import * as React from "react";
-import {useMutation, useQuery} from "@apollo/react-hooks";
+import {useMutation} from "@apollo/react-hooks";
 
 import {
-    APPROVE_ANNOTATION_MUTATION,
-    ApproveAnnotationResponse,
-    ApproveAnnotationVariables, COMPLETE_ANNOTATION_MUTATION, CompleteReconstructionResponse, CompleteReconstructionVariables,
-    DECLINE_ANNOTATION_MUTATION, DeclineAnnotationResponse, DeclineAnnotationVariables,
-    REVIEWABLE_ANNOTATIONS_QUERY,
-    ReviewableAnnotationsResponse
+    APPROVE_ANNOTATION_MUTATION, ApproveAnnotationResponse, ApproveAnnotationVariables, COMPLETE_ANNOTATION_MUTATION, CompleteReconstructionResponse,
+    CompleteReconstructionVariables, DECLINE_ANNOTATION_MUTATION, DeclineAnnotationResponse, DeclineAnnotationVariables
 } from "../../graphql/reconstruction";
 import {IReconstruction} from "../../models/reconstruction";
 import {displayNeuron} from "../../models/neuron";
@@ -133,7 +129,8 @@ const ReviewRow = (props: ReviewRowProps) => {
             <TableCell warning={!haveDendrite}>{dendriteIcon}{props.reconstruction.dendrite ? props.reconstruction.dendrite.nodeCount : "upload"}</TableCell>
             <TableCell>{props.reconstruction.annotator.firstName} {props.reconstruction.annotator.lastName}</TableCell>
             <TableCell>
-                <Label basic size="tiny" color={annotationStatusColor(props.reconstruction.status)}>{displayAnnotationStatus(props.reconstruction.status)}</Label>
+                <Label basic size="tiny"
+                       color={annotationStatusColor(props.reconstruction.status)}>{displayAnnotationStatus(props.reconstruction.status)}</Label>
             </TableCell>
             <TableCell>
                 <Button icon="eye" size="mini" color='blue' content="View"/>

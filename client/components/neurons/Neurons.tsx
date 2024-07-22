@@ -1,14 +1,14 @@
 import * as React from "react";
 import {useEffect, useState} from "react";
-import {Button, Dropdown, Segment, Grid, Confirm, Table, Header} from "semantic-ui-react";
+import {Button, Dropdown, Segment, Confirm, Table, Header} from "semantic-ui-react";
 import {toast} from "react-toastify";
 
 import {toastCreateError, toastDeleteError} from "../editors/Toasts";
 import {PaginationHeader} from "../editors/PaginationHeader";
 import {
     CREATE_NEURON_MUTATION,
-    CreateNeuronMutationData,
-    DELETE_NEURON_MUTATION,
+    CreateNeuronMutationData, CreateNeuronMutationResponse, CreateNeuronVariables,
+    DELETE_NEURON_MUTATION, DeleteNeuronMutationResponse, DeleteNeuronVariables,
     NEURONS_QUERY, NeuronsQueryResponse, NeuronsQueryVariables
 } from "../../graphql/neuron";
 import {displaySample, ISample} from "../../models/sample";
@@ -66,13 +66,13 @@ export const Neurons = (props: INeuronsProps) => {
         }
     }, ["sample", "isSampleLocked"])
 
-    const [deleteNeuron] = useMutation(DELETE_NEURON_MUTATION,
+    const [deleteNeuron] = useMutation<DeleteNeuronMutationResponse, DeleteNeuronVariables>(DELETE_NEURON_MUTATION,
         {
             refetchQueries: ["NeuronsQuery"],
             onError: (error) => toast.error(toastDeleteError(error), {autoClose: false})
         });
 
-    const [createNeuron] = useMutation(CREATE_NEURON_MUTATION,
+    const [createNeuron] = useMutation<CreateNeuronMutationResponse, CreateNeuronVariables>(CREATE_NEURON_MUTATION,
         {
             refetchQueries: ["NeuronsQuery"],
             onCompleted: (data) => onNeuronCreated(data.createNeuron),

@@ -6,7 +6,13 @@ import {toast} from "react-toastify";
 import {displaySample, ISample} from "../../models/sample";
 import {IMouseStrain} from "../../models/mouseStrain";
 import {SampleRow} from "./SampleRow";
-import {CREATE_SAMPLE_MUTATION, DELETE_SAMPLE_MUTATION, UPDATE_SAMPLE_MUTATION} from "../../graphql/sample";
+import {
+    CREATE_SAMPLE_MUTATION,
+    CreateSampleMutationResponse,
+    CreateSampleVariables,
+    DELETE_SAMPLE_MUTATION, DeleteSampleMutationResponse, DeleteSampleVariables,
+    UPDATE_SAMPLE_MUTATION, UpdateSampleMutationResponse, UpdateSampleVariables
+} from "../../graphql/sample";
 import {toastCreateError, toastDeleteError, toastUpdateError} from "../editors/Toasts";
 import {useState} from "react";
 import {UserPreferences} from "../../util/userPreferences";
@@ -28,20 +34,20 @@ type SamplesState = {
 }
 
 export const SamplesTable = (props: SamplesTableProps) => {
-    const [createSample] = useMutation(CREATE_SAMPLE_MUTATION,
+    const [createSample] = useMutation<CreateSampleMutationResponse, CreateSampleVariables>(CREATE_SAMPLE_MUTATION,
         {
             refetchQueries: ["SamplesQuery"],
             // onCompleted: (data) => onSampleCreated(data.createSample),
             onError: (error) => toast.error(toastCreateError(error), {autoClose: false})
         });
 
-    const [updateSample] = useMutation(UPDATE_SAMPLE_MUTATION,
+    const [updateSample] = useMutation<UpdateSampleMutationResponse, UpdateSampleVariables>(UPDATE_SAMPLE_MUTATION,
         {
             // onCompleted: (data) => onSampleUpdated(data.updateSample),
             onError: (error) => toast.error(toastUpdateError(error), {autoClose: false})
         });
 
-    const [deleteSample] = useMutation(DELETE_SAMPLE_MUTATION,
+    const [deleteSample] = useMutation<DeleteSampleMutationResponse, DeleteSampleVariables>(DELETE_SAMPLE_MUTATION,
         {
             refetchQueries: ["SamplesQuery"],
             onError: (error) => toast.error(toastDeleteError(error), {autoClose: false})

@@ -1,5 +1,4 @@
 import * as THREE from "three";
-import {SharkViewer} from "../../../viewer/shark_viewer";
 
 const OrbitControls = require("ndb-three-orbit-controls")(THREE);
 
@@ -158,9 +157,7 @@ export class SceneManager {
 
         const material = new THREE.PointsMaterial({color: new THREE.Color(color)});
 
-        const coneMesh = new THREE.Points(neuron, material);
-
-        return coneMesh;
+        return new THREE.Points(neuron, material);
     }
 
     private render() {

@@ -5,9 +5,9 @@ import cuid from "cuid";
 
 import {QueryPage} from "./QueryPage";
 import {NdbConstants} from "../../models/constants";
-import {SEARCH_NEURONS_QUERY, SearchContext, SearchNeuronsQueryResponse, SearchNeuronsQueryVariables} from "../../graphql/search";
+import {SEARCH_NEURONS_QUERY, SearchContext} from "../../graphql/search";
 import {INeuron} from "../../models/neuron";
-import {SearchScope, UIQueryPredicate, UIQueryPredicates} from "../../models/uiQueryPredicate";
+import {UIQueryPredicate, UIQueryPredicates} from "../../models/uiQueryPredicate";
 import {UserPreferences} from "../../util/userPreferences";
 import {Footer} from "./Footer";
 

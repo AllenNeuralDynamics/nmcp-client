@@ -55,17 +55,6 @@ export type CandidateNeuronsResponse = {
     candidateNeurons: NeuronsQueryData;
 }
 
-export const CANDIDATE_NEURONS_FOR_USER_QUERY = gql`query CandidatesForUser {
-    candidatesForUser {
-        ...NeuronFields
-    }
-}
-${NeuronFieldsFragment}`;
-
-export type CandidateNeuronsForUserQueryResponse = {
-    candidatesForUser: INeuron[];
-}
-
 export const CANDIDATE_NEURONS_FOR_REVIEW_QUERY = gql`query CandidatesForReview {
     candidatesForReview {
         ...NeuronFields

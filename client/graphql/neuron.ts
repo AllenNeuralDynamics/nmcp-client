@@ -17,6 +17,9 @@ const NEURON_RELATIONSHIP_FIELDS_FRAGMENT = gql`fragment NeuronRelationshipField
         animalId
         sampleDate
     }
+    reconstructions {
+        id
+    }
 }`;
 
 export const NEURON_BASE_FIELDS_FRAGMENT = gql`fragment NeuronBaseFields on Neuron {
@@ -68,38 +71,6 @@ export type NeuronsQueryData = {
 
 export type NeuronsQueryResponse = {
     neurons: NeuronsQueryData;
-}
-
-///
-/// Neuron Tracing Count Query
-///
-
-export const NEURON_TRACING_COUNT_QUERY = gql`query ReconstructionForNeuronsCount($ids: [String!]) {
-    reconstructionCountsForNeurons(ids: $ids) {
-        counts {
-            id
-            count
-        }
-        error
-    }
-}`;
-
-export type NeuronTracingCountVariables = {
-    ids: string[]
-}
-
-export type NeuronTracingCount = {
-    id: string;
-    count: number;
-}
-
-export type NeuronTracingCountQueryData = {
-    counts: NeuronTracingCount[];
-    error: string;
-}
-
-export type NeuronTracingCountResponse = {
-    reconstructionCountsForNeurons: NeuronTracingCountQueryData;
 }
 
 ///
@@ -202,30 +173,4 @@ export type DeleteNeuronMutationData = {
 
 export type DeleteNeuronMutationResponse = {
     deleteNeuron: DeleteNeuronMutationData;
-}
-
-//
-// Upload Neuron Annotation Metadata Mutation
-//
-
-export const UPLOAD_NEURON_ANNOTATION_METADATA_MUTATION = gql`
-    mutation uploadAnnotationMetadata($neuronId: String, $file: Upload) {
-        uploadAnnotationMetadata(neuronId: $neuronId,file: $file) {
-            metadata
-            error
-        }
-    }`;
-
-export type UploadAnnotationMetadataVariables = {
-    neuronId: string;
-    file: File
-}
-
-export type UploadAnnotationMetadataMutationData = {
-    metadata: string
-    error: string
-}
-
-export type UploadAnnotationMetadataResponse = {
-    uploadAnnotationMetadata: UploadAnnotationMetadataMutationData;
 }

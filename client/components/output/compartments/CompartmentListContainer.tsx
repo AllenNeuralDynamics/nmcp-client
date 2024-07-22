@@ -1,13 +1,13 @@
 import * as React from "react";
 import {observer} from "mobx-react-lite";
-import {Form, Icon, MenuItem} from "semantic-ui-react";
+import {Icon} from "semantic-ui-react";
 
 import {BrainCompartmentSelectionTree, IBrainAreaGeometryProps} from "./BrainCompartmentSelectionTree";
 import {BrainVolumesTable, IBrainVolumesTableProps} from "./BrainCompartmentViewHistoryList";
 import {DrawerState} from "../MainView";
 import {primaryBackground, secondaryBackground} from "../../../util/styles";
 import {TomographyControls} from "../../tomography/TomographyPanel";
-import {useStore, useViewModel} from "../../app/App";
+import {useViewModel} from "../../app/App";
 import { ViewerMeshVersion} from "../../../models/compartmentMeshSet";
 
 type CompartmentHeaderProps = {

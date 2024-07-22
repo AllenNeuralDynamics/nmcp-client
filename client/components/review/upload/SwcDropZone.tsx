@@ -1,6 +1,6 @@
 import * as React from "react";
 import {useState} from "react";
-import {Button, Dropdown, DropdownItemProps, Form, FormField, FormGroup, Grid, Header, Input, Segment} from "semantic-ui-react";
+import {Button, Dropdown, DropdownItemProps, Form, FormField, FormGroup, Header, Segment} from "semantic-ui-react";
 import Dropzone from "react-dropzone";
 
 import {FilePreview, SwcInputFile} from "./FilePreview";

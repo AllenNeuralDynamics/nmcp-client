@@ -70,7 +70,7 @@ export class VisibleBrainAreas {
             viewModel.isDisplayed = true;
         }
 
-        // Anytime is is reactivated, put in history even if they have previously removed.
+        // Anytime it is reactivated, put in history even if they have previously removed.
         if (viewModel.isDisplayed) {
             viewModel.shouldIncludeInHistory = true;
         }

@@ -11,12 +11,11 @@ import {FluorophoreAutoSuggest} from "../editors/FluorophoreAutoSuggest";
 import {toastCreateError, toastCreateSuccess} from "../editors/Toasts";
 import update from "immutability-helper";
 import {BrainAreaDropdown} from "../editors/BrainAreaDropdown";
-import {CREATE_INJECTION_MUTATION, CreateInjectionMutationData} from "../../graphql/injection";
+import {CREATE_INJECTION_MUTATION, CreateInjectionMutationData, CreateInjectionMutationResponse, CreateInjectionVariables} from "../../graphql/injection";
 import {isNullOrUndefined} from "../../util/nodeUtil";
 import {useContext, useState} from "react";
 import {useMutation} from "@apollo/react-hooks";
 import {ConstantsContext} from "../app/AppConstants";
-import {NdbConstants} from "../../models/constants";
 
 interface IAddInjectionProps {
     sample: ISample;
@@ -72,7 +71,7 @@ export const AddInjectionPanel = (props: IAddInjectionProps) => {
         }
     }
 
-    const [createInjection, _] = useMutation(CREATE_INJECTION_MUTATION,
+    const [createInjection, _] = useMutation<CreateInjectionMutationResponse, CreateInjectionVariables>(CREATE_INJECTION_MUTATION,
         {
             refetchQueries: ["AppQuery"],
             onCompleted: (data) => onInjectionCreated(data.createInjection),

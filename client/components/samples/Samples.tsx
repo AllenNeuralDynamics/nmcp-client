@@ -1,5 +1,4 @@
 import * as React from "react";
-import {Divider} from "semantic-ui-react";
 import {useQuery} from "@apollo/react-hooks";
 
 import {MOUSE_STRAINS_QUERY, MouseStrainsQueryResponse} from "../../graphql/mouseStrain";
