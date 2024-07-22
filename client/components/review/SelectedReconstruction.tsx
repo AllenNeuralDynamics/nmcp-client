@@ -1,5 +1,5 @@
 import * as React from "react";
-import {useContext, useState} from "react";
+import {useContext, useEffect, useState} from "react";
 import {useMutation} from "@apollo/react-hooks";
 import {Button, Grid, GridRow, Header, Icon, Placeholder, PlaceholderHeader, PlaceholderLine, Segment} from "semantic-ui-react";
 import {toast} from "react-toastify";
@@ -28,6 +28,15 @@ export const SelectedReconstruction = (props: SelectedReconstructionProps) => {
         notes: props.reconstruction.notes,
         checks: props.reconstruction.checks,
     })
+
+    useEffect(() => {
+        setState({
+            duration: props.reconstruction.durationHours.toString(),
+            length: props.reconstruction.lengthMillimeters.toString(),
+            notes: props.reconstruction.notes,
+            checks: props.reconstruction.checks,
+        })
+    }, [props.reconstruction]);
 
     const [updateReconstruction, {data: completeData}] = useMutation<UpdateReconstructionResponse, UpdateReconstructionVariables>(UPDATE_RECONSTRUCTION_MUTATION,
         {
