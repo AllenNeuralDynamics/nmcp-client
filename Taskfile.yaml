@@ -3,8 +3,8 @@
 version: '3'
 
 vars:
-  REPOSITORY: leapscientific
-  IMAGE: nmcp-client
+  REPOSITORY: ghcr.io
+  IMAGE: allenneuraldynamics/nmcp-client
   REPOIMAGE: "{{.REPOSITORY}}/{{.IMAGE}}"
   VERSION:
     sh: jq -r .version package.json
