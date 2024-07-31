@@ -112,7 +112,7 @@ export const NeuronRow = (props: INeuronRowProps) => {
             </Table.Cell>
             <Table.Cell style={{width: "150px"}}>
                 {count !== undefined ? (count == 0 ?
-                    <Button icon="trash" color="red" size="mini" content="none" labelPosition="left" onClick={() => props.onDeleteNeuron(n)}/>
+                    <Button icon="trash" color="red" size="mini" content="remove" labelPosition="left" onClick={() => props.onDeleteNeuron(n)}/>
                     : <Label>{count}<Label.Detail>{count == 1 ? "reconstruction" : "reconstructions"}</Label.Detail></Label>) : "?"}
             </Table.Cell>
         </Table.Row>

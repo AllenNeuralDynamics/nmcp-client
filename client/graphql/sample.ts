@@ -1,6 +1,8 @@
 import gql from "graphql-tag";
 
 import {ISample} from "../models/sample";
+import {ICollection} from "../models/collection";
+import {IMouseStrain} from "../models/mouseStrain";
 
 export const SAMPLE_FIELDS_FRAGMENT = gql`fragment SampleFields on Sample {
     id
@@ -11,6 +13,7 @@ export const SAMPLE_FIELDS_FRAGMENT = gql`fragment SampleFields on Sample {
     sampleDate
     tomography
     neuronCount
+    collectionId
     mouseStrain {
         id
         name
@@ -44,6 +47,16 @@ export const SAMPLES_QUERY = gql`query {
             ...SampleFields
         }
     }
+    collections {
+        id
+        name
+        description
+        reference
+    }
+    mouseStrains {
+        id
+        name
+    }
 }
 ${SAMPLE_FIELDS_FRAGMENT}
 `;
@@ -55,6 +68,8 @@ export type SamplesQueryData = {
 
 export type SamplesQueryResponse = {
     samples: SamplesQueryData;
+    collections: ICollection[];
+    mouseStrains: IMouseStrain[];
 }
 
 ///

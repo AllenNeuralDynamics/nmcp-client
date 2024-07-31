@@ -1,5 +1,5 @@
 import * as React from "react";
-import {Button, Label, Table} from "semantic-ui-react";
+import {Button, Dropdown, Label, Table} from "semantic-ui-react";
 import ReactDatePicker from "react-datepicker";
 import moment from "moment/moment";
 
@@ -9,9 +9,11 @@ import {AutoSuggestPopup} from "../editors/AutoSuggestPopup";
 import {IMouseStrain} from "../../models/mouseStrain";
 import {IInjection} from "../../models/injection";
 import {TextAreaPopup} from "../editors/TextAreaPopup";
+import {ICollection} from "../../models/collection";
 
 export type SampleRowProps = {
     sample: ISample;
+    collections: ICollection[];
     mouseStrains: IMouseStrain[];
 
     updateFcn(sample: ISample): void;
@@ -55,11 +57,21 @@ export const SampleRow = (props: SampleRowProps) => {
         }
     }
 
+    const onAcceptCollectionEdit = async (sample: ISample, collectionId: string, updateFn: any) => {
+        if (collectionId !== sample.collectionId) {
+            await updateFn({id: sample.id, collectionId: collectionId});
+        }
+    }
+
     const onAcceptTomographyEdit = async (sample: ISample, value: string, updateFn: any) => {
         if (value !== sample.tag) {
             await updateFn({id: sample.id, tomography: value});
         }
     }
+
+    const collections = props.collections.map(s => {
+        return {value: s.id, text: s.name}
+    });
 
     return (
         <Table.Row>
@@ -93,12 +105,18 @@ export const SampleRow = (props: SampleRowProps) => {
                 </a>
             </Table.Cell>
             <Table.Cell>
+                <Dropdown fluid selection options={collections} className="label"
+                          value={sample.collectionId}
+                          onChange={(_, {value}) => onAcceptCollectionEdit(sample, value as string, props.updateFcn)}
+                          style={{fontWeight: "normal"}}/>
+            </Table.Cell>
+            <Table.Cell>
                 <TextAreaPopup value={sample.tomography} limit={30} placeholder="Update tomography..."
                                onAccept={(value) => onAcceptTomographyEdit(sample, value, props.updateFcn)}/>
             </Table.Cell>
             <Table.Cell>
                 {sample.neuronCount === 0 ?
-                    <Button icon="trash" color="red" size="mini" content="none" labelPosition="left"
+                    <Button icon="trash" color="red" size="mini" content="remove" labelPosition="left"
                             onClick={() => props.setSampleForDelete(sample)}/> :
                     <Label>{sample.neuronCount}<Label.Detail>{sample.neuronCount == 1 ? "neuron" : "neurons"}</Label.Detail></Label>}
             </Table.Cell>

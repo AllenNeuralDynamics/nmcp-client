@@ -1,9 +1,9 @@
 import moment from "moment";
 
+import {displayMouseStrain, IMouseStrain} from "./mouseStrain";
 import {INeuron} from "./neuron";
 import {IInjection} from "./injection";
-
-import {displayMouseStrain, IMouseStrain} from "./mouseStrain";
+import {ICollection} from "./collection";
 
 export interface ISample {
     id: string,
@@ -17,6 +17,7 @@ export interface ISample {
     mouseStrain: IMouseStrain;
     injections: IInjection[];
     neurons: INeuron[];
+    collectionId: string;
     createdAt: number;
     updatedAt: number;
 }

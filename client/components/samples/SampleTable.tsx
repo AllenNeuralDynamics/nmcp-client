@@ -1,4 +1,5 @@
 import * as React from "react";
+import {useState} from "react";
 import {useMutation} from "@apollo/react-hooks";
 import {Button, Confirm, Header, List, Segment, Table} from "semantic-ui-react";
 import {toast} from "react-toastify";
@@ -14,14 +15,15 @@ import {
     UPDATE_SAMPLE_MUTATION, UpdateSampleMutationResponse, UpdateSampleVariables
 } from "../../graphql/sample";
 import {toastCreateError, toastDeleteError, toastUpdateError} from "../editors/Toasts";
-import {useState} from "react";
 import {UserPreferences} from "../../util/userPreferences";
 import {ManageInjections} from "../injections/ManageInjections";
 import {displayInjection, IInjection} from "../../models/injection";
 import {PaginationHeader} from "../editors/PaginationHeader";
+import {ICollection} from "../../models/collection";
 
 export type SamplesTableProps = {
     samples: ISample[];
+    collections: ICollection[];
     mouseStrains: IMouseStrain[];
 }
 
@@ -163,8 +165,9 @@ export const SamplesTable = (props: SamplesTableProps) => {
     const end = Math.min(state.offset + state.limit, totalCount);
 
     const rows = samples.map(s => {
-        return <SampleRow key={s.id} sample={s} mouseStrains={props.mouseStrains} renderInjections={renderInjections} setSampleForDelete={setSampleForDelete}
-                          onRequestManageInjections={onRequestManageInjections} updateFcn={sample => updateSample({variables: {sample}})}/>
+        return <SampleRow key={s.id} sample={s} mouseStrains={props.mouseStrains} collections={props.collections} renderInjections={renderInjections}
+                          setSampleForDelete={setSampleForDelete} onRequestManageInjections={onRequestManageInjections}
+                          updateFcn={sample => updateSample({variables: {sample}})}/>
     });
 
     return (
@@ -191,6 +194,7 @@ export const SamplesTable = (props: SamplesTableProps) => {
                             <Table.HeaderCell>Subject Id</Table.HeaderCell>
                             <Table.HeaderCell>Genotype</Table.HeaderCell>
                             <Table.HeaderCell>Injections</Table.HeaderCell>
+                            <Table.HeaderCell>Collection</Table.HeaderCell>
                             <Table.HeaderCell>Tomography</Table.HeaderCell>
                             <Table.HeaderCell>Neurons</Table.HeaderCell>
                         </Table.Row>
