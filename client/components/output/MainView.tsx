@@ -169,7 +169,7 @@ export class MainView extends React.Component<IOutputContainerProps, IOutputCont
     private neuronIdsForExport(): string[] {
         const neurons = this.state.neuronViewModels.filter(v => v.isSelected);
 
-        return neurons.map(n => n.neuron.idString);
+        return neurons.map(n => n.neuron.id);
     }
 
     private onNeuronListCloseOrPin(state: DrawerState) {
@@ -211,13 +211,12 @@ export class MainView extends React.Component<IOutputContainerProps, IOutputCont
             }
 
             fetch("/export", {
-                method: 'POST',
+                method: "POST",
                 headers: {
-                    'Content-Type': 'application/json'
+                    "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
                     ids,
-                    ccfVersion: ViewerMeshVersion.AibsCcf,
                     format
                 })
             }).then(async (response) => {
