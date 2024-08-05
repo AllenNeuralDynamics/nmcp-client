@@ -76,7 +76,7 @@ export const SelectedReconstruction = (props: SelectedReconstructionProps) => {
                                 <Header style={{margin: 0, marginTop: "6px", verticalAlign: "middle"}}>Reconstruction Metadata</Header>
                                 <div style={{order: 2, flexGrow: 1, flexShrink: 1}}/>
                                 <div style={{order: 3, flexGrow: 0, flexShrink: 0, marginRight: "12px"}}>
-                                    <Button size="tiny" color="blue" disabled={!canUpdate} onClick={onUpdateReconstruction}>Update</Button>
+                                    <Button size="tiny" color="green" disabled={!canUpdate} onClick={onUpdateReconstruction}>Update</Button>
                                 </div>
                             </div>
                         </Segment>

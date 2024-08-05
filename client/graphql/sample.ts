@@ -3,6 +3,7 @@ import gql from "graphql-tag";
 import {ISample} from "../models/sample";
 import {ICollection} from "../models/collection";
 import {IMouseStrain} from "../models/mouseStrain";
+import {COLLECTION_FIELDS_FRAGMENT} from "./collections";
 
 export const SAMPLE_FIELDS_FRAGMENT = gql`fragment SampleFields on Sample {
     id
@@ -48,10 +49,7 @@ export const SAMPLES_QUERY = gql`query {
         }
     }
     collections {
-        id
-        name
-        description
-        reference
+        ...CollectionFields
     }
     mouseStrains {
         id
@@ -59,6 +57,7 @@ export const SAMPLES_QUERY = gql`query {
     }
 }
 ${SAMPLE_FIELDS_FRAGMENT}
+${COLLECTION_FIELDS_FRAGMENT}
 `;
 
 export type SamplesQueryData = {

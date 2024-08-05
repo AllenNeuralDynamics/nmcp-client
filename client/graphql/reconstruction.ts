@@ -143,7 +143,7 @@ export type RequestAnnotationReviewResponse = {
 }
 
 //
-// Request Review Mutation
+//
 //
 export const UPDATE_RECONSTRUCTION_MUTATION = gql`mutation UpdateReconstruction($id: String!, $duration: Float!, $length: Float!, $notes: String!, $checks: String!) {
     updateReconstruction(id: $id, duration: $duration, length: $length, notes: $notes, checks: $checks) {
@@ -157,7 +157,7 @@ export type UpdateReconstructionVariables = RequestAnnotationReviewVariables;
 export type UpdateReconstructionResponse = RequestAnnotationReviewResponse;
 
 //
-// Request Review Mutation
+//
 //
 export const REQUEST_ANNOTATION_HOLD_MUTATION = gql`mutation RequestAnnotationHold($id: String!) {
     requestReconstructionHold(id: $id) {
