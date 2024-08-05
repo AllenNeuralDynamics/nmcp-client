@@ -2,9 +2,13 @@ import * as React from "react";
 import {useContext} from "react";
 
 import {ConstantsContext} from "../app/AppConstants";
+import {useLoadSystemConfiguration} from "../../hooks/useLoadSystemConfiguration";
+import {useStore} from "../app/App";
 
 export const Footer = () => {
     const constants = useContext(ConstantsContext)
+
+    const  {SystemConfiguration} = useStore();
 
     let totalMessage = "There are no reconstructions available";
 
@@ -34,7 +38,7 @@ export const Footer = () => {
             padding: "10px"
         }}>
             <div style={{verticalAlign: "middle", color: "white", order: 1, flexGrow: 0, flexShrink: 0}}>
-                Neuron Morphology Community Portal Copyright © 2023 - {(new Date().getFullYear())} Allen Institute (v{constants.ApiVersion})
+                Neuron Morphology Community Portal Copyright © 2023 - {(new Date().getFullYear())} Allen Institute
             </div>
             <div style={{order: 2, flexGrow: 1, flexShrink: 1, marginLeft: "10px"}}/>
             <div style={{verticalAlign: "middle", color: "white", order: 3, flexGrow: 0, flexShrink: 0}}>{totalMessage}</div>

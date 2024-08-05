@@ -1,33 +1,26 @@
 import * as React from "react";
 import {observer} from "mobx-react-lite";
-import {Button, Form, Modal} from "semantic-ui-react";
+import {Button, Form, Header, Icon, Label, Message, Modal} from "semantic-ui-react";
 import {SketchPicker} from 'react-color';
 
-const Slider = require("rc-slider").default;
-
 import {ViewerMeshVersion} from "../../models/compartmentMeshSet";
-import {NdbConstants} from "../../models/constants";
 import {useStore, useViewModel} from "../app/App";
 import {UserPreferences} from "../../util/userPreferences";
+import {useState} from "react";
 
 export const SettingsDialogContainer = observer(() => {
     const viewModel = useViewModel();
-    const {SystemConfiguration, Constants} = useStore();
 
-    return <SettingsDialog show={viewModel.Settings.IsSettingsWindowOpen} constants={Constants}
-                           isPublicRelease={true}
-                           onHide={() => viewModel.Settings.closeSettingsDialog()}/>;
+    return <SettingsDialog show={viewModel.Settings.IsSettingsWindowOpen} onHide={() => viewModel.Settings.closeSettingsDialog()}/>;
 });
 
-interface ISettingsDialogProps {
+type SettingsDialogProps = {
     show: boolean
-    isPublicRelease: boolean;
-    constants: NdbConstants;
 
     onHide(): void;
 }
 
-interface ISettingsDialogState {
+type SettingsDialogState = {
     shouldAutoCollapseOnQuery?: boolean;
     shouldAlwaysShowSoma?: boolean;
     shouldAlwaysShowFullTracing?: boolean;
@@ -35,125 +28,95 @@ interface ISettingsDialogState {
     compartmentMeshVersion?: ViewerMeshVersion;
 }
 
-class SettingsDialog extends React.Component<ISettingsDialogProps, ISettingsDialogState> {
-    public constructor(props: ISettingsDialogProps) {
-        super(props);
+const SettingsDialog = (props: SettingsDialogProps) => {
+    const [state, setState] = useState<SettingsDialogState>({
+        shouldAutoCollapseOnQuery: UserPreferences.Instance.ShouldAutoCollapseOnQuery,
+        shouldAlwaysShowSoma: UserPreferences.Instance.ShouldAlwaysShowSoma,
+        shouldAlwaysShowFullTracing: UserPreferences.Instance.ShouldAlwaysShowFullTracing,
+        displayColorPicker: false
+    });
 
-        this.state = {
-            shouldAutoCollapseOnQuery: UserPreferences.Instance.ShouldAutoCollapseOnQuery,
-            shouldAlwaysShowSoma: UserPreferences.Instance.ShouldAlwaysShowSoma,
-            shouldAlwaysShowFullTracing: UserPreferences.Instance.ShouldAlwaysShowFullTracing,
-            displayColorPicker: false
-        };
-    }
+    const {SystemConfiguration, Constants} = useStore();
 
-    public componentWillReceiveProps(props: ISettingsDialogProps) {
-        this.setState({
-            shouldAutoCollapseOnQuery: UserPreferences.Instance.ShouldAutoCollapseOnQuery,
-            shouldAlwaysShowSoma: UserPreferences.Instance.ShouldAlwaysShowSoma,
-            shouldAlwaysShowFullTracing: UserPreferences.Instance.ShouldAlwaysShowFullTracing
-        });
-    }
-
-    private onSetAutoCollapseOnQuery(b: boolean) {
+    const onSetAutoCollapseOnQuery = (b: boolean) => {
         UserPreferences.Instance.ShouldAutoCollapseOnQuery = b;
-        this.setState({shouldAutoCollapseOnQuery: b});
+        setState({shouldAutoCollapseOnQuery: b});
     }
 
-    private onSetAlwaysShowSoma(b: boolean) {
+    const onSetAlwaysShowSoma = (b: boolean) => {
         UserPreferences.Instance.ShouldAlwaysShowSoma = b;
-        this.setState({shouldAlwaysShowSoma: b});
+        setState({shouldAlwaysShowSoma: b});
     }
 
-    private onSetAlwaysShowFullTracing(b: boolean) {
+    const onSetAlwaysShowFullTracing = (b: boolean) => {
         UserPreferences.Instance.ShouldAlwaysShowFullTracing = b;
-        this.setState({shouldAlwaysShowFullTracing: b});
+        setState({shouldAlwaysShowFullTracing: b});
     }
 
-    private onAfterChangeOpacity(value: number) {
-        UserPreferences.Instance.TracingSelectionHiddenOpacity = value;
+    const handleClick = () => {
+        setState({displayColorPicker: !state.displayColorPicker})
     }
 
-    private onSetTracingFetchBatchSize(value: number) {
-        UserPreferences.Instance.TracingFetchBatchSize = value;
+    const handleClose = () => {
+        setState({displayColorPicker: false})
     }
 
-    private handleClick() {
-        this.setState({displayColorPicker: !this.state.displayColorPicker})
-    }
-
-    private handleClose() {
-        this.setState({displayColorPicker: false})
-    }
-
-    private onChangeNeuronColor(color) {
+    const onChangeNeuronColor = (color: any) => {
         UserPreferences.Instance.ViewerBackgroundColor = color.hex;
     }
 
-    public render() {
-        const rowStyles = {
-            color: {
-                width: "16px",
-                height: "16px",
-                borderRadius: "2px",
-                background: UserPreferences.Instance.ViewerBackgroundColor,
-            }
-        };
+    const rowStyles = {
+        color: {
+            width: "16px",
+            height: "16px",
+            borderRadius: "2px",
+            background: UserPreferences.Instance.ViewerBackgroundColor,
+        }
+    };
 
-        return (
-            <Modal open={this.props.show} onClose={this.props.onHide} dimmer="blurring">
-                <Modal.Header content="Settings"/>
-                <Modal.Content>
-                    <Form>
-                        <Form.Checkbox width={16} checked={this.state.shouldAutoCollapseOnQuery}
-                                       label="Collapse query after search"
-                                       onChange={(evt: any) => this.onSetAutoCollapseOnQuery(evt.target.checked)}/>
-                        <Form.Checkbox width={16} checked={this.state.shouldAlwaysShowSoma}
-                                       style={{marginTop: "10px"}}
-                                       label="Always display tracing after search"
-                                       onChange={(evt: any) => this.onSetAlwaysShowSoma(evt.target.checked)}/>
-                        <Form.Checkbox width={16} checked={this.state.shouldAlwaysShowFullTracing}
-                                       style={{marginLeft: "26px"}}
-                                       disabled={!this.state.shouldAlwaysShowSoma}
-                                       label="Display full tracing in addition to soma"
-                                       onChange={(evt: any) => this.onSetAlwaysShowFullTracing(evt.target.checked)}/>
-                    </Form>
+    return (
+        <Modal open={props.show} onClose={props.onHide} dimmer="blurring">
+            <Modal.Header style={{display: "flex", alignItems: "center", justifyContent: "space-between"}}>
+                <Header style={{margin: "0"}}>Settings</Header>
+                <div>
+                    <Label color="blue">Client v{SystemConfiguration.systemVersion}</Label>
+                    <br/>
+                    <Label color="teal">API v{Constants.ApiVersion}</Label>
+                </div>
+            </Modal.Header>
+            <Modal.Content>
+                <Form>
+                    <Form.Checkbox width={16} checked={state.shouldAutoCollapseOnQuery}
+                                   label="Collapse query after search"
+                                   onChange={(evt: any) => onSetAutoCollapseOnQuery(evt.target.checked)}/>
+                    <Form.Checkbox width={16} checked={state.shouldAlwaysShowSoma}
+                                   style={{marginTop: "10px"}}
+                                   label="Always display tracing after search"
+                                   onChange={(evt: any) => onSetAlwaysShowSoma(evt.target.checked)}/>
+                    <Form.Checkbox width={16} checked={state.shouldAlwaysShowFullTracing}
+                                   style={{marginLeft: "26px"}}
+                                   disabled={!state.shouldAlwaysShowSoma}
+                                   label="Display full tracing in addition to soma"
+                                   onChange={(evt: any) => onSetAlwaysShowFullTracing(evt.target.checked)}/>
 
                     <div style={{display: "flex", flexDirection: "row", alignItems: "center", marginTop: "20px"}}>
-                        <div style={styles.swatch} onClick={() => this.handleClick()}>
+                        <div style={styles.swatch} onClick={() => handleClick()}>
                             <div style={rowStyles.color}/>
                         </div>
-                        {this.state.displayColorPicker ? <div style={styles.popover}>
-                            <div style={styles.cover} onClick={() => this.handleClose()}/>
+                        {state.displayColorPicker ? <div style={styles.popover}>
+                            <div style={styles.cover} onClick={() => handleClose()}/>
                             <SketchPicker color={UserPreferences.Instance.ViewerBackgroundColor}
-                                          onChange={(color: any) => this.onChangeNeuronColor(color)}/>
+                                          onChange={(color: any) => onChangeNeuronColor(color)}/>
                         </div> : null}
                         <span style={styles.text}> Viewer background color</span>
                     </div>
-
-                    {!this.props.isPublicRelease ?
-                        <div style={{paddingTop: "20px"}}>
-                            <label>Tracing fetch batch size (requires page refresh)</label>
-                            <div style={{
-                                width: "100%",
-                                paddingLeft: "30px",
-                                paddingRight: "20px",
-                                marginBottom: "20px"
-                            }}>
-                                <Slider onAfterChange={(value) => this.onSetTracingFetchBatchSize(value)} min={1}
-                                        max={20}
-                                        step={1}
-                                        marks={{1: "1", 5: "5", 10: "10", 15: "15", 20: "20"}}
-                                        defaultValue={UserPreferences.Instance.TracingFetchBatchSize}/>
-                            </div>
-                        </div> : null}
-                </Modal.Content>
-                <Modal.Actions>
-                    <Button onClick={this.props.onHide}>Close</Button>
-                </Modal.Actions>
-            </Modal>
-        );
-    }
+                </Form>
+            </Modal.Content>
+            <Modal.Actions>
+                <Button onClick={props.onHide}>Close</Button>
+            </Modal.Actions>
+        </Modal>
+    );
 }
 
 type position = "initial" | "inherit" | "unset" | "relative" | "absolute" | "fixed" | "static" | "sticky";
