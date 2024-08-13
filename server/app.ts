@@ -55,9 +55,6 @@ if (process.env.NODE_ENV !== "production") {
     app.use(`${ServerConfiguration.graphQLService.endpoint}`, proxy(`${apiUri}`, {
         limit: "100mb",
         proxyReqPathResolver: maintainBaseUrl, proxyReqOptDecorator: (proxyReqOpts: any) => {
-            // if (proxyReqOpts.headers.Authorization == null) {
-            // proxyReqOpts.headers.Authorization = ServerConfiguration.authClientId;
-            // }
             return proxyReqOpts;
         }
     }));
@@ -96,8 +93,7 @@ function devServer() {
     const server = new webpackDevServer({
         proxy: {
             [ServerConfiguration.graphQLService.endpoint]: {
-                target: apiUri,
-                // headers: {"Authorization": ServerConfiguration.authClientId}
+                target: apiUri
             },
             [ServerConfiguration.tracingsService.endpoint]: {
                 target: tracingsUri

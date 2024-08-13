@@ -9,18 +9,6 @@ import {NdbConstants} from "./constants";
 import {FilterContents, IPosition, IPositionInput} from "./queryFilter";
 import cuid from "cuid";
 
-export enum SearchScope {
-    Unset = -1,
-    Private = 0,
-    Team = 1,
-    Division = 2,
-    Internal = 3,
-    Moderated = 4,
-    External = 5,
-    Public = 6,
-    Published
-}
-
 export type PredicateListenerFcn = (predicates: UIQueryPredicates) => void;
 
 export class UIQueryPredicates {
