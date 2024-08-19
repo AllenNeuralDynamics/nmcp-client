@@ -30,7 +30,7 @@ tasks:
   build:
     cmds:
       - task: compile
-      - webpack
+      - webpack -c webpack.config.cjs --progress
       - cp package.json dist/
       - cp package-lock.json dist/
       - cp LICENSE dist/

@@ -5,8 +5,8 @@ module.exports = {
     extends: path.resolve(__dirname, "./base.webpack.config.cjs"),
     plugins: [
         new webpack.DefinePlugin({
-            'process.env.AUTH_ENV': JSON.stringify("production")
+            'process.env.AUTH_ENV': JSON.stringify("staging")
         })
     ]
 };
-//# sourceMappingURL=webpack.config.js.map
+//# sourceMappingURL=webpack.staging.config.js.map

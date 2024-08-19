@@ -1,4 +1,5 @@
 import * as path from "path";
+import webpack from "webpack";
 
 // @ts-ignore
 import { dirname } from 'node:path';
@@ -66,6 +67,12 @@ export const webpackConfig = {
         fallback: { 'path': pathName },
         extensions: [".tsx", ".ts", ".js"]
     },
+
+    plugins: [
+        new webpack.DefinePlugin({
+            'process.env.AUTH_ENV': JSON.stringify("development")
+        })
+    ],
 
     devtool: 'inline-source-map'
 };

@@ -1,43 +1,39 @@
-import { Configuration, PopupRequest } from "@azure/msal-browser";
+import {Configuration, PopupRequest} from "@azure/msal-browser";
 
-import { LogLevel } from "@azure/msal-browser";
+import {LogLevel} from "@azure/msal-browser";
 
-const tenant = "leapnmcp";
-const client = "821f088d-c442-4590-92b5-4da06f6512b2";
-const audience = "4d4a7fd8-6ee6-461a-a4c6-9b4e5157dcdb";
+const prod = {
+    apiId: "3833203f-8f50-4947-a7e6-8652fa9a4ad2",
+    clientId: "87782f13-d218-414f-94f8-98c85ed0ce9f",
+    authorityId: "32669cd6-737f-4b39-8bdd-d6951120d3fc"
+};
 
-const scopes = [`https://${tenant}.onmicrosoft.com/${audience}/internal.read`, `https://${tenant}.onmicrosoft.com/${audience}/internal.write`]
+const staging = {
+    apiId: "b57728c9-e252-45ca-aeb6-8d6a98a52bde",
+    clientId: "cfbf816e-513d-4a41-b0cc-97effee5d823",
+    authorityId: "b8b2bd89-9ec5-414c-91fa-c1258d18559b"
+};
 
-export const b2cPolicies = {
-    names: {
-        signUpSignIn: 'B2C_1_susi',
-        forgotPassword: 'B2C_1_reset',
-        editProfile: 'B2C_1_edit',
-    },
-    authorities: {
-        signUpSignIn: {
-            authority: `https://${tenant}.b2clogin.com/${tenant}.onmicrosoft.com/b2c_1_susi`,
-        },
-        forgotPassword: {
-            authority: `https://${tenant}.b2clogin.com/${tenant}.onmicrosoft.com/B2C_1_reset`,
-        },
-        editProfile: {
-            authority: `https://${tenant}.b2clogin.com/${tenant}.onmicrosoft.com/b2c_1_edit`,
-        },
-    },
-    authorityDomain: `${tenant}.b2clogin.com`,
+const dev = {
+    apiId: "e00cfdc4-11cc-4daa-88cc-370a594042e2",
+    clientId: "c000a1f2-631b-4e9e-a877-57407be18d9d",
+    authorityId: "b8b2bd89-9ec5-414c-91fa-c1258d18559b"
+};
+
+const source = process.env.AUTH_ENV == "production" ? prod : (process.env.AUTH_ENV == "staging" ? staging : dev);
+
+const scopes = ["User.Read", `api://${source.apiId}/internal.read`, `api://${source.apiId}/internal.read`];
+
+const auth = {
+    clientId: source.clientId,
+    authority: `https://login.microsoftonline.com/${source.authorityId}`,
+    redirectUri: '/',
+    postLogoutRedirectUri: '/'
 };
 
 // Config object to be passed to Msal on creation
 export const msalConfig: Configuration = {
-    auth: {
-        clientId: client,
-        authority: b2cPolicies.authorities.signUpSignIn.authority,
-        knownAuthorities: [b2cPolicies.authorityDomain], // Mark your B2C tenant's domain as trusted.
-        redirectUri: "/",
-        postLogoutRedirectUri: "/",
-        navigateToLoginRequestUrl: false, // If "true", will navigate back to the original request location before processing the auth code response.
-    },
+    auth,
     cache: {
         cacheLocation: 'sessionStorage', // Configures cache location. "sessionStorage" is more secure, but "localStorage" gives you SSO between tabs.
         storeAuthStateInCookie: false, // Set this to "true" if you are having issues on IE11 or Edge

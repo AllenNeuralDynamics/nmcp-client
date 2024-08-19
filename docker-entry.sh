@@ -6,4 +6,4 @@ mkdir -p /var/log/nmcp
 
 export DEBUG=mnb*
 
-node app.js >> /var/log/nmcp/search-client-${logName}.log 2>&1
+node app.js >> /var/log/nmcp/nmcp-client-${logName}.log 2>&1
