@@ -44,4 +44,5 @@ jobs:
           cd $current_working_dir
           npm install
           npm link neuroglancer
+          chmod +x docker-entry.sh
           task release
