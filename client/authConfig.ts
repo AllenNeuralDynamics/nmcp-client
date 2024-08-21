@@ -11,7 +11,7 @@ const prod = {
 const staging = {
     apiId: "b57728c9-e252-45ca-aeb6-8d6a98a52bde",
     clientId: "cfbf816e-513d-4a41-b0cc-97effee5d823",
-    authorityId: "b8b2bd89-9ec5-414c-91fa-c1258d18559b"
+    authorityId: "32669cd6-737f-4b39-8bdd-d6951120d3fc"
 };
 
 const dev = {
