@@ -1,7 +1,7 @@
 import * as React from "react";
 import {useContext} from "react";
 import {useMutation} from "@apollo/react-hooks";
-import {Button, TableCell, TableRow} from "semantic-ui-react";
+import {Button, Label, Popup, TableCell, TableRow} from "semantic-ui-react";
 
 import {REQUEST_ANNOTATION_MUTATION} from "../../graphql/reconstruction";
 import {displayNeuron, INeuron} from "../../models/neuron";
@@ -9,6 +9,8 @@ import {displayBrainArea} from "../../models/brainArea";
 import {isUserReconstruction} from "../../models/reconstruction";
 import {AnnotatorList} from "../annotator/AnnotatorList";
 import {UserContext} from "../app/UserApp";
+import {CREATE_ISSUE_MUTATION, CreateIssueResponse, CreateIssueVariables} from "../../graphql/issue";
+import {annotationStatusColor, displayAnnotationStatus} from "../../models/annotationStatus";
 
 export interface ICandidateRowProps {
     key: string
@@ -22,10 +24,18 @@ export const CandidateTracingRow = (props: ICandidateRowProps) => {
             refetchQueries: ["CandidateNeuronsQuery"]
         });
 
+    const [createIssue, {data: createIssueData}] = useMutation<CreateIssueResponse, CreateIssueVariables>(CREATE_ISSUE_MUTATION);
+
     const user = useContext(UserContext);
 
-    const button = isUserReconstruction(user.id, props.neuron.reconstructions) ? null :
-        <Button icon="edit" size="mini" content="Annotate" onClick={() => requestAnnotation({variables: {id: props.neuron.id}})}/>
+    const annotateButton = isUserReconstruction(user.id, props.neuron.reconstructions) ? <div/> :
+        <Button icon="edit" color="green" size="mini" content="Annotate" onClick={() => requestAnnotation({variables: {id: props.neuron.id}})}/>
+
+    const reportIssueButton =
+        <Button circular compact color="red" size="mini" icon="exclamation"
+                onClick={() => createIssue({variables: {description: "A new issue", neuronId: props.neuron.id}})}/>
+
+    const reportWithPopup = <Popup content="Report an issue with this candidate" trigger={reportIssueButton} />
 
     return (
         <TableRow>
@@ -39,7 +49,9 @@ export const CandidateTracingRow = (props: ICandidateRowProps) => {
                 <AnnotatorList annotations={props.neuron.reconstructions} showCompleteOnly={false} showStatus={true} showProofreader={false}/>
             </TableCell>
             <TableCell>
-                {button}
+                <div style={{display: "flex", justifyContent: "space-between", alignItems: "center"}}>
+                    {annotateButton}
+                </div>
             </TableCell>
         </TableRow>
     )

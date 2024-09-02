@@ -47,9 +47,9 @@ function displayAnnotation(a: IReconstruction, showStatus: boolean) {
         <Label basic size="tiny" style={{marginRight: "8px"}} color={annotationStatusColor(a.status)}>{displayAnnotationStatus(a.status)}</Label> : null;
 
     return (
-        <div>
-            {label}
+        <div style={{display: "flex", justifyContent: "space-between"}}>
             <span>{`${a.annotator.firstName} ${a.annotator.lastName}`}</span>
+            {label}
         </div>
     )
 }

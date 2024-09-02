@@ -95,11 +95,17 @@ const ReviewRow = (props: ReviewRowProps) => {
 
     let decline = "Reject";
     let approveButton = null;
+    let approveDisabled = true;
     let completeButton = null;
 
-    if (props.reconstruction.status != AnnotationStatus.Approved && props.reconstruction.axon != null && props.reconstruction.dendrite != null) {
+    if (props.reconstruction.axon != null && props.reconstruction.dendrite != null) {
+        approveDisabled = false;
+    }
+
+    if (props.reconstruction.status != AnnotationStatus.Approved) {
         approveButton = (
-            <Button icon="check" size="mini" color='green' content="Approve" onClick={() => approveAnnotation({variables: {id: props.reconstruction.id}})}/>)
+            <Button icon="check" size="mini" color="green" disabled={approveDisabled} content="Approve"
+                    onClick={() => approveAnnotation({variables: {id: props.reconstruction.id}})}/>)
     }
 
     if (props.reconstruction.status == AnnotationStatus.Approved) {
@@ -133,7 +139,7 @@ const ReviewRow = (props: ReviewRowProps) => {
                        color={annotationStatusColor(props.reconstruction.status)}>{displayAnnotationStatus(props.reconstruction.status)}</Label>
             </TableCell>
             <TableCell>
-                <Button icon="eye" size="mini" color='blue' content="View"/>
+                {/*<Button icon="eye" size="mini" color='blue' content="View"/>*/}
                 {completeButton}
                 {approveButton}
                 <Button icon="cancel" size="mini" color='red' content={decline} onClick={() => declineAnnotation({variables: {id: props.reconstruction.id}})}/>
