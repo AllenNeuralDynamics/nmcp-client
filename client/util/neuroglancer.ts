@@ -1,8 +1,8 @@
 import {debounce} from "lodash-es";
-import {makeMinimalViewer} from "neuroglancer/ui/minimal_viewer.js";
-import {setDefaultInputEventBindings} from "neuroglancer/ui/default_input_event_bindings.js";
-import {disableWheel} from "neuroglancer/ui/disable_default_actions.js";
-import {registerEventListener} from "neuroglancer/util/disposable.js";
+import {makeMinimalViewer} from "neuroglancer/unstable/ui/minimal_viewer.js";
+import {setDefaultInputEventBindings} from "neuroglancer/unstable/ui/default_input_event_bindings.js";
+import {disableWheel} from "neuroglancer/unstable/ui/disable_default_actions.js";
+import {registerEventListener} from "neuroglancer/unstable/util/disposable.js";
 import {NdbConstants} from "../models/constants";
 import {UserPreferences} from "./userPreferences";
 

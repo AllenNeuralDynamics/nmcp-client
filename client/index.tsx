@@ -14,8 +14,8 @@ import "react-toastify/dist/ReactToastify.min.css";
 import "rc-slider/assets/index.css";
 import "../assets/style.css";
 
-import "neuroglancer/layer/enabled_frontend_modules.js";
-import "neuroglancer/datasource/enabled_frontend_modules.js";
+import "neuroglancer/unstable/layer/enabled_frontend_modules.js";
+import "neuroglancer/unstable/datasource/enabled_frontend_modules.js";
 
 const msalInstance = new PublicClientApplication(msalConfig);
 
