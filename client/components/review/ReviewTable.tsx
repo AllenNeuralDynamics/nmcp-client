@@ -9,7 +9,7 @@ import {
 import {IReconstruction} from "../../models/reconstruction";
 import {displayNeuron} from "../../models/neuron";
 import {displayBrainArea} from "../../models/brainArea";
-import {AnnotationStatus, annotationStatusColor, displayAnnotationStatus} from "../../models/annotationStatus";
+import {ReconstructionStatus, reconstructionStatusColor, reconstructionStatusString} from "../../models/reconstructionStatus";
 
 export type ReviewTableProps = {
     reconstructions: IReconstruction[]
@@ -102,17 +102,17 @@ const ReviewRow = (props: ReviewRowProps) => {
         approveDisabled = false;
     }
 
-    if (props.reconstruction.status != AnnotationStatus.Approved) {
+    if (props.reconstruction.status != ReconstructionStatus.Approved) {
         approveButton = (
             <Button icon="check" size="mini" color="green" disabled={approveDisabled} content="Approve"
                     onClick={() => approveAnnotation({variables: {id: props.reconstruction.id}})}/>)
     }
 
-    if (props.reconstruction.status == AnnotationStatus.Approved) {
+    if (props.reconstruction.status == ReconstructionStatus.Approved) {
         decline = "Rescind"
     }
 
-    if (props.reconstruction.status == AnnotationStatus.Approved && props.reconstruction.axon != null && props.reconstruction.dendrite != null) {
+    if (props.reconstruction.status == ReconstructionStatus.Approved && props.reconstruction.axon != null && props.reconstruction.dendrite != null) {
         completeButton = (<Button icon="cancel" size="mini" color='teal' content="Publish"
                                   onClick={() => completeReconstruction({variables: {id: props.reconstruction.id}})}/>)
     }
@@ -136,7 +136,7 @@ const ReviewRow = (props: ReviewRowProps) => {
             <TableCell>{props.reconstruction.annotator.firstName} {props.reconstruction.annotator.lastName}</TableCell>
             <TableCell>
                 <Label basic size="tiny"
-                       color={annotationStatusColor(props.reconstruction.status)}>{displayAnnotationStatus(props.reconstruction.status)}</Label>
+                       color={reconstructionStatusColor(props.reconstruction.status)}>{reconstructionStatusString(props.reconstruction.status)}</Label>
             </TableCell>
             <TableCell>
                 {/*<Button icon="eye" size="mini" color='blue' content="View"/>*/}

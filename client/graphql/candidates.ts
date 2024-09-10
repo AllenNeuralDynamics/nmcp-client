@@ -26,8 +26,8 @@ export const NeuronFieldsFragment = gql`fragment NeuronFields on Neuron {
 }
 ${ReconstructionFieldsFragment}`;
 
-export const CANDIDATE_NEURONS_QUERY = gql`query CandidateNeuronsQuery ($input: NeuronQueryInput) {
-    candidateNeurons(input: $input) {
+export const CANDIDATE_NEURONS_QUERY = gql`query CandidateNeuronsQuery ($input: NeuronQueryInput, $includeInProgress: Boolean) {
+    candidateNeurons(input: $input, includeInProgress: $includeInProgress) {
         totalCount
         items {
             ...NeuronFields
@@ -43,7 +43,8 @@ export type NeuronsQueryVariables = {
         sortOrder?: string
         sampleIds?: string[]
         brainStructureIds?: string[]
-    }
+    },
+    includeInProgress: boolean;
 }
 
 export type NeuronsQueryData = {

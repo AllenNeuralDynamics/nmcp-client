@@ -45,7 +45,7 @@ export const CandidatesViewer = (props: ITracingsTableProps) => {
         <div>
             <div style={{display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px"}}>
                 <div/>
-                <Button negative icon="repeat" size="small" content="Reset View" onClick={() => resetView()}/>
+                {/*<Button negative icon="repeat" size="small" content="Reset View" onClick={() => resetView()}/>*/}
             </div>
             <div id="neuroglancer-container" style={{minHeight: "400px", padding: "40px"}}/>
         </div>

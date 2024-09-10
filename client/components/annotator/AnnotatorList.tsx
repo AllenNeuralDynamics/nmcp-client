@@ -1,7 +1,7 @@
 import * as React from "react";
 import {Label} from "semantic-ui-react";
 
-import {AnnotationStatus, annotationStatusColor, displayAnnotationStatus} from "../../models/annotationStatus";
+import {ReconstructionStatus, reconstructionStatusColor, reconstructionStatusString} from "../../models/reconstructionStatus";
 import {IReconstruction} from "../../models/reconstruction";
 
 interface IAnnotatorListProps {
@@ -13,7 +13,7 @@ interface IAnnotatorListProps {
 
 export const AnnotatorList = (props: IAnnotatorListProps) => {
     const annotations = props.showCompleteOnly ?
-        props.annotations.filter(a => a.status == AnnotationStatus.Complete || a.status == AnnotationStatus.Approved) :
+        props.annotations.filter(a => a.status == ReconstructionStatus.Complete || a.status == ReconstructionStatus.Approved) :
         props.annotations;
 
     const displayFunction = props.showProofreader ? displayProofreader : displayAnnotation;
@@ -44,7 +44,7 @@ export const AnnotatorList = (props: IAnnotatorListProps) => {
 
 function displayAnnotation(a: IReconstruction, showStatus: boolean) {
     const label = showStatus ?
-        <Label basic size="tiny" style={{marginRight: "8px"}} color={annotationStatusColor(a.status)}>{displayAnnotationStatus(a.status)}</Label> : null;
+        <Label basic size="tiny" style={{marginRight: "8px"}} color={reconstructionStatusColor(a.status)}>{reconstructionStatusString(a.status)}</Label> : null;
 
     return (
         <div style={{display: "flex", justifyContent: "space-between"}}>

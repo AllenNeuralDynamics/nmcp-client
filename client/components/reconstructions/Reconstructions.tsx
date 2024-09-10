@@ -26,7 +26,7 @@ import {IReconstruction} from "../../models/reconstruction";
 import {PaginationHeader} from "../editors/PaginationHeader";
 import {CompleteReconstructionDialog} from "./CompleteReconstructionDialog";
 import {UserContext} from "../app/UserApp";
-import {AnnotationStatus, annotationStatusColor, displayAnnotationStatus} from "../../models/annotationStatus";
+import {ReconstructionStatus, reconstructionStatusColor, reconstructionStatusString} from "../../models/reconstructionStatus";
 import {AnnotatorList} from "../annotator/AnnotatorList";
 
 const statusFilterOptions = [
@@ -36,8 +36,7 @@ const statusFilterOptions = [
     {key: "inreview", text: "In Review", value: 3},
     {key: "approved", text: "Approved", value: 5},
     {key: "rejected", text: "Rejected", value: 6},
-    {key: "invalid", text: "Invalid", value: 9},
-    {key: "cancelled", text: "Cancelled", value: 7}
+    {key: "invalid", text: "Invalid", value: 9}
 ]
 
 function noReconstructionsText(userOnly: boolean, haveFilters: boolean) {
@@ -214,17 +213,17 @@ const ReconstructionRow = (props: IReconstructionRowProps) => {
     let cancelButton = null;
 
     if (props.annotation.annotatorId == props.userId) {
-        if (props.annotation.status != AnnotationStatus.Cancelled && props.annotation.status != AnnotationStatus.Complete) {
+        if (props.annotation.status != ReconstructionStatus.Complete) {
             cancelButton = (
                 <Button icon="cancel" size="mini" color='red' content="Cancel" onClick={() => cancelAnnotation({variables: {id: props.annotation.id}})}/>)
         }
 
-        if (props.annotation.status == AnnotationStatus.Cancelled || props.annotation.status == AnnotationStatus.InReview || props.annotation.status == AnnotationStatus.OnHold) {
+        if (props.annotation.status == ReconstructionStatus.InReview || props.annotation.status == ReconstructionStatus.OnHold) {
             reopenButton = (<Button icon="folder open outline" color="green" size="mini" content="Reopen"
                                     onClick={() => requestAnnotation({variables: {id: props.annotation.neuron.id}})}/>)
         }
 
-        if (props.annotation.status == AnnotationStatus.InProgress) {
+        if (props.annotation.status == ReconstructionStatus.InProgress) {
             reviewButton = (<Button icon="check circle outline" size="mini" color="violet" content="Request Review"
                                     onClick={() => props.showCompleteDialog(props.annotation.id)}/>)
             holdButton = (
@@ -246,7 +245,7 @@ const ReconstructionRow = (props: IReconstructionRowProps) => {
             <TableCell>{props.annotation.startedAt ? moment(props.annotation.startedAt).format("YYYY-MM-DD") : "N/A"}</TableCell>
             <TableCell>{props.annotation.completedAt ? moment(props.annotation.completedAt).format("YYYY-MM-DD") : "N/A"}</TableCell>
             <TableCell>
-                <Label basic size="tiny" color={annotationStatusColor(props.annotation.status)}>{displayAnnotationStatus(props.annotation.status)}</Label>
+                <Label basic size="tiny" color={reconstructionStatusColor(props.annotation.status)}>{reconstructionStatusString(props.annotation.status)}</Label>
             </TableCell>
             <TableCell>
                 {reviewButton}

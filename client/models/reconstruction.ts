@@ -1,6 +1,6 @@
 import {IUser} from "./user";
 import {INeuron} from "./neuron";
-import {AnnotationStatus} from "./annotationStatus";
+import {ReconstructionStatus} from "./reconstructionStatus";
 import {ISwcTracing} from "./swcTracing";
 
 export interface IReconstruction {
@@ -27,5 +27,5 @@ export function isUserReconstruction(userId: string, annotations: IReconstructio
         return false;
     }
 
-    return annotations.some(a => a.annotatorId == userId && a.status != AnnotationStatus.Cancelled);
+    return annotations.some(a => a.annotatorId == userId);
 }

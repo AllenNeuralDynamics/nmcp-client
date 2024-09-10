@@ -1,21 +1,26 @@
 import * as React from "react";
 
 import {Table} from "semantic-ui-react";
-import {CandidateTracingRow} from "./CandidateTracingRow";
+import {CandidateNeuronRow} from "./CandidateNeuronRow";
 import {INeuron} from "../../models/neuron";
 
 export interface ITracingsTableProps {
     neurons: INeuron[];
+    showAnnotators: boolean;
     totalCount: number;
     offset: number;
     limit: number;
     activePage: number;
     pageCount: number;
+    selectedCandidate: INeuron;
+
+    onSelected: (neuron: INeuron) => void;
 }
 
 export const CandidateTracingsTable = (props: ITracingsTableProps) => {
     const rows = props.neurons.map((t: INeuron) => {
-        return <CandidateTracingRow key={`tt_${t.id}`} neuron={t}/>
+        return <CandidateNeuronRow key={`tt_${t.id}`} neuron={t} isSelected={t.id == props.selectedCandidate?.id} showAnnotators={props.showAnnotators}
+                                   onSelected={props.onSelected}/>
     });
 
     const start = props.offset + 1;
@@ -23,14 +28,13 @@ export const CandidateTracingsTable = (props: ITracingsTableProps) => {
 
     return (
         <div>
-            <Table attached="bottom" compact="very" size="small" structured celled>
+            <Table attached="bottom" compact="very" size="small" structured celled selectable>
                 <Table.Header>
                     <Table.Row>
                         <Table.HeaderCell rowSpan={2}>Neuron</Table.HeaderCell>
                         <Table.HeaderCell rowSpan={2}>Subject</Table.HeaderCell>
                         <Table.HeaderCell colSpan={4} textAlign="center">Soma</Table.HeaderCell>
-                        <Table.HeaderCell rowSpan={2}>Annotator(s)</Table.HeaderCell>
-                        <Table.HeaderCell rowSpan={2}>Actions</Table.HeaderCell>
+                        {props.showAnnotators ? <Table.HeaderCell rowSpan={2}>Annotator(s)</Table.HeaderCell> : null}
                     </Table.Row>
                     <Table.Row>
                         <Table.HeaderCell>Structure</Table.HeaderCell>
