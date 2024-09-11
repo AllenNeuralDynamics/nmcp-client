@@ -60,10 +60,15 @@ export const CandidateActionPanel = (props: CandidateActionPanelProps) => {
 }
 
 const NoCandidate = () => (
-    <Header as="h4" color="red">
-        <Icon name="code branch"/>
-        <HeaderContent>
-            No Candidate Selected
-        </HeaderContent>
-    </Header>
+    <div style={{display: "flex", justifyContent: "space-between", alignItems: "center"}}>
+        <Header as="h4" style={{margin: 0}}>
+            <Icon name="code branch"/>
+            <HeaderContent>
+                No Candidate Selected
+                <HeaderSubheader>
+                    Select a candidate for additional options.
+                </HeaderSubheader>
+            </HeaderContent>
+        </Header>
+    </div>
 )

@@ -14,7 +14,7 @@ export interface ICandidateRowProps {
     onSelected: (neuron: INeuron) => void;
 }
 
-export const CandidateNeuronRow = (props: ICandidateRowProps) => {
+export const CandidateRow = (props: ICandidateRowProps) => {
     return (
         <TableRow onClick={() => props.onSelected(props.neuron)} active={props.isSelected}>
             <TableCell>{displayNeuron(props.neuron)}</TableCell>

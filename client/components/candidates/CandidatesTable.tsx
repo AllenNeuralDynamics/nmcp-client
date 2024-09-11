@@ -1,7 +1,7 @@
 import * as React from "react";
 
 import {Table} from "semantic-ui-react";
-import {CandidateNeuronRow} from "./CandidateNeuronRow";
+import {CandidateRow} from "./CandidateRow";
 import {INeuron} from "../../models/neuron";
 
 export interface ITracingsTableProps {
@@ -19,8 +19,8 @@ export interface ITracingsTableProps {
 
 export const CandidateTracingsTable = (props: ITracingsTableProps) => {
     const rows = props.neurons.map((t: INeuron) => {
-        return <CandidateNeuronRow key={`tt_${t.id}`} neuron={t} isSelected={t.id == props.selectedCandidate?.id} showAnnotators={props.showAnnotators}
-                                   onSelected={props.onSelected}/>
+        return <CandidateRow key={`tt_${t.id}`} neuron={t} isSelected={t.id == props.selectedCandidate?.id} showAnnotators={props.showAnnotators}
+                             onSelected={props.onSelected}/>
     });
 
     const start = props.offset + 1;

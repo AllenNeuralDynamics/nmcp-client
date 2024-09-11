@@ -110,7 +110,7 @@ export const Candidates = () => {
                 <Segment secondary>
                     <div style={{display: "flex"}}>
                         <Header style={{margin: "0", flexGrow: 1}}>Candidate Neurons</Header>
-                        {reportWithPopup}
+                        {/*reportWithPopup*/}
                     </div>
                 </Segment>
                 <Segment secondary>
@@ -134,7 +134,7 @@ export const Candidates = () => {
                                           onChange={(_, data) => setState({...state, limitBrainAreas: data.checked})}/>
 
                                 <div style={{marginLeft: "8px", minWidth: "300px"}}>
-                                    <BrainAreaMultiSelect compartments={constants.BrainAreas} selection={state.brainAreaFilter}
+                                    <BrainAreaMultiSelect compartments={constants.BrainAreasWithGeometry} selection={state.brainAreaFilter}
                                                           isDisabled={!state.limitBrainAreas}
                                                           onSelectionChange={(brainAreas: IBrainArea[]) => onBrainAreaFilterChange(brainAreas)}/>
                                 </div>

@@ -4,37 +4,37 @@ import Select from "react-select";
 import {displayBrainArea, IBrainArea} from "../../models/brainArea";
 
 const customStyles = {
-    dropdownIndicator: (provided) => ({
+    dropdownIndicator: (provided: any) => ({
         ...provided,
         padding: "0px 8px"
     }),
-    clearIndicator: (provided) => ({
+    clearIndicator: (provided: any) => ({
         ...provided,
         padding: "0px 0px"
     }),
-    indicatorSeparator: (provided) => ({
+    indicatorSeparator: (provided: any) => ({
         ...provided,
         visibility: "hidden"
     }),
-    control: (provided) => ({
+    control: (provided: any) => ({
         ...provided,
         boxShadow: "none",
         minHeight: "34px",
         maxHeight: "34px"
     }),
-    multiValue: (provided) => ({
+    multiValue: (provided: any) => ({
         ...provided,
         color: "rgb(0, 126, 255)",
         backgroundColor: "rgba(0, 126, 255, 0.0784314)",
         border: " 1px solid rgba(0, 126, 255, 0.239216)",
         borderRadius: "2px"
     }),
-    multiValueLabel: (provided) => ({
+    multiValueLabel: (provided: any) => ({
         ...provided,
         color: "rgb(0, 126, 255)",
         padding: 0
     }),
-    multiValueRemove: (provided) => ({
+    multiValueRemove: (provided: any) => ({
         ...provided,
         borderLeft: "1px solid rgba(0, 126, 255, 0.239216)",
     })

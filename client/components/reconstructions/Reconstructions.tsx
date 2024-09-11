@@ -1,33 +1,19 @@
 import * as React from "react";
 import {useContext, useState} from "react";
 import moment from "moment";
-import {Button, Checkbox, Dropdown, Header, Label, Segment, Table, TableCell, TableRow} from "semantic-ui-react";
-import {useMutation, useQuery} from "@apollo/react-hooks";
+import {Checkbox, Dropdown, Header, Label, List, Segment, Table, TableCell, TableRow} from "semantic-ui-react";
+import {useQuery} from "@apollo/react-hooks";
 
-import {
-    RECONSTRUCTIONS_QUERY,
-    ReconstructionVariables,
-    ReconstructionsResponse,
-    REQUEST_ANNOTATION_REVIEW_MUTATION,
-    CancelAnnotationMutationResponse,
-    CancelAnnotationVariables,
-    CANCEL_ANNOTATION_MUTATION,
-    RequestAnnotationResponse,
-    RequestAnnotationVariables,
-    REQUEST_ANNOTATION_MUTATION,
-    RequestAnnotationHoldResponse,
-    RequestAnnotationHoldVariables,
-    REQUEST_ANNOTATION_HOLD_MUTATION,
-    RequestAnnotationReviewResponse, RequestAnnotationReviewVariables
-} from "../../graphql/reconstruction";
+import {RECONSTRUCTIONS_QUERY, ReconstructionVariables, ReconstructionsResponse} from "../../graphql/reconstruction";
 import {displayNeuron} from "../../models/neuron";
 import {displayBrainArea} from "../../models/brainArea";
 import {IReconstruction} from "../../models/reconstruction";
 import {PaginationHeader} from "../editors/PaginationHeader";
 import {CompleteReconstructionDialog} from "./CompleteReconstructionDialog";
 import {UserContext} from "../app/UserApp";
-import {ReconstructionStatus, reconstructionStatusColor, reconstructionStatusString} from "../../models/reconstructionStatus";
+import {reconstructionStatusColor, reconstructionStatusString} from "../../models/reconstructionStatus";
 import {AnnotatorList} from "../annotator/AnnotatorList";
+import {ReconstructionActionPanel} from "./ReconstructionActionPanel";
 
 const statusFilterOptions = [
     {key: "complete", text: "Complete", value: 8},
@@ -49,7 +35,8 @@ export const Reconstructions = () => {
         limit: 10,
         userOnly: false,
         limitStatus: false,
-        statusFilter: []
+        statusFilter: [],
+        selectedId: null
     });
 
     const [isCompleteDialogVisible, setIsCompleteDialogVisible] = useState(false);
@@ -68,13 +55,18 @@ export const Reconstructions = () => {
         return (<div/>)
     }
 
-    const rows = data.reconstructions.reconstructions.map((t: IReconstruction) => {
-        return <ReconstructionRow key={`tt_${t.id}`} annotation={t} userId={user.id} showCompleteDialog={(id: string) => {
-            setMarkCompleteId(id);
-            setIsCompleteDialogVisible(true);
-        }}/>
-    });
+    const onSelected = (reconstruction: IReconstruction) => {
+        setState({...state, selectedId: reconstruction?.id == state.selectedId ? null : reconstruction?.id});
+    }
 
+    let selectedReconstruction = null;
+
+    const rows = data.reconstructions.reconstructions.map((t: IReconstruction) => {
+        if (t.id == state.selectedId) {
+            selectedReconstruction = t;
+        }
+        return <ReconstructionRow key={`tt_${t.id}`} reconstruction={t} isSelected={t.id == state.selectedId} onSelected={onSelected}/>
+    });
 
     const completeDialog = isCompleteDialogVisible ? (
         <CompleteReconstructionDialog id={markCompleteId} show={true} onClose={() => setIsCompleteDialogVisible(false)}/>) : null;
@@ -121,15 +113,20 @@ export const Reconstructions = () => {
                     <Header style={{margin: "0"}}>Reconstructions</Header>
                 </Segment>
                 <Segment secondary>
-                    <Header as="h4">Filters</Header>
-                    <Checkbox toggle label="My reconstructions only" checked={state.userOnly}
-                              onChange={(e, data) => setState({...state, userOnly: data.checked})}/>
-                    <p/>
-                    <Checkbox toggle label="Limit status to " checked={state.limitStatus}
-                              onChange={(e, data) => setState({...state, limitStatus: data.checked})}/>
-                    <Dropdown placeholder="Status" style={{marginLeft: "8px"}} multiple selection options={statusFilterOptions} value={state.statusFilter}
-                              disabled={!state.limitStatus}
-                              onChange={(e, d) => onStatusFilterChange(d.value as number[])}/>
+                    <List horizontal divided>
+                        <List.Item>
+                            <Checkbox toggle label="My reconstructions only" checked={state.userOnly}
+                                      onChange={(e, data) => setState({...state, userOnly: data.checked})}/>
+                        </List.Item>
+                        <List.Item>
+                            <Checkbox toggle label="Limit status to " checked={state.limitStatus}
+                                      onChange={(e, data) => setState({...state, limitStatus: data.checked})}/>
+                            <Dropdown placeholder="Status" style={{marginLeft: "8px"}} multiple selection options={statusFilterOptions}
+                                      value={state.statusFilter}
+                                      disabled={!state.limitStatus}
+                                      onChange={(e, d) => onStatusFilterChange(d.value as number[])}/>
+                        </List.Item>
+                    </List>
                 </Segment>
                 <Segment>
                     <PaginationHeader pageCount={pageCount} activePage={activePage}
@@ -137,7 +134,13 @@ export const Reconstructions = () => {
                                       onUpdateLimitForPage={onUpdateLimit}
                                       onUpdateOffsetForPage={onUpdateOffsetForPage}/>
                 </Segment>
-                <Table attached="bottom" compact="very" size="small" celled structured>
+                <Segment secondary>
+                    <ReconstructionActionPanel reconstruction={selectedReconstruction} userId={user.id} showCompleteDialog={(id: string) => {
+                        setMarkCompleteId(id);
+                        setIsCompleteDialogVisible(true);
+                    }}/>
+                </Segment>
+                <Table attached="bottom" compact="very" size="small" celled structured selectable>
                     <Table.Header>
                         <Table.Row>
                             <Table.HeaderCell rowSpan={2}>Neuron</Table.HeaderCell>
@@ -149,7 +152,6 @@ export const Reconstructions = () => {
                             <Table.HeaderCell rowSpan={2}>Started</Table.HeaderCell>
                             <Table.HeaderCell rowSpan={2}>Completed</Table.HeaderCell>
                             <Table.HeaderCell rowSpan={2}>Status</Table.HeaderCell>
-                            <Table.HeaderCell rowSpan={2}>Actions</Table.HeaderCell>
                         </Table.Row>
                         <Table.Row>
                             <Table.HeaderCell>Structure</Table.HeaderCell>
@@ -180,78 +182,30 @@ export const Reconstructions = () => {
 }
 
 interface IReconstructionRowProps {
-    annotation: IReconstruction;
-    userId: string;
+    reconstruction: IReconstruction;
+    isSelected: boolean;
 
-    showCompleteDialog(id: string): void;
+    onSelected: (reconstruction: IReconstruction) => void;
 }
 
 const ReconstructionRow = (props: IReconstructionRowProps) => {
-    const [cancelAnnotation, {data: cancelData}] = useMutation<CancelAnnotationMutationResponse, CancelAnnotationVariables>(CANCEL_ANNOTATION_MUTATION,
-        {
-            refetchQueries: ["ReconstructionsQuery"]
-        });
-
-    const [requestAnnotation, {data: requestData}] = useMutation<RequestAnnotationResponse, RequestAnnotationVariables>(REQUEST_ANNOTATION_MUTATION,
-        {
-            refetchQueries: ["ReconstructionsQuery"]
-        });
-
-    const [requestAnnotationHold, {data: holdData}] = useMutation<RequestAnnotationHoldResponse, RequestAnnotationHoldVariables>(REQUEST_ANNOTATION_HOLD_MUTATION,
-        {
-            refetchQueries: ["ReconstructionsQuery"]
-        });
-
-    const [requestAnnotationReview, {data: reviewData}] = useMutation<RequestAnnotationReviewResponse, RequestAnnotationReviewVariables>(REQUEST_ANNOTATION_REVIEW_MUTATION,
-        {
-            refetchQueries: ["ReconstructionsQuery"]
-        });
-
-    let reopenButton = null;
-    let holdButton = null;
-    let reviewButton = null;
-    let cancelButton = null;
-
-    if (props.annotation.annotatorId == props.userId) {
-        if (props.annotation.status != ReconstructionStatus.Complete) {
-            cancelButton = (
-                <Button icon="cancel" size="mini" color='red' content="Cancel" onClick={() => cancelAnnotation({variables: {id: props.annotation.id}})}/>)
-        }
-
-        if (props.annotation.status == ReconstructionStatus.InReview || props.annotation.status == ReconstructionStatus.OnHold) {
-            reopenButton = (<Button icon="folder open outline" color="green" size="mini" content="Reopen"
-                                    onClick={() => requestAnnotation({variables: {id: props.annotation.neuron.id}})}/>)
-        }
-
-        if (props.annotation.status == ReconstructionStatus.InProgress) {
-            reviewButton = (<Button icon="check circle outline" size="mini" color="violet" content="Request Review"
-                                    onClick={() => props.showCompleteDialog(props.annotation.id)}/>)
-            holdButton = (
-                <Button icon="pause" size="mini" color="yellow" content="Hold" onClick={() => requestAnnotationHold({variables: {id: props.annotation.id}})}/>)
-        }
-    }
-
-    return (<TableRow>
-            <TableCell>{displayNeuron(props.annotation.neuron)}</TableCell>
-            <TableCell>{props.annotation.neuron.sample.animalId}</TableCell>
-            <TableCell>{displayBrainArea(props.annotation.neuron.brainArea, "(unspecified)")}</TableCell>
-            <TableCell>{props.annotation.neuron.x.toFixed(1)}</TableCell>
-            <TableCell>{props.annotation.neuron.y.toFixed(1)}</TableCell>
-            <TableCell>{props.annotation.neuron.z.toFixed(1)}</TableCell>
-            <TableCell>{props.annotation.axon ? props.annotation.axon.nodeCount : "N/A"}</TableCell>
-            <TableCell>{props.annotation.dendrite ? props.annotation.dendrite.nodeCount : "N/A"}</TableCell>
-            <TableCell><AnnotatorList annotations={[props.annotation]} showCompleteOnly={false} showStatus={false} showProofreader={false}/></TableCell>
-            <TableCell><AnnotatorList annotations={[props.annotation]} showCompleteOnly={false} showStatus={false} showProofreader={true}/></TableCell>
-            <TableCell>{props.annotation.startedAt ? moment(props.annotation.startedAt).format("YYYY-MM-DD") : "N/A"}</TableCell>
-            <TableCell>{props.annotation.completedAt ? moment(props.annotation.completedAt).format("YYYY-MM-DD") : "N/A"}</TableCell>
+    return (
+        <TableRow active={props.isSelected} onClick={() => props.onSelected(props.reconstruction)}>
+            <TableCell>{displayNeuron(props.reconstruction.neuron)}</TableCell>
+            <TableCell>{props.reconstruction.neuron.sample.animalId}</TableCell>
+            <TableCell>{displayBrainArea(props.reconstruction.neuron.brainArea, "(unspecified)")}</TableCell>
+            <TableCell>{props.reconstruction.neuron.x.toFixed(1)}</TableCell>
+            <TableCell>{props.reconstruction.neuron.y.toFixed(1)}</TableCell>
+            <TableCell>{props.reconstruction.neuron.z.toFixed(1)}</TableCell>
+            <TableCell>{props.reconstruction.axon ? props.reconstruction.axon.nodeCount : "N/A"}</TableCell>
+            <TableCell>{props.reconstruction.dendrite ? props.reconstruction.dendrite.nodeCount : "N/A"}</TableCell>
+            <TableCell><AnnotatorList annotations={[props.reconstruction]} showCompleteOnly={false} showStatus={false} showProofreader={false}/></TableCell>
+            <TableCell><AnnotatorList annotations={[props.reconstruction]} showCompleteOnly={false} showStatus={false} showProofreader={true}/></TableCell>
+            <TableCell>{props.reconstruction.startedAt ? moment(props.reconstruction.startedAt).format("YYYY-MM-DD") : "N/A"}</TableCell>
+            <TableCell>{props.reconstruction.completedAt ? moment(props.reconstruction.completedAt).format("YYYY-MM-DD") : "N/A"}</TableCell>
             <TableCell>
-                <Label basic size="tiny" color={reconstructionStatusColor(props.annotation.status)}>{reconstructionStatusString(props.annotation.status)}</Label>
-            </TableCell>
-            <TableCell>
-                {reviewButton}
-                {holdButton}
-                {reopenButton}
-                {cancelButton}
+                <Label basic size="tiny"
+                       color={reconstructionStatusColor(props.reconstruction.status)}>{reconstructionStatusString(props.reconstruction.status)}</Label>
             </TableCell>
         </TableRow>
     );
