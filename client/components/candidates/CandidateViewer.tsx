@@ -8,13 +8,14 @@ import {UserPreferences} from "../../util/userPreferences";
 
 export interface ITracingsTableProps {
     neurons: INeuron[];
+    selectedId: string;
 }
 
 export const CandidatesViewer = (props: ITracingsTableProps) => {
     const [ngProxy, setNgProxy] = useState<NeuroglancerProxy>(null)
 
     useEffect(() => {
-        const annotations = createNeuroglancerAnnotationLayer(props.neurons);
+        const annotations = createNeuroglancerAnnotationLayer(props.neurons, props.selectedId);
 
         const proxy = NeuroglancerProxy.configureNeuroglancer("neuroglancer-container", UserPreferences.Instance.candidateViewerState, annotations);
 
@@ -27,16 +28,16 @@ export const CandidatesViewer = (props: ITracingsTableProps) => {
 
     useEffect(() => {
         if (ngProxy) {
-            const annotations = createNeuroglancerAnnotationLayer(props.neurons);
+            const annotations = createNeuroglancerAnnotationLayer(props.neurons, props.selectedId);
 
             ngProxy.updateAnnotations(annotations);
         }
-    }, [props.neurons]);
+    }, [props.neurons, props.selectedId]);
 
     const resetView = () => {
         ngProxy.resetNeuroglancerState();
 
-        const annotations = createNeuroglancerAnnotationLayer(props.neurons);
+        const annotations = createNeuroglancerAnnotationLayer(props.neurons, props.selectedId);
 
         ngProxy.updateAnnotations(annotations);
     };

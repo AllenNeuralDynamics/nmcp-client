@@ -146,23 +146,10 @@ export function parseAnnotationMetadata(data: string): IParsedAnnotationMetadata
     return null;
 }
 
-export function createNeuroglancerAnnotationLayer(neurons: INeuron[]) {
-    /*
-annotationProperties:[
-        {
-          "id": "color",
-          "type": "rgb",
-          "default": "#ff0000"
-        },
-        {
-          "id": "size",
-          "type": "float32",
-          "default": 10
-        }
-        ]
+export function createNeuroglancerAnnotationLayer(neurons: INeuron[], selectedId: string) {
+    const defaultColor = selectedId ? "#2184d033" : "#2184d0ff";
+    const defaultSize = selectedId ? 3 : 5;
 
-        props: ["#00ff00", 5]
-     */
     return neurons.map(n => {
         return {
             type: "point",
@@ -171,7 +158,8 @@ annotationProperties:[
                 n.x / 10,
                 n.y / 10,
                 n.z / 10
-            ]
+            ],
+            props: [n.id == selectedId ? "#00ff00ff" : defaultColor, n.id == selectedId ? 8 : defaultSize]
         }
     });
 }

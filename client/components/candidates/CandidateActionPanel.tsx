@@ -36,8 +36,6 @@ export const CandidateActionPanel = (props: CandidateActionPanelProps) => {
 
     const neuron = props.neurons[idx];
 
-    console.log(neuron.reconstructions)
-
     const canAnnotate = !loading && !isUserReconstruction(user.id, neuron.reconstructions)
 
     const annotateButton = <Button icon="edit" color="green" size="mini" disabled={!canAnnotate} content="Add to My Annotations"

@@ -87,7 +87,7 @@ function getSegmentColorMap() {
 }
 
 const defaultState = {
-    "dimensions": {
+    dimensions: {
         "x": [
             0.00001,
             "m"
@@ -139,6 +139,19 @@ const defaultState = {
             "tab": "annotations",
             "annotationColor": "#2184d0",
             "annotations": [],
+            "annotationProperties":[
+                {
+                    "id": "color",
+                    "type": "rgba",
+                    "default": "#ff0000ff"
+                },
+                {
+                    "id": "size",
+                    "type": "float32",
+                    "default": 10
+                }
+            ],
+            "shader": "\nvoid main() {\n  setColor(prop_color());\n  setPointMarkerSize(prop_size());\n}\n",
             "name": "Candidates"
         },
         {
@@ -157,35 +170,6 @@ const defaultState = {
             "objectAlpha": 0.20,
             "name": "CCF",
             "visible": true
-        },
-        {
-            "type": "image",
-            "source": "zarr://s3://aind-open-data/exaSPIM_651895_2023-09-08_10-16-01_fusion_2023-09-26/CCF_Registration_25/warped.ome.zarr/651895_warped_affine_transformed.zarr/",
-            "localDimensions": {
-                "c'": [
-                    1,
-                    ""
-                ]
-            },
-            "localPosition": [
-                0
-            ],
-            "tab": "source",
-            "opacity": 0.95,
-            "shaderControls": {
-                "normalized": {
-                    "range": [
-                        0,
-                        200
-                    ],
-                    "window": [
-                        0,
-                        65000
-                    ]
-                }
-            },
-            "name": "Sample 651895",
-            "visible": false
         }
     ],
     "selectedLayer": {

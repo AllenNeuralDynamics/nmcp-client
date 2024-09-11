@@ -155,8 +155,8 @@ export const Candidates = () => {
                                         selectedCandidate={state.selectedCandidate}/>
 
             </Segment.Group>
-
-            <CandidatesViewer neurons={(data && data.candidateNeurons) ? data.candidateNeurons.items : []}/>
+            
+            <CandidatesViewer neurons={(data && data.candidateNeurons) ? data.candidateNeurons.items : []} selectedId={state.selectedCandidate?.id}/>
         </div>
     );
 }
