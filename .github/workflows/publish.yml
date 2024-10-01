@@ -31,6 +31,7 @@ jobs:
         run: |
           current_working_dir=$(pwd)
           cd ~
+          nmcp_dir=$(pwd)
           echo "Cloning and pre-building neuroglancer"
           git clone https://github.com/AllenNeuralDynamics/nmcp-neuroglancer.git
           cd nmcp-neuroglancer && git checkout nmcp
@@ -41,6 +42,7 @@ jobs:
           cd $current_working_dir
           npm install
           npm remove neuroglancer
-          npm install ~/nmcp-neuroglancer/dist/package
+          npm install --dev $nmcp_dir/nmcp-neuroglancer/dist/package
+          npm list
           chmod +x docker-entry.sh
           task release
