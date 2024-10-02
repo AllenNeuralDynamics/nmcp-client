@@ -34,7 +34,7 @@ jobs:
           nmcp_dir=$(pwd)
           echo "Cloning and pre-building neuroglancer"
           git clone https://github.com/AllenNeuralDynamics/nmcp-neuroglancer.git
-          cd nmcp-neuroglancer && git checkout nmcp
+          cd nmcp-neuroglancer && git checkout debounce-resize
           npm install
           npm run build-package
 
