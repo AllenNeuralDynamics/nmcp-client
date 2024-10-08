@@ -80,8 +80,7 @@ export const AddInjectionPanel = (props: IAddInjectionProps) => {
 
     return (
         <div>
-            <Header content="Add Injections"
-                    subheader="Injections are defined per sample. They are the link between samples and the set of neurons and their associated reconstructions."/>
+            <Header content="Add Labeling"/>
             <Form>
                 <Form.Field>
                     <label>Brain Area</label>

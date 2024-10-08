@@ -32,7 +32,7 @@ export const ManageInjectionsContent = (props: IManageInjectionsContentProps) =>
                 <Icon name="circle notched" loading/>
                 <Message.Content>
                     <Message.Header content="Loading Injections"/>
-                    We are loading known injections for {displaySample(props.sample)}.
+                    Loading labels for {displaySample(props.sample)}.
                 </Message.Content>
             </Message>
         );

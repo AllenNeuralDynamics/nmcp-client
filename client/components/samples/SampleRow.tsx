@@ -76,8 +76,8 @@ export const SampleRow = (props: SampleRowProps) => {
     return (
         <Table.Row>
             <Table.Cell>
-                <InputPopup value={sample.idNumber.toString()} placeholder="Enter new id..." isValidValueFcn={(val: string) => !isNaN(parseInt(val))}
-                            onAccept={(value: string) => onAcceptIdNumberEdit(sample, value, props.updateFcn)}/>
+                <InputPopup value={sample.animalId} placeholder="Enter animal id..."
+                            onAccept={(value) => onAcceptAnimalIdEdit(sample, value, props.updateFcn)}/>
             </Table.Cell>
             <Table.Cell>
                 <ReactDatePicker
@@ -89,10 +89,6 @@ export const SampleRow = (props: SampleRowProps) => {
             <Table.Cell>
                 <InputPopup value={sample.tag} placeholder="Enter new tag..."
                             onAccept={(value: string) => onAcceptTagEdit(sample, value, props.updateFcn)}/>
-            </Table.Cell>
-            <Table.Cell>
-                <InputPopup value={sample.animalId} placeholder="Enter animal id..."
-                            onAccept={(value) => onAcceptAnimalIdEdit(sample, value, props.updateFcn)}/>
             </Table.Cell>
             <Table.Cell>
                 <AutoSuggestPopup<IMouseStrain> items={props.mouseStrains} placeholder="select or name a genotype"

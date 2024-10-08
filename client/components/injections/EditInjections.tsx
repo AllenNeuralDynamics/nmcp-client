@@ -97,8 +97,8 @@ export const EditInjectionsPanel = (props: IEditInjectionsPanelProps) => {
         }
 
         return (
-            <Confirm open={state.isDeleteConfirmationShowing} header="Delete Injection" dimmer="blurring"
-                     content={`Are you sure you want to delete the injection for ${state.injectionToDelete.brainArea.name}?  This action can not be undone.`}
+            <Confirm open={state.isDeleteConfirmationShowing} header="Delete Label" dimmer="blurring"
+                     content={`Are you sure you want to delete the label for ${state.injectionToDelete.brainArea.name}?  This action can not be undone.`}
                      confirmButton="Delete" onCancel={() => onClearDeleteConfirmation()}
                      onConfirm={async () => {
                          await deleteInjection({variables: {id: state.injectionToDelete.id}})
@@ -139,17 +139,16 @@ export const EditInjectionsPanel = (props: IEditInjectionsPanelProps) => {
         return (
             <div>
                 <Header>
-                    Modify and Delete Injections
+                    Modify and Delete Labels
                     <Header.Subheader>
                         <p>
-                            You may not delete injections that are associated with neurons.
+                            You may not delete labels that are associated with neurons.
                         </p>
                         <p>
-                            Modifying an injection should <span style={emp}>only</span> be done to correct errors. You
+                            Modifying an label should <span style={emp}>only</span> be done to correct errors. You
                             can <span style={emp}><a
-                            onClick={() => props.onSelectAddTab()}>add a new injection</a></span> if there are
-                            multiple
-                            injections for the sample.
+                            onClick={() => props.onSelectAddTab()}>add a new label</a></span> if there are
+                            multiple labels for the sample.
                         </p>
                     </Header.Subheader>
                 </Header>
@@ -174,10 +173,10 @@ export const EditInjectionsPanel = (props: IEditInjectionsPanelProps) => {
     const renderNoInjections = () => {
         return (
             <Header>
-                Edit and Remove Injections
+                Edit and Remove Labels
                 <Header.Subheader>
-                    There are no injections for this sample. You can <a
-                    onClick={() => props.onSelectAddTab()}> Add new injections here</a>
+                    There are no labels for this sample. You can <a
+                    onClick={() => props.onSelectAddTab()}> Add new labels here</a>
                 </Header.Subheader>
             </Header>
         );

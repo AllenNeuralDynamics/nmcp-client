@@ -188,12 +188,11 @@ export const SamplesTable = (props: SamplesTableProps) => {
                 <Table attached="top" compact="very" size="small">
                     <Table.Header>
                         <Table.Row>
-                            <Table.HeaderCell>Id</Table.HeaderCell>
+                            <Table.HeaderCell>Subject Id</Table.HeaderCell>
                             <Table.HeaderCell>Acq. Date</Table.HeaderCell>
                             <Table.HeaderCell>Tag</Table.HeaderCell>
-                            <Table.HeaderCell>Subject Id</Table.HeaderCell>
                             <Table.HeaderCell>Genotype</Table.HeaderCell>
-                            <Table.HeaderCell>Injections</Table.HeaderCell>
+                            <Table.HeaderCell>Labeling</Table.HeaderCell>
                             <Table.HeaderCell>Collection</Table.HeaderCell>
                             <Table.HeaderCell>Tomography</Table.HeaderCell>
                             <Table.HeaderCell>Neurons</Table.HeaderCell>
