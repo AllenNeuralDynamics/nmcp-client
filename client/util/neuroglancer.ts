@@ -10,7 +10,7 @@ export class NeuroglancerProxy {
     private _viewer: any = null;
     private _changeHandler: any = null;
 
-    public static configureNeuroglancer(id: string, state: any, annotations: any) {
+    public static configureNeuroglancer(id: string, state: any, annotations: any, selectionDelegate: any) {
         const proxy = new NeuroglancerProxy()
 
         const target = document.getElementById(id)
@@ -23,6 +23,16 @@ export class NeuroglancerProxy {
             e.preventDefault();
         });
 
+        registerEventListener(target, "click", (e: Event) => {
+            if (proxy._viewer && selectionDelegate) {
+                const selected = proxy._viewer.layerSelectedValues.toJSON();
+
+                if (selected && selected["Candidates"] && selected["Candidates"]["annotationId"]) {
+                    selectionDelegate(selected["Candidates"]["annotationId"]);
+                }
+            }
+        });
+
         defaultState.layers[1]["segmentColors"] = getSegmentColorMap()
 
         disableWheel();
@@ -31,9 +41,13 @@ export class NeuroglancerProxy {
 
         setDefaultInputEventBindings(proxy._viewer.inputEventBindings);
 
-        const s = state || defaultState;
-
-        s.layers[0].annotations = annotations;
+        let s = state || defaultState;
+        if (s?.layers?.length > 0) {
+            s.layers[0].annotations = annotations;
+        } else {
+            s = defaultState;
+            s.layers[0].annotations = annotations;
+        }
 
         proxy._viewer.state.restoreState(s);
 
@@ -50,15 +64,15 @@ export class NeuroglancerProxy {
     public updateAnnotations(annotations: any) {
         const state = this._viewer.state.toJSON();
 
-        state.layers[0].annotations = annotations;
-
-        this._viewer.state.restoreState(state);
+        if (state.layers?.length > 0) {
+            state.layers[0].annotations = annotations;
+            this._viewer.state.reset();
+            this._viewer.state.restoreState(state);
+        }
     }
 
     public resetNeuroglancerState() {
-        this._viewer.state.restoreState({"position": defaultState.position})
-        this._viewer.state.restoreState({"projectionScale": defaultState.projectionScale})
-        this._viewer.state.restoreState({"crossSectionScale": defaultState.crossSectionScale})
+        this._viewer.state.restoreState(defaultState);
     }
 
     public unlinkNeuroglancerHandler() {
@@ -111,6 +125,7 @@ const defaultState = {
         569.8789672851562,
         0
     ],
+    "projectionOrientation": [],
     "crossSectionScale": 2.7182818284590446,
     "projectionScale": 2048,
     "layers": [
@@ -139,7 +154,7 @@ const defaultState = {
             "tab": "annotations",
             "annotationColor": "#2184d0",
             "annotations": [],
-            "annotationProperties":[
+            "annotationProperties": [
                 {
                     "id": "color",
                     "type": "rgba",

@@ -22,6 +22,7 @@ export const USER_QUERY = gql`
     query UserQuery {
         user {
             id
+            authDirectoryId
             firstName
             lastName
             emailAddress
@@ -36,11 +37,12 @@ export type UserQueryResponse = {
 }
 
 export const USERS_QUERY = gql`
-    query UsersQuery {
-        users {
+    query UsersQuery($input: UserQueryInput) {
+        users(input: $input) {
             totalCount
             items {
                 id
+                authDirectoryId
                 firstName
                 lastName
                 emailAddress
@@ -50,6 +52,14 @@ export const USERS_QUERY = gql`
         }
     }
 `;
+
+export type UserQueryVariables = {
+    input: {
+        offset: number;
+        limit: number;
+        includeImported: boolean;
+    }
+}
 
 export type UsersQueryResponse = {
     users: {

@@ -16,10 +16,10 @@ import {AnnotatorList} from "../annotator/AnnotatorList";
 import {ReconstructionActionPanel} from "./ReconstructionActionPanel";
 
 const statusFilterOptions = [
-    {key: "complete", text: "Complete", value: 8},
-    {key: "inprogress", text: "In Progress", value: 1},
-    {key: "onhold", text: "On Hold", value: 2},
-    {key: "inreview", text: "In Review", value: 3},
+    {key: "complete", text: "Published", value: 8},
+    {key: "in-progress", text: "In Progress", value: 1},
+    {key: "on-hold", text: "On Hold", value: 2},
+    {key: "in-review", text: "In Review", value: 3},
     {key: "approved", text: "Approved", value: 5},
     {key: "rejected", text: "Rejected", value: 6},
     {key: "invalid", text: "Invalid", value: 9}
@@ -51,8 +51,16 @@ export const Reconstructions = () => {
         variables: {pageInput: {offset: state.offset, limit: state.limit, userOnly: state.userOnly, filters: filters}}, pollInterval: 10000
     });
 
-    if (loading || !data || !data.reconstructions) {
+    if (loading) {
         return (<div/>)
+    }
+
+    if (error) {
+        return (<div>{error}</div>)
+    }
+
+    if (!data || !data.reconstructions) {
+        return (<div>Data unavailable</div>)
     }
 
     const onSelected = (reconstruction: IReconstruction) => {
@@ -116,15 +124,15 @@ export const Reconstructions = () => {
                     <List horizontal divided>
                         <List.Item>
                             <Checkbox toggle label="My reconstructions only" checked={state.userOnly}
-                                      onChange={(e, data) => setState({...state, userOnly: data.checked})}/>
+                                      onChange={(_, data) => setState({...state, userOnly: data.checked})}/>
                         </List.Item>
                         <List.Item>
                             <Checkbox toggle label="Limit status to " checked={state.limitStatus}
-                                      onChange={(e, data) => setState({...state, limitStatus: data.checked})}/>
+                                      onChange={(_, data) => setState({...state, limitStatus: data.checked})}/>
                             <Dropdown placeholder="Status" style={{marginLeft: "8px"}} multiple selection options={statusFilterOptions}
                                       value={state.statusFilter}
                                       disabled={!state.limitStatus}
-                                      onChange={(e, d) => onStatusFilterChange(d.value as number[])}/>
+                                      onChange={(_, d) => onStatusFilterChange(d.value as number[])}/>
                         </List.Item>
                     </List>
                 </Segment>

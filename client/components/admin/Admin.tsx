@@ -4,6 +4,7 @@ import {Tab} from "semantic-ui-react"
 import {UserPreferences} from "../../util/userPreferences";
 import {Users} from "./Users";
 import {Collections} from "./Collections";
+import {Manage} from "./Manage";
 
 const panes = [
     {
@@ -13,6 +14,10 @@ const panes = [
     {
         menuItem: {key: 'collections', icon: 'cubes', content: 'Collections'},
         render: () => <Collections/>
+    },
+    {
+        menuItem: {key: 'manage', icon: 'settings', content: 'Manage'},
+        render: () => <Manage/>
     }
 ];
 

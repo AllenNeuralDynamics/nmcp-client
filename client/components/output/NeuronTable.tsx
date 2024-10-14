@@ -1,6 +1,6 @@
 import * as React from "react";
 import {observer} from "mobx-react-lite";
-import {Dropdown, Icon, Popup, Table} from "semantic-ui-react";
+import {Dropdown, Header, Icon, Popup, Table} from "semantic-ui-react";
 import {SketchPicker} from 'react-color';
 
 import {NEURON_VIEW_MODES, NeuronViewMode} from "../../viewmodel/neuronViewMode";
@@ -92,7 +92,10 @@ export const OutputTableRow = observer((props: IOutputTableRowProps) => {
                       onClick={() => props.onChangeNeuronMirror(v, !v.mirror)}/>
             </td>
             <td style={{verticalAlign: "middle"}}>
-                {v.neuron.idString}{v.neuron.consensus == ConsensusStatus.Single ? "*" : ""}
+                <div>
+                    {v.neuron.idString}{v.neuron.consensus == ConsensusStatus.Single ? "*" : ""}
+                    <Header sub color="grey">{v.neuron.sample.animalId}</Header>
+                </div>
             </td>
             <td style={{verticalAlign: "middle"}}>
                 {v.neuron.brainArea ? v.neuron.brainArea.acronym : "unknown"}

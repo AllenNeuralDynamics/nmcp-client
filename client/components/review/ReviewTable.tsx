@@ -13,6 +13,10 @@ import {ReconstructionStatus, reconstructionStatusColor, reconstructionStatusStr
 
 export type ReviewTableProps = {
     reconstructions: IReconstruction[]
+    totalCount: number;
+    offset: number;
+    limit: number;
+    isFiltered: boolean;
     selected: IReconstruction;
 
     onRowClick(id: IReconstruction): void;
@@ -23,17 +27,23 @@ export const ReviewTable = (props: ReviewTableProps) => {
         return <ReviewRow key={`tt_${r.id}`} reconstruction={r} isSelected={r == props.selected} onRowClick={props.onRowClick}/>
     });
 
-    const totalCount = props.reconstructions.length;
-
     let totalMessage = "There are no reconstructions awaiting review";
 
-    if (totalCount > 0) {
-        if (totalCount > 1) {
-            totalMessage = `There are ${totalCount} reconstructions awaiting review`
+    if (props.totalCount > 0) {
+        if (props.totalCount > 1) {
+            totalMessage = `There are ${props.totalCount} reconstructions awaiting review`
         } else {
             totalMessage = `There is 1 reconstruction awaiting review`
         }
     }
+
+    if (props.isFiltered) {
+        totalMessage += " that meet the filter setting"
+    }
+
+    const pageCount = Math.max(Math.ceil(props.totalCount / props.limit), 1);
+
+    const activePage = props.offset ? (Math.floor(props.offset / props.limit) + 1) : 1;
 
     return (
         <Table attached="bottom" compact="very" size="small" celled structured selectable>
@@ -61,8 +71,11 @@ export const ReviewTable = (props: ReviewTableProps) => {
             </Table.Body>
             <Table.Footer fullwidth="true">
                 <Table.Row>
-                    <Table.HeaderCell colSpan={11}>
+                    <Table.HeaderCell colSpan={7}>
                         {totalMessage}
+                    </Table.HeaderCell>
+                    <Table.HeaderCell colSpan={7} textAlign="right">
+                        {`Page ${activePage} of ${pageCount}`}
                     </Table.HeaderCell>
                 </Table.Row>
             </Table.Footer>

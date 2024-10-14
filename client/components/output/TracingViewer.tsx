@@ -482,7 +482,7 @@ export class TracingViewer extends React.Component<ITracingViewerProps, ITracing
         let color = Color(tracing.neuron.baseColor);
 
         if (tracing.structure.value === TracingStructure.dendrite) {
-            color = color.darken(0.75);
+            color = color.darken(0.25);
         }
 
         this._viewer.loadNeuron(tracing.id, color.hex(), nodes);

@@ -67,7 +67,7 @@ export const SelectedReconstruction = (props: SelectedReconstructionProps) => {
         <Grid fluid="true">
             <Grid.Row style={{paddingBottom: 10}}>
                 <Grid.Column width={8}>
-                    <CreateTracing neuron={props.reconstruction.neuron} tracingStructures={constants.TracingStructures}/>
+                    <CreateTracing reconstruction={props.reconstruction} tracingStructures={constants.TracingStructures}/>
                 </Grid.Column>
                 <Grid.Column width={8}>
                     <Segment.Group>

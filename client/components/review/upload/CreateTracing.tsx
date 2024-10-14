@@ -4,15 +4,15 @@ import {useMutation} from "@apollo/react-hooks";
 import {ApolloError} from "apollo-client";
 import {Grid, Confirm} from "semantic-ui-react";
 import {toast} from "react-toastify";
+import {SwcDropZone} from "./SwcDropZone";
 
-import {INeuron} from "../../../models/neuron";
+import {IReconstruction} from "../../../models/reconstruction";
 import {ITracingStructure} from "../../../models/tracingStructure";
 import {ISwcUploadOutput} from "../../../models/swcTracing";
 import {UPLOAD_TRACING_MUTATION, UploadTracingMutationResponse, UploadTracingVariables} from "../../../graphql/tracings";
-import {SwcDropZone} from "./SwcDropZone";
 
 export interface ICreateTracingProps {
-    neuron: INeuron;
+    reconstruction: IReconstruction;
     tracingStructures: ITracingStructure[];
 }
 
@@ -47,7 +47,7 @@ export const CreateTracing = (props: ICreateTracingProps) => {
     }
 
     function canUploadTracing(): boolean {
-        return props.neuron && (state.structure || !state.isSwcFile) && state.file !== null;
+        return props.reconstruction && (state.structure || !state.isSwcFile) && state.file !== null;
     }
 
     function setSwcFile(acceptedFiles: File[]) {
@@ -67,7 +67,7 @@ export const CreateTracing = (props: ICreateTracingProps) => {
             try {
                 await uploadSwc({
                     variables: {
-                        neuronId: props.neuron.id,
+                        reconstructionId: props.reconstruction.id,
                         structureId: state.structure ? state.structure.id : null,
                         file: state.file
                     }

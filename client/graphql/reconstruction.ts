@@ -76,6 +76,7 @@ export type ReconstructionVariables = {
         offset: number;
         limit: number;
         userOnly: boolean;
+        sampleIds?: string[];
         filters: number[];
     }
 }
@@ -92,16 +93,36 @@ export type ReconstructionsResponse = {
 //
 // Reviewable Annotations
 //
-export const REVIEWABLE_ANNOTATIONS_QUERY = gql`query ReviewableReconstructions {
-    reviewableReconstructions {
-        ...ReconstructionFields
+
+export type ReviewableVariables = {
+    input: {
+        offset: number;
+        limit: number;
+        sampleIds: string[];
+        status: number[];
+    }
+}
+
+export type ReviewableResponse = {
+    reviewableReconstructions: {
+        offset: number;
+        limit: number;
+        totalCount: number;
+        reconstructions: IReconstruction[];
+    };
+}
+
+export const REVIEWABLE_ANNOTATIONS_QUERY = gql`query ReviewableReconstructions($input: ReviewPageInput) {
+    reviewableReconstructions(input: $input) {
+        offset
+        limit
+        totalCount
+        reconstructions {
+            ...ReconstructionFields
+        }
     }
 }
 ${ReconstructionFieldsFragment}`;
-
-export type ReviewableAnnotationsResponse = {
-    reviewableReconstructions: IReconstruction[];
-}
 
 //
 // Request Reconstruction Mutation

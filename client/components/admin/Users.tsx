@@ -1,6 +1,6 @@
 import React, {useContext, useState} from "react";
 import {useMutation, useQuery} from "@apollo/react-hooks";
-import {Checkbox, Header, Segment, Table, TableCell, TableRow} from "semantic-ui-react";
+import {Checkbox, Dropdown, Header, List, Segment, Table, TableCell, TableRow} from "semantic-ui-react";
 
 import {PaginationHeader} from "../editors/PaginationHeader";
 import {IUser} from "../../models/user";
@@ -8,7 +8,7 @@ import {
     UPDATE_PERMISSIONS_MUTATION,
     UpdatePermissionsResponse,
     UpdatePermissionsVariables,
-    UserPermissions,
+    UserPermissions, UserQueryVariables,
     USERS_QUERY,
     UsersQueryResponse
 } from "../../graphql/user";
@@ -21,13 +21,15 @@ function noUsersText() {
 export const Users = () => {
     const [state, setState] = useState({
         offset: 0,
-        limit: 10
+        limit: 10,
+        includeImported: false
     });
 
     const user = useContext(UserContext);
 
-    const {loading, error, data} = useQuery<UsersQueryResponse>(USERS_QUERY, {
-        variables: {input: {offset: state.offset, limit: state.limit}}, pollInterval: 10000
+    const {loading, error, data} = useQuery<UsersQueryResponse, UserQueryVariables>(USERS_QUERY, {
+        variables: {input: {offset: state.offset, limit: state.limit, includeImported: state.includeImported}},
+        pollInterval: 10000
     });
 
     if (loading || !data || !data.users) {
@@ -74,6 +76,14 @@ export const Users = () => {
                 <Segment secondary>
                     <Header style={{margin: "0"}}>Users</Header>
                 </Segment>
+                <Segment secondary>
+                    <List horizontal divided>
+                        <List.Item>
+                            <Checkbox toggle label="Include imported" checked={state.includeImported}
+                                      onChange={(_, data) => setState({...state, includeImported: data.checked})}/>
+                        </List.Item>
+                    </List>
+                </Segment>
                 <Segment>
                     <PaginationHeader pageCount={pageCount} activePage={activePage}
                                       limit={state.limit}
@@ -90,7 +100,7 @@ export const Users = () => {
                             <Table.HeaderCell>Edit</Table.HeaderCell>
                             <Table.HeaderCell>Review</Table.HeaderCell>
                             <Table.HeaderCell>Admin</Table.HeaderCell>
-                            <Table.HeaderCell>Id</Table.HeaderCell>
+                            <Table.HeaderCell>Type</Table.HeaderCell>
                         </Table.Row>
                     </Table.Header>
                     <Table.Body>
@@ -157,22 +167,26 @@ const UserRow = (props: IUserRowProps) => {
             <TableCell>{props.user.affiliation}</TableCell>
             <TableCell>{props.user.emailAddress}</TableCell>
             <TableCell>
-                <PermissionsCheckBox userId={props.user.id} updatePermissions={updatePermissions} userPermissions={props.user.permissions}
+                <PermissionsCheckBox userId={props.user.id} updatePermissions={updatePermissions}
+                                     userPermissions={props.user.permissions}
                                      permission={UserPermissions.ViewReconstructions}/>
             </TableCell>
             <TableCell>
-                <PermissionsCheckBox userId={props.user.id} updatePermissions={updatePermissions} userPermissions={props.user.permissions}
+                <PermissionsCheckBox userId={props.user.id} updatePermissions={updatePermissions}
+                                     userPermissions={props.user.permissions}
                                      permission={UserPermissions.Edit}/>
             </TableCell>
             <TableCell>
-                <PermissionsCheckBox userId={props.user.id} updatePermissions={updatePermissions} userPermissions={props.user.permissions}
+                <PermissionsCheckBox userId={props.user.id} updatePermissions={updatePermissions}
+                                     userPermissions={props.user.permissions}
                                      permission={UserPermissions.Review}/>
             </TableCell>
             <TableCell>
-                <PermissionsCheckBox userId={props.user.id} updatePermissions={updatePermissions} userPermissions={props.user.permissions}
+                <PermissionsCheckBox userId={props.user.id} updatePermissions={updatePermissions}
+                                     userPermissions={props.user.permissions}
                                      permission={UserPermissions.Admin} disabled={props.user.id == props.userId}/>
             </TableCell>
-            <TableCell>{props.user.id}</TableCell>
+            <TableCell>{props.user.authDirectoryId ? "Registered" : "Imported"}</TableCell>
         </TableRow>
     );
 }

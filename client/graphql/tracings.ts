@@ -34,8 +34,8 @@ const TracingFieldsFragment = gql`fragment TracingFields on Tracing {
 //
 
 export const UPLOAD_TRACING_MUTATION = gql`
-    mutation uploadSwc($neuronId: String, $structureId: String, $file: Upload) {
-        uploadSwc(neuronId: $neuronId, structureId: $structureId, file: $file) {
+    mutation uploadSwc($reconstructionId: String, $structureId: String, $file: Upload) {
+        uploadSwc(reconstructionId: $reconstructionId, structureId: $structureId, file: $file) {
             tracings {
                 ...TracingFields
             }
@@ -47,7 +47,7 @@ export const UPLOAD_TRACING_MUTATION = gql`
     }${TracingFieldsFragment}`;
 
 export type UploadTracingVariables = {
-    neuronId: string;
+    reconstructionId: string;
     structureId: string;
     file: File
 }

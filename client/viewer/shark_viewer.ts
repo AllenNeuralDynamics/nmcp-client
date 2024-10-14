@@ -5,6 +5,7 @@ import {SystemShader} from "./shaders/shaders";
 import {StandardShader} from "./shaders/standardShader";
 import {CompartmentMeshSet} from "../models/compartmentMeshSet";
 import {UserPreferences} from "../util/userPreferences";
+import {debounce} from "lodash-es";
 
 const THREE = require("three");
 require("three-obj-loader")(THREE);
@@ -468,10 +469,16 @@ export class SharkViewer {
 
         this.trackControls = new OrbitControls(this.camera, document.getElementById(this.dom_element));
         this.trackControls.zoomSpeed = UserPreferences.Instance.ZoomSpeed;
-        this.trackControls.addEventListener("change", () => {
-            this.cameraObservers.forEach(c => c.cameraChanged(this.camera));
-            this.render();
-        });
+
+        const throttledCameraRendered = debounce(
+            () => {
+                this.cameraObservers.forEach(c => c.cameraChanged(this.camera));
+                this.render();
+            },
+            500
+        );
+
+        this.trackControls.addEventListener("change", throttledCameraRendered);
 
         this.rayCaster.params.Points.threshold = DEFAULT_POINT_THRESHOLD;
 

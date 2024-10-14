@@ -1,5 +1,6 @@
 export interface IUser {
     id: string;
+    authDirectoryId: string;
     firstName: string;
     lastName: string;
     emailAddress: string;

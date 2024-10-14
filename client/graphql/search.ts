@@ -21,6 +21,7 @@ export const SEARCH_NEURONS_QUERY = gql`query SearchNeurons($context: SearchCont
       sample {
         id
         idNumber
+        animalId
       }
       tracings {
         id

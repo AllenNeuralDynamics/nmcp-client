@@ -1,8 +1,21 @@
 import * as React from "react";
 import {useContext, useState} from "react";
 import {useQuery} from "@apollo/react-hooks";
-import {Button, Checkbox, Dropdown, Grid, GridColumn, GridRow, Header, Icon, List, Message, Popup, Segment} from "semantic-ui-react";
-import {uniqBy} from "lodash-es";
+import {
+    Button,
+    Checkbox,
+    Dropdown,
+    Grid,
+    GridColumn,
+    GridRow,
+    Header,
+    Icon,
+    List,
+    Message,
+    Popup,
+    Segment
+} from "semantic-ui-react";
+import {sample, uniqBy} from "lodash-es";
 
 import {CANDIDATE_NEURONS_QUERY, CandidateNeuronsResponse, NeuronsQueryVariables} from "../../graphql/candidates";
 import {PaginationHeader} from "../editors/PaginationHeader";
@@ -12,6 +25,7 @@ import {IBrainArea} from "../../models/brainArea";
 import {BrainAreaMultiSelect} from "../editors/BrainAreaMultiSelect";
 import {ConstantsContext} from "../app/AppConstants";
 import {CandidateActionPanel} from "./CandidateActionPanel";
+import {SAMPLES_QUERY, SamplesQueryResponse} from "../../graphql/sample";
 
 export const Candidates = () => {
     const [state, setState] = useState({
@@ -33,13 +47,24 @@ export const Candidates = () => {
 
     const {loading, error, data} = useQuery<CandidateNeuronsResponse, NeuronsQueryVariables>(CANDIDATE_NEURONS_QUERY, {
         variables: {
-            input: {offset: state.offset, limit: state.limit, sampleIds: sampleFilter, brainStructureIds: brainAreaFilter},
+            input: {
+                offset: state.offset,
+                limit: state.limit,
+                sampleIds: sampleFilter,
+                brainStructureIds: brainAreaFilter
+            },
             includeInProgress: state.includeInProgress
         },
         pollInterval: 10000
     });
 
-    if (loading || !data || !data.candidateNeurons) {
+    const {
+        loading: sampleLoading,
+        error: sampleError,
+        data: sampleData
+    } = useQuery<SamplesQueryResponse>(SAMPLES_QUERY, {pollInterval: 5000});
+
+    if (loading || sampleLoading || !data || !data.candidateNeurons) {
         return <Message icon>
             <Icon name="circle notched" loading/>
             <Message.Content>
@@ -49,7 +74,7 @@ export const Candidates = () => {
         </Message>
     }
 
-    if (error) {
+    if (error || sampleError) {
         return <Message negative style={{margin: "20px"}}>
             <Icon name="circle notched" loading/>
             <Message.Content>
@@ -59,9 +84,9 @@ export const Candidates = () => {
         </Message>
     }
 
-    const samples = uniqBy(data.candidateNeurons.items.map(n => n.sample), (s) => s.id);
+    let samples = sampleData.samples.items;
 
-    const sampleFilterOptions = samples.map(s => {
+    const sampleFilterOptions = samples.slice().sort((s1, s2) => s1.animalId < s2.animalId ? -1 : 1).map(s => {
         return {key: s.id, text: s.animalId, value: s.id}
     });
 
@@ -93,6 +118,16 @@ export const Candidates = () => {
         setState({...state, brainAreaFilter: data});
     }
 
+    const onNeuronSelectedFromViewer = (id: string) => {
+        if (data && data.candidateNeurons) {
+            const neuron = data.candidateNeurons.items.find(n => n.id == id);
+
+            if (neuron) {
+                setState({...state, selectedCandidate: neuron});
+            }
+        }
+    }
+
     const totalCount = data.candidateNeurons.totalCount;
 
     const pageCount = Math.max(Math.ceil(totalCount / state.limit), 1);
@@ -116,14 +151,17 @@ export const Candidates = () => {
                 <Segment secondary>
                     <List horizontal divided>
                         <List.Item>
-                            <Checkbox style={{verticalAlign: "middle"}} toggle label="Include in progress" checked={state.includeInProgress}
+                            <Checkbox style={{verticalAlign: "middle"}} toggle label="Include in progress"
+                                      checked={state.includeInProgress}
                                       onChange={(_, data) => setState({...state, includeInProgress: data.checked})}/>
                         </List.Item>
                         <List.Item>
-                            <Checkbox style={{verticalAlign: "middle"}} toggle label="Limit samples to " checked={state.limitSamples}
+                            <Checkbox style={{verticalAlign: "middle"}} toggle label="Limit samples to "
+                                      checked={state.limitSamples}
                                       onChange={(_, data) => setState({...state, limitSamples: data.checked})}/>
 
-                            <Dropdown placeholder="Select..." style={{marginLeft: "8px"}} multiple selection options={sampleFilterOptions}
+                            <Dropdown placeholder="Select..." style={{marginLeft: "8px"}} multiple selection
+                                      options={sampleFilterOptions}
                                       value={state.sampleFilter}
                                       disabled={!state.limitSamples}
                                       onChange={(_, d) => onSampleFilterChange(d.value)}/>
@@ -134,7 +172,8 @@ export const Candidates = () => {
                                           onChange={(_, data) => setState({...state, limitBrainAreas: data.checked})}/>
 
                                 <div style={{marginLeft: "8px", minWidth: "300px"}}>
-                                    <BrainAreaMultiSelect compartments={constants.BrainAreasWithGeometry} selection={state.brainAreaFilter}
+                                    <BrainAreaMultiSelect compartments={constants.BrainAreasWithGeometry}
+                                                          selection={state.brainAreaFilter}
                                                           isDisabled={!state.limitBrainAreas}
                                                           onSelectionChange={(brainAreas: IBrainArea[]) => onBrainAreaFilterChange(brainAreas)}/>
                                 </div>
@@ -149,14 +188,20 @@ export const Candidates = () => {
                 <Segment secondary>
                     <CandidateActionPanel neurons={data.candidateNeurons.items} neuronId={state.selectedCandidate?.id}/>
                 </Segment>
-                <CandidateTracingsTable neurons={(data && data.candidateNeurons) ? data.candidateNeurons.items : []} showAnnotators={state.includeInProgress}
-                                        activePage={activePage} offset={state.offset} limit={state.limit} totalCount={totalCount} pageCount={pageCount}
-                                        onSelected={(n => setState({...state, selectedCandidate: n == state.selectedCandidate ? null : n}))}
+                <CandidateTracingsTable neurons={(data && data.candidateNeurons) ? data.candidateNeurons.items : []}
+                                        showAnnotators={state.includeInProgress}
+                                        activePage={activePage} offset={state.offset} limit={state.limit}
+                                        totalCount={totalCount} pageCount={pageCount}
+                                        onSelected={(n => setState({
+                                            ...state,
+                                            selectedCandidate: n == state.selectedCandidate ? null : n
+                                        }))}
                                         selectedCandidate={state.selectedCandidate}/>
 
             </Segment.Group>
-            
-            <CandidatesViewer neurons={(data && data.candidateNeurons) ? data.candidateNeurons.items : []} selectedId={state.selectedCandidate?.id}/>
+
+            <CandidatesViewer neurons={(data && data.candidateNeurons) ? data.candidateNeurons.items : []}
+                              selectedId={state.selectedCandidate?.id} onViewerSelected={onNeuronSelectedFromViewer}/>
         </div>
     );
 }

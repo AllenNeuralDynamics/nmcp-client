@@ -16,6 +16,8 @@
   "exclude": [
     "dist",
     "node_modules",
-    "webpack.config.cjs"
+    "base.webpack.config.cjs",
+    "webpack.config.cjs",
+    "webpack.staging.config.cjs"
   ]
 }

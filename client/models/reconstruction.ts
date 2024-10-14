@@ -1,6 +1,5 @@
 import {IUser} from "./user";
 import {INeuron} from "./neuron";
-import {ReconstructionStatus} from "./reconstructionStatus";
 import {ISwcTracing} from "./swcTracing";
 
 export interface IReconstruction {
