@@ -5,9 +5,6 @@ import {
     Button,
     Checkbox,
     Dropdown,
-    Grid,
-    GridColumn,
-    GridRow,
     Header,
     Icon,
     List,
@@ -15,7 +12,6 @@ import {
     Popup,
     Segment
 } from "semantic-ui-react";
-import {sample, uniqBy} from "lodash-es";
 
 import {CANDIDATE_NEURONS_QUERY, CandidateNeuronsResponse, NeuronsQueryVariables} from "../../graphql/candidates";
 import {PaginationHeader} from "../editors/PaginationHeader";

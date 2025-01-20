@@ -9,6 +9,7 @@ export interface ISwcNode {
     z: number;
     radius: number;
     structureIdentifier: IStructureIdentifier;
+    brainStructureId: string;
     createdAt: number;
     updatedAt: number;
 }

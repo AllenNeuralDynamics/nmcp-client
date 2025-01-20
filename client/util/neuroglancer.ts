@@ -185,6 +185,13 @@ const defaultState = {
             "objectAlpha": 0.20,
             "name": "CCF",
             "visible": true
+        },
+        {
+            "type": "segmentation",
+            "source": "precomputed://s3://aind-neuron-morphology-community-portal-dev-u5u0i5",
+            "tab": "source",
+            "segments": [],
+            "name": "Pending Reconstructions"
         }
     ],
     "selectedLayer": {
