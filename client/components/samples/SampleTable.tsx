@@ -151,7 +151,7 @@ export const SamplesTable = (props: SamplesTableProps) => {
     };
 
     const samples = [...props.samples].sort(
-        (a, b) => b.idNumber - a.idNumber)
+        (a, b) => (a.animalId + "").localeCompare(b.animalId))
         .slice(state.offset, state.offset + state.limit);
 
     const totalCount = props.samples.length;
