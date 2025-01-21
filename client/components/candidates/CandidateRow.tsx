@@ -19,6 +19,7 @@ export const CandidateRow = (props: ICandidateRowProps) => {
         <TableRow onClick={() => props.onSelected(props.neuron)} active={props.isSelected}>
             <TableCell>{displayNeuron(props.neuron)}</TableCell>
             <TableCell>{props.neuron.sample.animalId}</TableCell>
+            <TableCell>{props.neuron.tag}</TableCell>
             <TableCell>{displayBrainArea(props.neuron.brainArea, "(unspecified)")}</TableCell>
             <TableCell>{props.neuron.x.toFixed(1)}</TableCell>
             <TableCell>{props.neuron.y.toFixed(1)}</TableCell>

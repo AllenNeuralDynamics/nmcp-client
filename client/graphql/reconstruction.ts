@@ -54,6 +54,10 @@ export const ReconstructionFieldsFragment = gql`fragment ReconstructionFields on
         nodeCount
         filename
     }
+    precomputed {
+        id
+        skeletonSegmentId
+    }
 }`;
 
 //

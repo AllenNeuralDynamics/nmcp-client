@@ -1,14 +1,29 @@
 import * as React from "react";
 import {useContext, useEffect, useState} from "react";
 import {useMutation} from "@apollo/react-hooks";
-import {Button, Grid, GridRow, Header, Icon, Placeholder, PlaceholderHeader, PlaceholderLine, Segment} from "semantic-ui-react";
+import {
+    Button,
+    Grid,
+    GridRow,
+    Header,
+    Icon,
+    Label,
+    Placeholder,
+    PlaceholderHeader,
+    PlaceholderLine,
+    Segment
+} from "semantic-ui-react";
 import {toast} from "react-toastify";
 
 import {IReconstruction} from "../../models/reconstruction";
 import {CreateTracing} from "./upload/CreateTracing";
 import {ConstantsContext} from "../app/AppConstants";
 import {CompleteReconstructionPanel} from "../reconstructions/CompleteReconstructionPanel";
-import {UPDATE_RECONSTRUCTION_MUTATION, UpdateReconstructionResponse, UpdateReconstructionVariables} from "../../graphql/reconstruction";
+import {
+    UPDATE_RECONSTRUCTION_MUTATION,
+    UpdateReconstructionResponse,
+    UpdateReconstructionVariables
+} from "../../graphql/reconstruction";
 import {toastCreateError, toastUpdateSuccess} from "../editors/Toasts";
 
 export type SelectedReconstructionProps = {
@@ -57,26 +72,39 @@ export const SelectedReconstruction = (props: SelectedReconstructionProps) => {
         const duration = state.duration.trim().length == 0 ? 0 : parseFloat(state.duration);
         const length = state.length.trim().length == 0 ? 0 : parseFloat(state.length);
 
-        await updateReconstruction({variables: {id: props.reconstruction.id, duration: duration, length: length, notes: state.notes, checks: state.checks}});
+        await updateReconstruction({
+            variables: {
+                id: props.reconstruction.id,
+                duration: duration,
+                length: length,
+                notes: state.notes,
+                checks: state.checks
+            }
+        });
     }
 
-    const axonIcon = props.reconstruction.axon ? <Icon name="check" color="green"/> : <Icon name="attention" color="red"/>
-    const dendriteIcon = props.reconstruction.dendrite ? <Icon name="check" color="green"/> : <Icon name="attention" color="red"/>
+    const axonIcon = props.reconstruction.axon ? <Icon name="check" color="green"/> :
+        <Icon name="attention" color="red"/>
+    const dendriteIcon = props.reconstruction.dendrite ? <Icon name="check" color="green"/> :
+        <Icon name="attention" color="red"/>
 
     return (
         <Grid fluid="true">
             <Grid.Row style={{paddingBottom: 10}}>
                 <Grid.Column width={8}>
-                    <CreateTracing reconstruction={props.reconstruction} tracingStructures={constants.TracingStructures}/>
+                    <CreateTracing reconstruction={props.reconstruction}
+                                   tracingStructures={constants.TracingStructures}/>
                 </Grid.Column>
                 <Grid.Column width={8}>
                     <Segment.Group>
                         <Segment secondary>
                             <div style={{display: "flex", flexDirection: "row", width: "100%"}}>
-                                <Header style={{margin: 0, marginTop: "6px", verticalAlign: "middle"}}>Reconstruction Metadata</Header>
+                                <Header style={{margin: 0, marginTop: "6px", verticalAlign: "middle"}}>Reconstruction
+                                    Metadata</Header>
                                 <div style={{order: 2, flexGrow: 1, flexShrink: 1}}/>
                                 <div style={{order: 3, flexGrow: 0, flexShrink: 0, marginRight: "12px"}}>
-                                    <Button size="tiny" color="green" disabled={!canUpdate} onClick={onUpdateReconstruction}>Update</Button>
+                                    <Button size="tiny" color="green" disabled={!canUpdate}
+                                            onClick={onUpdateReconstruction}>Update</Button>
                                 </div>
                             </div>
                         </Segment>
@@ -93,19 +121,27 @@ export const SelectedReconstruction = (props: SelectedReconstructionProps) => {
                                     </Grid.Column>
                                 </GridRow>
                             </Grid>
-                            <CompleteReconstructionPanel id={props.reconstruction.id} data={state} updateChecks={updateChecks} updateLength={updateLength}
+                            <CompleteReconstructionPanel id={props.reconstruction.id} data={state}
+                                                         updateChecks={updateChecks} updateLength={updateLength}
                                                          updateNotes={updateNotes} updateDuration={updateDuration}/>
+                            <br/> <br/>
+                            <Label>
+                                <Icon name="info circle" color="blue"/>
+                                {props.reconstruction.id}
+                            </Label>
                         </Segment>
                     </Segment.Group>
                 </Grid.Column>
             </Grid.Row>
         </Grid>
-    );
+    )
+        ;
 }
 
 const NoSelectedReconstruction = () => (
     <Segment>
-        <h5><Icon name="info circle"/>Select a reconstruction from the table to review and upload the reconstruction data.</h5>
+        <h5><Icon name="info circle"/>Select a reconstruction from the table to review and upload the reconstruction
+            data.</h5>
         <Placeholder>
             <PlaceholderHeader image>
                 <PlaceholderLine/>

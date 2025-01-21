@@ -1,6 +1,7 @@
 import {IUser} from "./user";
 import {INeuron} from "./neuron";
 import {ISwcTracing} from "./swcTracing";
+import {Precomputed} from "./precomputed";
 
 export interface IReconstruction {
     id: string;
@@ -19,6 +20,7 @@ export interface IReconstruction {
     axon: ISwcTracing;
     dendrite: ISwcTracing;
     tracings: ISwcTracing[];
+    precomputed?: Precomputed;
 }
 
 export function isUserReconstruction(userId: string, annotations: IReconstruction[]) {

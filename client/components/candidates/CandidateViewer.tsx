@@ -35,7 +35,17 @@ export const CandidatesViewer = (props: ITracingsTableProps) => {
         if (ngProxy) {
             const annotations = createNeuroglancerAnnotationLayer(props.neurons, props.selectedId);
 
-            ngProxy.updateAnnotations(annotations);
+            let selectedSkeletonSegmentId = null;
+
+            if (props.selectedId) {
+                const selected = props.neurons.find(n => n.id == props.selectedId);
+
+                if (selected?.reconstructions?.length > 0) {
+                    selectedSkeletonSegmentId = selected.reconstructions[0]?.precomputed?.skeletonSegmentId;
+                }
+            }
+
+            ngProxy.updateAnnotations(annotations, selectedSkeletonSegmentId);
         }
     }, [props.neurons, props.selectedId]);
 

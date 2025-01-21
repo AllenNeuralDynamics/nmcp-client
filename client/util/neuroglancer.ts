@@ -61,11 +61,29 @@ export class NeuroglancerProxy {
         return proxy;
     }
 
-    public updateAnnotations(annotations: any) {
+    public updateAnnotations(annotations: any, selectedSkeletonSegmentId: number = null) {
         const state = this._viewer.state.toJSON();
+
+        console.log(annotations)
+        console.log(selectedSkeletonSegmentId)
+
+        let stateChanged = false;
 
         if (state.layers?.length > 0) {
             state.layers[0].annotations = annotations;
+            stateChanged = true;
+        }
+
+        if (state.layers?.length > 2) {
+            if (selectedSkeletonSegmentId) {
+                state.layers[2].segments = [selectedSkeletonSegmentId];
+            } else {
+                state.layers[2].segments = [];
+            }
+            stateChanged = true;
+        }
+
+        if (stateChanged) {
             this._viewer.state.reset();
             this._viewer.state.restoreState(state);
         }
@@ -181,7 +199,7 @@ const defaultState = {
                 "enableDefaultSubsources": false
             },
             "tab": "source",
-            "segments": ["997"],
+            "segments": [997],
             "objectAlpha": 0.20,
             "name": "CCF",
             "visible": true
@@ -189,8 +207,9 @@ const defaultState = {
         {
             "type": "segmentation",
             "source": "precomputed://s3://aind-neuron-morphology-community-portal-dev-u5u0i5",
-            "tab": "source",
-            "segments": [],
+            "tab": "segments",
+            "segments": [
+            ],
             "name": "Pending Reconstructions"
         }
     ],
