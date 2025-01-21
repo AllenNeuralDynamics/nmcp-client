@@ -43,6 +43,7 @@ export type NeuronsQueryVariables = {
         sortOrder?: string
         sampleIds?: string[]
         brainStructureIds?: string[]
+        tag?: string
     },
     includeInProgress: boolean;
 }
