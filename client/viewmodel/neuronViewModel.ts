@@ -23,6 +23,8 @@ export class NeuronViewModel {
     somaOnlyTracing: TracingViewModel;
     tracings: TracingViewModel[];
 
+    skeletonSegmentId: number = null;
+
     private viewMode: NeuronViewMode;
     private requestedViewMode: NeuronViewMode | null;
 
@@ -44,7 +46,11 @@ export class NeuronViewModel {
         this.hasDendriteTracing = false;
 
         this.somaOnlyTracing = null;
-        this.tracings = [];
+        this.tracings = []
+
+        if (this.neuron.reconstructions?.length > 0) {
+            this.skeletonSegmentId = this.neuron.reconstructions[0].precomputed?.skeletonSegmentId
+        }
     }
 
     public get Id() {

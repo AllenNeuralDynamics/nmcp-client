@@ -24,7 +24,7 @@ import {AxisViewer} from "../../viewer/axisView";
 import * as Color from "color";
 import {CompartmentMeshSet, ViewerMeshVersion} from "../../models/compartmentMeshSet";
 import {ViewerStyle} from "../../viewer/viewerStyle";
-import {NeuroglancerContainer} from "./neuroglancerContainer";
+import {NeuroglancerContainer} from "./NeuroglancerContainer";
 import {UserPreferences} from "../../util/userPreferences";
 
 const ROOT_ID = 997;
@@ -40,6 +40,7 @@ export interface ITracingViewerBaseProps {
     constants: NdbConstants;
     compartments: BrainCompartmentViewModel[];
     tracings: TracingViewModel[];
+    skeletonSegmentIds: number[];
     isLoading: boolean;
     isRendering: boolean;
     fixedAspectRatio?: number;
@@ -635,7 +636,7 @@ export class TracingViewer extends React.Component<ITracingViewerProps, ITracing
         let viewerContainer = null;
 
         if (UserPreferences.Instance.ViewerStyle == ViewerStyle.Neuroglancer) {
-            viewerContainer = <NeuroglancerContainer elementName="neuroglancer-container" height={this.state.renderHeight} width={this.state.renderWidth}/>
+            viewerContainer = <NeuroglancerContainer elementName="neuroglancer-viewer-container" height={this.state.renderHeight} width={this.state.renderWidth} skeletonSegmentIds={this.props.skeletonSegmentIds}/>
         } else {
             viewerContainer = <div id="viewer-container" style={{height: this.state.renderHeight, width: this.state.renderWidth}}/>
         }

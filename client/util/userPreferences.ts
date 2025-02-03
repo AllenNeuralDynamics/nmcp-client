@@ -8,6 +8,7 @@ const NeuronPageOffset = "neuron.page.offset";
 const NeuronPageLimit = "neuron.page.limit";
 const LockedSampleId = "neuron.upload.locked.sample";
 const CandidateViewerState = "candidates.viewer.state.v3";
+const SearchViewerState = "search.viewer.state.v1";
 const ShouldAutoCollapseOnQuery = "viewer.shouldAutoCollapseOnQuery";
 const ShouldAlwaysShowSoma = "viewer.shouldAlwaysShowSoma";
 const ShouldAlwaysShowFullTracing = "viewer.shouldAlwaysShowFullTracing";
@@ -83,6 +84,14 @@ export class UserPreferences extends PreferencesManager {
 
     public set candidateViewerState(state: string) {
         this.saveLocalValue(CandidateViewerState, JSON.stringify(state));
+    }
+
+    public get searchViewerState(): any {
+        return this.loadLocalValue(SearchViewerState, null);
+    }
+
+    public set searchViewerState(state: string) {
+        this.saveLocalValue(SearchViewerState, JSON.stringify(state));
     }
 
     public get ShouldAutoCollapseOnQuery() {

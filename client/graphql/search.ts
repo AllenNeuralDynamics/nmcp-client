@@ -3,6 +3,7 @@ import gql from "graphql-tag";
 import {INeuron} from "../models/neuron";
 import {IPositionInput} from "../models/queryFilter";
 import {PredicateTypeValue} from "../models/brainAreaFilterType";
+import {ReconstructionFieldsFragment} from "./reconstruction";
 
 export const SEARCH_NEURONS_QUERY = gql`query SearchNeurons($context: SearchContext) {
   searchNeurons(context: $context) {
@@ -42,6 +43,9 @@ export const SEARCH_NEURONS_QUERY = gql`query SearchNeurons($context: SearchCont
           structureIdentifierId
         }
       }
+        reconstructions {
+            ...ReconstructionFields
+        }
     }
     
     error {
@@ -49,7 +53,8 @@ export const SEARCH_NEURONS_QUERY = gql`query SearchNeurons($context: SearchCont
       message
     }
   }
-}`;
+}
+${ReconstructionFieldsFragment}`;
 
 export type SearchPredicate = {
     predicateType: PredicateTypeValue;

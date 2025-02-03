@@ -21,7 +21,7 @@ export const CandidatesViewer = (props: ITracingsTableProps) => {
 
         const annotations = createNeuroglancerAnnotationLayer(props.neurons, props.selectedId);
 
-        const proxy = NeuroglancerProxy.configureNeuroglancer("neuroglancer-container", UserPreferences.Instance.candidateViewerState, annotations, selectNeuron);
+        const proxy = NeuroglancerProxy.configureCandidateNeuroglancer("neuroglancer-container", UserPreferences.Instance.candidateViewerState, annotations, selectNeuron);
 
         setNgProxy(proxy);
 
@@ -45,7 +45,7 @@ export const CandidatesViewer = (props: ITracingsTableProps) => {
                 }
             }
 
-            ngProxy.updateAnnotations(annotations, selectedSkeletonSegmentId);
+            ngProxy.updateCandidateAnnotations(annotations, selectedSkeletonSegmentId);
         }
     }, [props.neurons, props.selectedId]);
 
@@ -60,7 +60,7 @@ export const CandidatesViewer = (props: ITracingsTableProps) => {
 
         const annotations = createNeuroglancerAnnotationLayer(props.neurons, props.selectedId);
 
-        ngProxy.updateAnnotations(annotations);
+        ngProxy.updateCandidateAnnotations(annotations);
     };
 
     return (
