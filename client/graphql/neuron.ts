@@ -31,6 +31,9 @@ export const NEURON_BASE_FIELDS_FRAGMENT = gql`fragment NeuronBaseFields on Neur
     x
     y
     z
+    sampleX
+    sampleY
+    sampleZ
     doi
     consensus
     metadata

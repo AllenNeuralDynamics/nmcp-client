@@ -12,6 +12,9 @@ export const NeuronFieldsFragment = gql`fragment NeuronFields on Neuron {
     x
     y
     z
+    sampleX
+    sampleY
+    sampleZ
     sample {
         id
         animalId

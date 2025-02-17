@@ -6,7 +6,7 @@ import {toast} from "react-toastify";
 
 import {ConstantsContext} from "../app/AppConstants";
 import {ConsensusStatus, ConsensusStatusOptions, FindConsensusStatusOption} from "../../models/consensusStatus";
-import {formatSomaLocation, INeuron, parseSomaLocation} from "../../models/neuron";
+import {formatHortaLocation, formatSomaLocation, INeuron, parseSomaLocation} from "../../models/neuron";
 import {displaySample} from "../../models/sample";
 import {IBrainArea} from "../../models/brainArea";
 import {toastCreateError, toastUpdateError} from "../editors/Toasts";
@@ -51,6 +51,16 @@ export const NeuronRow = (props: INeuronRowProps) => {
         }
 
         await updateFn({variables: {neuron: {id: props.neuron.id, x: result.x, y: result.y, z: result.z}}});
+    }
+
+    const onAcceptHortaLocationEdit = async (value: string, updateFn: any) => {
+        const result = parseSomaLocation(value);
+
+        if (result.error) {
+            return;
+        }
+
+        await updateFn({variables: {neuron: {id: props.neuron.id, sampleX: result.x, sampleY: result.y, sampleZ: result.z}}});
     }
 
     const onBrainAreaChange = async (brainArea: IBrainArea, updateFn: any) => {
@@ -100,6 +110,11 @@ export const NeuronRow = (props: INeuronRowProps) => {
             <Table.Cell style={{maxWidth: "140px"}}>
                 <InputPopup value={formatSomaLocation(n)} placeholder="(undefined)"
                             onAccept={v => onAcceptSomaLocationEdit(v, updateNeuron)}
+                            isValidValueFcn={v => !parseSomaLocation(v).error}/>
+            </Table.Cell>
+            <Table.Cell style={{maxWidth: "140px"}}>
+                <InputPopup value={formatHortaLocation(n)} placeholder="(undefined)"
+                            onAccept={v => onAcceptHortaLocationEdit(v, updateNeuron)}
                             isValidValueFcn={v => !parseSomaLocation(v).error}/>
             </Table.Cell>
             <Table.Cell style={{width: "110px"}}>

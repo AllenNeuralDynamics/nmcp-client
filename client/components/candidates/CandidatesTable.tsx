@@ -34,7 +34,8 @@ export const CandidateTracingsTable = (props: ITracingsTableProps) => {
                         <Table.HeaderCell rowSpan={2}>Neuron</Table.HeaderCell>
                         <Table.HeaderCell rowSpan={2}>Subject</Table.HeaderCell>
                         <Table.HeaderCell rowSpan={2}>Tag(s)</Table.HeaderCell>
-                        <Table.HeaderCell colSpan={4} textAlign="center">Soma</Table.HeaderCell>
+                        <Table.HeaderCell colSpan={4} textAlign="center">Atlas Soma</Table.HeaderCell>
+                        <Table.HeaderCell rowSpan={2} colSpan={1} textAlign="center">Horta Soma (X, Y, Z)</Table.HeaderCell>
                         {props.showAnnotators ? <Table.HeaderCell rowSpan={2}>Annotator(s)</Table.HeaderCell> : null}
                     </Table.Row>
                     <Table.Row>

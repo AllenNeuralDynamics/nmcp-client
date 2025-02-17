@@ -14,6 +14,9 @@ export interface INeuron {
     x: number;
     y: number;
     z: number;
+    sampleX: number;
+    sampleY: number;
+    sampleZ: number;
     doi: string;
     consensus: ConsensusStatus;
     metadata?: string;
@@ -71,6 +74,14 @@ export function formatSomaCoords(x: number, y: number, z: number) {
 export function formatSomaLocation(neuron: INeuron) {
     if (neuron) {
         return formatSomaCoords(neuron.x, neuron.y, neuron.z);
+    } else {
+        return "(n/a)";
+    }
+}
+
+export function formatHortaLocation(neuron: INeuron) {
+    if (neuron) {
+        return formatSomaCoords(neuron.sampleX, neuron.sampleY, neuron.sampleZ);
     } else {
         return "(n/a)";
     }
