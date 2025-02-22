@@ -636,7 +636,7 @@ export class TracingViewer extends React.Component<ITracingViewerProps, ITracing
         let viewerContainer = null;
 
         if (UserPreferences.Instance.ViewerStyle == ViewerStyle.Neuroglancer) {
-            viewerContainer = <NeuroglancerContainer elementName="neuroglancer-viewer-container" height={this.state.renderHeight} width={this.state.renderWidth} skeletonSegmentIds={this.props.skeletonSegmentIds}/>
+            viewerContainer = <NeuroglancerContainer elementName="neuroglancer-viewer-container" height={this.state.renderHeight} width={this.state.renderWidth} skeletonSegmentIds={this.props.skeletonSegmentIds} compartments={this.props.compartments}/>
         } else {
             viewerContainer = <div id="viewer-container" style={{height: this.state.renderHeight, width: this.state.renderWidth}}/>
         }

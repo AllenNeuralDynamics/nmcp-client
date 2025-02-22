@@ -537,8 +537,6 @@ export class MainView extends React.Component<IOutputContainerProps, IOutputCont
             const ids = neuronsToDisplay.reduce((prev, n) => {
                 const viewMode = n.ViewMode.structure;
 
-                console.log(n.neuron)
-
                 prev.full = prev.full.concat(n.neuron.tracings.filter(t => {
                     switch (viewMode) {
                         case TracingStructure.all:
@@ -651,8 +649,6 @@ export class MainView extends React.Component<IOutputContainerProps, IOutputCont
 
                 this._isInQuery = false;
             } else {
-                console.log(data);
-
                 ids.forEach(id => {
                     const v = neuronViewModelMap.get(tracingNeuronMap.get(id));
                     v.isSelected = false;
@@ -784,15 +780,13 @@ export class MainView extends React.Component<IOutputContainerProps, IOutputCont
         let compartmentListFloat = null;
         let compartmentListDock = null;
 
-        if (UserPreferences.Instance.ViewerStyle == ViewerStyle.Default) {
-            compartmentListFloat = this.state.isCompartmentListOpen ? (
-                <div style={Object.assign({left: "calc(100% - 400px)"}, baseStyle)}>
-                    <CompartmentListContainer {...treeProps}/>
-                </div>) : null;
+        compartmentListFloat = this.state.isCompartmentListOpen ? (
+            <div style={Object.assign({left: "calc(100% - 400px)"}, baseStyle)}>
+                <CompartmentListContainer {...treeProps}/>
+            </div>) : null;
 
-            compartmentListDock = this.state.isCompartmentListDocked ? (
-                <CompartmentListContainer {...treeProps}/>) : null;
-        }
+        compartmentListDock = this.state.isCompartmentListDocked ? (
+            <CompartmentListContainer {...treeProps}/>) : null;
 
         const overlay = neuronListFloat !== null || compartmentListFloat !== null ? (
             <div style={{

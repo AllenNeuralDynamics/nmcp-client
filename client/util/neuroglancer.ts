@@ -59,9 +59,19 @@ export class NeuroglancerProxy {
         return proxy;
     }
 
-    public static configureSearchNeuroglancer(id: string, state: any): NeuroglancerProxy {
+    public static configureSearchNeuroglancer(id: string, state: any, selectionDelegate: any): NeuroglancerProxy {
         const [proxy, target] = NeuroglancerProxy.createCommon(id);
 
+        if (selectionDelegate) {
+            registerEventListener(target, "click", (e: Event) => {
+                if (proxy._viewer) {
+                    const selected = proxy._viewer.layerSelectedValues.toJSON();
+                    if (selected && selected["Reconstructions"] && selected["Reconstructions"]["value"] && selected["Reconstructions"]["value"]["key"]) {
+                        selectionDelegate(selected["Reconstructions"]["value"]["key"]);
+                    }
+                }
+            });
+        }
         const ccf_layer = defaultSearchState.layers.find(s => s.name == "CCF")
 
         if (ccf_layer) {
@@ -115,9 +125,6 @@ export class NeuroglancerProxy {
     public updateCandidateAnnotations(annotations: any, selectedSkeletonSegmentId: number = null) {
         const state = this._viewer.state.toJSON();
 
-        console.log(annotations)
-        console.log(selectedSkeletonSegmentId)
-
         let stateChanged = false;
 
         if (state.layers?.length > 0) {
@@ -143,12 +150,26 @@ export class NeuroglancerProxy {
     public updateSearchReconstructions(selectedSkeletonSegmentIds: number[] = []) {
         const state = this._viewer.state.toJSON();
 
-        console.log(selectedSkeletonSegmentIds)
-
         let stateChanged = false;
 
         if (state.layers?.length > 1) {
             state.layers[1].segments = selectedSkeletonSegmentIds;
+            stateChanged = true;
+        }
+
+        if (stateChanged) {
+            this._viewer.state.reset();
+            this._viewer.state.restoreState(state);
+        }
+    }
+
+    public updateSearchCompartments(compartmentIds: number[] = []) {
+        const state = this._viewer.state.toJSON();
+
+        let stateChanged = false;
+
+        if (state.layers?.length > 0) {
+            state.layers[0].segments = compartmentIds;
             stateChanged = true;
         }
 
