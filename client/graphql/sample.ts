@@ -41,8 +41,8 @@ export const SAMPLE_FIELDS_FRAGMENT = gql`fragment SampleFields on Sample {
 /// Samples Query
 ///
 
-export const SAMPLES_QUERY = gql`query {
-    samples {
+export const SAMPLES_QUERY = gql`query($input: SampleQueryInput) {
+    samples(input: $input) {
         totalCount
         items {
             ...SampleFields
@@ -71,6 +71,12 @@ export type SamplesQueryResponse = {
     mouseStrains: IMouseStrain[];
 }
 
+export type SamplesQueryVariables = {
+    input: {
+        reconstructionStatus?: number;
+    }
+}
+
 ///
 /// Mutation Input
 ///
@@ -85,6 +91,7 @@ type SampleVariables = {
     sampleDate?: Date;
     mouseStrainId?: string;
     mouseStrainName?: string;
+    reconstructionStatus?: number;
 }
 
 ///

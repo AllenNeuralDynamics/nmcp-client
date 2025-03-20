@@ -5,6 +5,7 @@ import {UserPreferences} from "../../util/userPreferences";
 import {Users} from "./Users";
 import {Collections} from "./Collections";
 import {Manage} from "./Manage";
+import {Published} from "./Published";
 
 const panes = [
     {
@@ -14,6 +15,10 @@ const panes = [
     {
         menuItem: {key: 'collections', icon: 'cubes', content: 'Collections'},
         render: () => <Collections/>
+    },
+    {
+        menuItem: {key: 'published', icon: 'cloud upload', content: 'Published'},
+        render: () => <Published/>
     },
     {
         menuItem: {key: 'manage', icon: 'settings', content: 'Manage'},

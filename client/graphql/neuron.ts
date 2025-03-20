@@ -62,9 +62,11 @@ ${NEURON_RELATIONSHIP_FIELDS_FRAGMENT}
 
 export type NeuronsQueryVariables = {
     input: {
-        offset: number,
-        limit: number,
-        sortOrder: string
+        offset?: number,
+        limit?: number,
+        sortOrder?: string
+        sampleIds?: string[]
+        reconstructionStatus?: number;
     }
 }
 
