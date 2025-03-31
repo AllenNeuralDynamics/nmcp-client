@@ -1,14 +1,29 @@
 import gql from "graphql-tag";
 import {IIssue, IssueKind} from "../models/issue";
 
-export const ISSUE_QUERY = gql`
-    query ISSUE_QUERY {
+export const OPEN_ISSUES_QUERY = gql`
+    query OPEN_ISSUES_QUERY {
         openIssues {
             id
             kind
             status
             description
             response
+            createdAt
+            creator {
+                id
+                firstName
+                lastName
+                emailAddress
+            }
+            neuron {
+                id
+                idString
+                sample {
+                    id
+                    animalId
+                }
+            }
         }
     }
 `;
@@ -41,3 +56,20 @@ export type CreateIssueVariables = {
 export type CreateIssueResponse = {
     createIssue: IIssue;
 }
+
+//
+// Close Mutation
+//
+export const CLOSE_ISSUE_MUTATION = gql`mutation CloseIssue($id: String!, $reason: String!) {
+    closeIssue(id: $id, reason: $reason)
+}`;
+
+export type CloseIssueVariables = {
+    id: string;
+    reason: string;
+}
+
+export type CloseIssueResponse = {
+    closeIssue: boolean;
+}
+

@@ -6,22 +6,27 @@ import {Users} from "./Users";
 import {Collections} from "./Collections";
 import {Manage} from "./Manage";
 import {Published} from "./Published";
+import {Issues} from "./Issues";
 
 const panes = [
     {
-        menuItem: {key: 'users', icon: 'users', content: 'Users'},
+        menuItem: {key: "users", icon: "users", content: "Users"},
         render: () => <Users/>
     },
     {
-        menuItem: {key: 'collections', icon: 'cubes', content: 'Collections'},
+        menuItem: {key: "collections", icon: "cubes", content: "Collections"},
         render: () => <Collections/>
     },
     {
-        menuItem: {key: 'published', icon: 'cloud upload', content: 'Published'},
+        menuItem: {key: "published", icon: "cloud upload", content: "Published"},
         render: () => <Published/>
     },
     {
-        menuItem: {key: 'manage', icon: 'settings', content: 'Manage'},
+        menuItem: {key: "issues", icon: "exclamation triangle", content: "Issues"},
+        render: () => <Issues/>
+    },
+    {
+        menuItem: {key: "manage", icon: "settings", content: "Manage"},
         render: () => <Manage/>
     }
 ];

@@ -27,7 +27,7 @@ export const IssueModal = (props: IssueModelProps) => {
             if (!error && data.createIssue) {
                 toast.success((<div><h3>Report Issue</h3>The issue was successfully reported.</div>), {autoClose: 1000});
             } else {
-                toast.error((<div><h3>Report Issue</h3>There was an unknown issue reporting this issue.</div>), {autoClose: false});
+                toast.error((<div><h3>Report Issue</h3>There was an unknown error reporting this issue.</div>), {autoClose: false});
             }
 
             setState({description: ""});

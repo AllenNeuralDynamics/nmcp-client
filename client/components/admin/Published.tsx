@@ -14,7 +14,7 @@ import {
     List,
     Message,
     MessageContent,
-    MessageHeader
+    MessageHeader, Statistic, StatisticLabel, StatisticValue
 } from "semantic-ui-react"
 
 import {UNPUBLISH_MUTATION} from "../../graphql/admin";
