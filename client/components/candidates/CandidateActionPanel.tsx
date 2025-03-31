@@ -1,13 +1,14 @@
 import * as React from "react";
-import {useContext} from "react";
+import {useContext, useState} from "react";
 import {useMutation} from "@apollo/react-hooks";
-import {Button, Header, HeaderContent, HeaderSubheader, Icon} from "semantic-ui-react";
+import {Button, Header, HeaderContent, HeaderSubheader, Icon, Popup} from "semantic-ui-react";
 import {findIndex} from "lodash-es";
 
 import {INeuron} from "../../models/neuron";
 import {REQUEST_ANNOTATION_MUTATION} from "../../graphql/reconstruction";
 import {UserContext} from "../app/UserApp";
 import {isUserReconstruction} from "../../models/reconstruction";
+import {IssueModal} from "./IssueModal";
 
 
 export type CandidateActionPanelProps = {
@@ -17,12 +18,16 @@ export type CandidateActionPanelProps = {
 
 export const CandidateActionPanel = (props: CandidateActionPanelProps) => {
 
+    const [state, setState] = useState({
+        isIssueModalVisible: false
+    });
+
+    const user = useContext(UserContext);
+
     const [requestAnnotation, {loading}] = useMutation(REQUEST_ANNOTATION_MUTATION,
         {
             refetchQueries: ["CandidateNeuronsQuery"]
         });
-
-    const user = useContext(UserContext);
 
     if (!props.neuronId) {
         return <NoCandidate/>;
@@ -41,6 +46,10 @@ export const CandidateActionPanel = (props: CandidateActionPanelProps) => {
     const annotateButton = <Button icon="edit" color="green" size="mini" disabled={!canAnnotate} content="Add to My Annotations"
                                    onClick={() => requestAnnotation({variables: {id: neuron.id}})}/>
 
+    const reportIssueButton = <Button icon="exclamation" color="red" size="mini" disabled={!canAnnotate} content="Report an Issue" onClick={() => setState({...state, isIssueModalVisible: true})}/>
+
+    const reportWithPopup = <Popup content="Report an issue with a candidate" trigger={reportIssueButton}/>
+
     return (
         <div style={{display: "flex", justifyContent: "space-between", alignItems: "center"}}>
             <Header as="h4" style={{margin: 0}}>
@@ -52,7 +61,11 @@ export const CandidateActionPanel = (props: CandidateActionPanelProps) => {
                     </HeaderSubheader>
                 </HeaderContent>
             </Header>
-            {annotateButton}
+            <div>
+                {reportWithPopup}
+                {annotateButton}
+            </div>
+            <IssueModal show={state.isIssueModalVisible} neuron={neuron} onClose={() => setState({...state, isIssueModalVisible: false})}/>
         </div>
     )
 }

@@ -64,22 +64,23 @@ export const Candidates = () => {
         data: sampleData
     } = useQuery<SamplesQueryResponse>(SAMPLES_QUERY, {pollInterval: 5000});
 
+    if (error || sampleError) {
+        return <Message negative style={{margin: "20px"}}>
+            <Icon name="circle notched" loading/>
+            <Message.Content>
+                <Message.Header content="Error"/>s
+                {error}
+            </Message.Content>
+        </Message>
+    }
+
+
     if (loading || sampleLoading || !data || !data.candidateNeurons) {
         return <Message icon>
             <Icon name="circle notched" loading/>
             <Message.Content>
                 <Message.Header content="Updating candidate neurons"/>
                 Updating candidate neurons.
-            </Message.Content>
-        </Message>
-    }
-
-    if (error || sampleError) {
-        return <Message negative style={{margin: "20px"}}>
-            <Icon name="circle notched" loading/>
-            <Message.Content>
-                <Message.Header content="Error"/>
-                {error}
             </Message.Content>
         </Message>
     }
@@ -134,11 +135,6 @@ export const Candidates = () => {
 
     const activePage = state.offset ? (Math.floor(state.offset / state.limit) + 1) : 1;
 
-    const reportIssueButton =
-        <Button circular compact basic color="red" size="mini" icon="exclamation"/>
-
-    const reportWithPopup = <Popup content="Report an issue with a candidate" trigger={reportIssueButton}/>
-
     return (
         <div style={{margin: "20px"}}>
             <Segment.Group>
@@ -186,7 +182,11 @@ export const Candidates = () => {
 
                                 <div style={{marginLeft: "8px", minWidth: "200px"}}>
                                     <Input size="mini" type="text" placehoder="..." value={state.tempTagFilter}
-                                           onKeyPress={(e) => {if (e.charCode === 13) {setState({...state, tagFilter: state.tempTagFilter})}}}
+                                           onKeyPress={(e) => {
+                                               if (e.charCode === 13) {
+                                                   setState({...state, tagFilter: state.tempTagFilter})
+                                               }
+                                           }}
                                            onBlur={() => setState({...state, tagFilter: state.tempTagFilter})}
                                            onChange={(e, {value}) => setState({...state, tempTagFilter: value})}/>
                                 </div>

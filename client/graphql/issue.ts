@@ -1,5 +1,5 @@
 import gql from "graphql-tag";
-import {IIssue} from "../models/issue";
+import {IIssue, IssueKind} from "../models/issue";
 
 export const ISSUE_QUERY = gql`
     query ISSUE_QUERY {
@@ -21,8 +21,8 @@ export type IssueQueryResponse = {
 //
 // Create Mutation
 //
-export const CREATE_ISSUE_MUTATION = gql`mutation CreateIssue($description: String!, $neuronId: String, $reconstructionId: String) {
-    createIssue(description: $description, neuronId: $neuronId, reconstructionId: $reconstructionId) {
+export const CREATE_ISSUE_MUTATION = gql`mutation CreateIssue($neuronId: String, $reconstructionId: String, $kind: Int!, $description: String!) {
+    createIssue(neuronId: $neuronId, reconstructionId: $reconstructionId, kind: $kind, description: $description) {
         id
         kind
         status
@@ -32,9 +32,10 @@ export const CREATE_ISSUE_MUTATION = gql`mutation CreateIssue($description: Stri
 }`;
 
 export type CreateIssueVariables = {
-    description: string;
     neuronId?: string;
     reconstructionId?: string;
+    kind?: IssueKind;
+    description: string;
 }
 
 export type CreateIssueResponse = {

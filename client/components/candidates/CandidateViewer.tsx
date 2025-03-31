@@ -17,8 +17,6 @@ export const CandidatesViewer = (props: ITracingsTableProps) => {
     const [ngProxy, setNgProxy] = useState<NeuroglancerProxy>(null)
 
     useEffect(() => {
-        console.log("use effect");
-
         const annotations = createNeuroglancerAnnotationLayer(props.neurons, props.selectedId);
 
         const proxy = NeuroglancerProxy.configureCandidateNeuroglancer("neuroglancer-container", UserPreferences.Instance.candidateViewerState, annotations, selectNeuron);
