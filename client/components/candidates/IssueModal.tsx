@@ -1,6 +1,6 @@
 import {INeuron} from "../../models/neuron";
 import * as React from "react";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {Button, Form, FormField, FormInput, Message, Modal, TextArea} from "semantic-ui-react";
 import {useMutation} from "@apollo/react-hooks";
 import {CREATE_ISSUE_MUTATION, CreateIssueResponse, CreateIssueVariables} from "../../graphql/issue";
@@ -14,12 +14,13 @@ type IssueModelProps = {
     onClose(): void;
 }
 
-const MIN_DESCRIPTION_LENGTH = 48;
+const MIN_DESCRIPTION_LENGTH = 1;
 const MAX_DESCRIPTION_LENGTH = 1024;
 
 export const IssueModal = (props: IssueModelProps) => {
     const [state, setState] = useState({
-        description: ""
+        description: "",
+        lastNeuronId: props.neuron.id
     });
 
     const [createIssue, {data, error}] = useMutation<CreateIssueResponse, CreateIssueVariables>(CREATE_ISSUE_MUTATION, {
@@ -30,9 +31,15 @@ export const IssueModal = (props: IssueModelProps) => {
                 toast.error((<div><h3>Report Issue</h3>There was an unknown error reporting this issue.</div>), {autoClose: false});
             }
 
-            setState({description: ""});
+            setState({...state, description: ""});
         }
     });
+
+    useEffect(() => {
+        if (props.neuron.id != state.lastNeuronId) {
+            setState({...state, lastNeuronId: props.neuron.id, description: ""});
+        }
+    }, [props.neuron]);
 
     const onReportClick = async () => {
         const description = state.description?.length < MAX_DESCRIPTION_LENGTH ? state.description : state.description.substring(0, MAX_DESCRIPTION_LENGTH);
@@ -46,11 +53,7 @@ export const IssueModal = (props: IssueModelProps) => {
 
     const isValidDescription = state.description?.length > MIN_DESCRIPTION_LENGTH;
 
-    let warningMessage = isValidDescription ? null : (
-        <Message
-            error
-            content="Please add additional detail about the issue."
-        />);
+    let warningMessage = null;
 
     if (isValidDescription && state.description.length > MAX_DESCRIPTION_LENGTH) {
         const message = `Your description will be truncated due to length.`;
@@ -67,7 +70,7 @@ export const IssueModal = (props: IssueModelProps) => {
             <Modal.Header content="Report an issue"/>
             <Modal.Content>
                 <Form>
-                    <FormField error={!isValidDescription}>
+                    <FormField>
                         <label>Describe the issue with Candidate Neuron {props.neuron.idString}</label>
                         <TextArea placeholder="Enter description..." value={state.description}
                                   onChange={(e, {name, value}) => setState({...state, description: value.toString()})}/>
