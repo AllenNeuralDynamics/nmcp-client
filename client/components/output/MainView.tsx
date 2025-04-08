@@ -23,8 +23,8 @@ import {IBrainArea} from "../../models/brainArea";
 import {CompartmentNode} from "./compartments/CompartmentNode";
 import {Button, Message, Modal} from "semantic-ui-react";
 import {ViewerMeshVersion} from "../../models/compartmentMeshSet";
-import {ViewerStyle} from "../../viewer/viewerStyle";
 import {UserPreferences} from "../../util/userPreferences";
+import {ViewerStyle} from "../../viewer/viewerStyle";
 
 const neuronViewModelMap = new Map<string, NeuronViewModel>();
 
@@ -45,7 +45,7 @@ export enum FetchState {
 
 interface FetchCalc {
     knownTracings: TracingViewModel[];
-    knownSkeletonSegmentIds: number[];
+    knownNeuronsToDisplay: NeuronViewModel[];
     hadQuery: boolean;
 }
 
@@ -84,7 +84,7 @@ interface IOutputContainerState {
     defaultStructureSelection?: NeuronViewMode;
     neuronViewModels?: NeuronViewModel[];
     tracingsToDisplay?: TracingViewModel[];
-    skeletonSegmentIdsToDisplay?: number[];
+    knownNeuronsToDisplay?: NeuronViewModel[];
     rootNode?: CompartmentNode;
     displayHighlightedOnly?: boolean;
     wasDisplayHighlightedOnly?: boolean;
@@ -118,7 +118,7 @@ export class MainView extends React.Component<IOutputContainerProps, IOutputCont
             defaultStructureSelection: NEURON_VIEW_MODE_SOMA,
             neuronViewModels: neuronCalc.neurons,
             tracingsToDisplay: [],
-            skeletonSegmentIdsToDisplay: [],
+            knownNeuronsToDisplay: [],
             rootNode: makeCompartmentNodes(props.constants.BrainAreasWithGeometry),
             displayHighlightedOnly: false,
             highlightSelectionMode: HighlightSelectionMode.Normal,
@@ -306,7 +306,11 @@ export class MainView extends React.Component<IOutputContainerProps, IOutputCont
 
         const fetchCalc = this.determineTracingFetchState(neuronViewModels);
 
-        this.setState({neuronViewModels, tracingsToDisplay: fetchCalc.knownTracings, skeletonSegmentIdsToDisplay: fetchCalc.knownSkeletonSegmentIds});
+        this.setState({
+            neuronViewModels,
+            tracingsToDisplay: fetchCalc.knownTracings,
+            knownNeuronsToDisplay: fetchCalc.knownNeuronsToDisplay
+        });
     }
 
     private onChangeSelectAllTracings(shouldSelectAll: boolean) {
@@ -316,7 +320,11 @@ export class MainView extends React.Component<IOutputContainerProps, IOutputCont
 
         const fetchCalc = this.determineTracingFetchState(neuronViewModels);
 
-        this.setState({neuronViewModels, tracingsToDisplay: fetchCalc.knownTracings, skeletonSegmentIdsToDisplay: fetchCalc.knownSkeletonSegmentIds});
+        this.setState({
+            neuronViewModels,
+            tracingsToDisplay: fetchCalc.knownTracings,
+            knownNeuronsToDisplay: fetchCalc.knownNeuronsToDisplay
+        });
     }
 
     private onChangeNeuronColor(neuron: NeuronViewModel, color: any) {
@@ -342,7 +350,10 @@ export class MainView extends React.Component<IOutputContainerProps, IOutputCont
 
         const fetchCalc = this.determineTracingFetchState(this.state.neuronViewModels.slice());
 
-        this.setState({tracingsToDisplay: fetchCalc.knownTracings, skeletonSegmentIdsToDisplay: fetchCalc.knownSkeletonSegmentIds});
+        this.setState({
+            tracingsToDisplay: fetchCalc.knownTracings,
+            knownNeuronsToDisplay: fetchCalc.knownNeuronsToDisplay
+        });
     }
 
 
@@ -516,7 +527,11 @@ export class MainView extends React.Component<IOutputContainerProps, IOutputCont
         const fetchCalc = this.determineTracingFetchState(loadedModels);
 
         if (setState) {
-            this.setState({neuronViewModels: loadedModels, tracingsToDisplay: fetchCalc.knownTracings, skeletonSegmentIdsToDisplay: fetchCalc.knownSkeletonSegmentIds});
+            this.setState({
+                neuronViewModels: loadedModels,
+                tracingsToDisplay: fetchCalc.knownTracings,
+                knownNeuronsToDisplay: fetchCalc.knownNeuronsToDisplay
+            });
         }
 
         return {
@@ -527,7 +542,7 @@ export class MainView extends React.Component<IOutputContainerProps, IOutputCont
 
     private determineTracingFetchState(knownViewModels: NeuronViewModel[]): FetchCalc {
         let tracingsToDisplay: TracingViewModel[] = null;
-        let knownSkeletonSegmentIds: number[] = []
+        let knownNeuronsToDisplay: NeuronViewModel[] = [];
 
         let hadQuery = false;
 
@@ -556,18 +571,25 @@ export class MainView extends React.Component<IOutputContainerProps, IOutputCont
                         n.requestViewMode(TracingStructure.soma);
                     }
                 }
-                if (n.skeletonSegmentId != null) {
-                    prev.skeletonSegmentIds.push(n.skeletonSegmentId);
-                }
+
+                prev.neuronViewModels.push(n);
 
                 return prev;
-            }, {full: [], soma: [], skeletonSegmentIds: []});
+            }, {full: [], soma: [], neuronViewModels: []});
 
-            const availableFullIds = Array.from(tracingViewModelMap2.values()).filter(t => t.tracing !== null).map(t => t.id);
 
-            const known = _.intersection(ids.full, availableFullIds);
+            let known = [];
+            let toQuery = [];
 
-            const toQuery = _.difference(ids.full, known);
+            if (UserPreferences.Instance.ViewerStyle == ViewerStyle.Neuroglancer) {
+                known = ids.full
+            } else {
+                const availableFullIds = Array.from(tracingViewModelMap2.values()).filter(t => t.tracing !== null).map(t => t.id);
+
+                known = _.intersection(ids.full, availableFullIds);
+
+                toQuery = _.difference(ids.full, known);
+            }
 
             tracingsToDisplay = known.map(id => {
                 const neuronModel = neuronViewModelMap.get(tracingNeuronMap.get(id));
@@ -586,14 +608,14 @@ export class MainView extends React.Component<IOutputContainerProps, IOutputCont
                 this.queueTracings(toQuery);
             }
 
-            knownSkeletonSegmentIds = ids.skeletonSegmentIds;
+            knownNeuronsToDisplay = ids.neuronViewModels;
         } else {
             tracingsToDisplay = [];
         }
 
         return {
             knownTracings: tracingsToDisplay,
-            knownSkeletonSegmentIds: knownSkeletonSegmentIds,
+            knownNeuronsToDisplay: knownNeuronsToDisplay,
             hadQuery
         };
     }
@@ -716,7 +738,7 @@ export class MainView extends React.Component<IOutputContainerProps, IOutputCont
             constants: this.props.constants,
             isLoading: this.props.isLoading,
             tracings: this.state.tracingsToDisplay,
-            skeletonSegmentIds: this.state.skeletonSegmentIdsToDisplay,
+            neuronViewModels: this.state.knownNeuronsToDisplay,
             compartments: this.props.visibleBrainAreas,
             highlightedTracings: [],
             isRendering: this.state.isRendering,

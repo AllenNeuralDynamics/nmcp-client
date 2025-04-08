@@ -4,6 +4,7 @@ import {
 } from "./neuronViewMode";
 import {TracingViewModel} from "./tracingViewModel";
 import {TracingStructure} from "../models/tracingStructure";
+import {IReconstruction} from "../models/reconstruction";
 
 export class NeuronViewModel {
     neuron: INeuron;
@@ -23,7 +24,7 @@ export class NeuronViewModel {
     somaOnlyTracing: TracingViewModel;
     tracings: TracingViewModel[];
 
-    skeletonSegmentId: number = null;
+    private readonly reconstruction: IReconstruction = null;
 
     private viewMode: NeuronViewMode;
     private requestedViewMode: NeuronViewMode | null;
@@ -49,12 +50,32 @@ export class NeuronViewModel {
         this.tracings = []
 
         if (this.neuron.reconstructions?.length > 0) {
-            this.skeletonSegmentId = this.neuron.reconstructions[0].precomputed?.skeletonSegmentId
+            this.reconstruction = this.neuron.reconstructions[0]
         }
     }
 
     public get Id() {
         return this.neuron.id;
+    }
+
+    public get Reconstruction() {
+        return this.reconstruction;
+    }
+
+    public get RequestedViewMode() {
+        return this.requestedViewMode;
+    }
+
+    public get SkeletonSegmentId() {
+        return this.reconstruction?.precomputed?.skeletonSegmentId;
+    }
+
+    public get ViewMode() {
+        return this.requestedViewMode || this.viewMode;
+    }
+
+    public get CurrentViewMode() {
+        return this.viewMode;
     }
 
     public requestViewMode(mode: TracingStructure) {
@@ -103,17 +124,5 @@ export class NeuronViewModel {
 
     public cancelRequestedViewMode() {
         this.requestedViewMode = null;
-    }
-
-    public get RequestedViewMode() {
-        return this.requestedViewMode;
-    }
-
-    public get ViewMode() {
-        return this.requestedViewMode || this.viewMode;
-    }
-
-    public get CurrentViewMode() {
-        return this.viewMode;
     }
 }

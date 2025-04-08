@@ -4,6 +4,7 @@ import {INeuron} from "../models/neuron";
 import {IPositionInput} from "../models/queryFilter";
 import {PredicateTypeValue} from "../models/brainAreaFilterType";
 import {ReconstructionFieldsFragment} from "./reconstruction";
+import {ITracingNode} from "../models/tracingNode";
 
 export const SEARCH_NEURONS_QUERY = gql`query SearchNeurons($context: SearchContext) {
   searchNeurons(context: $context) {
@@ -90,4 +91,39 @@ export type SearchNeuronsQueryData = {
 
 export type SearchNeuronsQueryResponse = {
     searchNeurons: SearchNeuronsQueryData
+}
+
+//
+// Nearest Node
+//
+
+export const NEAREST_NODE_QUERY = gql`query NearestNode($id: String!, $location: [Float!]!) {
+    nearestNode(id: $id, location: $location) {
+        reconstructionId
+        location
+        node {
+            id
+            x
+            y
+            z
+            brainStructureId
+            structureIdentifierId
+        }
+        error
+    }
+}
+`;
+
+export type NearestNodeQueryVariables = {
+    id: string;
+    location: number[];
+}
+
+export type NearestNodeQueryResponse = {
+    nearestNode: {
+        reconstructionId: string;
+        location: number[];
+        node: ITracingNode;
+        error: String;
+    }
 }

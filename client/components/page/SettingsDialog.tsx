@@ -1,12 +1,12 @@
 import * as React from "react";
+import {useState} from "react";
 import {observer} from "mobx-react-lite";
-import {Button, Form, Header, Icon, Label, Message, Modal} from "semantic-ui-react";
+import {Button, Form, Header, Label, Modal} from "semantic-ui-react";
 import {SketchPicker} from 'react-color';
 
-import {ViewerMeshVersion} from "../../models/compartmentMeshSet";
 import {useStore, useViewModel} from "../app/App";
 import {UserPreferences} from "../../util/userPreferences";
-import {useState} from "react";
+import {ViewerStyle} from "../../viewer/viewerStyle";
 
 export const SettingsDialogContainer = observer(() => {
     const viewModel = useViewModel();
@@ -25,7 +25,7 @@ type SettingsDialogState = {
     shouldAlwaysShowSoma?: boolean;
     shouldAlwaysShowFullTracing?: boolean;
     displayColorPicker?: boolean;
-    compartmentMeshVersion?: ViewerMeshVersion;
+    useNeuroglancer?: boolean;
 }
 
 const SettingsDialog = (props: SettingsDialogProps) => {
@@ -33,6 +33,7 @@ const SettingsDialog = (props: SettingsDialogProps) => {
         shouldAutoCollapseOnQuery: UserPreferences.Instance.ShouldAutoCollapseOnQuery,
         shouldAlwaysShowSoma: UserPreferences.Instance.ShouldAlwaysShowSoma,
         shouldAlwaysShowFullTracing: UserPreferences.Instance.ShouldAlwaysShowFullTracing,
+        useNeuroglancer: UserPreferences.Instance.ViewerStyle == ViewerStyle.Neuroglancer,
         displayColorPicker: false
     });
 
@@ -65,6 +66,11 @@ const SettingsDialog = (props: SettingsDialogProps) => {
         UserPreferences.Instance.ViewerBackgroundColor = color.hex;
     }
 
+    const onUseNeuroglancer = (b: boolean) => {
+        UserPreferences.Instance.ViewerStyle = b ? ViewerStyle.Neuroglancer : ViewerStyle.Default;
+        setState({useNeuroglancer: b});
+    }
+
     const rowStyles = {
         color: {
             width: "16px",
@@ -88,16 +94,19 @@ const SettingsDialog = (props: SettingsDialogProps) => {
                 <Form>
                     <Form.Checkbox width={16} checked={state.shouldAutoCollapseOnQuery}
                                    label="Collapse query after search"
-                                   onChange={(evt: any) => onSetAutoCollapseOnQuery(evt.target.checked)}/>
+                                   onChange={(_, props) =>onSetAutoCollapseOnQuery(props.checked)}/>
                     <Form.Checkbox width={16} checked={state.shouldAlwaysShowSoma}
                                    style={{marginTop: "10px"}}
                                    label="Always display tracing after search"
-                                   onChange={(evt: any) => onSetAlwaysShowSoma(evt.target.checked)}/>
+                                   onChange={(_, props) => onSetAlwaysShowSoma(props.checked)}/>
                     <Form.Checkbox width={16} checked={state.shouldAlwaysShowFullTracing}
                                    style={{marginLeft: "26px"}}
                                    disabled={!state.shouldAlwaysShowSoma}
                                    label="Display full tracing in addition to soma"
-                                   onChange={(evt: any) => onSetAlwaysShowFullTracing(evt.target.checked)}/>
+                                   onChange={(_, props) => onSetAlwaysShowFullTracing(props.checked)}/>
+                    <Form.Checkbox width={16} checked={state.useNeuroglancer}
+                                   label="Use Neuroglancer as viewer (browser refresh recommended)"
+                                   onChange={(_, props) => onUseNeuroglancer(props.checked)}/>
 
                     <div style={{display: "flex", flexDirection: "row", alignItems: "center", marginTop: "20px"}}>
                         <div style={styles.swatch} onClick={() => handleClick()}>

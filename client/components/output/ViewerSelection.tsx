@@ -466,7 +466,8 @@ export class ViewerSelection extends React.Component<IViewerSelectionProps, IVie
                 left: this.state.left + "px",
                 width: "auto",
                 opacity: 0.9,
-                border: "1px solid"
+                border: "1px solid",
+                zIndex: 1000
             }} onMouseDown={(e) => this.onMouseDown(e)} onMouseUp={() => this.onMouseUp()}
                  onMouseMove={(evt) => this.onMouseMove(evt)}>
                 {content1}

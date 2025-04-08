@@ -83,7 +83,6 @@ export class QueryHeader extends React.Component<IQueryHeaderBaseProps, {}> {
                 let matched = `Matched ${this.props.neuronMatchCount} of ${this.props.neuronSystemCount} reconstructions`;
 
                 matched += ` in ${duration.toFixed(3)} ${duration === 1 ? "second" : "seconds"}`;
-                console.log(matched)
                 return (<span>{matched}</span>);
             } else {
                 return null;

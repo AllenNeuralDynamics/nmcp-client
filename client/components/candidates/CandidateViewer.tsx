@@ -47,9 +47,9 @@ export const CandidatesViewer = (props: ITracingsTableProps) => {
         }
     }, [props.neurons, props.selectedId]);
 
-    const selectNeuron = (obj: any) => {
-        if (obj != props.selectedId) {
-            props.onViewerSelected(obj);
+    const selectNeuron = (id: string) => {
+        if (id != props.selectedId) {
+            props.onViewerSelected(id);
         }
     }
 

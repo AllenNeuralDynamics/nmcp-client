@@ -5,13 +5,24 @@ import {disableWheel} from "neuroglancer/unstable/ui/disable_default_actions.js"
 import {registerEventListener} from "neuroglancer/unstable/util/disposable.js";
 import {NdbConstants} from "../models/constants";
 import {UserPreferences} from "./userPreferences";
+import {NeuronViewModel} from "../viewmodel/neuronViewModel";
+
+export type SearchSelectionDelegate = {
+    (neuron: NeuronViewModel, position: number[]): void;
+}
+
+export type CandidateSelectionDelegate = {
+    (annotationId: string): void;
+}
 
 export class NeuroglancerProxy {
     private _viewer: any = null;
     private _changeHandler: any = null;
     private _defaultState: any = null;
 
-    public static configureCandidateNeuroglancer(id: string, state: any, annotations: any, selectionDelegate: any): NeuroglancerProxy {
+    private _modelMap = new Map<number, NeuronViewModel>();
+
+    public static configureCandidateNeuroglancer(id: string, state: any, annotations: any, selectionDelegate: CandidateSelectionDelegate): NeuroglancerProxy {
         const [proxy, target] = NeuroglancerProxy.createCommon(id);
 
         registerEventListener(target, "click", (e: Event) => {
@@ -59,15 +70,21 @@ export class NeuroglancerProxy {
         return proxy;
     }
 
-    public static configureSearchNeuroglancer(id: string, state: any, selectionDelegate: any): NeuroglancerProxy {
+    public static configureSearchNeuroglancer(id: string, state: any, selectionDelegate: SearchSelectionDelegate): NeuroglancerProxy {
         const [proxy, target] = NeuroglancerProxy.createCommon(id);
 
         if (selectionDelegate) {
             registerEventListener(target, "click", (e: Event) => {
                 if (proxy._viewer) {
                     const selected = proxy._viewer.layerSelectedValues.toJSON();
+
                     if (selected && selected["Reconstructions"] && selected["Reconstructions"]["value"] && selected["Reconstructions"]["value"]["key"]) {
-                        selectionDelegate(selected["Reconstructions"]["value"]["key"]);
+                        try {
+                            const id = parseInt(selected["Reconstructions"]["value"]["key"]);
+                            state = proxy._viewer.mouseState;
+                            selectionDelegate(proxy._modelMap.get(id), state.position);
+                        } catch {
+                        }
                     }
                 }
             });
@@ -86,13 +103,29 @@ export class NeuroglancerProxy {
 
         const s = state || defaultSearchState;
 
+        let reset = false;
+
+        if (s.layers?.length > 0) {
+            s.layers[0].segments = [997];
+            reset = true;
+        }
+
+
         if (s.layers?.length > 1) {
             s.layers[1].segments = [];
-            proxy._viewer.state.reset();
-            proxy._viewer.state.restoreState(s);
-        } else {
-            proxy._viewer.state.restoreState(s);
+            reset = true;
         }
+
+        if (s.layers?.length > 2) {
+            s.layers[2].annotations = [];
+            reset = true;
+        }
+
+        if (reset) {
+            proxy._viewer.state.reset();
+        }
+
+        proxy._viewer.state.restoreState(s);
 
         const throttledSetUrlHash = debounce(
             () => UserPreferences.Instance.searchViewerState = proxy._viewer.state.toJSON(),
@@ -147,13 +180,21 @@ export class NeuroglancerProxy {
         }
     }
 
-    public updateSearchReconstructions(selectedSkeletonSegmentIds: number[] = []) {
+    public updateSearchReconstructions(somas: any[], neurons: NeuronViewModel[] = []) {
         const state = this._viewer.state.toJSON();
 
         let stateChanged = false;
 
+        this._modelMap.clear();
+
         if (state.layers?.length > 1) {
-            state.layers[1].segments = selectedSkeletonSegmentIds;
+            neurons.forEach(n => this._modelMap.set(n.SkeletonSegmentId, n));
+            state.layers[1].segments = neurons.map(n => n.SkeletonSegmentId);
+            stateChanged = true;
+        }
+
+        if (state.layers?.length > 2) {
+            state.layers[2].annotations = somas;
             stateChanged = true;
         }
 
@@ -335,15 +376,18 @@ export const defaultSearchState = {
             0.001,
             "s"
         ]
-    },
-    "position": [
-        727.4166259765625,
-        401.1028137207031,
-        569.8789672851562,
-        0
+    },  "position": [
+        554.5824584960938,
+        512.8468627929688,
+        514.7276000976562
     ],
-    "projectionOrientation": [],
     "crossSectionScale": 2.7182818284590446,
+    "projectionOrientation": [
+        0.2751387655735016,
+        -0.45192277431488037,
+        -0.23387466371059418,
+        -0.815700352191925
+    ],
     "projectionScale": 2048,
     "layers": [
         {
@@ -369,6 +413,45 @@ export const defaultSearchState = {
             "tab": "segments",
             "segments": [],
             "name": "Reconstructions"
+        }, {
+            "type": "annotation",
+            "source": {
+                "url": "local://annotations",
+                "transform": {
+                    "outputDimensions": {
+                        "x": [
+                            0.00001,
+                            "m"
+                        ],
+                        "y": [
+                            0.00001,
+                            "m"
+                        ],
+                        "z": [
+                            0.00001,
+                            "m"
+                        ]
+                    }
+                }
+            },
+            "tool": "annotatePoint",
+            "tab": "annotations",
+            "annotationColor": "#2184d0",
+            "annotations": [],
+            "annotationProperties": [
+                {
+                    "id": "color",
+                    "type": "rgba",
+                    "default": "#ff0000ff"
+                },
+                {
+                    "id": "size",
+                    "type": "float32",
+                    "default": 10
+                }
+            ],
+            "shader": "\nvoid main() {\n  setColor(prop_color());\n  setPointMarkerSize(prop_size());\n}\n",
+            "name": "Somas"
         }
     ],
     "selectedLayer": {

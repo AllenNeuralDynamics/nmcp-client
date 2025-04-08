@@ -40,7 +40,7 @@ export interface ITracingViewerBaseProps {
     constants: NdbConstants;
     compartments: BrainCompartmentViewModel[];
     tracings: TracingViewModel[];
-    skeletonSegmentIds: number[];
+    neuronViewModels: NeuronViewModel[];
     isLoading: boolean;
     isRendering: boolean;
     fixedAspectRatio?: number;
@@ -80,6 +80,8 @@ interface ITracingViewerState {
 
     selectedTracing?: TracingViewModel;
     selectedNode?: ITracingNode;
+
+    triggerRender: boolean;
 }
 
 @observer
@@ -111,7 +113,8 @@ export class TracingViewer extends React.Component<ITracingViewerProps, ITracing
             renderWidth: 0,
             renderHeight: 0,
             selectedTracing: null,
-            selectedNode: null
+            selectedNode: null,
+            triggerRender: false
         }
     }
 
@@ -255,6 +258,8 @@ export class TracingViewer extends React.Component<ITracingViewerProps, ITracing
             if (this._viewer) {
                 this._viewer.setBackground(parseInt(UserPreferences.Instance.ViewerBackgroundColor.slice(1), 16));
             }
+        } else if (name == "viewerStyle") {
+            this.setState({triggerRender: !this.state.triggerRender});
         }
     }
 
@@ -296,7 +301,7 @@ export class TracingViewer extends React.Component<ITracingViewerProps, ITracing
             s.metadata = false;
             s.WIDTH = width;
             s.HEIGHT = height;
-            s.on_select_node = (tracingId: string, sampleNumber: number, event) => this.onSelectNode(tracingId, sampleNumber, event);
+            s.on_select_node = (tracingId: string, sampleNumber: number, event) => this.onSelectNodeFromTracing(tracingId, sampleNumber, event);
             s.on_toggle_node = (tracingId: string) => this.props.onToggleTracing(tracingId);
 
             s.init();
@@ -589,7 +594,26 @@ export class TracingViewer extends React.Component<ITracingViewerProps, ITracing
         this.props.onHighlightTracing(neuron, false);
     }
 
-    private onSelectNode(tracingId: string, sampleNumber: number, event) {
+    private onSelectNodeFromTracingNode(node: ITracingNode, tracing: TracingViewModel = null, isShiftKey: boolean = false, isCtrlKey: boolean = false, isAltKey: boolean = false) {
+        if (!isCtrlKey && !isAltKey) {
+            if (!isShiftKey) {
+                if (node) {
+                    this.setState({selectedTracing: tracing, selectedNode: node});
+
+                    if (this.props.onSelectNode) {
+                        this.props.onSelectNode(tracing, node);
+                    }
+                } else {
+                }
+            } else {
+                if (tracing) {
+                    this.props.onHighlightTracing(tracing.neuron);
+                }
+            }
+        }
+    }
+
+    private onSelectNodeFromTracing(tracingId: string, sampleNumber: number, event: any) {
         if (!this.props.tracings) {
             return;
         }
@@ -608,19 +632,7 @@ export class TracingViewer extends React.Component<ITracingViewerProps, ITracing
                 node = tracing.soma;
             }
 
-            if (!event.ctrlKey && !event.altKey) {
-                if (!event.shiftKey) {
-                    if (node) {
-                        this.setState({selectedTracing: tracing, selectedNode: node});
-
-                        if (this.props.onSelectNode) {
-                            this.props.onSelectNode(tracing, node);
-                        }
-                    }
-                } else {
-                    this.props.onHighlightTracing(tracing.neuron);
-                }
-            }
+            this.onSelectNodeFromTracingNode(node, tracing, event.shiftKey, event.ctrlKey, event.altKey);
         }
     }
 
@@ -636,7 +648,9 @@ export class TracingViewer extends React.Component<ITracingViewerProps, ITracing
         let viewerContainer = null;
 
         if (UserPreferences.Instance.ViewerStyle == ViewerStyle.Neuroglancer) {
-            viewerContainer = <NeuroglancerContainer elementName="neuroglancer-viewer-container" height={this.state.renderHeight} width={this.state.renderWidth} skeletonSegmentIds={this.props.skeletonSegmentIds} compartments={this.props.compartments}/>
+            viewerContainer = <NeuroglancerContainer elementName="neuroglancer-viewer-container" height={this.state.renderHeight} width={this.state.renderWidth}
+                                                     neuronViewModels={this.props.neuronViewModels} compartments={this.props.compartments}
+                                                     onSelectNode={(n, t, a, b, c) => this.onSelectNodeFromTracingNode(n, t, a, b, c)}/>
         } else {
             viewerContainer = <div id="viewer-container" style={{height: this.state.renderHeight, width: this.state.renderWidth}}/>
         }
