@@ -1,6 +1,6 @@
 import * as THREEM from "three";
 import {ICameraObserver} from "./shark_viewer";
-import {CompartmentMeshSet} from "../models/compartmentMeshSet";
+import {CompartmentMeshSet} from "../../models/compartmentMeshSet";
 
 const THREE = require("three");
 const fontJson = require("three/examples/fonts/helvetiker_regular.typeface.json");

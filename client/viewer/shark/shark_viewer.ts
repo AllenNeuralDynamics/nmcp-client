@@ -1,10 +1,10 @@
-import {NODE_PARTICLE_IMAGE} from "./util";
+import {NODE_PARTICLE_IMAGE} from "../util";
 
 import * as THREEM from "three";
 import {SystemShader} from "./shaders/shaders";
 import {StandardShader} from "./shaders/standardShader";
-import {CompartmentMeshSet} from "../models/compartmentMeshSet";
-import {UserPreferences} from "../util/userPreferences";
+import {CompartmentMeshSet} from "../../models/compartmentMeshSet";
+import {UserPreferences} from "../../util/userPreferences";
 import {debounce} from "lodash-es";
 
 const THREE = require("three");

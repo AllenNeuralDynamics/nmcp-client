@@ -1,4 +1,4 @@
-import {UserPreferences} from "../util/userPreferences";
+import {UserPreferences} from "../../util/userPreferences";
 
 const MOUSE_MOVE_THRESHOLD = 1;
 

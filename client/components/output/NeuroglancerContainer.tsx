@@ -1,7 +1,7 @@
 import * as React from "react";
 import {useEffect, useState} from "react";
 
-import {NeuroglancerProxy} from "../../util/neuroglancer";
+import {NeuroglancerProxy} from "../../viewer/neuroglancer/neuroglancer";
 import {UserPreferences} from "../../util/userPreferences";
 import {NeuronViewModel} from "../../viewmodel/neuronViewModel";
 import {NEURON_VIEW_MODE_SOMA, NeuronViewMode} from "../../viewmodel/neuronViewMode";
@@ -12,6 +12,7 @@ import {NEAREST_NODE_QUERY, NearestNodeQueryResponse, NearestNodeQueryVariables}
 
 export type NeuroglancerContainerProps = {
     neuronViewModels: NeuronViewModel[]
+    nonce: any;
     compartments: any[];
     elementName: string
     width: number;
@@ -37,15 +38,12 @@ export const NeuroglancerContainer = (props: NeuroglancerContainerProps) => {
 
     useEffect(() => {
         if (ngProxy) {
-            const s = props.neuronViewModels.filter(n => n.CurrentViewMode == NEURON_VIEW_MODE_SOMA)
-                .map(n => n.somaOnlyTracing.soma)
+            const somas = props.neuronViewModels.filter(n => n.CurrentViewMode == NEURON_VIEW_MODE_SOMA)
+                .map(n => n.somaOnlyTracing.soma).filter(s => s);
 
-            const a = props.neuronViewModels.filter(n => n.CurrentViewMode != NEURON_VIEW_MODE_SOMA)
-                .filter(n =>  n.SkeletonSegmentId != null)
-            const x = nodesAsAnnotation(s);
-            ngProxy.updateSearchReconstructions(x, a);
+            ngProxy.updateSearchReconstructions(nodesAsAnnotation(somas), props.neuronViewModels);
         }
-    }, [props.neuronViewModels]);
+    }, [props.neuronViewModels, props.nonce]);
 
 
     useEffect(() => {

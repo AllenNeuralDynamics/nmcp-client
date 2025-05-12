@@ -8,7 +8,7 @@ import "../../util/override.css";
 import {INeuron} from "../../models/neuron";
 import {TracingViewModel} from "../../viewmodel/tracingViewModel";
 import {NeuronViewModel} from "../../viewmodel/neuronViewModel";
-import {jet} from "../../util/colors";
+import {getNeuronColorTable, jet} from "../../util/colors";
 import {NEURON_VIEW_MODE_SOMA, NeuronViewMode} from "../../viewmodel/neuronViewMode";
 import {TracingStructure, TracingStructures} from "../../models/tracingStructure";
 import {BrainCompartmentViewModel} from "../../viewmodel/brainCompartmentViewModel";
@@ -108,6 +108,8 @@ export class MainView extends React.Component<IOutputContainerProps, IOutputCont
 
     private _viewerContainer = null;
     private _expectingFetch = false;
+
+    private _colormap = jet;
 
     public constructor(props: IOutputContainerProps) {
         super(props);
@@ -468,7 +470,11 @@ export class MainView extends React.Component<IOutputContainerProps, IOutputCont
             let viewModel = neuronViewModelMap.get(neuron.id);
 
             if (!viewModel) {
-                const color = jet[this._colorIndex++ % jet.length];
+                if (this._colormap == jet) {
+                    // this._colormap = getNeuronColorTable()
+                }
+
+                const color = this._colormap[this._colorIndex++ % this._colormap.length];
 
                 viewModel = new NeuronViewModel(neuron, color);
 
@@ -655,7 +661,7 @@ export class MainView extends React.Component<IOutputContainerProps, IOutputCont
 
                 let tracingsToDisplay = this.state.tracingsToDisplay;
 
-                tracings.forEach((t: ITracing) => {
+                tracings.filter(t => t).forEach((t: ITracing) => {
                     const model = tracingViewModelMap2.get(t.id);
                     model.tracing = t;
                     tracingsToDisplay.push(model);

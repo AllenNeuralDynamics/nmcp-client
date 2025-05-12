@@ -1,11 +1,15 @@
 import {debounce} from "lodash-es";
-import {makeMinimalViewer} from "neuroglancer/unstable/ui/minimal_viewer.js";
-import {setDefaultInputEventBindings} from "neuroglancer/unstable/ui/default_input_event_bindings.js";
-import {disableWheel} from "neuroglancer/unstable/ui/disable_default_actions.js";
-import {registerEventListener} from "neuroglancer/unstable/util/disposable.js";
-import {NdbConstants} from "../models/constants";
-import {UserPreferences} from "./userPreferences";
-import {NeuronViewModel} from "../viewmodel/neuronViewModel";
+import {makeMinimalViewer} from "../../../../nmcp-neuroglancer/dist/package/lib/ui/minimal_viewer.js";
+import {setDefaultInputEventBindings} from "../../../../nmcp-neuroglancer/dist/package/lib/ui/default_input_event_bindings.js";
+import {disableWheel} from "../../../../nmcp-neuroglancer/dist/package/lib/ui/disable_default_actions.js";
+import {registerEventListener} from "../../../../nmcp-neuroglancer/dist/package/lib/util/disposable.js";
+import {UserPreferences} from "../../util/userPreferences";
+import {NeuronViewModel} from "../../viewmodel/neuronViewModel";
+import {getSegmentColorMap} from "../../util/colors";
+import {NEURON_VIEW_MODE_ALL, NEURON_VIEW_MODE_AXON, NEURON_VIEW_MODE_DENDRITE, NEURON_VIEW_MODE_SOMA} from "../../viewmodel/neuronViewMode";
+
+// TODO: env var
+const PRECOMPUTED_URL = "precomputed://s3://aind-neuron-morphology-community-portal-dev-u5u0i5";
 
 export type SearchSelectionDelegate = {
     (neuron: NeuronViewModel, position: number[]): void;
@@ -14,6 +18,25 @@ export type SearchSelectionDelegate = {
 export type CandidateSelectionDelegate = {
     (annotationId: string): void;
 }
+
+type SearchLayer = {
+    name: string;
+    index: number;
+    source: string;
+    isMirror: boolean;
+}
+
+const CandidateReconstructionLayer: SearchLayer = {name: "Pending Reconstructions", index: 2, isMirror: false, source: PRECOMPUTED_URL};
+
+const SearchCcfLayer: SearchLayer = {name: "CCF", index: 0, isMirror: false, source: PRECOMPUTED_URL};
+const SearchSomaAnnotationLayer: SearchLayer = {name: "Soma", index: 1, isMirror: false, source: PRECOMPUTED_URL};
+const SearchReconstructionLayer: SearchLayer = {name: "Reconstruction", index: 2, isMirror: false, source: PRECOMPUTED_URL};
+const SearchReconstructionMirrorLayer: SearchLayer = {name: "Reconstruction Mirror", index: 3, isMirror: true, source: PRECOMPUTED_URL};
+const SearchAxonLayer: SearchLayer = {name: "Axon", index: 4, isMirror: false, source: PRECOMPUTED_URL};
+const SearchAxonMirrorLayer: SearchLayer = {name: "Axon Mirror", index: 5, isMirror: true, source: PRECOMPUTED_URL};
+const SearchDendritesLayer: SearchLayer = {name: "Dendrite", index: 6, isMirror: false, source: PRECOMPUTED_URL};
+const SearchDendritesMirrorLayer: SearchLayer = {name: "Dendrite Mirror", index: 7, isMirror: true, source: PRECOMPUTED_URL};
+
 
 export class NeuroglancerProxy {
     private _viewer: any = null;
@@ -78,9 +101,9 @@ export class NeuroglancerProxy {
                 if (proxy._viewer) {
                     const selected = proxy._viewer.layerSelectedValues.toJSON();
 
-                    if (selected && selected["Reconstructions"] && selected["Reconstructions"]["value"] && selected["Reconstructions"]["value"]["key"]) {
+                    if (selected && selected["Reconstruction"] && selected["Reconstruction"]["value"] && selected["Reconstruction"]["value"]["key"]) {
                         try {
-                            const id = parseInt(selected["Reconstructions"]["value"]["key"]);
+                            const id = parseInt(selected["Reconstruction"]["value"]["key"]);
                             state = proxy._viewer.mouseState;
                             selectionDelegate(proxy._modelMap.get(id), state.position);
                         } catch {
@@ -105,20 +128,24 @@ export class NeuroglancerProxy {
 
         let reset = false;
 
-        if (s.layers?.length > 0) {
-            s.layers[0].segments = [997];
+        if (s.layers?.length >= SearchCcfLayer.index) {
+            s.layers[SearchCcfLayer.index].segments = [997];
             reset = true;
         }
 
-
-        if (s.layers?.length > 1) {
-            s.layers[1].segments = [];
+        if (s.layers?.length >= SearchSomaAnnotationLayer.index) {
+            s.layers[SearchSomaAnnotationLayer.index].annotations = [];
             reset = true;
         }
 
-        if (s.layers?.length > 2) {
-            s.layers[2].annotations = [];
-            reset = true;
+        for (let idx = SearchReconstructionLayer.index; idx < SearchDendritesMirrorLayer.index; idx++) {
+            if (s.layers?.length >= idx) {
+                s.layers[idx].segments = [];
+                s.layers[idx].segmentColors = {};
+                reset = true;
+            } else {
+                break;
+            }
         }
 
         if (reset) {
@@ -183,25 +210,37 @@ export class NeuroglancerProxy {
     public updateSearchReconstructions(somas: any[], neurons: NeuronViewModel[] = []) {
         const state = this._viewer.state.toJSON();
 
-        let stateChanged = false;
-
         this._modelMap.clear();
+        neurons.forEach(n => this._modelMap.set(n.SkeletonSegmentId, n));
 
-        if (state.layers?.length > 1) {
-            neurons.forEach(n => this._modelMap.set(n.SkeletonSegmentId, n));
-            state.layers[1].segments = neurons.map(n => n.SkeletonSegmentId);
-            stateChanged = true;
+        if (state.layers?.length >= SearchSomaAnnotationLayer.index) {
+            state.layers[SearchSomaAnnotationLayer.index].annotations = somas;
         }
 
-        if (state.layers?.length > 2) {
-            state.layers[2].annotations = somas;
-            stateChanged = true;
-        }
+        this.updateSearchReconstructionLayers(state, neurons.filter(n => n.CurrentViewMode == NEURON_VIEW_MODE_ALL), SearchReconstructionLayer, SearchReconstructionMirrorLayer);
+        this.updateSearchReconstructionLayers(state, neurons.filter(n => n.CurrentViewMode == NEURON_VIEW_MODE_AXON), SearchAxonLayer, SearchAxonMirrorLayer);
+        this.updateSearchReconstructionLayers(state, neurons.filter(n => n.CurrentViewMode == NEURON_VIEW_MODE_DENDRITE), SearchDendritesLayer, SearchDendritesMirrorLayer);
 
-        if (stateChanged) {
-            this._viewer.state.reset();
-            this._viewer.state.restoreState(state);
+        this._viewer.state.reset();
+        this._viewer.state.restoreState(state);
+    }
+
+    private updateSearchReconstructionLayers(state: any, neurons: NeuronViewModel[], layer: SearchLayer, mirrorLayer: SearchLayer) {
+        if (state.layers?.length >= layer.index) {
+            this.updateSearchReconstructionLayerContents(state.layers[layer.index], neurons, false)
         }
+        if (state.layers?.length >= mirrorLayer.index) {
+            this.updateSearchReconstructionLayerContents(state.layers[mirrorLayer.index], neurons, true)
+        }
+    }
+
+    private updateSearchReconstructionLayerContents(layer: any, neurons: NeuronViewModel[], selectMirror: boolean) {
+        const display = neurons.filter(n => n.mirror == selectMirror);
+        layer.segments = display.map(n => n.SkeletonSegmentId);
+        layer.segmentColors = display.reduce((obj, n) => {
+            obj[n.SkeletonSegmentId.toString()] = n.baseColor;
+            return obj;
+        }, {});
     }
 
     public updateSearchCompartments(compartmentIds: number[] = []) {
@@ -210,7 +249,7 @@ export class NeuroglancerProxy {
         let stateChanged = false;
 
         if (state.layers?.length > 0) {
-            state.layers[0].segments = compartmentIds;
+            state.layers[SearchCcfLayer.index].segments = compartmentIds;
             stateChanged = true;
         }
 
@@ -233,23 +272,60 @@ export class NeuroglancerProxy {
     }
 }
 
-let colorMap = null;
+function reconstructionLayer(layerDefinition: SearchLayer) {
+    const layer = {
+        "type": "segmentation",
+        "source": {
+            "url": layerDefinition.source
+        },
+        "tab": "segments",
+        "segments": [],
+        "name": layerDefinition.name
+    };
 
-function getSegmentColorMap() {
-    if (colorMap == null) {
-        colorMap = {};
-
-        NdbConstants.DefaultConstants.BrainAreas.map(b => {
-            if (b.geometryEnable) {
-                colorMap[b.structureId.toString()] = "#" + b.geometryColor;
+    if (layerDefinition.isMirror) {
+        layer.source["transform"] = {
+            "matrix": [
+                [
+                    1,
+                    0,
+                    0,
+                    0
+                ],
+                [
+                    0,
+                    1,
+                    0,
+                    0
+                ],
+                [
+                    0,
+                    0,
+                    -1,
+                    1140
+                ]
+            ],
+            "outputDimensions": {
+                "x": [
+                    0.00001,
+                    "m"
+                ],
+                "y": [
+                    0.00001,
+                    "m"
+                ],
+                "z": [
+                    0.00001,
+                    "m"
+                ]
             }
-        });
+        }
     }
 
-    return colorMap;
+    return layer;
 }
 
-export const defaultCandidateState = {
+const defaultCandidateState = {
     dimensions: {
         "x": [
             0.00001,
@@ -335,13 +411,7 @@ export const defaultCandidateState = {
             "name": "CCF",
             "visible": true
         },
-        {
-            "type": "segmentation",
-            "source": "precomputed://s3://aind-neuron-morphology-community-portal-dev-u5u0i5",
-            "tab": "segments",
-            "segments": [],
-            "name": "Pending Reconstructions"
-        }
+        reconstructionLayer(CandidateReconstructionLayer),
     ],
     "selectedLayer": {
         "layer": "CCF"
@@ -358,7 +428,7 @@ export const defaultCandidateState = {
     "projectionBackgroundColor": "#ffffff"
 };
 
-export const defaultSearchState = {
+const defaultSearchState = {
     dimensions: {
         "x": [
             0.00001,
@@ -376,7 +446,7 @@ export const defaultSearchState = {
             0.001,
             "s"
         ]
-    },  "position": [
+    }, "position": [
         554.5824584960938,
         512.8468627929688,
         514.7276000976562
@@ -406,13 +476,6 @@ export const defaultSearchState = {
             "objectAlpha": 0.20,
             "name": "CCF",
             "visible": true
-        },
-        {
-            "type": "segmentation",
-            "source": "precomputed://s3://aind-neuron-morphology-community-portal-dev-u5u0i5",
-            "tab": "segments",
-            "segments": [],
-            "name": "Reconstructions"
         }, {
             "type": "annotation",
             "source": {
@@ -451,8 +514,14 @@ export const defaultSearchState = {
                 }
             ],
             "shader": "\nvoid main() {\n  setColor(prop_color());\n  setPointMarkerSize(prop_size());\n}\n",
-            "name": "Somas"
-        }
+            "name": "Soma"
+        },
+        reconstructionLayer(SearchReconstructionLayer),
+        reconstructionLayer(SearchReconstructionMirrorLayer),
+        reconstructionLayer(SearchAxonLayer),
+        reconstructionLayer(SearchAxonMirrorLayer),
+        reconstructionLayer(SearchDendritesLayer),
+        reconstructionLayer(SearchDendritesMirrorLayer)
     ],
     "selectedLayer": {
         "layer": "CCF"

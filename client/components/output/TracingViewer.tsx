@@ -8,8 +8,8 @@ import {TracingViewModel} from "../../viewmodel/tracingViewModel";
 import {NdbConstants} from "../../models/constants";
 import {BrainCompartmentViewModel} from "../../viewmodel/brainCompartmentViewModel";
 import {IPositionInput} from "../../models/queryFilter";
-import {ViewerMouseHandler} from "../../viewer/viewMouseHandler";
-import {SharkViewer} from "../../viewer/shark_viewer";
+import {ViewerMouseHandler} from "../../viewer/shark/viewMouseHandler";
+import {SharkViewer} from "../../viewer/shark/shark_viewer";
 import {ViewerSelection} from "./ViewerSelection";
 import {INotificationListener} from "../../util/preferencesManager";
 import {NeuronViewModel} from "../../viewmodel/neuronViewModel";
@@ -20,12 +20,13 @@ import {rootViewModel} from "../../store/viewModel/systemViewModel";
 import {SliceManager} from "../../tomography/sliceManager";
 import {TomographyViewModel} from "../../store/viewModel/tomographyViewModel";
 import {TracingStructure} from "../../models/tracingStructure";
-import {AxisViewer} from "../../viewer/axisView";
+import {AxisViewer} from "../../viewer/shark/axisView";
 import * as Color from "color";
 import {CompartmentMeshSet, ViewerMeshVersion} from "../../models/compartmentMeshSet";
 import {ViewerStyle} from "../../viewer/viewerStyle";
 import {NeuroglancerContainer} from "./NeuroglancerContainer";
 import {UserPreferences} from "../../util/userPreferences";
+import cuid from "cuid";
 
 const ROOT_ID = 997;
 
@@ -649,7 +650,7 @@ export class TracingViewer extends React.Component<ITracingViewerProps, ITracing
 
         if (UserPreferences.Instance.ViewerStyle == ViewerStyle.Neuroglancer) {
             viewerContainer = <NeuroglancerContainer elementName="neuroglancer-viewer-container" height={this.state.renderHeight} width={this.state.renderWidth}
-                                                     neuronViewModels={this.props.neuronViewModels} compartments={this.props.compartments}
+                                                     neuronViewModels={this.props.neuronViewModels} compartments={this.props.compartments} nonce={cuid()}
                                                      onSelectNode={(n, t, a, b, c) => this.onSelectNodeFromTracingNode(n, t, a, b, c)}/>
         } else {
             viewerContainer = <div id="viewer-container" style={{height: this.state.renderHeight, width: this.state.renderWidth}}/>
