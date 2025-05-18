@@ -1,6 +1,6 @@
 import {NdbConstants} from "../models/constants";
-import {SegmentColorHash} from "../../../nmcp-neuroglancer/dist/package/lib/segment_color";
-import {Uint64} from "../../../nmcp-neuroglancer/dist/package/lib/util/uint64";
+import {SegmentColorHash} from "neuroglancer/unstable/segment_color.js";
+import {Uint64} from "neuroglancer/unstable/util/uint64.js";
 
 let colorMap = null;
 
