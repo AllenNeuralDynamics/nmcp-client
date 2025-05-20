@@ -481,6 +481,9 @@ export class MainView extends React.Component<IOutputContainerProps, IOutputCont
                 neuronViewModelMap.set(neuron.id, viewModel);
 
                 neuron.tracings.map(t => {
+                    if (!t) {
+                        return;
+                    }
                     tracingNeuronMap.set(t.id, neuron.id);
 
                     const model = new TracingViewModel(t.id, viewModel);
@@ -502,17 +505,19 @@ export class MainView extends React.Component<IOutputContainerProps, IOutputCont
                 });
 
                 if (neuron.tracings.length > 0) {
-                    const somaTracingModel = new TracingViewModel(neuron.id, viewModel);
+                    if (viewModel.neuron.tracings[0]) {
+                        const somaTracingModel = new TracingViewModel(neuron.id, viewModel);
 
-                    // Borrow soma data from one of the tracings.
-                    somaTracingModel.soma = viewModel.neuron.tracings[0].soma;
+                        // Borrow soma data from one of the tracings.
+                        somaTracingModel.soma = viewModel.neuron.tracings[0].soma;
 
-                    somaTracingModel.structure = TracingStructures.Soma;
+                        somaTracingModel.structure = TracingStructures.Soma;
 
-                    viewModel.somaOnlyTracing = somaTracingModel;
+                        viewModel.somaOnlyTracing = somaTracingModel;
 
-                    // Store under the neuron id.
-                    tracingViewModelMap2.set(neuron.id, somaTracingModel);
+                        // Store under the neuron id.
+                        tracingViewModelMap2.set(neuron.id, somaTracingModel);
+                    }
                 }
 
                 if (this.props.shouldAlwaysShowFullTracing) {
