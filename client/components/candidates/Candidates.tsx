@@ -112,11 +112,11 @@ export const Candidates = () => {
     };
 
     const onSampleFilterChange = (data: any) => {
-        setState({...state, sampleFilter: data});
+        setState({...state, sampleFilter: data, offset: 0});
     }
 
     const onBrainAreaFilterChange = (data: IBrainArea[]) => {
-        setState({...state, brainAreaFilter: data});
+        setState({...state, brainAreaFilter: data, offset: 0});
     }
 
     const onNeuronSelectedFromViewer = (id: string) => {
@@ -149,12 +149,12 @@ export const Candidates = () => {
                         <List.Item>
                             <Checkbox style={{verticalAlign: "middle"}} toggle label="Include in progress"
                                       checked={state.includeInProgress}
-                                      onChange={(_, data) => setState({...state, includeInProgress: data.checked})}/>
+                                      onChange={(_, data) => setState({...state, includeInProgress: data.checked, offset: 0})}/>
                         </List.Item>
                         <List.Item>
                             <Checkbox style={{verticalAlign: "middle"}} toggle label="Limit samples "
                                       checked={state.limitSamples}
-                                      onChange={(_, data) => setState({...state, limitSamples: data.checked})}/>
+                                      onChange={(_, data) => setState({...state, limitSamples: data.checked, offset: 0})}/>
 
                             <Dropdown placeholder="Select..." style={{marginLeft: "8px"}} multiple selection
                                       options={sampleFilterOptions}
@@ -165,7 +165,7 @@ export const Candidates = () => {
                         <List.Item>
                             <div style={{display: "flex", alignItems: "center"}}>
                                 <Checkbox toggle label="Limit structures " checked={state.limitBrainAreas}
-                                          onChange={(_, data) => setState({...state, limitBrainAreas: data.checked})}/>
+                                          onChange={(_, data) => setState({...state, limitBrainAreas: data.checked, offset: 0})}/>
 
                                 <div style={{marginLeft: "8px", minWidth: "200px"}}>
                                     <BrainAreaMultiSelect compartments={constants.BrainAreasWithGeometry}
@@ -178,7 +178,7 @@ export const Candidates = () => {
                         <List.Item>
                             <div style={{display: "flex", alignItems: "center"}}>
                                 <Checkbox toggle label="Limit Tag " checked={state.limitTags}
-                                          onChange={(_, data) => setState({...state, limitTags: data.checked})}/>
+                                          onChange={(_, data) => setState({...state, limitTags: data.checked, offset: 0})}/>
 
                                 <div style={{marginLeft: "8px", minWidth: "200px"}}>
                                     <Input size="mini" type="text" placehoder="..." value={state.tempTagFilter}
@@ -188,7 +188,7 @@ export const Candidates = () => {
                                                }
                                            }}
                                            onBlur={() => setState({...state, tagFilter: state.tempTagFilter})}
-                                           onChange={(e, {value}) => setState({...state, tempTagFilter: value})}/>
+                                           onChange={(e, {value}) => setState({...state, tempTagFilter: value, offset: 0})}/>
                                 </div>
                             </div>
                         </List.Item>

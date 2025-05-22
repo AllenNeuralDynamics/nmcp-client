@@ -35,7 +35,7 @@ export const SampleRow = (props: SampleRowProps) => {
 
     const onSampleDateEdit = async (sample: ISample, value: Date, updateFn: any) => {
         if (value !== sample.sampleDate) {
-            await updateFn({id: sample.id, sampleDate: value.valueOf()});
+            await updateFn({id: sample.id, sampleDate: value ? value.valueOf() : null});
         }
     }
 
@@ -83,8 +83,8 @@ export const SampleRow = (props: SampleRowProps) => {
                 <ReactDatePicker
                     className="date-picker-input"
                     dateFormat="YYYY-MM-DD"
-                    selected={moment(new Date(sample.sampleDate))}
-                    onChange={(d) => onSampleDateEdit(sample, d.toDate(), props.updateFcn)}/>
+                    selected={sample.sampleDate ? moment(new Date(sample.sampleDate)) : null}
+                    onChange={(d) => onSampleDateEdit(sample, d?.toDate(), props.updateFcn)}/>
             </Table.Cell>
             <Table.Cell>
                 <InputPopup value={sample.tag} placeholder="Enter new tag..."

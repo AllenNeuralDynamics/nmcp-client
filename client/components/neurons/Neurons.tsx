@@ -1,6 +1,6 @@
 import * as React from "react";
 import {useEffect, useState} from "react";
-import {Button, Dropdown, Segment, Confirm, Table, Header} from "semantic-ui-react";
+import {Button, Dropdown, Segment, Confirm, Table, Header, List, Checkbox} from "semantic-ui-react";
 import {toast} from "react-toastify";
 
 import {toastCreateError, toastDeleteError} from "../editors/Toasts";
@@ -22,10 +22,12 @@ interface INeuronsProps {
 }
 
 interface INeuronsState {
-    offset?: number;
-    limit?: number;
-    sample?: ISample;
-    isSampleLocked?: boolean;
+    offset: number;
+    limit: number;
+    sample: ISample;
+    isSampleLocked: boolean;
+    limitSamples: boolean;
+    sampleIds: string[];
     requestedNeuronForDelete?: INeuron;
     requestedNeuronForAnnotations?: INeuron;
 }
@@ -44,6 +46,8 @@ export const Neurons = (props: INeuronsProps) => {
         limit: UserPreferences.Instance.neuronPageLimit,
         sample,
         isSampleLocked,
+        limitSamples: false,
+        sampleIds: [],
         requestedNeuronForDelete: null,
         requestedNeuronForAnnotations: null
     });
@@ -79,10 +83,12 @@ export const Neurons = (props: INeuronsProps) => {
             onError: (error) => toast.error(toastCreateError(error), {autoClose: false})
         });
 
+    const sampleIds = state.limitSamples ? state.sampleIds : [];
+
     const {loading, error, data} = useQuery<NeuronsQueryResponse, NeuronsQueryVariables>(NEURONS_QUERY,
         {
             pollInterval: 10000,
-            variables: {input: {offset: state.offset, limit: state.limit, sortOrder: "DESC"}}
+            variables: {input: {offset: state.offset, limit: state.limit, sampleIds: sampleIds, sortOrder: "DESC"}}
         });
 
     const onUpdateOffsetForPage = (page: number) => {
@@ -123,6 +129,10 @@ export const Neurons = (props: INeuronsProps) => {
         setState({...state, isSampleLocked: !state.isSampleLocked});
     }
 
+    const onSampleFilterChange = (data: any) => {
+        setState({...state, sampleIds: data, offset: 0});
+    }
+
     const renderCreateNeuron = () => {
         const items = props.samples.map(s => {
             return {value: s.id, text: displaySample(s)}
@@ -142,7 +152,7 @@ export const Neurons = (props: INeuronsProps) => {
                             <Button as="div" fluid labelPosition="left">
                                 <Dropdown search fluid selection options={items}
                                           className="label"
-                                          placeholder="Select sample..."
+                                          placeholder="Select sample for new neuron..."
                                           disabled={state.isSampleLocked || props.samples.length === 0}
                                           value={state.sample ? state.sample.id : null}
                                           onChange={(_, {value}) => onSampleChange(value as string)}
@@ -184,6 +194,9 @@ export const Neurons = (props: INeuronsProps) => {
     if (error || loading) {
         return null
     }
+    const sampleFilterOptions = props.samples.slice().sort((s1, s2) => s1.animalId < s2.animalId ? -1 : 1).map(s => {
+        return {key: s.id, text: s.animalId, value: s.id}
+    });
 
     const totalCount = data.neurons ? data.neurons.totalCount : 0;
 
@@ -205,6 +218,21 @@ export const Neurons = (props: INeuronsProps) => {
                 }}>
                     <Header content="Neurons" style={{margin: "0"}}/>
                     {renderCreateNeuron()}
+                </Segment>
+                <Segment secondary>
+                    <List horizontal divided>
+                        <List.Item>
+                            <Checkbox style={{verticalAlign: "middle"}} toggle label="Limit list to samples "
+                                      checked={state.limitSamples}
+                                      onChange={(_, data) => setState({...state, limitSamples: data.checked})}/>
+
+                            <Dropdown placeholder="Select..." style={{marginLeft: "8px"}} multiple selection
+                                      options={sampleFilterOptions}
+                                      value={state.sampleIds}
+                                      disabled={!state.limitSamples}
+                                      onChange={(_, d) => onSampleFilterChange(d.value)}/>
+                        </List.Item>
+                    </List>
                 </Segment>
                 <Segment>
                     <PaginationHeader pageCount={pageCount} activePage={activePage}

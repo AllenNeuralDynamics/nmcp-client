@@ -14,6 +14,7 @@ import {UserContext} from "../app/UserApp";
 import {reconstructionStatusColor, reconstructionStatusString} from "../../models/reconstructionStatus";
 import {AnnotatorList} from "../annotator/AnnotatorList";
 import {ReconstructionActionPanel} from "./ReconstructionActionPanel";
+import {SAMPLES_QUERY, SamplesQueryResponse} from "../../graphql/sample";
 
 const statusFilterOptions = [
     {key: "complete", text: "Published", value: 8},
@@ -36,6 +37,8 @@ export const Reconstructions = () => {
         userOnly: false,
         limitStatus: false,
         statusFilter: [],
+        limitSamples: false,
+        sampleIds: [],
         selectedId: null
     });
 
@@ -47,20 +50,39 @@ export const Reconstructions = () => {
 
     const filters: number[] = state.limitStatus ? state.statusFilter : []
 
+    const sampleIds = state.limitSamples ? state.sampleIds : [];
+
     const {loading, error, data} = useQuery<ReconstructionsResponse, ReconstructionVariables>(RECONSTRUCTIONS_QUERY, {
-        variables: {pageInput: {offset: state.offset, limit: state.limit, userOnly: state.userOnly, filters: filters}}, pollInterval: 10000
+        variables: {pageInput: {offset: state.offset, limit: state.limit, userOnly: state.userOnly, filters: filters, sampleIds: sampleIds}},
+        pollInterval: 10000
     });
 
-    if (loading) {
+    const {
+        loading: sampleLoading,
+        error: sampleError,
+        data: sampleData
+    } = useQuery<SamplesQueryResponse>(SAMPLES_QUERY, {pollInterval: 5000});
+
+    if (loading || sampleLoading) {
         return (<div/>)
     }
 
-    if (error) {
+    if (error || sampleError) {
         return (<div>{error}</div>)
     }
 
     if (!data || !data.reconstructions) {
         return (<div>Data unavailable</div>)
+    }
+
+    let samples = sampleData.samples.items;
+
+    const sampleFilterOptions = samples.slice().sort((s1, s2) => s1.animalId < s2.animalId ? -1 : 1).map(s => {
+        return {key: s.id, text: s.animalId, value: s.id}
+    });
+
+    const onSampleFilterChange = (data: any) => {
+        setState({...state, sampleIds: data, offset: 0});
     }
 
     const onSelected = (reconstruction: IReconstruction) => {
@@ -88,7 +110,7 @@ export const Reconstructions = () => {
     };
 
     const onStatusFilterChange = (data: number[]) => {
-        setState({...state, statusFilter: data});
+        setState({...state, statusFilter: data, offset: 0});
     }
 
     const onUpdateLimit = (limit: number) => {
@@ -125,6 +147,17 @@ export const Reconstructions = () => {
                         <List.Item>
                             <Checkbox toggle label="My reconstructions only" checked={state.userOnly}
                                       onChange={(_, data) => setState({...state, userOnly: data.checked})}/>
+                        </List.Item>
+                        <List.Item>
+                            <Checkbox style={{verticalAlign: "middle"}} toggle label="Limit samples to "
+                                      checked={state.limitSamples}
+                                      onChange={(_, data) => setState({...state, limitSamples: data.checked})}/>
+
+                            <Dropdown placeholder="Select..." style={{marginLeft: "8px"}} multiple selection
+                                      options={sampleFilterOptions}
+                                      value={state.sampleIds}
+                                      disabled={!state.limitSamples}
+                                      onChange={(_, d) => onSampleFilterChange(d.value)}/>
                         </List.Item>
                         <List.Item>
                             <Checkbox toggle label="Limit status to " checked={state.limitStatus}
