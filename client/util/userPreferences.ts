@@ -26,6 +26,7 @@ const HideCursorInViewer = "viewer.hideCursorInViewer";
 const HideCursorOnPage = "viewer.hideCursorOnPage";
 const ViewerStylePreference = "viewer.viewerStyle";
 const AdminPageSelectedTab = "admin.selectedTab";
+const ShowReferenceIds = "selection.showReferenceIds";
 
 export class UserPreferences extends PreferencesManager {
     private static _instance: UserPreferences = null;
@@ -217,11 +218,22 @@ export class UserPreferences extends PreferencesManager {
         return this.loadLocalValue(AdminPageSelectedTab, 0);
     }
 
-    public set AdminPageSelectedTab(n: ViewerStyle) {
+    public set AdminPageSelectedTab(n: number) {
         this.saveLocalValue(AdminPageSelectedTab, n.valueOf().toFixed(0));
 
         this.notifyListeners("adminPageSelectedTab", n);
     }
+
+    public get ShowReferenceIds(): boolean {
+        return this.loadLocalValue(ShowReferenceIds, false);
+    }
+
+    public set ShowReferenceIds(b: boolean) {
+        this.saveLocalValue(ShowReferenceIds, b);
+
+        this.notifyListeners("showReferenceIds", b);
+    }
+
 
     protected validateDefaultPreferences() {
         this.setDefaultLocalValue(SamplePageOffset, 0);
@@ -246,5 +258,6 @@ export class UserPreferences extends PreferencesManager {
         this.setDefaultLocalValue(HideCursorOnPage, false);
         this.setDefaultLocalValue(ViewerStylePreference, ViewerStyle.Default);
         this.setDefaultLocalValue(AdminPageSelectedTab, 0);
+        this.setDefaultLocalValue(ShowReferenceIds, false);
     }
 }

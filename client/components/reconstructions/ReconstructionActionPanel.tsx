@@ -1,6 +1,6 @@
 import * as React from "react";
 import {useMutation} from "@apollo/react-hooks";
-import {Button, Header, HeaderContent, HeaderSubheader, Icon} from "semantic-ui-react";
+import {Button, Header, HeaderContent, HeaderSubheader, Icon, Label} from "semantic-ui-react";
 
 import {IReconstruction} from "../../models/reconstruction";
 import {ReconstructionStatus} from "../../models/reconstructionStatus";
@@ -18,6 +18,7 @@ import {
     RequestAnnotationReviewVariables,
     RequestAnnotationVariables
 } from "../../graphql/reconstruction";
+import {UserPreferences} from "../../util/userPreferences";
 
 
 export type ReconstructionPanelProps = {
@@ -77,17 +78,25 @@ export const ReconstructionActionPanel = (props: ReconstructionPanelProps) => {
         }
     }
 
+    const info = UserPreferences.Instance.ShowReferenceIds ? (<Label mini style={{marginLeft: "8px"}}>
+        <Icon name="info circle" color="blue"/>
+        {props.reconstruction.id}
+    </Label>) : null;
+
     return (
         <div style={{display: "flex", justifyContent: "space-between", alignItems: "center"}}>
-            <Header as="h4" style={{margin: 0}}>
-                <Icon name="code branch"/>
-                <HeaderContent>
-                    {props.reconstruction.neuron.idString}
-                    <HeaderSubheader>
-                        Subject {props.reconstruction.neuron.sample.animalId}
-                    </HeaderSubheader>
-                </HeaderContent>
-            </Header>
+            <div style={{display: "flex", justifyContent: "space-between", alignItems: "center"}}>
+                <Header as="h4" style={{margin: 0}}>
+                    <Icon name="code branch"/>
+                    <HeaderContent>
+                        {props.reconstruction.neuron.idString}
+                        <HeaderSubheader>
+                            Subject {props.reconstruction.neuron.sample.animalId}
+                        </HeaderSubheader>
+                    </HeaderContent>
+                </Header>
+                {info}
+            </div>
             <div>
                 {reviewButton}
                 {holdButton}
