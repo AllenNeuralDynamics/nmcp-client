@@ -28,14 +28,16 @@ type SearchLayer = {
 
 const CandidateReconstructionLayer: SearchLayer = {name: "Pending Reconstructions", index: 2, isMirror: false, source: PRECOMPUTED_URL};
 
-const SearchCcfLayer: SearchLayer = {name: "CCF", index: 0, isMirror: false, source: PRECOMPUTED_URL};
-const SearchSomaAnnotationLayer: SearchLayer = {name: "Soma", index: 1, isMirror: false, source: PRECOMPUTED_URL};
-const SearchReconstructionLayer: SearchLayer = {name: "Reconstruction", index: 2, isMirror: false, source: PRECOMPUTED_URL};
-const SearchReconstructionMirrorLayer: SearchLayer = {name: "Reconstruction Mirror", index: 3, isMirror: true, source: PRECOMPUTED_URL};
-const SearchAxonLayer: SearchLayer = {name: "Axon", index: 4, isMirror: false, source: PRECOMPUTED_URL};
-const SearchAxonMirrorLayer: SearchLayer = {name: "Axon Mirror", index: 5, isMirror: true, source: PRECOMPUTED_URL};
-const SearchDendritesLayer: SearchLayer = {name: "Dendrite", index: 6, isMirror: false, source: PRECOMPUTED_URL};
-const SearchDendritesMirrorLayer: SearchLayer = {name: "Dendrite Mirror", index: 7, isMirror: true, source: PRECOMPUTED_URL};
+const SearchCcfLayer: SearchLayer = {name: "CCF", index: 0, isMirror: false, source: "precomputed://gs://allen_neuroglancer_ccf/ccf_test1"};
+const SearchSomaAnnotationLayer: SearchLayer = {name: "Soma", index: 1, isMirror: false, source: "local://annotations"};
+const SearchReconstructionLayer: SearchLayer = {name: "Reconstruction", index: 2, isMirror: false, source: `${PRECOMPUTED_URL}/full`};
+const SearchReconstructionMirrorLayer: SearchLayer = {name: "Reconstruction Mirror", index: 3, isMirror: true, source: `${PRECOMPUTED_URL}/full`};
+const SearchAxonLayer: SearchLayer = {name: "Axon", index: 4, isMirror: false, source: `${PRECOMPUTED_URL}/axon`};
+const SearchAxonMirrorLayer: SearchLayer = {name: "Axon Mirror", index: 5, isMirror: true, source: `${PRECOMPUTED_URL}/axon`};
+const SearchDendritesLayer: SearchLayer = {name: "Dendrite", index: 6, isMirror: false, source: `${PRECOMPUTED_URL}/dendrite`};
+const SearchDendritesMirrorLayer: SearchLayer = {name: "Dendrite Mirror", index: 7, isMirror: true, source: `${PRECOMPUTED_URL}/dendrite`};
+
+const SearchSelectionLayers = [SearchReconstructionLayer, SearchReconstructionMirrorLayer, SearchAxonLayer, SearchAxonMirrorLayer, SearchDendritesLayer, SearchDendritesMirrorLayer];
 
 
 export class NeuroglancerProxy {
@@ -100,15 +102,18 @@ export class NeuroglancerProxy {
             registerEventListener(target, "click", (e: Event) => {
                 if (proxy._viewer) {
                     const selected = proxy._viewer.layerSelectedValues.toJSON();
-
-                    if (selected && selected["Reconstruction"] && selected["Reconstruction"]["value"] && selected["Reconstruction"]["value"]["key"]) {
-                        try {
-                            const id = parseInt(selected["Reconstruction"]["value"]["key"]);
-                            state = proxy._viewer.mouseState;
-                            selectionDelegate(proxy._modelMap.get(id), state.position);
-                        } catch {
+                    let found = false;
+                    SearchSelectionLayers.forEach(layer => {
+                        if (!found && selected && selected[layer.name] && selected[layer.name]["value"] && selected[layer.name]["value"]["key"]) {
+                            try {
+                                const id = parseInt(selected[layer.name]["value"]["key"]);
+                                state = proxy._viewer.mouseState;
+                                selectionDelegate(proxy._modelMap.get(id), state.position);
+                                found = true;
+                            } catch {
+                            }
                         }
-                    }
+                    });
                 }
             });
         }
