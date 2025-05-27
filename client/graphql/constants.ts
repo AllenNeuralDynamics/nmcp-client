@@ -9,6 +9,9 @@ export const CONSTANTS_QUERY = gql`query ConstantsQuery {
   systemSettings {
     apiVersion
     neuronCount
+    features {
+      enableUpdatedViewer
+    }
   }
   tracingStructures {
     id
@@ -43,6 +46,9 @@ export const CONSTANTS_QUERY = gql`query ConstantsQuery {
 export interface ISystemSettings {
     apiVersion: string;
     neuronCount: number;
+    features: {
+      enableUpdatedViewer: boolean;
+    }
 }
 
 export interface ConstantsQueryResponse {

@@ -28,6 +28,8 @@ export class NdbConstants {
 
     private _neuronCount = -1;
 
+    private _enableUpdatedViewer: boolean = false;
+
     private _isLoaded: boolean;
 
     public static DefaultConstants = new NdbConstants();
@@ -43,6 +45,7 @@ export class NdbConstants {
 
         this._apiVersion = data.systemSettings.apiVersion;
         this._neuronCount = data.systemSettings.neuronCount;
+        this._enableUpdatedViewer = data.systemSettings.features.enableUpdatedViewer;
 
         this.loadQueryOperators(data.queryOperators);
         this.loadBrainAreas(data.brainAreas);
@@ -59,12 +62,16 @@ export class NdbConstants {
         return this._isLoaded;
     }
 
+    public get ApiVersion(): string {
+        return this._apiVersion;
+    }
+
     public get NeuronCount(): number {
         return this._neuronCount;
     }
 
-    public get ApiVersion(): string {
-        return this._apiVersion;
+    public get EnabledUpdatedViewer(): boolean {
+        return this._enableUpdatedViewer;
     }
 
     public get QueryOperators(): IQueryOperator[] {

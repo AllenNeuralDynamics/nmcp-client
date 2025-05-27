@@ -94,7 +94,7 @@ const SettingsDialog = (props: SettingsDialogProps) => {
                 <Form>
                     <Form.Checkbox width={16} checked={state.shouldAutoCollapseOnQuery}
                                    label="Collapse query after search"
-                                   onChange={(_, props) =>onSetAutoCollapseOnQuery(props.checked)}/>
+                                   onChange={(_, props) => onSetAutoCollapseOnQuery(props.checked)}/>
                     <Form.Checkbox width={16} checked={state.shouldAlwaysShowSoma}
                                    style={{marginTop: "10px"}}
                                    label="Always display tracing after search"
@@ -104,9 +104,10 @@ const SettingsDialog = (props: SettingsDialogProps) => {
                                    disabled={!state.shouldAlwaysShowSoma}
                                    label="Display full tracing in addition to soma"
                                    onChange={(_, props) => onSetAlwaysShowFullTracing(props.checked)}/>
-                    <Form.Checkbox width={16} checked={state.useNeuroglancer}
-                                   label="Use Neuroglancer as viewer (browser refresh recommended)"
-                                   onChange={(_, props) => onUseNeuroglancer(props.checked)}/>
+                    {Constants.EnabledUpdatedViewer ?
+                        <Form.Checkbox width={16} checked={state.useNeuroglancer}
+                                       label="Use Neuroglancer as viewer (browser refresh recommended)"
+                                       onChange={(_, props) => onUseNeuroglancer(props.checked)}/> : null}
 
                     <div style={{display: "flex", flexDirection: "row", alignItems: "center", marginTop: "20px"}}>
                         <div style={styles.swatch} onClick={() => handleClick()}>
