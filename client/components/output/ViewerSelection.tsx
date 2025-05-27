@@ -282,9 +282,9 @@ export class ViewerSelection extends React.Component<IViewerSelectionProps, IVie
                     </div>
                     <div style={{order: 2, flex: "1 1 0"}}/>
                     <div style={{order: 3, paddingLeft: "20px"}}>
-                        <strong>x:</strong>{` ${node.x.toFixed(1)}`}<br/>
+                        <strong>x:</strong>{` ${node.z.toFixed(1)}`}<br/>
                         <strong>y:</strong>{` ${node.y.toFixed(1)}`}<br/>
-                        <strong>z:</strong>{` ${node.z.toFixed(1)}`}
+                        <strong>z:</strong>{` ${node.x.toFixed(1)}`}
                     </div>
                 </div>
                 <div style={{order: 2, marginTop: "4px", paddingTop: "4px", borderTop: "1px solid #ddd"}}>
