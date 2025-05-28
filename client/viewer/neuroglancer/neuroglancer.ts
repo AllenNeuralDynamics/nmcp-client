@@ -129,6 +129,12 @@ export class NeuroglancerProxy {
 
         setDefaultInputEventBindings(proxy._viewer.inputEventBindings);
 
+        if (state) {
+            state["position"] = defaultSearchState.position;
+            state["projectionOrientation"] = defaultSearchState.projectionOrientation;
+            state["projectionScale"] = defaultSearchState.projectionScale;
+        }
+
         const s = state || defaultSearchState;
 
         let reset = false;
@@ -452,16 +458,16 @@ const defaultSearchState = {
             "s"
         ]
     }, "position": [
-        554.5824584960938,
-        512.8468627929688,
-        514.7276000976562
+        659.5,
+        399.5,
+        569.5
     ],
     "crossSectionScale": 2.7182818284590446,
     "projectionOrientation": [
-        0.2751387655735016,
-        -0.45192277431488037,
-        -0.23387466371059418,
-        -0.815700352191925
+        -0.2892743945121765,
+        0.45396557450294495,
+        0.1698378622531891,
+        0.8254639506340027
     ],
     "projectionScale": 2048,
     "layers": [

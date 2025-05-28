@@ -101,6 +101,7 @@
     font-weight: normal;
     border-radius: 0;
 }
+
 .ReactTable {
     border: none;
 }
@@ -115,12 +116,12 @@
     overflow: visible;
 }
 
-.ui.edit-input>input {
+.ui.edit-input > input {
     border: none;
     padding: 2px 4px;
 }
 
-.ui.pagejump>input {
+.ui.pagejump > input {
     width: 60px;
     text-align: right;
 }
@@ -143,12 +144,17 @@
     background-color: rgb(39, 128, 220) !important;
 }
 
+.neuroglancer-layer-panel {
+    visibility: collapse !important;
+    height: 0 !important;
+}
+
 #neuroglancer-container {
     overflow: hidden;
     flex: 1;
     color: white;
     border: 0 solid black;
-    border-radius: 4px;
+    border-radius: 0px;
     box-shadow: 0 1px 2px 0 rgba(34, 36, 38, .1);
     box-sizing: content-box;
     webkit-box-sizing: content-box;
