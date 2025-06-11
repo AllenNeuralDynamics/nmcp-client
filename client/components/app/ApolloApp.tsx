@@ -3,7 +3,7 @@ import {useEffect} from "react";
 import {InteractionRequiredAuthError} from "@azure/msal-browser";
 import {useAccount, useIsAuthenticated, useMsal} from "@azure/msal-react";
 import {ApolloClient, InMemoryCache, ApolloLink, ApolloProvider, concat} from "@apollo/client";
-import {createUploadLink} from "apollo-upload-client";
+import createUploadLink from "apollo-upload-client/createUploadLink.mjs";
 import {ToastContainer, ToastPosition} from "react-toastify";
 
 import {AppConstants} from "./AppConstants";

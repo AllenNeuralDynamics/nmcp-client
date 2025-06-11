@@ -1,6 +1,6 @@
 import React, {useState} from "react";
 import {Button, Grid, Header, Icon, Message, Segment, Table, TableCell, TableRow} from "semantic-ui-react";
-import {useMutation, useQuery} from "@apollo/react-hooks";
+import {useMutation, useQuery} from "@apollo/client";
 import {IssueQueryResponse, CLOSE_ISSUE_MUTATION, CloseIssueResponse, CloseIssueVariables, OPEN_ISSUES_QUERY} from "../../graphql/issue";
 import {IIssue, issueKindString} from "../../models/issue";
 import moment from "moment";

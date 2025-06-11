@@ -1,6 +1,6 @@
 import {Button, Icon, Label, Table, TableCell, TableRow} from "semantic-ui-react";
 import * as React from "react";
-import {useMutation} from "@apollo/react-hooks";
+import {useMutation} from "@apollo/client";
 
 import {
     APPROVE_ANNOTATION_MUTATION, ApproveAnnotationResponse, ApproveAnnotationVariables, COMPLETE_ANNOTATION_MUTATION, CompleteReconstructionResponse,

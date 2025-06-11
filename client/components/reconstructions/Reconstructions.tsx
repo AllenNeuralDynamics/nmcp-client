@@ -2,7 +2,7 @@ import * as React from "react";
 import {useContext, useState} from "react";
 import moment from "moment";
 import {Checkbox, Dropdown, Header, Label, List, Segment, Table, TableCell, TableRow} from "semantic-ui-react";
-import {useQuery} from "@apollo/react-hooks";
+import {useQuery} from "@apollo/client";
 
 import {RECONSTRUCTIONS_QUERY, ReconstructionVariables, ReconstructionsResponse} from "../../graphql/reconstruction";
 import {displayNeuron} from "../../models/neuron";
@@ -68,7 +68,10 @@ export const Reconstructions = () => {
     }
 
     if (error || sampleError) {
-        return (<div>{error}</div>)
+        return (<div>
+            {error.graphQLErrors.map(({message}, i) => (
+                <span key={i}>{message}</span>))}
+        </div>)
     }
 
     if (!data || !data.reconstructions) {

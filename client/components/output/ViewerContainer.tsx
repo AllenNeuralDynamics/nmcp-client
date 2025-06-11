@@ -28,16 +28,17 @@ interface IViewerContainerState {
 
 export class ViewerContainer extends React.Component<IViewerProps, IViewerContainerState> {
 
-    private _tracingViewer;
+    private readonly myRef: React.RefObject<TracingViewer>;
 
     public constructor(props: IViewerProps) {
         super(props);
 
+        this.myRef = React.createRef<TracingViewer>();
         this.state = {}
     }
 
     public get TracingViewer() {
-        return this._tracingViewer;
+        return this.myRef;
     }
 
     private renderFloatNeuronListGlyph() {
@@ -219,7 +220,7 @@ export class ViewerContainer extends React.Component<IViewerProps, IViewerContai
             }}>
                 {this.renderHeader()}
                 <div style={{order: 2, flexGrow: 1, width: "100%", height: "100%"}}>
-                    <TracingViewer {...this.props} ref={(t => this._tracingViewer = t)}/>
+                    <TracingViewer {...this.props} ref={this.myRef}/>
                 </div>
             </div>
         );

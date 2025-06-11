@@ -16,6 +16,7 @@ import "../assets/style.css";
 
 import "neuroglancer/unstable/layer/enabled_frontend_modules.js";
 import "neuroglancer/unstable/datasource/enabled_frontend_modules.js";
+import {createRoot} from "react-dom/client";
 
 const msalInstance = new PublicClientApplication(msalConfig);
 
@@ -38,11 +39,12 @@ try {
 
 const rootEl = document.getElementById("root");
 
-ReactDOM.render(
+const root = createRoot(rootEl);
+
+root.render(
     <BrowserRouter>
         <MsalProvider instance={msalInstance}>
             <App/>
         </MsalProvider>
-    </BrowserRouter>,
-    rootEl
+    </BrowserRouter>
 );

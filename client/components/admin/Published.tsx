@@ -1,5 +1,5 @@
 import React, {useState} from "react"
-import {useLazyQuery, useMutation, useQuery} from "@apollo/react-hooks";
+import {useLazyQuery, useMutation, useQuery} from "@apollo/client";
 import * as uuid from "uuid";
 import {
     Button,
@@ -123,7 +123,8 @@ const ReconstructionSelection = (props: ReconstructionSelectionProps) => {
             <Icon name="exclamation"/>
             <MessageContent>
                 <MessageHeader>
-                    {sampleError}
+                    {sampleError.graphQLErrors.map(({message}, i) => (
+                        <span key={i}>{message}</span>))}
                 </MessageHeader>
                 Some Error Message
             </MessageContent>
@@ -154,7 +155,8 @@ const ReconstructionSelection = (props: ReconstructionSelectionProps) => {
             <Icon name="exclamation"/>
             <MessageContent>
                 <MessageHeader>
-                    {neuronsQueryError}
+                    {neuronsQueryError.graphQLErrors.map(({ message }, i) => (
+                        <span key={i}>{message}</span>))}
                 </MessageHeader>
                 Some Error Message
             </MessageContent>

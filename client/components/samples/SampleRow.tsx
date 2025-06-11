@@ -1,7 +1,7 @@
 import * as React from "react";
 import {Button, Dropdown, Label, Table} from "semantic-ui-react";
-import ReactDatePicker from "react-datepicker";
-import moment from "moment/moment";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 import {ISample} from "../../models/sample";
 import {InputPopup} from "../editors/InputPopup";
@@ -19,7 +19,7 @@ export type SampleRowProps = {
     updateFcn(sample: ISample): void;
     onRequestManageInjections(sample: ISample): void;
     setSampleForDelete(sample: ISample): void;
-    renderInjections(injections: IInjection[], isExpanded: boolean): string | JSX.Element;
+    renderInjections(injections: IInjection[], isExpanded: boolean): string | React.JSX.Element;
 }
 
 export const SampleRow = (props: SampleRowProps) => {
@@ -80,11 +80,9 @@ export const SampleRow = (props: SampleRowProps) => {
                             onAccept={(value) => onAcceptAnimalIdEdit(sample, value, props.updateFcn)}/>
             </Table.Cell>
             <Table.Cell>
-                <ReactDatePicker
-                    className="date-picker-input"
-                    dateFormat="YYYY-MM-DD"
-                    selected={sample.sampleDate ? moment(new Date(sample.sampleDate)) : null}
-                    onChange={(d) => onSampleDateEdit(sample, d?.toDate(), props.updateFcn)}/>
+                <DatePicker showIcon toggleCalendarOnIconClick placeholderText="Select sample date" dateFormat="YYYY-MM-DD"
+                    selected={sample.sampleDate ? new Date(sample.sampleDate) : null}
+                    onChange={(d: Date) => onSampleDateEdit(sample, d, props.updateFcn)}/>
             </Table.Cell>
             <Table.Cell>
                 <InputPopup value={sample.tag} placeholder="Enter new tag..."

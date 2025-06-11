@@ -24,7 +24,6 @@ export const CandidatesViewer = (props: ITracingsTableProps) => {
         setNgProxy(proxy);
 
         return () => {
-            console.log("unlink")
             proxy.unlinkNeuroglancerHandler();
         }
     }, []);

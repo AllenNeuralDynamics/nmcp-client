@@ -1,6 +1,6 @@
 import * as React from "react";
 import {useContext, useState} from "react";
-import {useQuery} from "@apollo/react-hooks";
+import {useQuery} from "@apollo/client";
 import {
     Button,
     Checkbox,
@@ -69,7 +69,8 @@ export const Candidates = () => {
             <Icon name="circle notched" loading/>
             <Message.Content>
                 <Message.Header content="Error"/>s
-                {error}
+                {error.graphQLErrors.map(({ message }, i) => (
+                    <span key={i}>{message}</span>))}
             </Message.Content>
         </Message>
     }

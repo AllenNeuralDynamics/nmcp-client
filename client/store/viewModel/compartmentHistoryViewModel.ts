@@ -1,5 +1,9 @@
-import {observable} from "mobx";
+import {observable, makeObservable} from "mobx";
 
 export class CompartmentHistoryViewModel {
-    @observable public IsVisible: boolean = true;
+    public IsVisible: boolean = true;
+
+    public constructor() {
+        makeObservable(this, {IsVisible: observable});
+    }
 }

@@ -1,5 +1,5 @@
 import * as React from "react";
-import {useQuery} from "@apollo/react-hooks";
+import {useQuery} from "@apollo/client";
 import {createContext, useEffect} from "react";
 import {useAccount, useIsAuthenticated, useMsal} from "@azure/msal-react";
 import {Message} from "semantic-ui-react";

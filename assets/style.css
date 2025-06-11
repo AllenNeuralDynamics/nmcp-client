@@ -27,18 +27,8 @@
     background-color: rgb(243, 244, 245);
 }
 
-.react-datepicker-wrapper {
-    width: 100%;
-}
-
-.react-datepicker__input-container {
-    width: 100%;
-}
-
-.react-datepicker__input-container .date-picker-input {
-    font-weight: normal;
-    border: none;
-    width: 100%;
+.react-datepicker__view-calendar-icon input {
+    border: 0;
 }
 
 .react-autosuggest__container {

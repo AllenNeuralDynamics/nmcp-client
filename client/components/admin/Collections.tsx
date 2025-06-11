@@ -1,5 +1,5 @@
 import React, {useState} from "react";
-import {useQuery} from "@apollo/react-hooks";
+import {useQuery} from "@apollo/client";
 import {Button, Header, Segment, Table, TableCell, TableRow} from "semantic-ui-react";
 
 import {COLLECTIONS_QUERY, CollectionsResponse} from "../../graphql/collections";

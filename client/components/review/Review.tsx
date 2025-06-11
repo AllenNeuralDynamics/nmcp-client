@@ -1,6 +1,6 @@
 import * as React from "react";
 import {useState} from "react";
-import {useQuery} from "@apollo/react-hooks";
+import {useQuery} from "@apollo/client";
 import {Checkbox, Dropdown, Header, List, Segment} from "semantic-ui-react";
 
 import {IReconstruction} from "../../models/reconstruction";
@@ -56,7 +56,10 @@ export const Review = () => {
     }
 
     if (error || sampleError) {
-        return (<div>{error}</div>)
+        return (<div>
+            {error.graphQLErrors.map(({ message }, i) => (
+                <span key={i}>{message}</span>))}
+        </div>)
     }
 
     let samples = sampleData.samples.items;

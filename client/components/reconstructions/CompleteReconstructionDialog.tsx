@@ -1,6 +1,6 @@
 import * as React from "react";
 import {useState} from "react";
-import {useMutation} from "@apollo/react-hooks";
+import {useMutation} from "@apollo/client";
 import {Button, Modal} from "semantic-ui-react";
 
 import {REQUEST_ANNOTATION_REVIEW_MUTATION, RequestAnnotationReviewResponse, RequestAnnotationReviewVariables

@@ -1,5 +1,6 @@
 import * as React from "react";
 import {useEffect, useState} from "react";
+import {useLazyQuery} from "@apollo/client";
 
 import {NeuroglancerProxy} from "../../viewer/neuroglancer/neuroglancer";
 import {UserPreferences} from "../../util/userPreferences";
@@ -7,7 +8,6 @@ import {NeuronViewModel} from "../../viewmodel/neuronViewModel";
 import {NEURON_VIEW_MODE_SOMA, NeuronViewMode} from "../../viewmodel/neuronViewMode";
 import {ITracingNode, nodesAsAnnotation} from "../../models/tracingNode";
 import {TracingViewModel} from "../../viewmodel/tracingViewModel";
-import {useLazyQuery} from "@apollo/react-hooks";
 import {NEAREST_NODE_QUERY, NearestNodeQueryResponse, NearestNodeQueryVariables} from "../../graphql/search";
 
 export type NeuroglancerContainerProps = {

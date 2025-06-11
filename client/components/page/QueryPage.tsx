@@ -8,7 +8,7 @@ import {MainView} from "../output/MainView";
 import {QueryStatus} from "../query/QueryHeader";
 import {VisibleBrainAreas} from "../../viewmodel/VisibleBrainAreas";
 import {BrainCompartmentViewModel} from "../../viewmodel/brainCompartmentViewModel";
-import {ApolloError} from "apollo-client";
+import {ApolloError} from "@apollo/client";
 import {UIQueryPredicate, UIQueryPredicates} from "../../models/uiQueryPredicate";
 import {BRAIN_AREA_FILTER_TYPE_SPHERE} from "../../models/brainAreaFilterType";
 import {ViewerMeshVersion} from "../../models/compartmentMeshSet";

@@ -14,7 +14,7 @@ import {BrainAreaDropdown} from "../editors/BrainAreaDropdown";
 import {CREATE_INJECTION_MUTATION, CreateInjectionMutationData, CreateInjectionMutationResponse, CreateInjectionVariables} from "../../graphql/injection";
 import {isNullOrUndefined} from "../../util/nodeUtil";
 import {useContext, useState} from "react";
-import {useMutation} from "@apollo/react-hooks";
+import {useMutation} from "@apollo/client";
 import {ConstantsContext} from "../app/AppConstants";
 
 interface IAddInjectionProps {

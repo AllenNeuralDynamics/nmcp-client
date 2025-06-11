@@ -1,5 +1,6 @@
 import * as React from "react";
 import {useEffect, useState} from "react";
+import {useMutation, useQuery} from "@apollo/client";
 import {Button, Dropdown, Segment, Confirm, Table, Header, List, Checkbox} from "semantic-ui-react";
 import {toast} from "react-toastify";
 
@@ -14,7 +15,6 @@ import {
 import {displaySample, ISample} from "../../models/sample";
 import {NeuronsTable} from "./NeuronsTable";
 import {displayNeuron, INeuron} from "../../models/neuron";
-import {useMutation, useQuery} from "@apollo/react-hooks";
 import {UserPreferences} from "../../util/userPreferences";
 
 interface INeuronsProps {

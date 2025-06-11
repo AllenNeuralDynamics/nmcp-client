@@ -1,6 +1,6 @@
 import * as React from "react";
 import {useContext} from "react";
-import {useMutation} from "@apollo/react-hooks";
+import {useMutation} from "@apollo/client";
 import {Table, Button, Dropdown, Label} from "semantic-ui-react";
 import {toast} from "react-toastify";
 

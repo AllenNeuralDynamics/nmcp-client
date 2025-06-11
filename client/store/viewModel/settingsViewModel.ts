@@ -1,14 +1,16 @@
-import {action, observable} from "mobx";
+import {action, observable, makeObservable} from "mobx";
 
 export class SettingsViewModel {
-    @observable public IsSettingsWindowOpen: boolean = false;
+    public IsSettingsWindowOpen: boolean = false;
 
-    @action
+    constructor() {
+        makeObservable(this, {IsSettingsWindowOpen: observable, openSettingsDialog: action, closeSettingsDialog: action});
+    }
+
     public openSettingsDialog() {
         this.IsSettingsWindowOpen = true;
     }
 
-    @action
     public closeSettingsDialog() {
         this.IsSettingsWindowOpen = false;
     }

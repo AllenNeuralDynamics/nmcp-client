@@ -1,6 +1,6 @@
 import * as React from "react";
-import {ApolloError} from "apollo-client";
-import {ApolloConsumer} from "@apollo/react-hooks";
+import {ApolloError, } from "@apollo/client";
+import {ApolloConsumer} from "@apollo/client";
 import cuid from "cuid";
 
 import {QueryPage} from "./QueryPage";
@@ -33,10 +33,12 @@ interface IContentState {
 export class Content extends React.Component<IContentProps, IContentState> {
     private _uiPredicates: UIQueryPredicates;
 
-    private _queryPage: QueryPage;
+    private _queryPage: React.RefObject<QueryPage>;
 
     public constructor(props: IContentProps) {
         super(props);
+
+        this._queryPage = React.createRef<QueryPage>();
 
         this.state = {
             isSettingsOpen: false,
@@ -137,7 +139,7 @@ export class Content extends React.Component<IContentProps, IContentState> {
                                    shouldAlwaysShowFullTracing={this.state.shouldAlwaysShowFullTracing}
                                    shouldAlwaysShowSoma={this.state.shouldAlwaysShowSoma}
                                    exportLimit={this.props.exportLimit}
-                                   ref={(r) => this._queryPage = r}
+                                   ref={this._queryPage}
                                    onPerformQuery={() => this.onExecuteQuery(client)}
                                    onResetPage={() => this.onResetPage()}/>
                         <Footer/>

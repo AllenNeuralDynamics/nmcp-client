@@ -1,5 +1,5 @@
 import * as React from "react";
-import {useQuery} from "@apollo/react-hooks";
+import {useQuery} from "@apollo/client";
 
 import {SAMPLES_QUERY, SamplesQueryResponse} from "../../graphql/sample";
 import {Neurons} from "../neurons/Neurons";

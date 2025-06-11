@@ -1,15 +1,19 @@
-import {observable} from "mobx";
+import {makeObservable, observable} from "mobx";
 
 import {SystemConfigurationStore} from "./systemConfigurationStore";
 import {TomographyCollection} from "./tomographyCollection";
 import {NdbConstants} from "../../models/constants";
 
 export class SystemDataStore {
-    @observable public SystemConfiguration: SystemConfigurationStore = new SystemConfigurationStore();
+    public SystemConfiguration: SystemConfigurationStore = new SystemConfigurationStore();
 
-    @observable public Tomography: TomographyCollection = new TomographyCollection();
+    public Tomography: TomographyCollection = new TomographyCollection();
 
     public Constants: NdbConstants = NdbConstants.DefaultConstants;
+
+    public constructor() {
+        makeObservable(this, {SystemConfiguration: observable, Tomography: observable});
+    }
 }
 
 export const rootDataStore: SystemDataStore = new SystemDataStore();

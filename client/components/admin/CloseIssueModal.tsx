@@ -1,7 +1,7 @@
 import * as React from "react";
 import {useState} from "react";
 import {Button, Form, FormField, FormInput, Message, Modal, TextArea} from "semantic-ui-react";
-import {useMutation} from "@apollo/react-hooks";
+import {useMutation} from "@apollo/client";
 import {
     CLOSE_ISSUE_MUTATION,
     CloseIssueResponse,

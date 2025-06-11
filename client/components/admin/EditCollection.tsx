@@ -1,6 +1,6 @@
 import * as React from "react";
 import {useEffect, useState} from "react";
-import {useMutation} from "@apollo/react-hooks";
+import {useMutation} from "@apollo/client";
 import {Button, Form, Grid, Header, Icon, Input, Message, Placeholder, PlaceholderHeader, PlaceholderLine, Segment, TextArea} from "semantic-ui-react";
 import {toast} from "react-toastify";
 

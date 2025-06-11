@@ -1,4 +1,4 @@
-import {observable} from "mobx";
+import {observable, makeObservable} from "mobx";
 
 import {rootDataStore} from "../system/systemDataStore";
 import {TomographyViewModel} from "./tomographyViewModel";
@@ -7,15 +7,24 @@ import {SettingsViewModel} from "./settingsViewModel";
 import {CompartmentsViewModel} from "./compartmentsViewModel";
 
 export class SystemViewModel {
-    @observable Settings: SettingsViewModel = new SettingsViewModel();
+    Settings: SettingsViewModel;
+    Tomography: TomographyViewModel;
+    Compartments: CompartmentsViewModel;
+    CompartmentHistory: CompartmentHistoryViewModel;
 
-    @observable Tomography: TomographyViewModel = new TomographyViewModel(rootDataStore.Tomography);
+    constructor() {
+        this.Settings = new SettingsViewModel();
+        this.Tomography = new TomographyViewModel(rootDataStore.Tomography);
+        this.Compartments = new CompartmentsViewModel();
+        this.CompartmentHistory = new CompartmentHistoryViewModel();
 
-    // Currently only used for mesh version.
-    @observable Compartments: CompartmentsViewModel = new CompartmentsViewModel();
-
-    // Currently only used for collapse/expand of the history panel itself.
-    @observable CompartmentHistory: CompartmentHistoryViewModel = new CompartmentHistoryViewModel();
+        makeObservable(this, {
+            Settings: observable,
+            Tomography: observable,
+            Compartments: observable,
+            CompartmentHistory: observable,
+        });
+    }
 }
 
 export const rootViewModel: SystemViewModel = new SystemViewModel();

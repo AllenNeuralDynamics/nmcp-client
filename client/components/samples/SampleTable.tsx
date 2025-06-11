@@ -1,6 +1,6 @@
 import * as React from "react";
 import {useState} from "react";
-import {useMutation} from "@apollo/react-hooks";
+import {useMutation} from "@apollo/client";
 import {Button, Confirm, Header, List, Segment, Table} from "semantic-ui-react";
 import {toast} from "react-toastify";
 

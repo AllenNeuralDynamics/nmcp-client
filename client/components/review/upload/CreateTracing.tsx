@@ -1,7 +1,7 @@
 import * as React from "react";
 import {useState} from "react";
-import {useMutation} from "@apollo/react-hooks";
-import {ApolloError} from "apollo-client";
+import {useMutation} from "@apollo/client";
+import {ApolloError} from "@apollo/client";
 import {Grid, Confirm} from "semantic-ui-react";
 import {toast} from "react-toastify";
 import {SwcDropZone} from "./SwcDropZone";

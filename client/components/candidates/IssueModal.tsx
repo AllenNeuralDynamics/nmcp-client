@@ -2,7 +2,7 @@ import {INeuron} from "../../models/neuron";
 import * as React from "react";
 import {useEffect, useState} from "react";
 import {Button, Form, FormField, FormInput, Message, Modal, TextArea} from "semantic-ui-react";
-import {useMutation} from "@apollo/react-hooks";
+import {useMutation} from "@apollo/client";
 import {CREATE_ISSUE_MUTATION, CreateIssueResponse, CreateIssueVariables} from "../../graphql/issue";
 import {IssueKind} from "../../models/issue";
 import {toast} from "react-toastify";

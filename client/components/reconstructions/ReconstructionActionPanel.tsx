@@ -1,5 +1,5 @@
 import * as React from "react";
-import {useMutation} from "@apollo/react-hooks";
+import {useMutation} from "@apollo/client";
 import {Button, Header, HeaderContent, HeaderSubheader, Icon, Label} from "semantic-ui-react";
 
 import {IReconstruction} from "../../models/reconstruction";

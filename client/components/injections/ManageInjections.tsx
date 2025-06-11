@@ -1,4 +1,6 @@
 import * as React from "react";
+import {useState} from "react";
+import {useQuery} from "@apollo/client";
 import {Button, Icon, Modal, Tab, Message} from "semantic-ui-react";
 
 import {AddInjectionPanel} from "./AddInjectionPanel";
@@ -8,8 +10,6 @@ import {INJECTIONS_FOR_SAMPLE_QUERY, InjectionsForSampleQueryResponse, Injection
 import {IInjection} from "../../models/injection";
 import {IInjectionVirus} from "../../models/injectionVirus";
 import {IFluorophore} from "../../models/fluorophore";
-import {useState} from "react";
-import {useQuery} from "@apollo/react-hooks";
 
 interface IManageInjectionsContentProps {
     sample: ISample;

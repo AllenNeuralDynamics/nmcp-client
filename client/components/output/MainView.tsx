@@ -106,13 +106,15 @@ export class MainView extends React.Component<IOutputContainerProps, IOutputCont
     private _colorIndex: number = 0;
     private _fetchBatchSize = UserPreferences.Instance.TracingFetchBatchSize;
 
-    private _viewerContainer = null;
+    private _viewerContainer: React.RefObject<ViewerContainer>;
     private _expectingFetch = false;
 
     private _colormap = jet;
 
     public constructor(props: IOutputContainerProps) {
         super(props);
+
+        this._viewerContainer = React.createRef<ViewerContainer>();
 
         const neuronCalc = this.updateNeuronViewModels(props, false);
 
@@ -167,7 +169,7 @@ export class MainView extends React.Component<IOutputContainerProps, IOutputCont
             n.isSelected = n.isSelected || this.props.shouldAlwaysShowSoma
         });
         this.onCancelFetch();
-        this.ViewerContainer.TracingViewer.reset();
+        this.ViewerContainer.current.TracingViewer.current.reset();
         this.setState({displayHighlightedOnly: false, highlightSelectionMode: HighlightSelectionMode.Normal});
     }
 
@@ -852,7 +854,7 @@ export class MainView extends React.Component<IOutputContainerProps, IOutputCont
                 {overlay}
                 <div style={fullRowStyle}>
                     {this.state.isNeuronListDocked ? neuronList : null}
-                    <ViewerContainer {...viewerProps} ref={(v) => this._viewerContainer = v}/>
+                    <ViewerContainer {...viewerProps} ref={this._viewerContainer}/>
                     {compartmentListDock}
                 </div>
             </div>

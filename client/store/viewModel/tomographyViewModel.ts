@@ -1,4 +1,4 @@
-import {action, computed, observable, observe} from 'mobx';
+import {observable, computed, action, observe, makeObservable} from 'mobx';
 
 import {TomographyConstants, TomographyPlaneConstants} from "../../tomography/tomographyConstants";
 import {ISample} from "../../models/sample";
@@ -10,10 +10,11 @@ const tomographyConstants = TomographyConstants.Instance;
 const ThresholdPaddingPercentage = 0.2;
 
 export class SliceControlViewModel {
-    @observable public IsEnabled: boolean = false;
-    @observable public Location: number = 0;
+    public IsEnabled: boolean = false;
+    public Location: number = 0;
 
     public constructor(constants: TomographyPlaneConstants) {
+        makeObservable(this, {IsEnabled: observable, Location: observable});
         this.IsEnabled = false;
         this.Location = constants.Center;
     }
@@ -25,48 +26,58 @@ export class SampleTomographyViewModel {
     public constructor(tomography: SampleTomography) {
         this._sampleTomography = tomography;
 
+        makeObservable(this, {
+            SampleIdNumber: observable,
+            UseCustomThreshold: observable,
+            CustomThreshold: observable,
+            CustomThresholdLimits: observable,
+            SampleTomography: computed,
+            IsReferenceSample: computed,
+            IsCustomThreshold: computed,
+            incrementMinThreshold: action,
+            incrementMaxThreshold: action,
+            updateCustomThreshold: action,
+            resetCustomThreshold: action
+        });
+
         this.resetCustomThreshold();
 
         this.computePaddedLimits();
     }
 
-    @observable public SampleIdNumber: number;
+    public SampleIdNumber: number = 0;
 
-    @observable public UseCustomThreshold: boolean = false;
+    public UseCustomThreshold: boolean = false;
 
-    @observable public CustomThreshold: Threshold = new Threshold(0, 1);
+    public CustomThreshold: Threshold = new Threshold(0, 1);
 
-    @observable public CustomThresholdLimits: Threshold= new Threshold(0, 1);
+    public CustomThresholdLimits: Threshold = new Threshold(0, 1);
 
-    @computed get SampleTomography(): SampleTomography {
+    get SampleTomography(): SampleTomography {
         return this._sampleTomography;
     }
 
-    @computed get IsReferenceSample(): boolean {
+    get IsReferenceSample(): boolean {
         return this._sampleTomography.IsReferenceTomography;
     }
 
-    @computed get IsCustomThreshold(): boolean {
+    get IsCustomThreshold(): boolean {
         return this.UseCustomThreshold && (this.CustomThreshold.Min !== this._sampleTomography.DefaultThreshold.Min || this.CustomThreshold.Max !== this._sampleTomography.DefaultThreshold.Max);
     }
 
-    @action
     public incrementMinThreshold(amount: number) {
         this.CustomThreshold.Min = Math.max(this.CustomThresholdLimits.Min, Math.min(this.CustomThresholdLimits.Max, this.CustomThreshold.Min + amount));
     }
 
-    @action
     public incrementMaxThreshold(amount: number) {
         this.CustomThreshold.Max = Math.max(this.CustomThresholdLimits.Min, Math.min(this.CustomThresholdLimits.Max, this.CustomThreshold.Max + amount));
     }
 
-    @action
     public updateCustomThreshold(value: [number, number]): void {
         this.CustomThreshold.Min = value[0];
         this.CustomThreshold.Max = value[1];
     }
 
-    @action
     public resetCustomThreshold() {
         this.CustomThreshold.Min = this._sampleTomography.DefaultThreshold.Min;
         this.CustomThreshold.Max = this._sampleTomography.DefaultThreshold.Max;
@@ -87,17 +98,33 @@ export class SampleTomographyViewModel {
  * collapsed or shown, etc.).
  */
 export class TomographyViewModel {
-    @observable private readonly _tomographyDataStore: TomographyCollection;
+    private readonly _tomographyDataStore: TomographyCollection;
 
     private _viewModels: Map<string, SampleTomographyViewModel> = new Map<string, SampleTomographyViewModel>();
 
     private _lastTomography: SampleTomographyViewModel | null = null;
 
-    @observable private _selection: SampleTomographyViewModel | null = null;
+    public _selection: SampleTomographyViewModel | null = null;
 
-    @observable private _refTomography: SampleTomographyViewModel;
+    public _refTomography: SampleTomographyViewModel = null;
 
     public constructor(tomographyDataStore: TomographyCollection) {
+        makeObservable(this, {
+            _selection: observable,
+            _refTomography: observable,
+            AreControlsVisible: observable,
+            Sagittal: observable,
+            Horizontal: observable,
+            Coronal: observable,
+            ReferenceSampleTomography: computed,
+            title: computed,
+            Selection: computed,
+            CanSwapSample: computed,
+            CurrentLocation: computed,
+            setSample: action,
+            swapSample: action
+        });
+
         this._tomographyDataStore = tomographyDataStore;
 
         // Tomography will most likely not have been loaded when this view model is created.
@@ -108,13 +135,13 @@ export class TomographyViewModel {
         });
     }
 
-    @observable public AreControlsVisible: boolean = true;
+    public AreControlsVisible: boolean = true;
 
-    @observable public Sagittal: SliceControlViewModel = new SliceControlViewModel(tomographyConstants.Sagittal);
-    @observable public Horizontal: SliceControlViewModel = new SliceControlViewModel(tomographyConstants.Horizontal);
-    @observable public Coronal: SliceControlViewModel = new SliceControlViewModel(tomographyConstants.Coronal);
+    public Sagittal: SliceControlViewModel = new SliceControlViewModel(tomographyConstants.Sagittal);
+    public Horizontal: SliceControlViewModel = new SliceControlViewModel(tomographyConstants.Horizontal);
+    public Coronal: SliceControlViewModel = new SliceControlViewModel(tomographyConstants.Coronal);
 
-    @computed get ReferenceSampleTomography(): SampleTomographyViewModel | null {
+    get ReferenceSampleTomography(): SampleTomographyViewModel | null {
 
         if (this._refTomography == null && this._tomographyDataStore.ReferenceTomography != null) {
             this._refTomography = new SampleTomographyViewModel(this._tomographyDataStore.ReferenceTomography);
@@ -123,25 +150,22 @@ export class TomographyViewModel {
         return this._refTomography;
     }
 
-    @computed
     public get title(): string {
         return this.Selection != null ? this.Selection.IsReferenceSample ? "Reference" : `Sample ${this.Selection.SampleIdNumber}` : "No Selection";
     }
 
-    @computed
     public get Selection(): SampleTomographyViewModel | null {
         return this._selection;
     };
 
-    @computed get CanSwapSample(): boolean {
+    get CanSwapSample(): boolean {
         return this.Selection !== null && (this.Selection !== this._refTomography || this._lastTomography !== null);
     }
 
-    @computed get CurrentLocation(): Point3D {
+    get CurrentLocation(): Point3D {
         return [this.Sagittal.Location, this.Horizontal.Location, this.Coronal.Location]
     }
 
-    @action
     public setSample(sample: ISample) {
         if (this._viewModels.has(sample.id)) {
             this._selection = this._viewModels.get(sample.id)!;
@@ -157,7 +181,6 @@ export class TomographyViewModel {
         }
     }
 
-    @action
     public swapSample() {
         if (this.Selection && this.Selection.IsReferenceSample) {
             this._selection = this._lastTomography;
