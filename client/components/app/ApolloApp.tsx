@@ -13,6 +13,7 @@ import {AppRouter} from "./AppRouter";
 import {PageHeader} from "../page/PageHeader";
 import {SettingsDialogContainer} from "../page/SettingsDialog";
 import {AppSystemConfiguration} from "./AppSystemConfiguration";
+import {NotificationsApp} from "./NotificationsApp";
 
 const toastStyleOverride = {
     minWidth: "600px",
@@ -69,10 +70,12 @@ export const ApolloApp = () => {
         <UserApp>
             <AppSystemConfiguration>
                 <AppConstants>
-                    <PageHeader/>
-                    <SettingsDialogContainer/>
-                    <ToastContainer autoClose={6000} position={ToastPosition.BOTTOM_CENTER} style={toastStyleOverride}/>
-                    <AppRouter/>
+                    <NotificationsApp>
+                        <PageHeader/>
+                        <SettingsDialogContainer/>
+                        <ToastContainer autoClose={6000} position={ToastPosition.BOTTOM_CENTER} style={toastStyleOverride}/>
+                        <AppRouter/>
+                    </NotificationsApp>
                 </AppConstants>
             </AppSystemConfiguration>
         </UserApp>

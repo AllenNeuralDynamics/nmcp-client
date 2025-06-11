@@ -1,5 +1,6 @@
-import {Route, Switch} from "react-router-dom";
 import * as React from "react";
+import {createContext} from "react";
+import {Route, Routes} from "react-router-dom";
 
 import {AppContent} from "./AppContent";
 import {Candidates} from "../candidates/Candidates";
@@ -10,13 +11,13 @@ import {Review} from "../review/Review";
 
 export const AppRouter = () => {
     return (
-        <Switch>
-            <Route path="/candidates" render={() => (<Candidates/>)}/>
-            <Route path="/reconstructions" render={() => (<Reconstructions/>)}/>
-            <Route path="/samples" render={() => (<Samples/>)}/>
-            <Route path="/review" render={() => (<Review/>)}/>
-            <Route path="/admin" render={() => (<Admin/>)}/>
-            <Route path="/" render={() => (<AppContent/>)}/>
-        </Switch>
+        <Routes>
+            <Route path="/candidates" element={<Candidates/>}/>
+            <Route path="/reconstructions" element={<Reconstructions/>}/>
+            <Route path="/samples" element={<Samples/>}/>
+            <Route path="/review" element={<Review/>}/>
+            <Route path="/admin" element={<Admin/>}/>
+            <Route path="/" element={<AppContent/>}/>
+        </Routes>
     );
 }

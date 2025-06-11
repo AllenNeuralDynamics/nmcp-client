@@ -1,5 +1,5 @@
-import React, {useState} from "react"
-import {Tab} from "semantic-ui-react"
+import React, {useContext, useState} from "react"
+import {Icon, Label, MenuItem, Tab} from "semantic-ui-react"
 
 import {UserPreferences} from "../../util/userPreferences";
 import {Users} from "./Users";
@@ -7,6 +7,7 @@ import {Collections} from "./Collections";
 import {Manage} from "./Manage";
 import {Published} from "./Published";
 import {Issues} from "./Issues";
+import {NotificationContext} from "../app/NotificationsApp";
 
 const panes = [
     {
@@ -22,7 +23,11 @@ const panes = [
         render: () => <Published/>
     },
     {
-        menuItem: {key: "issues", icon: "exclamation triangle", content: "Issues"},
+        menuItem:(
+            <MenuItem key='issues'>
+                <Icon name="exclamation triangle"/>
+                Issues<Label>15</Label>
+            </MenuItem>),
         render: () => <Issues/>
     },
     {
@@ -33,6 +38,16 @@ const panes = [
 
 export const Admin = () => {
     const [state, setState] = useState<number>(UserPreferences.Instance.AdminPageSelectedTab);
+
+    const notifications = useContext(NotificationContext);
+
+    panes[3].menuItem = (
+        <MenuItem key='issues'>
+            <Icon name="exclamation triangle"/>
+            Issues
+            <Label color="red" size="small">{notifications.issueCount}</Label>
+        </MenuItem>
+    );
 
     const onTabChanged = (_, {activeIndex}) => {
         UserPreferences.Instance.AdminPageSelectedTab = activeIndex;

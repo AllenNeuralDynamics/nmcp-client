@@ -1,7 +1,7 @@
 import * as React from "react";
 import {useContext, useState} from "react";
 import {NavLink} from "react-router-dom";
-import {Dropdown, Icon, Image, Menu, MenuItem, Modal} from "semantic-ui-react";
+import {Dropdown, Icon, Image, Label, Menu, MenuItem, Modal} from "semantic-ui-react";
 import {useIsAuthenticated} from "@azure/msal-react";
 import {observer} from "mobx-react-lite";
 
@@ -12,6 +12,7 @@ import {UserPermissions} from "../../graphql/user";
 
 import logo from "../../../assets/nmcp_logo.png";
 import {UserContext} from "../app/UserApp";
+import {NotificationContext} from "../app/NotificationsApp";
 
 type PageHeaderState = {
     showShortcuts?: boolean;
@@ -22,6 +23,8 @@ export const PageHeader = () => {
     const isAuthenticated = useIsAuthenticated();
 
     const user = useContext(UserContext);
+
+    const notifications = useContext(NotificationContext);
 
     const userCanView = user && (user.permissions & UserPermissions.ViewReconstructions) != 0
 
@@ -36,6 +39,10 @@ export const PageHeader = () => {
             Shortcuts
         </Dropdown.Item>
     ];
+
+    const issueCountLabel = (
+        <Label color="red" key="red" size="small" style={{marginLeft: "4px", marginTop: "2px"}}>{notifications.issueCount}</Label>
+    );
 
     return (
         <Menu inverted fluid stackable borderless={true} style={{marginBottom: "0px"}}>
@@ -59,7 +66,7 @@ export const PageHeader = () => {
                 <Menu.Item as={NavLink} exact to="/reconstructions" name="reconstructions" key="reconstructions">Reconstruct Neurons</Menu.Item> : null}
             {isAuthenticated && userCanReview ? <Menu.Item as={NavLink} exact to="/review" name="review" key="review">Review Reconstructions</Menu.Item> : null}
             {isAuthenticated && userCanEdit ? <Menu.Item as={NavLink} exact to="/samples" name="samples" key="samples">Add Samples</Menu.Item> : null}
-            {isAuthenticated && userCanAdmin ? <Menu.Item as={NavLink} exact to="/admin" name="admin" key="admin">Admin</Menu.Item> : null}
+            {isAuthenticated && userCanAdmin ? <Menu.Item as={NavLink} exact to="/admin" name="admin" key="admin">Admin{issueCountLabel}</Menu.Item> : null}
             <Menu.Menu position="right">
                 <Dropdown item text="Help">
                     <Dropdown.Menu>

@@ -32,6 +32,15 @@ export type IssueQueryResponse = {
     openIssues: IIssue[];
 }
 
+export const ISSUE_COUNT_QUERY = gql`
+    query ISSUE_COUNT_QUERY {
+        issueCount
+    }
+`;
+
+export type IssueCountResponse = {
+    issueCount: number;
+}
 
 //
 // Create Mutation
