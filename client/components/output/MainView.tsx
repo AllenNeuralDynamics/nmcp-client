@@ -25,6 +25,7 @@ import {Button, Message, Modal} from "semantic-ui-react";
 import {ViewerMeshVersion} from "../../models/compartmentMeshSet";
 import {UserPreferences} from "../../util/userPreferences";
 import {ViewerStyle} from "../../viewer/viewerStyle";
+import {toast} from "react-toastify";
 
 const neuronViewModelMap = new Map<string, NeuronViewModel>();
 
@@ -235,23 +236,15 @@ export class MainView extends React.Component<IOutputContainerProps, IOutputCont
 
                 let contents = data.contents;
 
-                let mime = "text/plain;charset=utf-8";
+                contents = dataToBlob(contents);
 
-                if (format === ExportFormat.SWC) {
-                    contents = dataToBlob(contents);
-
-                    if (ids.length > 1) {
-                        mime = "application/zip";
-                    }
-                } else {
-                    contents = JSON.stringify(contents, null, 2);
-                }
-
+                const mime = "application/zip";
 
                 saveFile(contents, `${data.filename}`, mime);
             }).catch((err) => {
                 console.log(err)
             });
+            toast.info("Export requested.  A download will being when the data is ready.", {autoClose: 2500});
         } catch (error) {
             console.log(error);
         }
