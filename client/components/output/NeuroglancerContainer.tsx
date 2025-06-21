@@ -27,7 +27,7 @@ export const NeuroglancerContainer = (props: NeuroglancerContainerProps) => {
     const [getNearest] = useLazyQuery<NearestNodeQueryResponse, NearestNodeQueryVariables>(NEAREST_NODE_QUERY);
 
     useEffect(() => {
-        const proxy = NeuroglancerProxy.configureSearchNeuroglancer("neuroglancer-container", UserPreferences.Instance.searchViewerState, selectNeuron);
+        const proxy = NeuroglancerProxy.configureSearchNeuroglancer("neuroglancer-container", UserPreferences.Instance.searchViewerState, selectNeuron, selectSoma);
 
         setNgProxy(proxy);
 
@@ -39,9 +39,9 @@ export const NeuroglancerContainer = (props: NeuroglancerContainerProps) => {
     useEffect(() => {
         if (ngProxy) {
             const somas = props.neuronViewModels.filter(n => n.CurrentViewMode == NEURON_VIEW_MODE_SOMA)
-                .map(n => n.somaOnlyTracing.soma).filter(s => s);
+                .filter(n => n.somaOnlyTracing.soma);
 
-            ngProxy.updateSearchReconstructions(nodesAsAnnotation(somas), props.neuronViewModels);
+            ngProxy.updateSearchReconstructions(somas, props.neuronViewModels);
         }
     }, [props.neuronViewModels, props.nonce]);
 
@@ -62,6 +62,12 @@ export const NeuroglancerContainer = (props: NeuroglancerContainerProps) => {
                     }
                 }
             });
+        }
+    }
+
+    const selectSoma = (node: ITracingNode, neuron: NeuronViewModel) => {
+        if (node && neuron) {
+            props.onSelectNode(node, neuron.tracings[0], false, false, false);
         }
     }
 

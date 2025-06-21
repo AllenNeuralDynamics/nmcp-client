@@ -1,7 +1,7 @@
 import * as React from "react";
 import {useEffect, useState} from "react";
 
-import {createNeuroglancerAnnotationLayer, INeuron} from "../../models/neuron";
+import {createCandidateAnnotationLayer, INeuron} from "../../models/neuron";
 import {NeuroglancerProxy} from "../../viewer/neuroglancer/neuroglancer";
 import {Button} from "semantic-ui-react";
 import {UserPreferences} from "../../util/userPreferences";
@@ -17,7 +17,7 @@ export const CandidatesViewer = (props: ITracingsTableProps) => {
     const [ngProxy, setNgProxy] = useState<NeuroglancerProxy>(null)
 
     useEffect(() => {
-        const annotations = createNeuroglancerAnnotationLayer(props.neurons, props.selectedId);
+        const annotations = createCandidateAnnotationLayer(props.neurons, props.selectedId);
 
         const proxy = NeuroglancerProxy.configureCandidateNeuroglancer("neuroglancer-container", UserPreferences.Instance.candidateViewerState, annotations, selectNeuron);
 
@@ -30,7 +30,7 @@ export const CandidatesViewer = (props: ITracingsTableProps) => {
 
     useEffect(() => {
         if (ngProxy) {
-            const annotations = createNeuroglancerAnnotationLayer(props.neurons, props.selectedId);
+            const annotations = createCandidateAnnotationLayer(props.neurons, props.selectedId);
 
             let selectedSkeletonSegmentId = null;
 
@@ -55,7 +55,7 @@ export const CandidatesViewer = (props: ITracingsTableProps) => {
     const resetView = () => {
         ngProxy.resetNeuroglancerState();
 
-        const annotations = createNeuroglancerAnnotationLayer(props.neurons, props.selectedId);
+        const annotations = createCandidateAnnotationLayer(props.neurons, props.selectedId);
 
         ngProxy.updateCandidateAnnotations(annotations);
     };

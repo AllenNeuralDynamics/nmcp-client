@@ -7,12 +7,18 @@ import {UserPreferences} from "../../util/userPreferences";
 import {NeuronViewModel} from "../../viewmodel/neuronViewModel";
 import {getSegmentColorMap} from "../../util/colors";
 import {NEURON_VIEW_MODE_ALL, NEURON_VIEW_MODE_AXON, NEURON_VIEW_MODE_DENDRITE, NEURON_VIEW_MODE_SOMA} from "../../viewmodel/neuronViewMode";
+import {INeuron} from "../../models/neuron";
+import {ITracingNode} from "../../models/tracingNode";
 
 // TODO: env var
 const PRECOMPUTED_URL = "precomputed://s3://aind-neuron-morphology-community-portal-dev-u5u0i5";
 
-export type SearchSelectionDelegate = {
+export type NeuronSelectionDelegate = {
     (neuron: NeuronViewModel, position: number[]): void;
+}
+
+export type SomaSelectionDelegate = {
+    (soma: ITracingNode, neuron: NeuronViewModel): void;
 }
 
 export type CandidateSelectionDelegate = {
@@ -46,6 +52,8 @@ export class NeuroglancerProxy {
     private _defaultState: any = null;
 
     private _modelMap = new Map<number, NeuronViewModel>();
+    private _somaModelMap = new Map<string, NeuronViewModel>();
+    private _somaNodeMap = new Map<string, ITracingNode>();
 
     public static configureCandidateNeuroglancer(id: string, state: any, annotations: any, selectionDelegate: CandidateSelectionDelegate): NeuroglancerProxy {
         const [proxy, target] = NeuroglancerProxy.createCommon(id);
@@ -95,25 +103,35 @@ export class NeuroglancerProxy {
         return proxy;
     }
 
-    public static configureSearchNeuroglancer(id: string, state: any, selectionDelegate: SearchSelectionDelegate): NeuroglancerProxy {
+    public static configureSearchNeuroglancer(id: string, state: any, neuronSelectionDelegate: NeuronSelectionDelegate, somaSelectionDelegate: SomaSelectionDelegate): NeuroglancerProxy {
         const [proxy, target] = NeuroglancerProxy.createCommon(id);
 
-        if (selectionDelegate) {
+        if (neuronSelectionDelegate) {
             registerEventListener(target, "click", (e: Event) => {
                 if (proxy._viewer) {
                     const selected = proxy._viewer.layerSelectedValues.toJSON();
+
+                    if (!selected) {
+                        return;
+                    }
+
                     let found = false;
+
                     SearchSelectionLayers.forEach(layer => {
-                        if (!found && selected && selected[layer.name] && selected[layer.name]["value"] && selected[layer.name]["value"]["key"]) {
+                        if (!found && selected[layer.name] && selected[layer.name]["value"] && selected[layer.name]["value"]["key"]) {
                             try {
                                 const id = parseInt(selected[layer.name]["value"]["key"]);
                                 state = proxy._viewer.mouseState;
-                                selectionDelegate(proxy._modelMap.get(id), state.position);
+                                neuronSelectionDelegate(proxy._modelMap.get(id), state.position);
                                 found = true;
                             } catch {
                             }
                         }
                     });
+                    if (!found && selected[SearchSomaAnnotationLayer.name] && selected[SearchSomaAnnotationLayer.name]["annotationId"]) {
+                        const somaId = selected[SearchSomaAnnotationLayer.name]["annotationId"];
+                        somaSelectionDelegate(proxy._somaNodeMap.get(somaId), proxy._somaModelMap.get(somaId));
+                    }
                 }
             });
         }
@@ -218,14 +236,36 @@ export class NeuroglancerProxy {
         }
     }
 
-    public updateSearchReconstructions(somas: any[], neurons: NeuronViewModel[] = []) {
+    public updateSearchReconstructions(somas: NeuronViewModel[], neurons: NeuronViewModel[] = []) {
         const state = this._viewer.state.toJSON();
 
         this._modelMap.clear();
+
+        this._somaModelMap.clear();
+        this._somaNodeMap.clear();
+
         neurons.forEach(n => this._modelMap.set(n.SkeletonSegmentId, n));
 
         if (state.layers?.length >= SearchSomaAnnotationLayer.index) {
-            state.layers[SearchSomaAnnotationLayer.index].annotations = somas;
+            const annotations = somas.map(n => {
+                const soma = n.somaOnlyTracing.soma;
+
+                this._somaModelMap.set(soma.id, n);
+                this._somaNodeMap.set(soma.id, soma);
+
+                return {
+                    type: "point",
+                    id: soma.id,
+                    point: [
+                        soma.z / 10,
+                        soma.y / 10,
+                        soma.x / 10
+                    ],
+                    props: [n.baseColor, 3]
+                };
+            });
+
+            state.layers[SearchSomaAnnotationLayer.index].annotations = annotations;
         }
 
         this.updateSearchReconstructionLayers(state, neurons.filter(n => n.CurrentViewMode == NEURON_VIEW_MODE_ALL), SearchReconstructionLayer, SearchReconstructionMirrorLayer);

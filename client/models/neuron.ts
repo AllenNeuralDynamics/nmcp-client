@@ -157,7 +157,7 @@ export function parseAnnotationMetadata(data: string): IParsedAnnotationMetadata
     return null;
 }
 
-export function createNeuroglancerAnnotationLayer(neurons: INeuron[], selectedId: string) {
+export function createCandidateAnnotationLayer(neurons: INeuron[], selectedId: string) {
     const defaultColor = selectedId ? "#2184d033" : "#2184d0ff";
     const defaultSize = selectedId ? 3 : 5;
 
