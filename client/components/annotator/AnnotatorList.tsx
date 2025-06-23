@@ -13,7 +13,7 @@ interface IAnnotatorListProps {
 
 export const AnnotatorList = (props: IAnnotatorListProps) => {
     const annotations = props.showCompleteOnly ?
-        props.annotations.filter(a => a.status == ReconstructionStatus.Complete || a.status == ReconstructionStatus.Approved) :
+        props.annotations.filter(a => a.status == ReconstructionStatus.Published || a.status == ReconstructionStatus.Approved) :
         props.annotations;
 
     const displayFunction = props.showProofreader ? displayProofreader : displayAnnotation;

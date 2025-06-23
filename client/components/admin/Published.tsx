@@ -101,7 +101,7 @@ const ReconstructionSelection = (props: ReconstructionSelectionProps) => {
     const [state, setState] = useState({sample: null});
 
     const {loading: sampleLoading, error: sampleError, data: sampleData} = useQuery<SamplesQueryResponse, SamplesQueryVariables>(SAMPLES_QUERY, {
-        pollInterval: 10000, variables: {input: {reconstructionStatus: ReconstructionStatus.Complete}}
+        pollInterval: 10000, variables: {input: {reconstructionStatus: ReconstructionStatus.Published}}
     });
 
     const [getNeurons, {
@@ -190,7 +190,7 @@ const ReconstructionSelection = (props: ReconstructionSelectionProps) => {
         setState({...state, sample: value});
 
         if (value) {
-            await getNeurons({variables: {input: {sampleIds: [value], reconstructionStatus: ReconstructionStatus.Complete}}})
+            await getNeurons({variables: {input: {sampleIds: [value], reconstructionStatus: ReconstructionStatus.Published}}})
         }
     }
 

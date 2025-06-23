@@ -98,7 +98,8 @@ export const Users = () => {
                             <Table.HeaderCell>Contact</Table.HeaderCell>
                             <Table.HeaderCell>View</Table.HeaderCell>
                             <Table.HeaderCell>Edit</Table.HeaderCell>
-                            <Table.HeaderCell>Review</Table.HeaderCell>
+                            <Table.HeaderCell>Peer Review</Table.HeaderCell>
+                            <Table.HeaderCell>Publish</Table.HeaderCell>
                             <Table.HeaderCell>Admin</Table.HeaderCell>
                             <Table.HeaderCell>Type</Table.HeaderCell>
                         </Table.Row>
@@ -179,7 +180,12 @@ const UserRow = (props: IUserRowProps) => {
             <TableCell>
                 <PermissionsCheckBox userId={props.user.id} updatePermissions={updatePermissions}
                                      userPermissions={props.user.permissions}
-                                     permission={UserPermissions.Review}/>
+                                     permission={UserPermissions.PeerReview}/>
+            </TableCell>
+            <TableCell>
+                <PermissionsCheckBox userId={props.user.id} updatePermissions={updatePermissions}
+                                     userPermissions={props.user.permissions}
+                                     permission={UserPermissions.FullReview}/>
             </TableCell>
             <TableCell>
                 <PermissionsCheckBox userId={props.user.id} updatePermissions={updatePermissions}

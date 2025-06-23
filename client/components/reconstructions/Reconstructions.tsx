@@ -15,6 +15,7 @@ import {reconstructionStatusColor, reconstructionStatusString} from "../../model
 import {AnnotatorList} from "../annotator/AnnotatorList";
 import {ReconstructionActionPanel} from "./ReconstructionActionPanel";
 import {SAMPLES_QUERY, SamplesQueryResponse} from "../../graphql/sample";
+import {UserPreferences} from "../../util/userPreferences";
 
 const statusFilterOptions = [
     {key: "complete", text: "Published", value: 8},
@@ -34,7 +35,7 @@ export const Reconstructions = () => {
     const [state, setState] = useState({
         offset: 0,
         limit: 10,
-        userOnly: false,
+        userOnly: UserPreferences.Instance.ReconstructionNeuronsUserOnly,
         limitStatus: false,
         statusFilter: [],
         limitSamples: false,
@@ -83,6 +84,11 @@ export const Reconstructions = () => {
     const sampleFilterOptions = samples.slice().sort((s1, s2) => s1.animalId < s2.animalId ? -1 : 1).map(s => {
         return {key: s.id, text: s.animalId, value: s.id}
     });
+
+    const onUserOnlyChange = (userOnly: boolean) => {
+        UserPreferences.Instance.ReconstructionNeuronsUserOnly = userOnly;
+        setState({...state, userOnly: userOnly})
+    }
 
     const onSampleFilterChange = (data: any) => {
         setState({...state, sampleIds: data, offset: 0});
@@ -149,7 +155,7 @@ export const Reconstructions = () => {
                     <List horizontal divided>
                         <List.Item>
                             <Checkbox toggle label="My reconstructions only" checked={state.userOnly}
-                                      onChange={(_, data) => setState({...state, userOnly: data.checked})}/>
+                                      onChange={(_, data) => onUserOnlyChange(data.checked)}/>
                         </List.Item>
                         <List.Item>
                             <Checkbox style={{verticalAlign: "middle"}} toggle label="Limit samples to "

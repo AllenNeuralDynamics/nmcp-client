@@ -5,11 +5,11 @@ export enum ReconstructionStatus {
     InProgress = 1,
     OnHold = 2,
     InReview = 3,
-    Returned = 4,
+    InPeerReview = 4,
     Approved = 5,
     Rejected = 6,
-    Complete = 8,
-    Invalid = 9
+    Published = 8,
+    Invalid = 99
 }
 
 export function reconstructionStatusString(status: ReconstructionStatus): string {
@@ -20,13 +20,13 @@ export function reconstructionStatusString(status: ReconstructionStatus): string
             return "On Hold";
         case ReconstructionStatus.InReview:
             return "In Review";
-        case ReconstructionStatus.Returned:
-            return "Returned";
+        case ReconstructionStatus.InPeerReview:
+            return "In Peer Review";
         case ReconstructionStatus.Approved:
             return "Approved";
         case ReconstructionStatus.Rejected:
             return "Rejected";
-        case ReconstructionStatus.Complete:
+        case ReconstructionStatus.Published:
             return "Published";
         default:
             return "Unknown";
@@ -41,13 +41,13 @@ export function reconstructionStatusColor(status: ReconstructionStatus): Semanti
             return "orange";
         case ReconstructionStatus.InReview:
             return "blue";
-        case ReconstructionStatus.Returned:
+        case ReconstructionStatus.InPeerReview:
             return "orange";
         case ReconstructionStatus.Approved:
             return "purple";
         case ReconstructionStatus.Rejected:
             return "red";
-        case ReconstructionStatus.Complete:
+        case ReconstructionStatus.Published:
             return "teal";
         default:
             return null;

@@ -129,7 +129,7 @@ export const REVIEWABLE_ANNOTATIONS_QUERY = gql`query ReviewableReconstructions(
 ${ReconstructionFieldsFragment}`;
 
 //
-// Request Reconstruction Mutation
+// Request Annotation Mutation
 //
 export const REQUEST_ANNOTATION_MUTATION = gql`mutation RequestAnnotation($id: String!) {
     requestReconstruction(id: $id) {
@@ -144,6 +144,25 @@ export type RequestAnnotationVariables = {
 export type RequestAnnotationResponse = {
     requestReconstruction: INeuron;
 }
+
+//
+// Request Peer Review Mutation
+//
+export const REQUEST_PEER_REVIEW_MUTATION = gql`mutation RequestPeerReview($id: String!) {
+    requestReconstructionPeerReview(id: $id) {
+        message
+        name
+    }
+}`;
+
+export type RequestPeerReviewVariables = {
+    id: string;
+}
+
+export type RequestPeerReviewResponse = {
+    requestReconstructionPeerReview: ErrorOutput;
+}
+
 
 //
 // Request Review Mutation

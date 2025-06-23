@@ -30,7 +30,7 @@ export const PageHeader = () => {
 
     const userCanEdit = user && (user.permissions & UserPermissions.Edit) != 0
 
-    const userCanReview = user && (user.permissions & UserPermissions.Review) != 0
+    const userCanReview = user && (user.permissions & UserPermissions.FullReview) != 0
 
     const userCanAdmin = user && (user.permissions & UserPermissions.Admin) != 0
 

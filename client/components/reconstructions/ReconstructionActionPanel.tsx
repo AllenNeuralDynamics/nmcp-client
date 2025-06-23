@@ -10,13 +10,13 @@ import {
     CancelAnnotationVariables,
     REQUEST_ANNOTATION_HOLD_MUTATION,
     REQUEST_ANNOTATION_MUTATION,
-    REQUEST_ANNOTATION_REVIEW_MUTATION,
+    REQUEST_ANNOTATION_REVIEW_MUTATION, REQUEST_PEER_REVIEW_MUTATION,
     RequestAnnotationHoldResponse,
     RequestAnnotationHoldVariables,
     RequestAnnotationResponse,
     RequestAnnotationReviewResponse,
     RequestAnnotationReviewVariables,
-    RequestAnnotationVariables
+    RequestAnnotationVariables, RequestPeerReviewResponse, RequestPeerReviewVariables
 } from "../../graphql/reconstruction";
 import {UserPreferences} from "../../util/userPreferences";
 
@@ -48,29 +48,34 @@ export const ReconstructionActionPanel = (props: ReconstructionPanelProps) => {
             refetchQueries: ["ReconstructionsQuery"]
         });
 
-    const [requestAnnotationReview, {data: reviewData}] = useMutation<RequestAnnotationReviewResponse, RequestAnnotationReviewVariables>(REQUEST_ANNOTATION_REVIEW_MUTATION,
+    const [requestReconstructionPeerReview, {data: peerReviewData}] = useMutation<RequestPeerReviewResponse, RequestPeerReviewVariables>(REQUEST_PEER_REVIEW_MUTATION,
         {
             refetchQueries: ["ReconstructionsQuery"]
         });
 
     let reopenButton = null;
     let holdButton = null;
+    let peerReviewButton = null;
     let reviewButton = null;
     let cancelButton = null;
 
     if (props.reconstruction.annotatorId == props.userId) {
-        if (props.reconstruction.status != ReconstructionStatus.Complete) {
+        if (props.reconstruction.status != ReconstructionStatus.Published) {
             cancelButton = (
                 <Button icon="cancel" size="mini" color='red' content="Cancel" onClick={() => cancelAnnotation({variables: {id: props.reconstruction.id}})}/>)
         }
 
-        if (props.reconstruction.status == ReconstructionStatus.InReview || props.reconstruction.status == ReconstructionStatus.OnHold) {
+        if (props.reconstruction.status == ReconstructionStatus.InReview || props.reconstruction.status == ReconstructionStatus.InPeerReview || props.reconstruction.status == ReconstructionStatus.OnHold) {
             reopenButton = (<Button icon="folder open outline" color="green" size="mini" content="Reopen"
                                     onClick={() => requestAnnotation({variables: {id: props.reconstruction.neuron.id}})}/>)
         }
 
         if (props.reconstruction.status == ReconstructionStatus.InProgress) {
-            reviewButton = (<Button icon="check circle outline" size="mini" color="violet" content="Request Review"
+            /*
+            peerReviewButton = (<Button icon="check circle outline" size="mini" color="orange" content="Request Peer Review"
+                                    onClick={() => requestReconstructionPeerReview({variables: {id: props.reconstruction.id}})}/>)
+             */
+            reviewButton = (<Button icon="check circle outline" size="mini" color="violet" content="Request Publish Review"
                                     onClick={() => props.showCompleteDialog(props.reconstruction.id)}/>)
             holdButton = (
                 <Button icon="pause" size="mini" color="yellow" content="Hold"
@@ -99,6 +104,7 @@ export const ReconstructionActionPanel = (props: ReconstructionPanelProps) => {
             </div>
             <div>
                 {reviewButton}
+                {peerReviewButton}
                 {holdButton}
                 {reopenButton}
                 {cancelButton}

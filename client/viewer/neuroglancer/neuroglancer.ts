@@ -404,6 +404,7 @@ const defaultCandidateState = {
     "projectionOrientation": [],
     "crossSectionScale": 2.7182818284590446,
     "projectionScale": 2048,
+    "showAxisLines": false,
     "layers": [
         {
             "type": "annotation",
@@ -510,6 +511,7 @@ const defaultSearchState = {
         0.8254639506340027
     ],
     "projectionScale": 2048,
+    "showAxisLines": false,
     "layers": [
         {
             "type": "segmentation",

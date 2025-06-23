@@ -1,6 +1,10 @@
 import gql from "graphql-tag";
 import {IUser} from "../models/user";
 
+/*
+    This will toggle display of a top-level tab, but does not affect the data shown or requests that can be made.  That is enforced through authorization
+    on the backend.
+ */
 export enum UserPermissions {
     None = 0x00,
     View = 0x01,
@@ -10,9 +14,10 @@ export enum UserPermissions {
     Edit = 0x10,
     // Any edit permutations through 0x800
     EditAll = Edit,
-    Review = 0x100,
+    FullReview = 0x100,
+    PeerReview = 0x200,
     // Any review permutations through 0x8000
-    ReviewAll = Review,
+    ReviewAll = PeerReview | FullReview,
     Admin = 0x1000,
     // Any admin permutations through 0x80000
     AdminAll = Admin

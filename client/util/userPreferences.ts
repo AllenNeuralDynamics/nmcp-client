@@ -27,6 +27,7 @@ const HideCursorOnPage = "viewer.hideCursorOnPage";
 const ViewerStylePreference = "viewer.viewerStyle";
 const AdminPageSelectedTab = "admin.selectedTab";
 const ShowReferenceIds = "selection.showReferenceIds";
+const ReconstructionNeuronsUserOnly = "reconstruct.neurons.userOnly";
 
 export class UserPreferences extends PreferencesManager {
     private static _instance: UserPreferences = null;
@@ -232,6 +233,16 @@ export class UserPreferences extends PreferencesManager {
         this.saveLocalValue(ShowReferenceIds, b);
 
         this.notifyListeners("showReferenceIds", b);
+    }
+
+    public get ReconstructionNeuronsUserOnly(): boolean {
+        return this.loadLocalValue(ReconstructionNeuronsUserOnly, false);
+    }
+
+    public set ReconstructionNeuronsUserOnly(b: boolean) {
+        this.saveLocalValue(ReconstructionNeuronsUserOnly, b);
+
+        this.notifyListeners("reconstructionNeuronsUserOnly", b);
     }
 
 
