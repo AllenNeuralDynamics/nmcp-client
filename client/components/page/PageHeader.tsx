@@ -40,9 +40,9 @@ export const PageHeader = () => {
         </Dropdown.Item>
     ];
 
-    const issueCountLabel = (
+    const issueCountLabel = notifications.issueCount > 0 ? (
         <Label color="red" key="red" size="small" style={{marginLeft: "4px", marginTop: "2px"}}>{notifications.issueCount}</Label>
-    );
+    ) : null;
 
     return (
         <Menu inverted fluid stackable borderless={true} style={{marginBottom: "0px"}}>

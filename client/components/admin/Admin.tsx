@@ -26,7 +26,7 @@ const panes = [
         menuItem:(
             <MenuItem key='issues'>
                 <Icon name="exclamation triangle"/>
-                Issues<Label>15</Label>
+                Issues<Label>0</Label>
             </MenuItem>),
         render: () => <Issues/>
     },
@@ -41,11 +41,16 @@ export const Admin = () => {
 
     const notifications = useContext(NotificationContext);
 
-    panes[3].menuItem = (
+    panes[3].menuItem = notifications.issueCount > 0 ? (
         <MenuItem key='issues'>
             <Icon name="exclamation triangle"/>
             Issues
             <Label color="red" size="small">{notifications.issueCount}</Label>
+        </MenuItem>
+    ) : (
+        <MenuItem key='issues'>
+            <Icon name="exclamation triangle"/>
+            Issues
         </MenuItem>
     );
 
