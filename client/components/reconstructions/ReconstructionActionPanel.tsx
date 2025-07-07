@@ -10,13 +10,10 @@ import {
     CancelAnnotationVariables,
     REQUEST_ANNOTATION_HOLD_MUTATION,
     REQUEST_ANNOTATION_MUTATION,
-    REQUEST_ANNOTATION_REVIEW_MUTATION, REQUEST_PEER_REVIEW_MUTATION,
     RequestAnnotationHoldResponse,
     RequestAnnotationHoldVariables,
     RequestAnnotationResponse,
-    RequestAnnotationReviewResponse,
-    RequestAnnotationReviewVariables,
-    RequestAnnotationVariables, RequestPeerReviewResponse, RequestPeerReviewVariables
+    RequestAnnotationVariables
 } from "../../graphql/reconstruction";
 import {UserPreferences} from "../../util/userPreferences";
 
@@ -25,7 +22,7 @@ export type ReconstructionPanelProps = {
     reconstruction: IReconstruction;
     userId: string;
 
-    showCompleteDialog(id: string): void;
+    showRequestReviewDialog(id: string, status: ReconstructionStatus): void;
 }
 
 export const ReconstructionActionPanel = (props: ReconstructionPanelProps) => {
@@ -48,11 +45,6 @@ export const ReconstructionActionPanel = (props: ReconstructionPanelProps) => {
             refetchQueries: ["ReconstructionsQuery"]
         });
 
-    const [requestReconstructionPeerReview, {data: peerReviewData}] = useMutation<RequestPeerReviewResponse, RequestPeerReviewVariables>(REQUEST_PEER_REVIEW_MUTATION,
-        {
-            refetchQueries: ["ReconstructionsQuery"]
-        });
-
     let reopenButton = null;
     let holdButton = null;
     let peerReviewButton = null;
@@ -71,14 +63,11 @@ export const ReconstructionActionPanel = (props: ReconstructionPanelProps) => {
         }
 
         if (props.reconstruction.status == ReconstructionStatus.InProgress) {
-            /*
             peerReviewButton = (<Button icon="check circle outline" size="mini" color="orange" content="Request Peer Review"
-                                    onClick={() => requestReconstructionPeerReview({variables: {id: props.reconstruction.id}})}/>)
-             */
+                                    onClick={() => props.showRequestReviewDialog(props.reconstruction.id, ReconstructionStatus.InPeerReview)}/>)
             reviewButton = (<Button icon="check circle outline" size="mini" color="violet" content="Request Publish Review"
-                                    onClick={() => props.showCompleteDialog(props.reconstruction.id)}/>)
-            holdButton = (
-                <Button icon="pause" size="mini" color="yellow" content="Hold"
+                                    onClick={() => props.showRequestReviewDialog(props.reconstruction.id, ReconstructionStatus.InReview)}/>)
+            holdButton = (<Button icon="pause" size="mini" color="yellow" content="Hold"
                         onClick={() => requestAnnotationHold({variables: {id: props.reconstruction.id}})}/>)
         }
     }

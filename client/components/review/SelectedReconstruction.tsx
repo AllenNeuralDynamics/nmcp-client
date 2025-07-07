@@ -18,7 +18,7 @@ import {toast} from "react-toastify";
 import {IReconstruction} from "../../models/reconstruction";
 import {CreateTracing} from "./upload/CreateTracing";
 import {ConstantsContext} from "../app/AppConstants";
-import {CompleteReconstructionPanel} from "../reconstructions/CompleteReconstructionPanel";
+import {RequestReviewPanel} from "../reconstructions/RequestReviewPanel";
 import {
     UPDATE_RECONSTRUCTION_MUTATION,
     UpdateReconstructionResponse,
@@ -121,9 +121,9 @@ export const SelectedReconstruction = (props: SelectedReconstructionProps) => {
                                     </Grid.Column>
                                 </GridRow>
                             </Grid>
-                            <CompleteReconstructionPanel id={props.reconstruction.id} data={state}
-                                                         updateChecks={updateChecks} updateLength={updateLength}
-                                                         updateNotes={updateNotes} updateDuration={updateDuration}/>
+                            <RequestReviewPanel id={props.reconstruction.id} data={state}
+                                                updateChecks={updateChecks} updateLength={updateLength}
+                                                updateNotes={updateNotes} updateDuration={updateDuration}/>
                             <br/> <br/>
                             <Label>
                                 <Icon name="info circle" color="blue"/>

@@ -129,6 +129,40 @@ export const REVIEWABLE_ANNOTATIONS_QUERY = gql`query ReviewableReconstructions(
 ${ReconstructionFieldsFragment}`;
 
 //
+// Peer Reviewable Annotations
+//
+
+export type PeerReviewableVariables = {
+    input: {
+        offset: number;
+        limit: number;
+        sampleIds: string[];
+        tag: string;
+    }
+}
+
+export type PeerReviewableResponse = {
+    peerReviewableReconstructions: {
+        offset: number;
+        limit: number;
+        totalCount: number;
+        reconstructions: IReconstruction[];
+    };
+}
+
+export const PEER_REVIEWABLE_ANNOTATIONS_QUERY = gql`query PeerReviewableReconstructions($input: PeerReviewPageInput) {
+    peerReviewableReconstructions(input: $input) {
+        offset
+        limit
+        totalCount
+        reconstructions {
+            ...ReconstructionFields
+        }
+    }
+}
+${ReconstructionFieldsFragment}`;
+
+//
 // Request Annotation Mutation
 //
 export const REQUEST_ANNOTATION_MUTATION = gql`mutation RequestAnnotation($id: String!) {
@@ -148,8 +182,8 @@ export type RequestAnnotationResponse = {
 //
 // Request Peer Review Mutation
 //
-export const REQUEST_PEER_REVIEW_MUTATION = gql`mutation RequestPeerReview($id: String!) {
-    requestReconstructionPeerReview(id: $id) {
+export const REQUEST_PEER_REVIEW_MUTATION = gql`mutation RequestPeerReview($id: String!, $duration: Float!, $length: Float!, $notes: String!, $checks: String!) {
+    requestReconstructionPeerReview(id: $id, duration: $duration, length: $length, notes: $notes, checks: $checks) {
         message
         name
     }
@@ -157,6 +191,10 @@ export const REQUEST_PEER_REVIEW_MUTATION = gql`mutation RequestPeerReview($id: 
 
 export type RequestPeerReviewVariables = {
     id: string;
+    duration: number;
+    length: number;
+    notes: string;
+    checks: string;
 }
 
 export type RequestPeerReviewResponse = {
@@ -219,6 +257,24 @@ export type RequestAnnotationHoldResponse = {
 }
 
 //
+// Approve Reconstruction Peer Review Mutation
+//
+export const APPROVE_RECONSTRUCTION_PEER_REVIEW_MUTATION = gql`mutation ApproveReconstructionPeerReview($id: String!) {
+    approveReconstructionPeerReview(id: $id) {
+        message
+        name
+    }
+}`;
+
+export type ApproveReconstructionPeerReviewVariables = {
+    id: string;
+}
+
+export type ApproveReconstructionPeerReviewResponse = {
+    approveReconstructionPeerReview: ErrorOutput;
+}
+
+//
 // Approve Annotation Mutation
 //
 export const APPROVE_ANNOTATION_MUTATION = gql`mutation ApproveAnnotation($id: String!) {
@@ -278,19 +334,19 @@ export type CancelAnnotationMutationResponse = {
 }
 
 //
-// Complete Reconstruction Mutation
+// Publish Reconstruction Mutation
 //
-export const COMPLETE_ANNOTATION_MUTATION = gql`mutation CompleteAnnotation($id: String!) {
-    completeReconstruction(id: $id) {
+export const PUBLISH_RECONSTRUCTION_MUTATION = gql`mutation PublishReconstruction($id: String!) {
+    publishReconstruction(id: $id) {
         message
         name
     }
 }`;
 
-export type CompleteReconstructionVariables = {
+export type PublishReconstructionVariables = {
     id: string;
 }
 
-export type CompleteReconstructionResponse = {
-    completeReconstruction: ErrorOutput;
+export type PublishReconstructionResponse = {
+    publishReconstruction: ErrorOutput;
 }

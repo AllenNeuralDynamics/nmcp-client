@@ -26,13 +26,13 @@ export const PageHeader = () => {
 
     const notifications = useContext(NotificationContext);
 
-    const userCanView = user && (user.permissions & UserPermissions.ViewReconstructions) != 0
+    const userCanView = user && (user.permissions & UserPermissions.ViewReconstructions) != 0;
 
-    const userCanEdit = user && (user.permissions & UserPermissions.Edit) != 0
+    const userCanEdit = user && (user.permissions & UserPermissions.Edit) != 0;
 
-    const userCanReview = user && (user.permissions & UserPermissions.FullReview) != 0
+    const userCanReview = user && ((user.permissions & UserPermissions.FullReview) != 0) || ((user.permissions & UserPermissions.PeerReview) != 0);
 
-    const userCanAdmin = user && (user.permissions & UserPermissions.Admin) != 0
+    const userCanAdmin = user && (user.permissions & UserPermissions.Admin) != 0;
 
     const helpItems = [
         <Dropdown.Item key={"2"} onClick={() => setState({showShortcuts: true})}>

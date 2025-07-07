@@ -4,14 +4,14 @@ import moment from "moment";
 import {Checkbox, Dropdown, Header, Label, List, Segment, Table, TableCell, TableRow} from "semantic-ui-react";
 import {useQuery} from "@apollo/client";
 
-import {RECONSTRUCTIONS_QUERY, ReconstructionVariables, ReconstructionsResponse} from "../../graphql/reconstruction";
+import {RECONSTRUCTIONS_QUERY, ReconstructionsResponse, ReconstructionVariables} from "../../graphql/reconstruction";
 import {displayNeuron} from "../../models/neuron";
 import {displayBrainArea} from "../../models/brainArea";
 import {IReconstruction} from "../../models/reconstruction";
 import {PaginationHeader} from "../editors/PaginationHeader";
-import {CompleteReconstructionDialog} from "./CompleteReconstructionDialog";
+import {RequestReviewDialog} from "./RequestReviewDialog";
 import {UserContext} from "../app/UserApp";
-import {reconstructionStatusColor, reconstructionStatusString} from "../../models/reconstructionStatus";
+import {ReconstructionStatus, reconstructionStatusColor, reconstructionStatusString} from "../../models/reconstructionStatus";
 import {AnnotatorList} from "../annotator/AnnotatorList";
 import {ReconstructionActionPanel} from "./ReconstructionActionPanel";
 import {SAMPLES_QUERY, SamplesQueryResponse} from "../../graphql/sample";
@@ -45,7 +45,8 @@ export const Reconstructions = () => {
 
     const [isCompleteDialogVisible, setIsCompleteDialogVisible] = useState(false);
 
-    const [markCompleteId, setMarkCompleteId] = useState("");
+    const [reviewRequestId, setReviewRequestId] = useState("");
+    const [reviewRequestStatus, setReviewRequestStatus] = useState(ReconstructionStatus.Unknown);
 
     const user = useContext(UserContext);
 
@@ -108,7 +109,7 @@ export const Reconstructions = () => {
     });
 
     const completeDialog = isCompleteDialogVisible ? (
-        <CompleteReconstructionDialog id={markCompleteId} show={true} onClose={() => setIsCompleteDialogVisible(false)}/>) : null;
+        <RequestReviewDialog id={reviewRequestId} show={true} requestedStatus={reviewRequestStatus} onClose={() => setIsCompleteDialogVisible(false)}/>) : null;
 
     const onUpdateOffsetForPage = (page: number) => {
         const offset = state.limit * (page - 1);
@@ -185,8 +186,9 @@ export const Reconstructions = () => {
                                       onUpdateOffsetForPage={onUpdateOffsetForPage}/>
                 </Segment>
                 <Segment secondary>
-                    <ReconstructionActionPanel reconstruction={selectedReconstruction} userId={user.id} showCompleteDialog={(id: string) => {
-                        setMarkCompleteId(id);
+                    <ReconstructionActionPanel reconstruction={selectedReconstruction} userId={user.id} showRequestReviewDialog={(id: string, status: ReconstructionStatus) => {
+                        setReviewRequestId(id);
+                        setReviewRequestStatus(status);
                         setIsCompleteDialogVisible(true);
                     }}/>
                 </Segment>

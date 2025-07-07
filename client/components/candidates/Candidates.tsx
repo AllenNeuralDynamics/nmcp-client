@@ -22,6 +22,7 @@ import {BrainAreaMultiSelect} from "../editors/BrainAreaMultiSelect";
 import {ConstantsContext} from "../app/AppConstants";
 import {CandidateActionPanel} from "./CandidateActionPanel";
 import {SAMPLES_QUERY, SamplesQueryResponse} from "../../graphql/sample";
+import {NeuronTagFilter} from "../editors/NeuronTagFilter";
 
 export const Candidates = () => {
     const [state, setState] = useState({
@@ -177,21 +178,12 @@ export const Candidates = () => {
                             </div>
                         </List.Item>
                         <List.Item>
-                            <div style={{display: "flex", alignItems: "center"}}>
-                                <Checkbox toggle label="Limit Tag " checked={state.limitTags}
-                                          onChange={(_, data) => setState({...state, limitTags: data.checked, offset: 0})}/>
-
-                                <div style={{marginLeft: "8px", minWidth: "200px"}}>
-                                    <Input size="mini" type="text" placehoder="..." value={state.tempTagFilter}
-                                           onKeyPress={(e) => {
-                                               if (e.charCode === 13) {
-                                                   setState({...state, tagFilter: state.tempTagFilter})
-                                               }
-                                           }}
-                                           onBlur={() => setState({...state, tagFilter: state.tempTagFilter})}
-                                           onChange={(e, {value}) => setState({...state, tempTagFilter: value, offset: 0})}/>
-                                </div>
-                            </div>
+                            <NeuronTagFilter
+                                checked={state.limitTags}
+                                initialValue={state.tagFilter}
+                                onCheckedChange={(checked) => setState({...state, limitTags: checked, offset: 0})}
+                                onValueChange={(value) => setState({...state, tagFilter: value, offset: 0})}
+                            />
                         </List.Item>
                     </List>
                 </Segment>

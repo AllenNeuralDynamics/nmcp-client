@@ -19,7 +19,7 @@ export type CompleteReconstructionPanelProps = {
     updateChecks(value: string): void;
 }
 
-export const CompleteReconstructionPanel = (props: CompleteReconstructionPanelProps) => {
+export const RequestReviewPanel = (props: CompleteReconstructionPanelProps) => {
     return (
         <Grid>
             <Grid.Row>
