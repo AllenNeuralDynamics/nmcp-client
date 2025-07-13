@@ -11,6 +11,7 @@ export interface IServiceOptions {
     tracingsService: ServiceLocation;
     staticService: ServiceLocation;
     exportService: ServiceLocation;
+    downloadService: ServiceLocation;
     exportLimit: number;
 }
 
@@ -37,6 +38,11 @@ const configuration: IServiceOptions = {
         port: 5000,
         endpoint: "/export"
     },
+    downloadService: {
+        hostname: "nmcp-export",
+        port: 5000,
+        endpoint: "/download"
+    },
     exportLimit: 20
 };
 
@@ -56,6 +62,9 @@ function loadServerConfiguration() {
 
     options.exportService.hostname = process.env.EXPORT_API_HOST || options.exportService.hostname;
     options.exportService.port = parseInt(process.env.EXPORT_API_PORT) || options.exportService.port;
+
+    options.downloadService.hostname = process.env.EXPORT_API_HOST || options.exportService.hostname;
+    options.downloadService.port = parseInt(process.env.EXPORT_API_PORT) || options.exportService.port;
 
     options.exportLimit = parseInt(process.env.NMCP_CLIENT_EXPORT_LIMIT) || options.exportLimit;
 

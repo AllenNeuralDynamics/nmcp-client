@@ -27,6 +27,7 @@ const apiUri = `http://${ServerConfiguration.graphQLService.hostname}:${ServerCo
 const tracingsUri = `http://${ServerConfiguration.tracingsService.hostname}:${ServerConfiguration.tracingsService.port}`;
 const staticUri = `http://${ServerConfiguration.staticService.hostname}:${ServerConfiguration.staticService.port}`;
 const exportUri = `http://${ServerConfiguration.exportService.hostname}:${ServerConfiguration.exportService.port}`;
+const downloadUri = `http://${ServerConfiguration.exportService.hostname}:${ServerConfiguration.exportService.port}`;
 
 let app = null;
 
@@ -71,6 +72,9 @@ if (process.env.NODE_ENV !== "production") {
     debug(`proxying ${ServerConfiguration.exportService.endpoint} to ${exportUri}`);
     app.use(`${ServerConfiguration.exportService.endpoint}`, proxy(`${exportUri}`, {proxyReqPathResolver: req => "/export" + req.url}));
 
+    debug(`proxying ${ServerConfiguration.downloadService.endpoint} to ${downloadUri}`);
+    app.use(`${ServerConfiguration.downloadService.endpoint}`, proxy(`${downloadUri}`, {proxyReqPathResolver: req => "/download" + req.url}));
+
     app.use(express.static(rootPath));
 
     app.use("/", (req, res) => {
@@ -103,6 +107,9 @@ function devServer() {
             },
             [ServerConfiguration.exportService.endpoint]: {
                 target: exportUri
+            },
+            [ServerConfiguration.downloadService.endpoint]: {
+                target: downloadUri
             },
             ["/slice"]: {
                 target: staticUri
