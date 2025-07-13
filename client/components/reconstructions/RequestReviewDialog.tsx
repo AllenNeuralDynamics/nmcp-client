@@ -31,12 +31,12 @@ export const RequestReviewDialog = (props: CompleteReconstructionDialogProps) =>
 
     const [requestReview] = useMutation<RequestAnnotationReviewResponse, RequestAnnotationReviewVariables>(REQUEST_ANNOTATION_REVIEW_MUTATION,
         {
-            refetchQueries: ["ReconstructionsQuery"]
+            refetchQueries: ["ReconstructionsQuery", "ReviewableReconstructions"]
         });
 
     const [requestPeerReview] = useMutation<RequestPeerReviewResponse, RequestPeerReviewVariables>(REQUEST_PEER_REVIEW_MUTATION,
         {
-            refetchQueries: ["ReconstructionsQuery"]
+            refetchQueries: ["ReconstructionsQuery", "PeerReviewableReconstructions"]
         });
 
     const updateDuration = (value: string) => setState({...state, duration: value});
