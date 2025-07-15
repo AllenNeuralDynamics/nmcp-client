@@ -7,7 +7,6 @@ import {UserPreferences} from "../../util/userPreferences";
 import {NeuronViewModel} from "../../viewmodel/neuronViewModel";
 import {getSegmentColorMap} from "../../util/colors";
 import {NEURON_VIEW_MODE_ALL, NEURON_VIEW_MODE_AXON, NEURON_VIEW_MODE_DENDRITE, NEURON_VIEW_MODE_SOMA} from "../../viewmodel/neuronViewMode";
-import {INeuron} from "../../models/neuron";
 import {ITracingNode} from "../../models/tracingNode";
 
 // TODO: env var
@@ -157,16 +156,19 @@ export class NeuroglancerProxy {
 
         let reset = false;
 
+        // Default compartment visibility.
         if (s.layers?.length >= SearchCcfLayer.index) {
             s.layers[SearchCcfLayer.index].segments = [997];
             reset = true;
         }
 
+        // Clear any stored soma annotations from last session.
         if (s.layers?.length >= SearchSomaAnnotationLayer.index) {
             s.layers[SearchSomaAnnotationLayer.index].annotations = [];
             reset = true;
         }
 
+        // Clear any stored segments from last session.
         for (let idx = SearchReconstructionLayer.index; idx < SearchDendritesMirrorLayer.index; idx++) {
             if (s.layers?.length >= idx) {
                 s.layers[idx].segments = [];
@@ -396,10 +398,9 @@ const defaultCandidateState = {
         ]
     },
     "position": [
-        727.4166259765625,
-        401.1028137207031,
-        569.8789672851562,
-        0
+        659.5,
+        399.5,
+        569.5
     ],
     "projectionOrientation": [],
     "crossSectionScale": 2.7182818284590446,

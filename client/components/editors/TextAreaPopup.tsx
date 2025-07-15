@@ -10,61 +10,51 @@ type TextAreaPProps = {
     onAccept?(value: string): void;
 }
 
-type TextAreaPState = {
-    value?: string;
-    isOpen?: boolean;
-}
+export function TextAreaPopup(props: TextAreaPProps) {
+    const [value, setValue] = React.useState<string>(props.value || "");
+    const [isOpen, setIsOpen] = React.useState<boolean>(false);
 
-export class TextAreaPopup extends React.Component<TextAreaPProps, TextAreaPState> {
-    public constructor(props: TextAreaPProps) {
-        super(props);
-
-        this.state = {
-            value: props.value || "",
-            isOpen: false
+    React.useEffect(() => {
+        if (!isOpen) {
+            setValue(props.value || "");
         }
-    }
+    }, [props.value, isOpen]);
 
-    public componentWillReceiveProps(nextProps: Readonly<TextAreaPProps>, nextContext: any): void {
-        if (!this.state.isOpen) {
-            this.setState({value: this.props.value});
-        }
-    }
-
-    private onKeyPress = (event: any) => {
+    const onKeyPress = (event: any) => {
         if ((event.charCode || event.which) === 13) {
-            this.props.onAccept(this.state.value);
+            props.onAccept?.(value);
         }
     };
 
-    private onClose = () => {
-        this.setState({isOpen: false, value: this.props.value});
+    const onClose = () => {
+        setIsOpen(false);
+        setValue(props.value || "");
     };
 
-    public render() {
-        const str = this.props.limit ? this.props.value?.substring(0, this.props.limit) || null : this.props.value;
+    const handleAccept = () => {
+        props.onAccept?.(value);
+        setIsOpen(false);
+    };
 
-        return (
-            <Popup open={this.state.isOpen} onOpen={() => this.setState({isOpen: true})}
-                   onClose={this.onClose} on="click" flowing
-                   header={this.props.header || ""}
-                   trigger={<span>{str || "(none)"}</span>}
-                   content={
-                       <Form>
-                           <Form.TextArea size="mini" placeholder={this.props.placeholder || ""}
-                                     style={{minWidth: "500px"}}
-                                     value={this.state.value}
-                                     onInput={this.onKeyPress}
-                                     onChange={(e, data) => {
-                                         this.setState({value: data.value.toString()})
-                                     }}
-                           />
-                           <Form.Button size="mini" icon="check" labelPosition="right" content="OK" color="teal" floated="right" onClick={() => {
-                               this.props.onAccept(this.state.value);
-                               this.setState({isOpen: false})
-                           }}/>
-                       </Form>
-                   }/>
-        );
-    }
+    const str = props.limit ? props.value?.substring(0, props.limit) || null : props.value;
+
+    return (
+        <Popup open={isOpen} onOpen={() => setIsOpen(true)}
+               onClose={onClose} on="click" flowing
+               header={props.header || ""}
+               trigger={<span>{str || "(none)"}</span>}
+               content={
+                   <Form>
+                       <Form.TextArea size="mini" placeholder={props.placeholder || ""}
+                                 style={{minWidth: "500px"}}
+                                 value={value}
+                                 onInput={onKeyPress}
+                                 onChange={(e, data) => {
+                                     setValue(data.value.toString());
+                                 }}
+                       />
+                       <Form.Button size="mini" icon="check" labelPosition="right" content="OK" color="teal" floated="right" onClick={handleAccept}/>
+                   </Form>
+               }/>
+    );
 }

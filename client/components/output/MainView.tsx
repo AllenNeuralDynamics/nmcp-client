@@ -2,7 +2,7 @@ import * as React from "react";
 import * as _ from "lodash-es";
 
 import {ExportFormat, ITracing} from "../../models/tracing";
-import {HighlightSelectionMode} from "./TracingViewer";
+import {HighlightSelectionMode, TracingViewer} from "./TracingViewer";
 
 import "../../util/override.css";
 import {INeuron} from "../../models/neuron";
@@ -107,7 +107,7 @@ export class MainView extends React.Component<IOutputContainerProps, IOutputCont
     private _colorIndex: number = 0;
     private _fetchBatchSize = UserPreferences.Instance.TracingFetchBatchSize;
 
-    private _viewerContainer: React.RefObject<ViewerContainer>;
+    private _viewerContainer: React.RefObject<TracingViewer>;
     private _expectingFetch = false;
 
     private _colormap = jet;
@@ -115,7 +115,7 @@ export class MainView extends React.Component<IOutputContainerProps, IOutputCont
     public constructor(props: IOutputContainerProps) {
         super(props);
 
-        this._viewerContainer = React.createRef<ViewerContainer>();
+        this._viewerContainer = React.createRef<TracingViewer>();
 
         const neuronCalc = this.updateNeuronViewModels(props, false);
 
@@ -170,7 +170,7 @@ export class MainView extends React.Component<IOutputContainerProps, IOutputCont
             n.isSelected = n.isSelected || this.props.shouldAlwaysShowSoma
         });
         this.onCancelFetch();
-        this.ViewerContainer.current.TracingViewer.current.reset();
+        this.ViewerContainer.current.reset();
         this.setState({displayHighlightedOnly: false, highlightSelectionMode: HighlightSelectionMode.Normal});
     }
 

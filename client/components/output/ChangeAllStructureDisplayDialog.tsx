@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useState, useCallback, useEffect } from "react";
 import {Button, Modal} from "semantic-ui-react";
 
 import {NEURON_VIEW_MODES, NeuronViewMode} from "../../viewmodel/neuronViewMode";
@@ -12,39 +13,39 @@ interface IChangeAllStructureDisplayDialogProps {
     onAccept(mode: NeuronViewMode): void;
 }
 
-interface IChangeAllStructureDisplayDialogState {
-    structureSelection: NeuronViewMode;
-}
+export const ChangeAllStructureDisplayDialog: React.FC<IChangeAllStructureDisplayDialogProps> = (props) => {
+    const [structureSelection, setStructureSelection] = useState<NeuronViewMode>(props.defaultStructureSelection);
 
-export class ChangeAllStructureDisplayDialog extends React.Component<IChangeAllStructureDisplayDialogProps, IChangeAllStructureDisplayDialogState> {
-    public constructor(props: IChangeAllStructureDisplayDialogProps) {
-        super(props);
+    // Update structureSelection when defaultStructureSelection prop changes
+    useEffect(() => {
+        setStructureSelection(props.defaultStructureSelection);
+    }, [props.defaultStructureSelection]);
 
-        this.state = {structureSelection: props.defaultStructureSelection};
-    }
-    private onViewModeChange(viewMode: NeuronViewMode) {
-        this.setState({structureSelection: viewMode});
-    }
+    const onViewModeChange = useCallback((viewMode: NeuronViewMode) => {
+        setStructureSelection(viewMode);
+    }, []);
 
-    public render() {
-        return (
-            <Modal open={this.props.show} onClose={this.props.onCancel}>
-                <Modal.Header content="Set Display Structures"/>
-                <Modal.Content>
-                    Update the all neurons to display
-                    <TracingViewModeSelect idName="view-mode"
-                                           options={NEURON_VIEW_MODES}
-                                           placeholder="any"
-                                           clearable={false}
-                                           searchable={false}
-                                           selectedOption={this.state.structureSelection}
-                                           onSelect={(v: NeuronViewMode) => this.onViewModeChange(v)}/>
-                </Modal.Content>
-                <Modal.Actions>
-                    <Button onClick={this.props.onCancel}>Cancel</Button>
-                    <Button onClick={() => this.props.onAccept(this.state.structureSelection)}>Ok</Button>
-                </Modal.Actions>
-            </Modal>
-        );
-    }
-}
+    const handleAccept = useCallback(() => {
+        props.onAccept(structureSelection);
+    }, [props.onAccept, structureSelection]);
+
+    return (
+        <Modal open={props.show} onClose={props.onCancel}>
+            <Modal.Header content="Set Display Structures"/>
+            <Modal.Content>
+                Update the all neurons to display
+                <TracingViewModeSelect idName="view-mode"
+                                       options={NEURON_VIEW_MODES}
+                                       placeholder="any"
+                                       clearable={false}
+                                       searchable={false}
+                                       selectedOption={structureSelection}
+                                       onSelect={onViewModeChange}/>
+            </Modal.Content>
+            <Modal.Actions>
+                <Button onClick={props.onCancel}>Cancel</Button>
+                <Button onClick={handleAccept}>Ok</Button>
+            </Modal.Actions>
+        </Modal>
+    );
+};

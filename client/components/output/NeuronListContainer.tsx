@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useCallback } from "react";
 import {Dropdown, Icon, Message} from "semantic-ui-react";
 
 import {INeuronTableProps, NeuronTable} from "./NeuronTable";
@@ -16,42 +17,34 @@ interface INeuronListContainerProps extends INeuronTableProps {
     onRequestExport(format: ExportFormat): void;
 }
 
-interface INeuronListContainerState {
-}
+export const NeuronListContainer: React.FC<INeuronListContainerProps> = (props) => {
 
-export class NeuronListContainer extends React.Component<INeuronListContainerProps, INeuronListContainerState> {
-    public constructor(props: INeuronListContainerProps) {
-        super(props);
-
-        this.state = {}
-    }
-
-    private renderCloseGlyph() {
-        const transform = this.props.isDocked ? "" : "rotate(-45deg)";
-        const state = this.props.isDocked ? DrawerState.Float : DrawerState.Dock;
+    const renderCloseGlyph = useCallback(() => {
+        const transform = props.isDocked ? "" : "rotate(-45deg)";
+        const state = props.isDocked ? DrawerState.Float : DrawerState.Dock;
 
         return (
             <Icon name="pin" style={{margin: "auto", order: 3, marginRight: "10px", transform: transform}}
-                  onClick={() => this.props.onClickCloseOrPin(state)}/>
+                  onClick={() => props.onClickCloseOrPin(state)}/>
         );
-    }
+    }, [props.isDocked, props.onClickCloseOrPin]);
 
-    private renderExport() {
-        const count = this.props.neuronViewModels.reduce((c, n) => {
+    const renderExport = useCallback(() => {
+        const count = props.neuronViewModels.reduce((c, n) => {
             return n.isSelected ? c + 1 : c
         }, 0);
 
         let options = null;
 
-        if (count <= this.props.exportLimit) {
+        if (count <= props.exportLimit) {
             options = [
-                <Dropdown.Item key="1" text="Export SWC" onClick={() => this.props.onRequestExport(ExportFormat.SWC)}/>,
+                <Dropdown.Item key="1" text="Export SWC" onClick={() => props.onRequestExport(ExportFormat.SWC)}/>,
                 <Dropdown.Item key="2" text="Export JSON"
-                               onClick={() => this.props.onRequestExport(ExportFormat.JSON)}/>
+                               onClick={() => props.onRequestExport(ExportFormat.JSON)}/>
             ];
         } else {
             options = [
-                <Message key="3" error content={`Please select ${this.props.exportLimit} or fewer tracings to export`}/>
+                <Message key="3" error content={`Please select ${props.exportLimit} or fewer tracings to export`}/>
             ];
         }
 
@@ -61,9 +54,9 @@ export class NeuronListContainer extends React.Component<INeuronListContainerPro
                 {options}
             </Dropdown.Menu>
         </Dropdown>
-    }
+    }, [props.neuronViewModels, props.exportLimit, props.onRequestExport]);
 
-    private renderHeader() {
+    const renderHeader = useCallback(() => {
         return (
             <div style={{
                 backgroundColor: primaryBackground,
@@ -77,7 +70,7 @@ export class NeuronListContainer extends React.Component<INeuronListContainerPro
                 order: 1,
                 flexDirection: "row"
             }}>
-                {this.renderExport()}
+                {renderExport()}
                 <h4 style={{
                     color: "white",
                     fontWeight: "lighter",
@@ -87,57 +80,55 @@ export class NeuronListContainer extends React.Component<INeuronListContainerPro
                     flexGrow: 1,
                     order: 2
                 }}>Neurons</h4>
-                {this.renderCloseGlyph()}
+                {renderCloseGlyph()}
                 <Icon name="chevron left" style={{margin: "auto", order: 4}}
-                      onClick={() => this.props.onClickCloseOrPin(DrawerState.Hidden)}/>
+                      onClick={() => props.onClickCloseOrPin(DrawerState.Hidden)}/>
             </div>
         );
-    }
+    }, [renderExport, renderCloseGlyph, props.onClickCloseOrPin]);
 
-    public render() {
-        let content = null;
+    let content = null;
 
-        if (this.props.queryStatus === QueryStatus.NeverQueried) {
+    if (props.queryStatus === QueryStatus.NeverQueried) {
+        content = (
+            <h5 style={{textAlign: "center", verticalAlign: "middle", marginTop: "40px"}}>Perform a query to view
+                matching neurons</h5>);
+    } else if (props.queryStatus === QueryStatus.Loading) {
+        if (props.neuronViewModels.length === 0) {
             content = (
-                <h5 style={{textAlign: "center", verticalAlign: "middle", marginTop: "40px"}}>Perform a query to view
-                    matching neurons</h5>);
-        } else if (this.props.queryStatus === QueryStatus.Loading) {
-            if (this.props.neuronViewModels.length === 0) {
-                content = (
-                    <h5 style={{textAlign: "center", verticalAlign: "middle", marginTop: "40px"}}>Loading</h5>);
-            } else {
-                content = (<NeuronTable {...this.props}/>);
-            }
+                <h5 style={{textAlign: "center", verticalAlign: "middle", marginTop: "40px"}}>Loading</h5>);
         } else {
-            if (this.props.neuronViewModels.length === 0) {
-                content = (
-                    <h5 style={{textAlign: "center", verticalAlign: "middle", marginTop: "40px"}}>No neurons
-                        found</h5>);
-            } else {
-                content = (<NeuronTable {...this.props}/>);
-            }
+            content = (<NeuronTable {...props}/>);
         }
-
-        return (
-            <div style={{
-                backgroundColor: "#efefef",
-                opacity: this.props.isDocked ? 1.0 : 0.75,
-                flexDirection: "column",
-                flexWrap: "nowrap",
-                order: 1,
-                width: "500px",
-                minWidth: "500px",
-                height: "100%",
-                flexGrow: 0,
-                flexShrink: 0,
-                display: "flex",
-                border: "1px solid"
-            }}>
-                {this.renderHeader()}
-                <div style={{order: 2, flexGrow: 1, width: "100%", overflow: "auto"}}>
-                    {content}
-                </div>
-            </div>
-        );
+    } else {
+        if (props.neuronViewModels.length === 0) {
+            content = (
+                <h5 style={{textAlign: "center", verticalAlign: "middle", marginTop: "40px"}}>No neurons
+                    found</h5>);
+        } else {
+            content = (<NeuronTable {...props}/>);
+        }
     }
-}
+
+    return (
+        <div style={{
+            backgroundColor: "#efefef",
+            opacity: props.isDocked ? 1.0 : 0.75,
+            flexDirection: "column",
+            flexWrap: "nowrap",
+            order: 1,
+            width: "500px",
+            minWidth: "500px",
+            height: "100%",
+            flexGrow: 0,
+            flexShrink: 0,
+            display: "flex",
+            border: "1px solid"
+        }}>
+            {renderHeader()}
+            <div style={{order: 2, flexGrow: 1, width: "100%", overflow: "auto"}}>
+                {content}
+            </div>
+        </div>
+    );
+};

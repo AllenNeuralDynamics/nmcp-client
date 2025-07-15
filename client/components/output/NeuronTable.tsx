@@ -126,76 +126,64 @@ export interface INeuronTableProps {
     onChangeDefaultStructure(mode: NeuronViewMode): void;
 }
 
-interface IOutputTableState {
-    showChangeAllStructureDisplayDialog: boolean
-}
+export function NeuronTable(props: INeuronTableProps) {
+    const [showChangeAllStructureDisplayDialog, setShowChangeAllStructureDisplayDialog] = React.useState<boolean>(false);
 
-export class NeuronTable extends React.Component<INeuronTableProps, IOutputTableState> {
-    public constructor(props: INeuronTableProps) {
-        super(props);
+    const onCancel = () => {
+        setShowChangeAllStructureDisplayDialog(false);
+    };
 
-        this.state = {
-            showChangeAllStructureDisplayDialog: false
-        };
+    const onAccept = (mode: NeuronViewMode) => {
+        setShowChangeAllStructureDisplayDialog(false);
+        props.onChangeDefaultStructure(mode);
+    };
+
+    if (!props.neuronViewModels || props.neuronViewModels.length === 0) {
+        return null;
     }
 
-    public onCancel() {
-        this.setState({showChangeAllStructureDisplayDialog: false})
-    }
+    const rows: any = props.neuronViewModels.map((v, idx) => {
+        return (<OutputTableRow key={`trf_${v.neuron.id}`} neuronViewModel={v}
+                                onChangeNeuronColor={props.onChangeNeuronColor}
+                                onChangeNeuronMirror={props.onChangeNeuronMirror}
+                                onChangeSelectTracing={props.onChangeSelectTracing}
+                                onChangeNeuronViewMode={props.onChangeNeuronViewMode}/>)
+    });
 
-    public onAccept(mode: NeuronViewMode) {
-        this.setState({showChangeAllStructureDisplayDialog: false});
-        this.props.onChangeDefaultStructure(mode);
-    }
+    return (
+        <Table compact>
+            <ChangeAllStructureDisplayDialog show={showChangeAllStructureDisplayDialog}
+                                             onCancel={() => onCancel()}
+                                             onAccept={(mode: NeuronViewMode) => onAccept(mode)}
+                                             defaultStructureSelection={props.defaultStructureSelection}/>
+            <thead>
+            <tr>
+                <th>
+                    <Icon name={props.isAllTracingsSelected ? "check square outline" : "square outline"}
+                          onClick={() => props.onChangeSelectAllTracings(!props.isAllTracingsSelected)}/>
 
-    public render() {
-        if (!this.props.neuronViewModels || this.props.neuronViewModels.length === 0) {
-            return null;
-        }
-
-        const rows: any = this.props.neuronViewModels.map((v, idx) => {
-            return (<OutputTableRow key={`trf_${v.neuron.id}`} neuronViewModel={v}
-                                    onChangeNeuronColor={this.props.onChangeNeuronColor}
-                                    onChangeNeuronMirror={this.props.onChangeNeuronMirror}
-                                    onChangeSelectTracing={this.props.onChangeSelectTracing}
-                                    onChangeNeuronViewMode={this.props.onChangeNeuronViewMode}/>)
-        });
-
-        return (
-            <Table compact>
-                <ChangeAllStructureDisplayDialog show={this.state.showChangeAllStructureDisplayDialog}
-                                                 onCancel={() => this.onCancel()}
-                                                 onAccept={(mode: NeuronViewMode) => this.onAccept(mode)}
-                                                 defaultStructureSelection={this.props.defaultStructureSelection}/>
-                <thead>
-                <tr>
-                    <th>
-                        <Icon name={this.props.isAllTracingsSelected ? "check square outline" : "square outline"}
-                              onClick={() => this.props.onChangeSelectAllTracings(!this.props.isAllTracingsSelected)}/>
-
-                    </th>
-                    <th>
-                        <Icon name="edit" style={{marginRight: "6px"}}
-                              onClick={() => this.setState({showChangeAllStructureDisplayDialog: true})}/>
-                        <a onClick={() => this.setState({showChangeAllStructureDisplayDialog: true})}
-                           style={{textDecoration: "underline"}}>
-                            Structures
-                        </a>
-                    </th>
-                    <th>
-                        Mirror
-                    </th>
-                    <th>Neuron</th>
-                    <th>Compartment</th>
-                    <th/>
-                </tr>
-                </thead>
-                <tbody>
-                {rows}
-                </tbody>
-            </Table>
-        );
-    }
+                </th>
+                <th>
+                    <Icon name="edit" style={{marginRight: "6px"}}
+                          onClick={() => setShowChangeAllStructureDisplayDialog(true)}/>
+                    <a onClick={() => setShowChangeAllStructureDisplayDialog(true)}
+                       style={{textDecoration: "underline"}}>
+                        Structures
+                    </a>
+                </th>
+                <th>
+                    Mirror
+                </th>
+                <th>Neuron</th>
+                <th>Compartment</th>
+                <th/>
+            </tr>
+            </thead>
+            <tbody>
+            {rows}
+            </tbody>
+        </Table>
+    );
 }
 
 const styles = {

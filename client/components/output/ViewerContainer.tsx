@@ -23,29 +23,16 @@ interface IViewerProps extends ITracingViewerBaseProps {
     onCancelFetch(): void;
 }
 
-interface IViewerContainerState {
-}
+export const ViewerContainer = React.forwardRef<TracingViewer, IViewerProps>((props, ref) => {
+    const myRef = React.useRef<TracingViewer>(null);
 
-export class ViewerContainer extends React.Component<IViewerProps, IViewerContainerState> {
+    React.useImperativeHandle(ref, () => myRef.current!, []);
 
-    private readonly myRef: React.RefObject<TracingViewer>;
-
-    public constructor(props: IViewerProps) {
-        super(props);
-
-        this.myRef = React.createRef<TracingViewer>();
-        this.state = {}
-    }
-
-    public get TracingViewer() {
-        return this.myRef;
-    }
-
-    private renderFloatNeuronListGlyph() {
-        if (!this.props.isNeuronListDocked && !this.props.isNeuronListOpen) {
+    const renderFloatNeuronListGlyph = () => {
+        if (!props.isNeuronListDocked && !props.isNeuronListOpen) {
             return (
                 <div style={{display: "flex", alignItems: "center", height: "100%"}}
-                     onClick={() => this.props.onFloatNeuronList()}>
+                     onClick={() => props.onFloatNeuronList()}>
                     <h5 style={{color: "white", fontWeight: "lighter", margin: "0 6px 0 10px"}}>
                         Neurons</h5>
                     <Icon name="chevron right" style={{top: -1, order: 2}}
@@ -54,13 +41,13 @@ export class ViewerContainer extends React.Component<IViewerProps, IViewerContai
         } else {
             return null;
         }
-    }
+    };
 
-    private renderFloatCompartmentListGlyph() {
-        if (!this.props.isCompartmentListDocked && !this.props.isCompartmentListOpen) {
+    const renderFloatCompartmentListGlyph = () => {
+        if (!props.isCompartmentListDocked && !props.isCompartmentListOpen) {
             return (
                 <div style={{display: "flex", alignItems: "center", height: "100%"}}
-                     onClick={() => this.props.onFloatCompartmentList()}>
+                     onClick={() => props.onFloatCompartmentList()}>
                     <Icon name="chevron left" style={{order: 1, top: -1}}/>
                     <h5 style={{
                         color: "white",
@@ -73,26 +60,26 @@ export class ViewerContainer extends React.Component<IViewerProps, IViewerContai
         } else {
             return null;
         }
-    }
+    };
 
-    private renderCollapseQueryGlyph() {
-        return (<Icon name={this.props.isQueryCollapsed ? "chevron down" : "chevron up"}
+    const renderCollapseQueryGlyph = () => {
+        return (<Icon name={props.isQueryCollapsed ? "chevron down" : "chevron up"}
                            style={{margin: "auto", order: 3}}
-                           onClick={() => this.props.onToggleQueryCollapsed()}/>)
-    }
+                           onClick={() => props.onToggleQueryCollapsed()}/>)
+    };
 
-    private renderProgress() {
-        if ((this.props.fetchCount > 0 && this.props.fetchState === FetchState.Running) || this.props.isRendering) {
+    const renderProgress = () => {
+        if ((props.fetchCount > 0 && props.fetchState === FetchState.Running) || props.isRendering) {
             return (<div style={spinnerStyle}/>);
         }
 
         return null;
-    }
+    };
 
-    private renderMessage() {
-        const isPaused = this.props.fetchState === FetchState.Paused;
+    const renderMessage = () => {
+        const isPaused = props.fetchState === FetchState.Paused;
 
-        if (this.props.fetchCount > 0) {
+        if (props.fetchCount > 0) {
             const iconName = isPaused ? "play" : "pause";
 
             return (
@@ -100,7 +87,7 @@ export class ViewerContainer extends React.Component<IViewerProps, IViewerContai
                     <div style={{
                         flex: "", marginLeft: "10px", height: "100%", color: "white"
                     }}>
-                        {`Fetching neuron tracings ( ${this.props.fetchCount} remaining ${isPaused ? "- paused" : ""})`}
+                        {`Fetching neuron tracings ( ${props.fetchCount} remaining ${isPaused ? "- paused" : ""})`}
                     </div>
                     <div style={{
                         display: "inline-block",
@@ -118,7 +105,7 @@ export class ViewerContainer extends React.Component<IViewerProps, IViewerContai
                         }}>
                             <Icon name={iconName}
                                        style={{paddingTop: "2px", paddingBottom: "0px", paddingLeft: "1px"}}
-                                       onClick={() => this.props.onSetFetchState(isPaused ? FetchState.Running : FetchState.Paused)}/>
+                                       onClick={() => props.onSetFetchState(isPaused ? FetchState.Running : FetchState.Paused)}/>
                         </div>
                         <div style={{
                             display: "inline-block",
@@ -129,14 +116,14 @@ export class ViewerContainer extends React.Component<IViewerProps, IViewerContai
                         }}>
                             <Icon name="remove"
                                        style={{paddingTop: "2px", paddingBottom: "0px", paddingLeft: "1px"}}
-                                       onClick={() => this.props.onCancelFetch()}/>
+                                       onClick={() => props.onCancelFetch()}/>
                         </div>
                     </div>
                 </div>
             );
         }
 
-        if (this.props.isRendering) {
+        if (props.isRendering) {
             return (
                 <div>
                     <span style={{color: "white"}}>
@@ -146,10 +133,10 @@ export class ViewerContainer extends React.Component<IViewerProps, IViewerContai
             );
         }
 
-    }
+    };
 
-    private renderHeader() {
-        const isLeftGlyphVisible = !this.props.isNeuronListDocked && !this.props.isNeuronListOpen;
+    const renderHeader = () => {
+        const isLeftGlyphVisible = !props.isNeuronListDocked && !props.isNeuronListOpen;
         const progressMarginLeft = isLeftGlyphVisible ? "20px" : "0px";
         return (
             <div style={{
@@ -166,11 +153,11 @@ export class ViewerContainer extends React.Component<IViewerProps, IViewerContai
             }}>
                 <div style={{display: "flex", flexDirection: "row", width: "100%"}}>
                     <div style={{flex: "0 0 auto", order: 1, width: "auto"}}>
-                        {this.renderFloatNeuronListGlyph()}
+                        {renderFloatNeuronListGlyph()}
                     </div>
                     <div style={{display: "flex", flexDirection: "column", flex: "1 1 auto", order: 2, width: "100%"}}>
                         <div style={{flex: "0 0 auto", order: 1, textAlign: "center", height: "15px"}}>
-                            {this.renderCollapseQueryGlyph()}
+                            {renderCollapseQueryGlyph()}
                         </div>
                         <div style={{display: "flex", flexDirection: "row", flex: "1 1 auto", order: 2}}>
                             <div style={{
@@ -179,53 +166,50 @@ export class ViewerContainer extends React.Component<IViewerProps, IViewerContai
                                 marginRight: "6px",
                                 marginLeft: progressMarginLeft
                             }}>
-                                {this.renderProgress()}
+                                {renderProgress()}
                             </div>
                             <div style={{flex: "1 1 auto", margin: "auto", order: 2, textAlign: "left"}}>
-                                {this.renderMessage()}
+                                {renderMessage()}
                             </div>
                         </div>
                         <div style={{flex: "1 1 auto", order: 2, textAlign: "center", width: "100%"}}>
-                            {this.props.isQueryCollapsed ?
-                                <span onClick={() => this.props.onToggleQueryCollapsed()}>
+                            {props.isQueryCollapsed ?
+                                <span onClick={() => props.onToggleQueryCollapsed()}>
                                     Show Search
                                 </span> : null}
                         </div>
                     </div>
                     <div style={{flex: "0 0 auto", order: 3, width: "auto"}}>
-                        {this.renderFloatCompartmentListGlyph()}
+                        {renderFloatCompartmentListGlyph()}
                     </div>
                 </div>
             </div>
         );
-    }
+    };
 
-    public render() {
-
-        return (
-            <div style={{
-                flexDirection: "column",
-                flexWrap: "nowrap",
-                alignItems: "flex-start",
-                alignContent: "flex-start",
-                order: 2,
-                flexGrow: 1,
-                flexShrink: 1,
-                flexBasis: 0,
-                display: "flex",
-                height: "100%",
-                minWidth: "200px",
-                borderTop: "1px solid",
-                borderBottom: "1px solid"
-            }}>
-                {this.renderHeader()}
-                <div style={{order: 2, flexGrow: 1, width: "100%", height: "100%"}}>
-                    <TracingViewer {...this.props} ref={this.myRef}/>
-                </div>
+    return (
+        <div style={{
+            flexDirection: "column",
+            flexWrap: "nowrap",
+            alignItems: "flex-start",
+            alignContent: "flex-start",
+            order: 2,
+            flexGrow: 1,
+            flexShrink: 1,
+            flexBasis: 0,
+            display: "flex",
+            height: "100%",
+            minWidth: "200px",
+            borderTop: "1px solid",
+            borderBottom: "1px solid"
+        }}>
+            {renderHeader()}
+            <div style={{order: 2, flexGrow: 1, width: "100%", height: "100%"}}>
+                <TracingViewer {...props} ref={myRef}/>
             </div>
-        );
-    }
-}
+        </div>
+    );
+});
 
 const spinnerStyle = {
     width: 20,

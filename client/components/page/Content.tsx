@@ -3,7 +3,7 @@ import {ApolloError, } from "@apollo/client";
 import {ApolloConsumer} from "@apollo/client";
 import cuid from "cuid";
 
-import {QueryPage} from "./QueryPage";
+import {QueryPage, QueryPageRef} from "./QueryPage";
 import {NdbConstants} from "../../models/constants";
 import {SEARCH_NEURONS_QUERY, SearchContext} from "../../graphql/search";
 import {INeuron} from "../../models/neuron";
@@ -33,7 +33,7 @@ interface IContentState {
 export class Content extends React.Component<IContentProps, IContentState> {
     private _uiPredicates: UIQueryPredicates;
 
-    private _queryPage: React.RefObject<QueryPage>;
+    private _queryPage: React.RefObject<QueryPageRef>;
 
     private _shouldAutoExecuteFromUrl: boolean = false;
 
@@ -73,7 +73,7 @@ export class Content extends React.Component<IContentProps, IContentState> {
     public constructor(props: IContentProps) {
         super(props);
 
-        this._queryPage = React.createRef<QueryPage>();
+        this._queryPage = React.createRef<QueryPageRef>();
 
         this.state = {
             isSettingsOpen: false,

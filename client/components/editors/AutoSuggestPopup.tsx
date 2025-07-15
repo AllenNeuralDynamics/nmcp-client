@@ -20,119 +20,99 @@ export interface IObjectAutoSuggestState<T extends INamedModel> {
     isOpen?: boolean;
 }
 
-export class AutoSuggestPopup<T extends INamedModel> extends React.Component<IObjectAutoSuggestProps<T>, IObjectAutoSuggestState<T>> {
-    constructor(props: any) {
-        super(props);
+export function AutoSuggestPopup<T extends INamedModel>(props: IObjectAutoSuggestProps<T>) {
+    const [suggestions, setSuggestions] = React.useState<T[]>([]);
+    const [value, setValue] = React.useState<string>(props.value || "");
+    const [isOpen, setIsOpen] = React.useState<boolean>(false);
 
-        this.state = {
-            suggestions: [],
-            value: props.initialValue
-        };
-    }
-
-    private onAcceptEdit() {
-        if (this.props.onChange) {
-            this.props.onChange(this.state.value);
+    React.useEffect(() => {
+        if (!isOpen) {
+            setValue(props.value || "");
         }
+    }, [props.value, isOpen]);
 
-        this.setState({isOpen: false});
-    }
-
-    private onAutoSuggestInputChange(obj: any) {
-        this.setState({
-            value: obj.newValue
-        });
+    const onAcceptEdit = () => {
+        if (props.onChange) {
+            props.onChange(value);
+        }
+        setIsOpen(false);
     };
 
-    private getSuggestions(value: string): T[] {
-        if (!this.props.items) {
+    const onAutoSuggestInputChange = (obj: any) => {
+        setValue(obj.newValue);
+    };
+
+    const getSuggestions = (inputValue: string): T[] => {
+        if (!props.items) {
             return [];
         }
 
-        const inputValue = value.trim().toLowerCase();
-        const inputLength = inputValue.length;
+        const trimmedValue = inputValue.trim().toLowerCase();
+        const inputLength = trimmedValue.length;
 
-        return inputLength === 0 ? [] : this.props.items.filter(item => {
-                return item.name.toLowerCase().indexOf(inputValue) > -1;
+        return inputLength === 0 ? [] : props.items.filter(item => {
+                return item.name.toLowerCase().indexOf(trimmedValue) > -1;
             }
         );
-    }
+    };
 
-    public componentWillReceiveProps(props: IObjectAutoSuggestProps<T>) {
-        if (!this.state.isOpen) {
-            this.setState({value: this.props.value});
-        }
-    }
-
-    private renderAutoSuggest() {
+    const renderAutoSuggest = () => {
         const inputProps = {
-            placeholder: this.props.placeholder,
-            value: this.state.value || "",
-            onChange: (event: any, obj: any) => this.onAutoSuggestInputChange(obj)
+            placeholder: props.placeholder,
+            value: value || "",
+            onChange: (event: any, obj: any) => onAutoSuggestInputChange(obj)
         };
 
-
-        const props = {
+        const autoSuggestProps = {
             theme: inputGroupTheme,
-            suggestions: this.state.suggestions,
-            onSuggestionsFetchRequested: (obj: any) => this.onSuggestionsFetchRequested(obj),
-            onSuggestionsClearRequested: () => this.onSuggestionsClearRequested(),
-            getSuggestionValue: (suggestion: any) => this.getSuggestionValue(suggestion),
-            renderSuggestion: (suggestion: any) => this.renderSuggestion(suggestion),
+            suggestions: suggestions,
+            onSuggestionsFetchRequested: (obj: any) => onSuggestionsFetchRequested(obj),
+            onSuggestionsClearRequested: () => onSuggestionsClearRequested(),
+            getSuggestionValue: (suggestion: any) => getSuggestionValue(suggestion),
+            renderSuggestion: (suggestion: any) => renderSuggestion(suggestion),
             inputProps: inputProps
         };
 
-        return (<AutoSuggest {...props}/>);
-    }
+        return (<AutoSuggest {...autoSuggestProps}/>);
+    };
 
-    // Use your imagination to render suggestions.
-    private renderSuggestion(suggestion: T) {
+    const renderSuggestion = (suggestion: T) => {
         return (
             <div>
                 {suggestion?.name}
             </div>
         );
-    }
-
-    // Autosuggest will call this function every time you need to update suggestions.
-    // You already implemented this logic above, so just use it.
-    private onSuggestionsFetchRequested({value}: any) {
-        this.setState({
-            suggestions: this.getSuggestions(value)
-        });
     };
 
-    // Autosuggest will call this function every time you need to clear suggestions.
-    private onSuggestionsClearRequested() {
-        this.setState({
-            suggestions: []
-        });
-    }
+    const onSuggestionsFetchRequested = ({value: fetchValue}: any) => {
+        setSuggestions(getSuggestions(fetchValue));
+    };
 
-    private getSuggestionValue(suggestion: T) {
+    const onSuggestionsClearRequested = () => {
+        setSuggestions([]);
+    };
+
+    const getSuggestionValue = (suggestion: T) => {
         return suggestion?.name ?? "";
-    }
+    };
 
+    return (
+        <Popup open={isOpen} onOpen={() => setIsOpen(true)}
+               onClose={() => setIsOpen(false)} on="click" flowing
+               header={props.header || ""}
+               trigger={<span>{props.value || "(none)"}</span>}
+               content={
 
-    public render() {
-        return (
-            <Popup open={this.state.isOpen} onOpen={() => this.setState({isOpen: true})}
-                   onClose={() => this.setState({isOpen: false})} on="click" flowing
-                   header={this.props.header || ""}
-                   trigger={<span>{this.props.value || "(none)"}</span>}
-                   content={
-
-                       <Button as="div" labelPosition="left" fluid style={{display: "flex"}}>
-                           <Label as="div" basic pointing="right"
-                                  style={{display: "flex", padding: 0, flexGrow: 1}}>
-                               <div style={{flexGrow: 1}}>
-                                   {this.renderAutoSuggest()}
-                               </div>
-                           </Label>
-                           <Button icon="check" color="teal" onClick={() => this.onAcceptEdit()}/>
-                       </Button>}/>
-        );
-    }
+                   <Button as="div" labelPosition="left" fluid style={{display: "flex"}}>
+                       <Label as="div" basic pointing="right"
+                              style={{display: "flex", padding: 0, flexGrow: 1}}>
+                           <div style={{flexGrow: 1}}>
+                               {renderAutoSuggest()}
+                           </div>
+                       </Label>
+                       <Button icon="check" color="teal" onClick={() => onAcceptEdit()}/>
+                   </Button>}/>
+    );
 }
 
 const standardTheme = {

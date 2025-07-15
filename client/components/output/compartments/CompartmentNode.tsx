@@ -35,49 +35,47 @@ type CompartmentNodeProps = {
     onSelect(node: CompartmentNode, select: boolean): void;
 }
 
-export class CompartmentNodeView extends React.Component<CompartmentNodeProps, {}> {
-    private get IconName(): SemanticICONS {
-        if (this.props.compartmentOnly) {
+export function CompartmentNodeView(props: CompartmentNodeProps) {
+    const getIconName = (): SemanticICONS => {
+        if (props.compartmentOnly) {
             return "file";
         }
 
-        if (this.props.compartmentNode.toggled) {
+        if (props.compartmentNode.toggled) {
             return "folder open";
         }
 
-        return this.props.compartmentNode.children && this.props.compartmentNode.children.length > 0 ? "folder" : "file";
-    }
+        return props.compartmentNode.children && props.compartmentNode.children.length > 0 ? "folder" : "file";
+    };
 
-    public render() {
-        let items = null;
+    let items = null;
 
-        if (this.props.compartmentNode.toggled && !this.props.compartmentOnly && this.props.compartmentNode.children) {
-            items = (
-                <List.List>
-                    {this.props.compartmentNode.children.map(c => (
-                        <CompartmentNodeView key={c.name} compartmentNode={c}
-                                             compartmentOnly={this.props.compartmentOnly}
-                                             visibleBrainAreas={this.props.visibleBrainAreas}
-                                             onToggle={this.props.onToggle}
-                                             onSelect={this.props.onSelect}/>
-                    ))}
-                </List.List>
-            );
-        }
-
-        const isSelected = this.props.visibleBrainAreas.some(c => c.compartment.id === this.props.compartmentNode.compartment.id && c.isDisplayed);
-
-        return (
-            <List.Item>
-                <List.Icon name={this.IconName} onClick={() => {if (this.props.onToggle) {this.props.onToggle(this.props.compartmentNode);}}}/>
-                <List.Content>
-                    <List.Description onClick={() => this.props.onSelect(this.props.compartmentNode, !isSelected)}>
-                        <Icon name={isSelected ? "check square outline" : "square outline"}/>
-                        {this.props.compartmentNode.name}
-                    </List.Description>
-                    {items}
-                </List.Content>
-            </List.Item>
+    if (props.compartmentNode.toggled && !props.compartmentOnly && props.compartmentNode.children) {
+        items = (
+            <List.List>
+                {props.compartmentNode.children.map(c => (
+                    <CompartmentNodeView key={c.name} compartmentNode={c}
+                                         compartmentOnly={props.compartmentOnly}
+                                         visibleBrainAreas={props.visibleBrainAreas}
+                                         onToggle={props.onToggle}
+                                         onSelect={props.onSelect}/>
+                ))}
+            </List.List>
         );
     }
+
+    const isSelected = props.visibleBrainAreas.some(c => c.compartment.id === props.compartmentNode.compartment.id && c.isDisplayed);
+
+    return (
+        <List.Item>
+            <List.Icon name={getIconName()} onClick={() => {if (props.onToggle) {props.onToggle(props.compartmentNode);}}}/>
+            <List.Content>
+                <List.Description onClick={() => props.onSelect(props.compartmentNode, !isSelected)}>
+                    <Icon name={isSelected ? "check square outline" : "square outline"}/>
+                    {props.compartmentNode.name}
+                </List.Description>
+                {items}
+            </List.Content>
+        </List.Item>
+    );
 }

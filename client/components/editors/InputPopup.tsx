@@ -17,67 +17,59 @@ type InputPopupState = {
     isOpen?: boolean;
 }
 
-export class InputPopup extends React.Component<InputPopupProps, InputPopupState> {
-    public constructor(props: InputPopupProps) {
-        super(props);
+export function InputPopup(props: InputPopupProps) {
+    const [value, setValue] = React.useState<string>(props.value || "");
+    const [isOpen, setIsOpen] = React.useState<boolean>(false);
 
-        this.state = {
-            value: props.value || "",
-            isOpen: false
+    React.useEffect(() => {
+        if (!isOpen) {
+            setValue(props.value || "");
         }
-    }
+    }, [props.value, isOpen]);
 
-    public componentWillReceiveProps(nextProps: Readonly<InputPopupProps>, nextContext: any): void {
-        if (!this.state.isOpen) {
-            this.setState({value: this.props.value});
-        }
-    }
-
-    private onKeyPress = (event: any) => {
-        if ((event.charCode || event.which) === 13 && this.isValidValue()) {
-            this.onAccept();
+    const onKeyPress = (event: any) => {
+        if ((event.charCode || event.which) === 13 && isValidValue()) {
+            onAccept();
         }
     };
 
-    private onAccept = () => {
-        if (this.props.onAccept) {
-            this.props.onAccept(this.state.value);
+    const onAccept = () => {
+        if (props.onAccept) {
+            props.onAccept(value);
         }
-
-        this.setState({isOpen: false})
+        setIsOpen(false);
     };
 
-    private isValidValue(): boolean {
-        return !this.props.isValidValueFcn || this.props.isValidValueFcn(this.state.value);
-    }
-
-    private onClose = () => {
-        this.setState({isOpen: false, value: this.props.value});
+    const isValidValue = (): boolean => {
+        return !props.isValidValueFcn || props.isValidValueFcn(value);
     };
 
-    public render() {
-        return (
-            <Popup open={this.state.isOpen} onOpen={() => this.setState({isOpen: true})}
-                   onClose={this.onClose} on="click" flowing
-                   header={this.props.header || ""}
-                   trigger={<span>{this.props.value || "(none)"}</span>}
-                   content={
-                       <Input size="mini" placeholder={this.props.placeholder || ""}
-                              style={{minWidth: "100px"}}
-                              value={this.state.value}
-                              onKeyPress={this.onKeyPress}
-                              onChange={(e, data) => {
-                                  this.setState({value: data.value.toString()})
-                              }}
-                              action={{
-                                  icon: "check",
-                                  color: "teal",
-                                  size: "mini",
-                                  disabled: !this.isValidValue(),
-                                  onClick: this.onAccept
-                              }}
-                       />
-                   }/>
-        );
-    }
+    const onClose = () => {
+        setIsOpen(false);
+        setValue(props.value || "");
+    };
+
+    return (
+        <Popup open={isOpen} onOpen={() => setIsOpen(true)}
+               onClose={onClose} on="click" flowing
+               header={props.header || ""}
+               trigger={<span>{props.value || "(none)"}</span>}
+               content={
+                   <Input size="mini" placeholder={props.placeholder || ""}
+                          style={{minWidth: "100px"}}
+                          value={value}
+                          onKeyPress={onKeyPress}
+                          onChange={(e, data) => {
+                              setValue(data.value.toString());
+                          }}
+                          action={{
+                              icon: "check",
+                              color: "teal",
+                              size: "mini",
+                              disabled: !isValidValue(),
+                              onClick: onAccept
+                          }}
+                   />
+               }/>
+    );
 }

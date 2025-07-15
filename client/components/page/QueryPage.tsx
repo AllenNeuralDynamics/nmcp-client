@@ -32,58 +32,57 @@ interface IPageProps {
     onResetPage(): void;
 }
 
-interface IPageState {
-    isQueryCollapsed?: boolean;
-    visibleBrainAreas?: BrainCompartmentViewModel[];
+export interface QueryPageRef {
+    resetView(r1: number, r2: number): void;
+    updateVisibleCompartments(ids: number[]): void;
 }
 
-export class QueryPage extends React.Component<IPageProps, IPageState> {
-    private _visibleBrainAreas = new VisibleBrainAreas();
+export const QueryPage = React.forwardRef<QueryPageRef, IPageProps>((props, ref) => {
+    const [isQueryCollapsed, setIsQueryCollapsed] = React.useState<boolean>(false);
+    const [visibleBrainAreas, setVisibleBrainAreas] = React.useState<BrainCompartmentViewModel[]>([]);
+    
+    const visibleBrainAreasRef = React.useRef<VisibleBrainAreas>(new VisibleBrainAreas());
+    const mainViewRef = React.useRef<any>(null);
 
-    private _mainView;
-
-    public constructor(props: IPageProps) {
-        super(props);
-
-        this._visibleBrainAreas.initialize(props.constants);
-
-        this.state = {
-            isQueryCollapsed: false,
-            visibleBrainAreas: this._visibleBrainAreas.BrainAreas
-        };
-    }
-
-    private onPerformQuery = () => {
-        if (this.state.isQueryCollapsed && !UserPreferences.Instance.ShouldAutoCollapseOnQuery) {
-            this.setState({isQueryCollapsed: !this.state.isQueryCollapsed});
+    React.useEffect(() => {
+        if (!visibleBrainAreasRef.current) {
+            visibleBrainAreasRef.current = new VisibleBrainAreas();
         }
+        visibleBrainAreasRef.current.initialize(props.constants);
+        setVisibleBrainAreas(visibleBrainAreasRef.current.BrainAreas);
+    }, [props.constants]);
 
-        this.props.onPerformQuery();
+    React.useImperativeHandle(ref, () => ({
+        resetView: (r1: number, r2: number) => {
+            mainViewRef.current?.ViewerContainer.TracingViewer.resetView(r1, r2);
+        },
+        updateVisibleCompartments: (ids: number[]) => {
+            visibleBrainAreasRef.current.show(ids);
+            setVisibleBrainAreas(visibleBrainAreasRef.current.BrainAreas);
+        }
+    }));
+
+    const onPerformQuery = () => {
+        if (isQueryCollapsed && !UserPreferences.Instance.ShouldAutoCollapseOnQuery) {
+            setIsQueryCollapsed(!isQueryCollapsed);
+        }
+        props.onPerformQuery();
     };
 
-    public resetView(r1: number, r2: number) {
-        this._mainView.ViewerContainer.TracingViewer.resetView(r1, r2);
-    }
-
-    public updateVisibleCompartments(ids: number[]) {
-        this._visibleBrainAreas.show(ids);
-
-        this.setState({visibleBrainAreas: this._visibleBrainAreas.BrainAreas});
-    }
-
-    private onResetPage = () => {
-        this.props.onResetPage();
-
-        this._visibleBrainAreas.clear();
-        this._mainView.resetPage();
-
-        this.setState({visibleBrainAreas: this._visibleBrainAreas.BrainAreas, isQueryCollapsed: false});
+    const onResetPage = () => {
+        props.onResetPage();
+        
+        visibleBrainAreasRef.current.clear();
+        mainViewRef.current?.resetPage();
+        
+        setVisibleBrainAreas(visibleBrainAreasRef.current.BrainAreas);
+        setIsQueryCollapsed(false);
     };
 
-    private onShare = () => {
+    const onShare = () => {
         const queryData = {
             timestamp: Date.now(),
-            filters: this.props.predicateList.map(p => p.serialize())
+            filters: props.predicateList.map(p => p.serialize())
         };
         
         const encodedQuery = btoa(JSON.stringify(queryData));
@@ -106,20 +105,20 @@ export class QueryPage extends React.Component<IPageProps, IPageState> {
         }
     };
 
-    private populateCustomPredicate?(position: IPositionInput, replace: boolean) {
-        this.setState({isQueryCollapsed: false});
+    const populateCustomPredicate = (position: IPositionInput, replace: boolean) => {
+        setIsQueryCollapsed(false);
 
         if (replace) {
-            const filter = this.props.predicateList[this.props.predicateList.length - 1];
+            const filter = props.predicateList[props.predicateList.length - 1];
             filter.brainAreaFilterType = BRAIN_AREA_FILTER_TYPE_SPHERE;
             filter.filter.arbCenter = {
                 x: position.x.toFixed(1),
                 y: position.y.toFixed(1),
                 z: position.z.toFixed(1)
             };
-            this.props.predicates.replacePredicate(filter);
+            props.predicates.replacePredicate(filter);
         } else {
-            this.props.predicates.addPredicate({
+            props.predicates.addPredicate({
                 brainAreaFilterType: BRAIN_AREA_FILTER_TYPE_SPHERE
             }, {
                 composition: FilterComposition.and,
@@ -130,78 +129,76 @@ export class QueryPage extends React.Component<IPageProps, IPageState> {
                 }
             });
         }
-    }
+    };
 
-    private onToggleBrainArea(id: string) {
-        this._visibleBrainAreas.toggle(id);
-        this.setState({visibleBrainAreas: this._visibleBrainAreas.BrainAreas});
-    }
+    const onToggleBrainArea = (id: string) => {
+        visibleBrainAreasRef.current.toggle(id);
+        setVisibleBrainAreas(visibleBrainAreasRef.current.BrainAreas);
+    };
 
-    private onRemoveBrainAreaFromHistory(viewModel: BrainCompartmentViewModel) {
+    const onRemoveBrainAreaFromHistory = (viewModel: BrainCompartmentViewModel) => {
         viewModel.shouldIncludeInHistory = false;
-        this.setState({visibleBrainAreas: this._visibleBrainAreas.BrainAreas});
-    }
+        setVisibleBrainAreas(visibleBrainAreasRef.current.BrainAreas);
+    };
 
-    private onMutateBrainAreas(added: string[], removed: string[]) {
-        this._visibleBrainAreas.mutate(added, removed);
-        this.setState({visibleBrainAreas: this._visibleBrainAreas.BrainAreas});
-    }
+    const onMutateBrainAreas = (added: string[], removed: string[]) => {
+        visibleBrainAreasRef.current.mutate(added, removed);
+        setVisibleBrainAreas(visibleBrainAreasRef.current.BrainAreas);
+    };
 
-    public render() {
-        const queryStatus = this.props.isInQuery ? QueryStatus.Loading : (this.props.totalCount >= 0 ? QueryStatus.Loaded : QueryStatus.NeverQueried);
+    const queryStatus = props.isInQuery ? QueryStatus.Loading : (props.totalCount >= 0 ? QueryStatus.Loaded : QueryStatus.NeverQueried);
 
-        const queryProps: any = {
-            constants: this.props.constants,
-            predicates: this.props.predicates,
-            predicateList: this.props.predicateList,
-            isCollapsed: this.state.isQueryCollapsed,
-            status: queryStatus,
-            neuronSystemCount: this.props.totalCount,
-            neuronMatchCount: this.props.neurons.length,
-            queryDuration: this.props.queryTime,
-            onPerformQuery: this.onPerformQuery,
-            onResetPage: this.onResetPage,
-            onShare: this.onShare,
-            onToggleCollapsed: () => this.setState({isQueryCollapsed: !this.state.isQueryCollapsed}),
-        };
+    const queryProps: any = {
+        constants: props.constants,
+        predicates: props.predicates,
+        predicateList: props.predicateList,
+        isCollapsed: isQueryCollapsed,
+        status: queryStatus,
+        neuronSystemCount: props.totalCount,
+        neuronMatchCount: props.neurons.length,
+        queryDuration: props.queryTime,
+        onPerformQuery: onPerformQuery,
+        onResetPage: onResetPage,
+        onShare: onShare,
+        onToggleCollapsed: () => setIsQueryCollapsed(!isQueryCollapsed),
+    };
 
-        const viewerProps = {
-            constants: this.props.constants,
-            isQueryCollapsed: this.state.isQueryCollapsed,
-            queryStatus: queryStatus,
-            neurons: this.props.neurons,
-            visibleBrainAreas: this.state.visibleBrainAreas,
-            isLoading: this.props.isInQuery,
-            nonce: this.props.queryNonce,
-            shouldAlwaysShowFullTracing: this.props.shouldAlwaysShowFullTracing,
-            shouldAlwaysShowSoma: this.props.shouldAlwaysShowSoma,
-            exportLimit: this.props.exportLimit,
-            compartmentMeshVersion: ViewerMeshVersion.AibsCcf,
-            ref: (r) => this._mainView = r,
-            onToggleQueryCollapsed: () => this.setState({isQueryCollapsed: !this.state.isQueryCollapsed}),
-            populateCustomPredicate: (p: IPositionInput, b: boolean) => this.populateCustomPredicate(p, b),
-            onToggleBrainArea: (id: string) => this.onToggleBrainArea(id),
-            onRemoveBrainAreaFromHistory: (id: BrainCompartmentViewModel) => this.onRemoveBrainAreaFromHistory(id),
-            onMutateBrainAreas: (added: string[], removed: string[]) => this.onMutateBrainAreas(added, removed)
-        };
+    const viewerProps = {
+        constants: props.constants,
+        isQueryCollapsed: isQueryCollapsed,
+        queryStatus: queryStatus,
+        neurons: props.neurons,
+        visibleBrainAreas: visibleBrainAreas,
+        isLoading: props.isInQuery,
+        nonce: props.queryNonce,
+        shouldAlwaysShowFullTracing: props.shouldAlwaysShowFullTracing,
+        shouldAlwaysShowSoma: props.shouldAlwaysShowSoma,
+        exportLimit: props.exportLimit,
+        compartmentMeshVersion: ViewerMeshVersion.AibsCcf,
+        ref: (r: any) => mainViewRef.current = r,
+        onToggleQueryCollapsed: () => setIsQueryCollapsed(!isQueryCollapsed),
+        populateCustomPredicate: (p: IPositionInput, b: boolean) => populateCustomPredicate(p, b),
+        onToggleBrainArea: (id: string) => onToggleBrainArea(id),
+        onRemoveBrainAreaFromHistory: (id: BrainCompartmentViewModel) => onRemoveBrainAreaFromHistory(id),
+        onMutateBrainAreas: (added: string[], removed: string[]) => onMutateBrainAreas(added, removed)
+    };
 
-        return (
-            <div style={{
-                height: "100%",
-                width: "100%",
-                display: "flex",
-                flexDirection: "column",
-                flexWrap: "nowrap",
-                alignItems: "flex-start",
-                alignContent: "flex-start"
-            }}>
-                <div style={{width: "100%", order: 1, flexBasis: "auto", overflow: "auto"}}>
-                    <QueryFilterContainer {...queryProps}/>
-                </div>
-                <div style={{height: "100px", width: "100%", flexGrow: 1, flexShrink: 1, order: 2}}>
-                    <MainView{...viewerProps}/>
-                </div>
+    return (
+        <div style={{
+            height: "100%",
+            width: "100%",
+            display: "flex",
+            flexDirection: "column",
+            flexWrap: "nowrap",
+            alignItems: "flex-start",
+            alignContent: "flex-start"
+        }}>
+            <div style={{width: "100%", order: 1, flexBasis: "auto", overflow: "auto"}}>
+                <QueryFilterContainer {...queryProps}/>
             </div>
-        );
-    }
-}
+            <div style={{height: "100px", width: "100%", flexGrow: 1, flexShrink: 1, order: 2}}>
+                <MainView{...viewerProps}/>
+            </div>
+        </div>
+    );
+});

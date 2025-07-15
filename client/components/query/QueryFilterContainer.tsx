@@ -20,21 +20,20 @@ const styles = {
     }
 };
 
-export class QueryFilterContainer extends React.Component<IQueryFilterContainerProps, {}> {
-     private renderPredicates(style: any) {
-        const listItems = this.props.predicateList.map((q, index) => (
+export function QueryFilterContainer(props: IQueryFilterContainerProps) {
+    const renderPredicates = (style: any) => {
+        const listItems = props.predicateList.map((q, index) => (
             <List.Item key={`qf_${q.id}`} style={{padding: "0", margin: 0, border: "none"}}>
                 <QueryFilter queryFilter={q}
                              isComposite={index > 0}
-                             isRemovable={this.props.predicateList.length > 1}
-                             constants={this.props.constants}
-                             queryOperators={this.props.constants.QueryOperators}
-                             onChangeFilter={(f) => this.props.predicates.replacePredicate(f)}
-                             onRemoveFilter={(id: string) => this.props.predicates.removePredicate(id)}
+                             isRemovable={props.predicateList.length > 1}
+                             constants={props.constants}
+                             queryOperators={props.constants.QueryOperators}
+                             onChangeFilter={(f) => props.predicates.replacePredicate(f)}
+                             onRemoveFilter={(id: string) => props.predicates.removePredicate(id)}
                 />
             </List.Item>
         ));
-
 
         return (
             <div style={style}>
@@ -43,26 +42,24 @@ export class QueryFilterContainer extends React.Component<IQueryFilterContainerP
                 </List>
             </div>
         );
-    }
+    };
 
-    public render() {
-        const flexStyle = {
-            height: "300px",
-            backgroundColor: "#efefef",
-            width: "100%",
-            flexGrow: 1,
-            flexShrink: 1,
-            order: 2,
-            overflow: "auto"
-        };
+    const flexStyle = {
+        height: "300px",
+        backgroundColor: "#efefef",
+        width: "100%",
+        flexGrow: 1,
+        flexShrink: 1,
+        order: 2,
+        overflow: "auto"
+    };
 
-        return (
-            <div style={columnStyle}>
-                <div style={{width: "100%", order: 1, flexBasis: "auto"}}>
-                    <QueryHeader {...this.props}/>
-                </div>
-                {this.props.isCollapsed ? null : this.renderPredicates(flexStyle)}
+    return (
+        <div style={columnStyle}>
+            <div style={{width: "100%", order: 1, flexBasis: "auto"}}>
+                <QueryHeader {...props}/>
             </div>
-        );
-    }
+            {props.isCollapsed ? null : renderPredicates(flexStyle)}
+        </div>
+    );
 }

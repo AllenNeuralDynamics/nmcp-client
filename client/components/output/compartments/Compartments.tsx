@@ -12,81 +12,67 @@ type CompartmentsProps = {
     onChangeLoadedGeometry(added: string[], removed: string[]): void;
 }
 
-type CompartmentsState = {
-    filterText: string;
-    selectedNode: CompartmentNode;
-}
+export function Compartments(props: CompartmentsProps) {
+    const [filterText, setFilterText] = React.useState<string>("");
+    const [selectedNode, setSelectedNode] = React.useState<CompartmentNode | null>(null);
 
-export class Compartments extends React.Component<CompartmentsProps, CompartmentsState> {
-    public constructor(props: CompartmentsProps) {
-        super(props);
-
-        this.state = {
-            filterText: "",
-            selectedNode: null
-        }
-    }
-
-    public onSelect = (node: CompartmentNode, select: boolean) => {
-
+    const onSelect = (node: CompartmentNode, select: boolean) => {
         const added = select ? [node.compartment.id] : [];
         const remove = select ? [] : [node.compartment.id];
 
-        this.props.onChangeLoadedGeometry(added, remove);
+        props.onChangeLoadedGeometry(added, remove);
     };
 
-    public onToggle = (node: CompartmentNode) => {
+    const onToggle = (node: CompartmentNode) => {
         if (node.children) {
             node.toggled = !node.toggled;
         }
 
-        this.setState({selectedNode: node});
+        setSelectedNode(node);
     };
 
-    public render() {
-        if (this.props.rootNode === null) {
-            return null;
-        }
+    if (props.rootNode === null) {
+        return null;
+    }
 
-        let list = null;
+    let list = null;
 
-        if (this.state.filterText) {
-            const items = compartmentNodeSortedList.filter(c => c.matches(this.state.filterText));
+    if (filterText) {
+        const items = compartmentNodeSortedList.filter(c => c.matches(filterText));
 
-            const listItems = items.map(c => (
-                <CompartmentNodeView key={c.name} compartmentNode={c}
-                                     compartmentOnly={true}
-                                     visibleBrainAreas={this.props.visibleBrainAreas}
-                                     onSelect={this.onSelect}/>
-            ));
-            list = (
-                <List>
-                    {listItems}
-                </List>
-            );
-        } else {
-            list = (
-                <List>
-                    <CompartmentNodeView compartmentNode={this.props.rootNode}
-                                         compartmentOnly={false}
-                                         onToggle={this.onToggle}
-                                         visibleBrainAreas={this.props.visibleBrainAreas}
-                                         onSelect={this.onSelect}/>
-                </List>
-            );
-        }
-
-        return (
-            <Container fluid>
-                <div>
-                    <Input size="mini" icon="search" iconPosition="left" action={{icon: "cancel", as: "div", onClick: () => this.setState({filterText: ""})}}
-                           placeholder='Filter compartments...' fluid value={this.state.filterText} className="compartment-search"
-                           onChange={(e, {value}) => this.setState({filterText: value.toLowerCase()})}/>
-                </div>
-                <div style={{padding: "10px"}}>
-                    {list}
-                </div>
-            </Container>
+        const listItems = items.map(c => (
+            <CompartmentNodeView key={c.name} compartmentNode={c}
+                                 compartmentOnly={true}
+                                 visibleBrainAreas={props.visibleBrainAreas}
+                                 onSelect={onSelect}/>
+        ));
+        list = (
+            <List>
+                {listItems}
+            </List>
+        );
+    } else {
+        list = (
+            <List>
+                <CompartmentNodeView compartmentNode={props.rootNode}
+                                     compartmentOnly={false}
+                                     onToggle={onToggle}
+                                     visibleBrainAreas={props.visibleBrainAreas}
+                                     onSelect={onSelect}/>
+            </List>
         );
     }
+
+    return (
+        <Container fluid>
+            <div>
+                <Input size="mini" icon="search" iconPosition="left" action={{icon: "cancel", as: "div", onClick: () => setFilterText("")}}
+                       placeholder='Filter compartments...' fluid value={filterText} className="compartment-search"
+                       onChange={(e, {value}) => setFilterText(value.toLowerCase())}/>
+            </div>
+            <div style={{padding: "10px"}}>
+                {list}
+            </div>
+        </Container>
+    );
 }
