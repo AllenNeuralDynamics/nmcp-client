@@ -35,6 +35,41 @@ export class Content extends React.Component<IContentProps, IContentState> {
 
     private _queryPage: React.RefObject<QueryPage>;
 
+    private _shouldAutoExecuteFromUrl: boolean = false;
+
+    private parseUrlQuery(): UIQueryPredicate[] | null {
+        const urlParams = new URLSearchParams(window.location.search);
+        const queryParam = urlParams.get('q');
+        
+        if (!queryParam) {
+            return null;
+        }
+        
+        try {
+            const decodedQuery = JSON.parse(atob(queryParam));
+            if (decodedQuery && decodedQuery.filters && Array.isArray(decodedQuery.filters)) {
+                return decodedQuery.filters.map(f => UIQueryPredicate.deserialize(f, this.props.constants));
+            }
+        } catch (e) {
+            console.warn('Invalid URL query parameter:', e);
+        }
+        
+        return null;
+    }
+
+    private updateUrlWithQuery = (predicates: UIQueryPredicate[]) => {
+        const queryData = {
+            timestamp: Date.now(),
+            filters: predicates.map(p => p.serialize())
+        };
+        
+        const encodedQuery = btoa(JSON.stringify(queryData));
+        const url = new URL(window.location.href);
+        url.searchParams.set('q', encodedQuery);
+        
+        window.history.replaceState({}, '', url.toString());
+    };
+
     public constructor(props: IContentProps) {
         super(props);
 
@@ -54,15 +89,31 @@ export class Content extends React.Component<IContentProps, IContentState> {
         };
     }
 
+    public componentDidMount() {
+        if (this._shouldAutoExecuteFromUrl) {
+            this._shouldAutoExecuteFromUrl = false;
+        }
+    }
+
     public componentWillReceiveProps(props: IContentProps) {
         this.setState({predicates: this.initializeQueryFilters(props)});
     }
 
     private initializeQueryFilters(props: IContentProps): UIQueryPredicate[] {
         if (!this.state) {
-            this._uiPredicates = new UIQueryPredicates(UserPreferences.Instance.LastQuery, props.constants);
+            const urlQuery = this.parseUrlQuery();
+            if (urlQuery) {
+                this._shouldAutoExecuteFromUrl = true;
+                this._uiPredicates = new UIQueryPredicates(urlQuery, null, props.constants);
+            } else {
+                this._uiPredicates = new UIQueryPredicates(null, UserPreferences.Instance.LastQuery, props.constants);
+            }
 
-            this._uiPredicates.PredicateListener = () => this.setState({predicates: this._uiPredicates.Predicates});
+            this._uiPredicates.PredicateListener = () => {
+                this.setState({predicates: this._uiPredicates.Predicates});
+                // TODO Not well tested to continuously update the URL with the query.
+                // this.updateUrlWithQuery(this._uiPredicates.Predicates);
+            };
 
             return this._uiPredicates.Predicates;
         } else {
@@ -72,6 +123,10 @@ export class Content extends React.Component<IContentProps, IContentState> {
 
     private onResetPage = () => {
         this._uiPredicates.clearPredicates();
+
+        const url = new URL(window.location.href);
+        url.searchParams.delete('q');
+        window.history.replaceState({}, '', url.toString());
 
         this.setState({neurons: [], queryTime: -1});
     };
@@ -129,22 +184,31 @@ export class Content extends React.Component<IContentProps, IContentState> {
     public render() {
         return (
             <ApolloConsumer>
-                {client => (
-                    <div style={{height: "calc(100vh - 94px)"}}>
-                        <QueryPage constants={this.props.constants} predicates={this._uiPredicates}
-                                   predicateList={this.state.predicates} neurons={this.state.neurons}
-                                   totalCount={this.state.totalCount} isInQuery={this.state.isInQuery}
-                                   queryError={this.state.queryError} queryTime={this.state.queryTime}
-                                   queryNonce={this.state.queryNonce}
-                                   shouldAlwaysShowFullTracing={this.state.shouldAlwaysShowFullTracing}
-                                   shouldAlwaysShowSoma={this.state.shouldAlwaysShowSoma}
-                                   exportLimit={this.props.exportLimit}
-                                   ref={this._queryPage}
-                                   onPerformQuery={() => this.onExecuteQuery(client)}
-                                   onResetPage={() => this.onResetPage()}/>
-                        <Footer/>
-                    </div>
-                )}
+                {client => {
+                    if (this._shouldAutoExecuteFromUrl) {
+                        this._shouldAutoExecuteFromUrl = false;
+                        setTimeout(() => {
+                            this.onExecuteQuery(client, cuid());
+                        }, 100);
+                    }
+                    
+                    return (
+                        <div style={{height: "calc(100vh - 94px)"}}>
+                            <QueryPage constants={this.props.constants} predicates={this._uiPredicates}
+                                       predicateList={this.state.predicates} neurons={this.state.neurons}
+                                       totalCount={this.state.totalCount} isInQuery={this.state.isInQuery}
+                                       queryError={this.state.queryError} queryTime={this.state.queryTime}
+                                       queryNonce={this.state.queryNonce}
+                                       shouldAlwaysShowFullTracing={this.state.shouldAlwaysShowFullTracing}
+                                       shouldAlwaysShowSoma={this.state.shouldAlwaysShowSoma}
+                                       exportLimit={this.props.exportLimit}
+                                       ref={this._queryPage}
+                                       onPerformQuery={() => this.onExecuteQuery(client)}
+                                       onResetPage={() => this.onResetPage()}/>
+                            <Footer/>
+                        </div>
+                    );
+                }}
             </ApolloConsumer>
         );
     }

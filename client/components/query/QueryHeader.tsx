@@ -34,6 +34,8 @@ export interface IQueryHeaderBaseProps {
     onPerformQuery(): void;
 
     onResetPage(): void;
+
+    onShare(): void;
 }
 
 export class QueryHeader extends React.Component<IQueryHeaderBaseProps, {}> {
@@ -93,12 +95,17 @@ export class QueryHeader extends React.Component<IQueryHeaderBaseProps, {}> {
     private renderButtons() {
         return (
             <div>
+                <Button size="mini" inverted icon="share" content="Share"
+                        disabled={this.props.status === QueryStatus.Loading}
+                        onClick={() => this.props.onShare()}/>
                 <Button size="mini" inverted icon="plus" content="Add Filter"
                         disabled={this.props.status === QueryStatus.Loading}
-                        onClick={() => this.props.predicates.addPredicate()}/>
+                        onClick={() => this.props.predicates.addPredicate()}
+                        style={{marginLeft: "4px"}}/>
                 <Button size="mini" inverted icon="search" content="Search"
                         disabled={this.props.status === QueryStatus.Loading}
-                        onClick={() => this.props.onPerformQuery()}/>
+                        onClick={() => this.props.onPerformQuery()}
+                        style={{marginLeft: "4px"}}/>
             </div>
         );
     }

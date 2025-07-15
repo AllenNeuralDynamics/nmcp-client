@@ -84,12 +84,12 @@ export class FilterContents {
         filter.tracingIdsOrDOIsExactMatch = data.tracingIdsOrDOIsExactMatch == null ? true : data.tracingIdsOrDOIsExactMatch;
         filter.neuronalStructure = constants.findNeuronalStructure(data.neuronalStructureId);
         filter.operator = constants.findQueryOperator(data.operatorId);
-        filter.amount = data.amount;
-        filter.brainAreas = data.brainAreaStructureIds.map(s => constants.findBrainArea(s));
-        filter.arbCenter = data.arbCenter;
-        filter.arbSize = data.arbSize;
-        filter.invert = data.invert;
-        filter.composition = data.composition;
+        filter.amount = data.amount || "0";
+        filter.brainAreas = data.brainAreaStructureIds ? data.brainAreaStructureIds.map(s => constants.findBrainArea(s)) : [];
+        filter.arbCenter = data.arbCenter || {x: "6500", y: "4000", z: "5500"};
+        filter.arbSize = data.arbSize || "1000";
+        filter.invert = data.invert || false;
+        filter.composition = data.composition || FilterComposition.and;
 
         return filter;
     }

@@ -16,11 +16,14 @@ export class UIQueryPredicates {
 
     private _predicateListener: PredicateListenerFcn = null;
 
-    public constructor(predicates: UIQueryPredicate[], constants: NdbConstants) {
-        if (predicates && predicates.length > 0) {
-            this._predicates = predicates.map(f => {
+    public constructor(predicates: UIQueryPredicate[], serializedPredicates: any[], constants: NdbConstants) {
+        if (serializedPredicates && serializedPredicates.length > 0) {
+            this._predicates = serializedPredicates.map(f => {
                 return UIQueryPredicate.deserialize(f, constants);
             });
+        }
+        else if (predicates && predicates.length > 0) {
+            this._predicates = predicates;
         } else {
             this._predicates = [Object.assign(new UIQueryPredicate(), DEFAULT_QUERY_FILTER, {id: cuid()})];
         }
@@ -126,7 +129,6 @@ export class UIQueryPredicate {
         filter.id = data.id || "";
         filter.index = data.index || 0;
         filter.brainAreaFilterType = findBrainAreaFilterType(data.brainAreaFilterTypeOption || PredicateType.AnatomicalRegion);
-
         filter.filter = data.filter ? FilterContents.deserialize(data.filter, constants) : null;
 
         return filter;

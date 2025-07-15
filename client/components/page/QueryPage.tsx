@@ -80,6 +80,32 @@ export class QueryPage extends React.Component<IPageProps, IPageState> {
         this.setState({visibleBrainAreas: this._visibleBrainAreas.BrainAreas, isQueryCollapsed: false});
     };
 
+    private onShare = () => {
+        const queryData = {
+            timestamp: Date.now(),
+            filters: this.props.predicateList.map(p => p.serialize())
+        };
+        
+        const encodedQuery = btoa(JSON.stringify(queryData));
+        const baseUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname}`;
+        const shareUrl = `${baseUrl}?q=${encodedQuery}`;
+        
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(shareUrl).then(() => {
+                // console.log('URL copied to clipboard');
+            }).catch(err => {
+                console.error('Failed to copy URL to clipboard:', err);
+            });
+        } else {
+            const textArea = document.createElement('textarea');
+            textArea.value = shareUrl;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+        }
+    };
+
     private populateCustomPredicate?(position: IPositionInput, replace: boolean) {
         this.setState({isQueryCollapsed: false});
 
@@ -135,6 +161,7 @@ export class QueryPage extends React.Component<IPageProps, IPageState> {
             queryDuration: this.props.queryTime,
             onPerformQuery: this.onPerformQuery,
             onResetPage: this.onResetPage,
+            onShare: this.onShare,
             onToggleCollapsed: () => this.setState({isQueryCollapsed: !this.state.isQueryCollapsed}),
         };
 
