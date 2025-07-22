@@ -1,6 +1,6 @@
 import {debounce} from "lodash-es";
 import {makeMinimalViewer} from "neuroglancer/unstable/ui/minimal_viewer.js";
-import {setDefaultInputEventBindings} from "neuroglancer/unstable/ui/default_input_event_bindings.js";
+import {getDefaultRenderedDataPanelBindings, setDefaultInputEventBindings} from "neuroglancer/unstable/ui/default_input_event_bindings.js";
 import {disableWheel} from "neuroglancer/unstable/ui/disable_default_actions.js";
 import {registerEventListener} from "neuroglancer/unstable/util/disposable.js";
 import {UserPreferences} from "../../util/userPreferences";
@@ -54,6 +54,8 @@ export class NeuroglancerProxy {
     private _somaModelMap = new Map<string, NeuronViewModel>();
     private _somaNodeMap = new Map<string, ITracingNode>();
 
+    public static SearchNeuroglancer?: NeuroglancerProxy = null;
+
     public static configureCandidateNeuroglancer(id: string, state: any, annotations: any, selectionDelegate: CandidateSelectionDelegate): NeuroglancerProxy {
         const [proxy, target] = NeuroglancerProxy.createCommon(id);
 
@@ -103,6 +105,9 @@ export class NeuroglancerProxy {
     }
 
     public static configureSearchNeuroglancer(id: string, state: any, neuronSelectionDelegate: NeuronSelectionDelegate, somaSelectionDelegate: SomaSelectionDelegate): NeuroglancerProxy {
+        const map = getDefaultRenderedDataPanelBindings();
+        map.set("at:wheel", {action: "zoom-via-wheel", originalEventIdentifier: "wheel", preventDefault: true});
+
         const [proxy, target] = NeuroglancerProxy.createCommon(id);
 
         if (neuronSelectionDelegate) {
@@ -193,6 +198,15 @@ export class NeuroglancerProxy {
         proxy._changeHandler = proxy._viewer.state.changed.add(throttledSetUrlHash);
 
         proxy._defaultState = defaultSearchState;
+
+        NeuroglancerProxy.SearchNeuroglancer = proxy;
+
+        proxy._viewer.inputEventBindings.perspectiveView.bindings["at:wheel"] = {action: "zoom-via-wheel", preventDefault: true}
+        proxy._viewer.inputEventBindings.perspectiveView.bindings["wheel"] = {action: "zoom-via-wheel", preventDefault: true};
+        proxy._viewer.inputEventBindings.global.bindings["at:wheel"] = {action: "zoom-via-wheel", preventDefault: true};
+        proxy._viewer.inputEventBindings.global.bindings["wheel"] = {action: "zoom-via-wheel", preventDefault: true};
+
+        console.log(proxy._viewer);
 
         return proxy;
     }
@@ -314,6 +328,19 @@ export class NeuroglancerProxy {
 
     public resetNeuroglancerState() {
         this._viewer.state.restoreState(this._defaultState);
+    }
+
+    public resetView() {
+        const state = this._viewer.state.toJSON();
+
+        state.position = this._defaultState.position;
+        state.projectionOrientation = this._defaultState.projectionOrientation;
+        state.projectionScale = this._defaultState.projectionScale;
+        state.crossSectionScale = this._defaultState.crossSectionScale;
+        state.showAxisLines = this._defaultState.showAxisLines;
+
+        this._viewer.state.reset();
+        this._viewer.state.restoreState(state);
     }
 
     public unlinkNeuroglancerHandler() {

@@ -8,10 +8,15 @@ import {PeerReview} from "./PeerReview";
 
 export const Review = () => {
     const user = useContext(UserContext);
+console.log(user)
+    console.log(user?.permissions)
+    console.log(user?.permissions & UserPermissions.PeerReview)
+    const peer = user?.permissions & UserPermissions.PeerReview ? <PeerReview/> : null;
 
-    if (user?.permissions & UserPermissions.PeerReview) {
-        return (<PeerReview/>);
-    } else {
-        return (<FullReview/>)
-    }
+    return (
+        <div>
+            {peer}
+            <FullReview/>
+        </div>
+    );
 };

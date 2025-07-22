@@ -16,6 +16,8 @@ export interface IReconstruction {
     annotator: IUser;
     proofreaderId: string;
     proofreader: IUser;
+    peerReviewerId: string;
+    peerReviewer: IUser;
     neuron: INeuron;
     axon: ISwcTracing;
     dendrite: ISwcTracing;

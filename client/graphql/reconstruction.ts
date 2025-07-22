@@ -25,6 +25,13 @@ export const ReconstructionFieldsFragment = gql`fragment ReconstructionFields on
         lastName
         emailAddress
     }
+    peerReviewerId
+    peerReviewer {
+        id
+        firstName
+        lastName
+        emailAddress
+    }
     neuronId
     neuron {
         id

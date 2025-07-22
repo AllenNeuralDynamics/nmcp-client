@@ -4,6 +4,9 @@ import {ITracingViewerBaseProps, TracingViewer} from "./TracingViewer";
 import {FetchState} from "./MainView";
 import {primaryBackground} from "../../util/styles";
 import {Icon} from "semantic-ui-react";
+import {UserPreferences} from "../../util/userPreferences";
+import {ViewerStyle} from "../../viewer/viewerStyle";
+import {NeuroglancerProxy} from "../../viewer/neuroglancer/neuroglancer";
 
 interface IViewerProps extends ITracingViewerBaseProps {
     isQueryCollapsed: boolean;
@@ -17,9 +20,13 @@ interface IViewerProps extends ITracingViewerBaseProps {
     isRendering: boolean;
 
     onFloatNeuronList(): void;
+
     onFloatCompartmentList(): void;
+
     onToggleQueryCollapsed(): void;
+
     onSetFetchState(fetchState: FetchState): void;
+
     onCancelFetch(): void;
 }
 
@@ -64,8 +71,8 @@ export const ViewerContainer = React.forwardRef<TracingViewer, IViewerProps>((pr
 
     const renderCollapseQueryGlyph = () => {
         return (<Icon name={props.isQueryCollapsed ? "chevron down" : "chevron up"}
-                           style={{margin: "auto", order: 3}}
-                           onClick={() => props.onToggleQueryCollapsed()}/>)
+                      style={{margin: "auto", order: 3}}
+                      onClick={() => props.onToggleQueryCollapsed()}/>)
     };
 
     const renderProgress = () => {
@@ -104,8 +111,8 @@ export const ViewerContainer = React.forwardRef<TracingViewer, IViewerProps>((pr
                             padding: "0px 10px"
                         }}>
                             <Icon name={iconName}
-                                       style={{paddingTop: "2px", paddingBottom: "0px", paddingLeft: "1px"}}
-                                       onClick={() => props.onSetFetchState(isPaused ? FetchState.Running : FetchState.Paused)}/>
+                                  style={{paddingTop: "2px", paddingBottom: "0px", paddingLeft: "1px"}}
+                                  onClick={() => props.onSetFetchState(isPaused ? FetchState.Running : FetchState.Paused)}/>
                         </div>
                         <div style={{
                             display: "inline-block",
@@ -115,8 +122,8 @@ export const ViewerContainer = React.forwardRef<TracingViewer, IViewerProps>((pr
                             padding: "0px 10px"
                         }}>
                             <Icon name="remove"
-                                       style={{paddingTop: "2px", paddingBottom: "0px", paddingLeft: "1px"}}
-                                       onClick={() => props.onCancelFetch()}/>
+                                  style={{paddingTop: "2px", paddingBottom: "0px", paddingLeft: "1px"}}
+                                  onClick={() => props.onCancelFetch()}/>
                         </div>
                     </div>
                 </div>
@@ -134,6 +141,20 @@ export const ViewerContainer = React.forwardRef<TracingViewer, IViewerProps>((pr
         }
 
     };
+
+    const renderResetView = () => {
+        if (UserPreferences.Instance.ViewerStyle == ViewerStyle.Neuroglancer) {
+            return (
+                <span style={{marginRight: "6px", textDecoration: "underline"}} onClick={() => {
+                    if (NeuroglancerProxy.SearchNeuroglancer) {
+                        NeuroglancerProxy.SearchNeuroglancer.resetView();
+                    }
+                }}>Reset View</span>
+            );
+        }
+
+        return null;
+    }
 
     const renderHeader = () => {
         const isLeftGlyphVisible = !props.isNeuronListDocked && !props.isNeuronListOpen;
@@ -177,6 +198,9 @@ export const ViewerContainer = React.forwardRef<TracingViewer, IViewerProps>((pr
                                 <span onClick={() => props.onToggleQueryCollapsed()}>
                                     Show Search
                                 </span> : null}
+                        </div>
+                        <div style={{flex: "1 1 auto", order: 2, textAlign: "right", width: "100%"}}>
+                            {renderResetView()}
                         </div>
                     </div>
                     <div style={{flex: "0 0 auto", order: 3, width: "auto"}}>

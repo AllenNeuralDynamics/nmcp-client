@@ -10,6 +10,7 @@ import {IReconstruction} from "../../models/reconstruction";
 import {displayNeuron} from "../../models/neuron";
 import {displayBrainArea} from "../../models/brainArea";
 import {ReconstructionStatus, reconstructionStatusColor, reconstructionStatusString} from "../../models/reconstructionStatus";
+import {IUser} from "../../models/user";
 
 export type ReviewTableProps = {
     reconstructions: IReconstruction[]
@@ -54,6 +55,8 @@ export const ReviewTable = (props: ReviewTableProps) => {
                     <Table.HeaderCell colSpan={4} textAlign="center">Soma</Table.HeaderCell>
                     <Table.HeaderCell colSpan={2} textAlign="center">Nodes</Table.HeaderCell>
                     <Table.HeaderCell rowSpan={2}>Annotator</Table.HeaderCell>
+                    <Table.HeaderCell rowSpan={2}>Proofreader</Table.HeaderCell>
+                    <Table.HeaderCell rowSpan={2}>Peer Reviewer</Table.HeaderCell>
                     <Table.HeaderCell rowSpan={2}>Status</Table.HeaderCell>
                     <Table.HeaderCell rowSpan={2}>Actions</Table.HeaderCell>
                 </Table.Row>
@@ -136,6 +139,13 @@ const ReviewRow = (props: ReviewRowProps) => {
     const axonIcon = haveAxon ? null : <Icon name="attention"/>
     const dendriteIcon = haveDendrite ? null : <Icon name="attention"/>
 
+    function userNameIfAvailable(user?: IUser): [string, "left" | "center" | "right"] {
+        return user ? [`${user.firstName} ${user.lastName}`, "left"] : ["-", "center"];
+    }
+
+    const [proof, proofAlign] = userNameIfAvailable(props.reconstruction.proofreader);
+    const [peer, peerAlign] = userNameIfAvailable(props.reconstruction.peerReviewer);
+
     return (
         <TableRow onClick={() => props.onRowClick(props.reconstruction)} active={props.isSelected}>
             <TableCell>{displayNeuron(props.reconstruction.neuron)}</TableCell>
@@ -147,12 +157,13 @@ const ReviewRow = (props: ReviewRowProps) => {
             <TableCell warning={!haveAxon}>{axonIcon}{props.reconstruction.axon ? props.reconstruction.axon.nodeCount : "upload"}</TableCell>
             <TableCell warning={!haveDendrite}>{dendriteIcon}{props.reconstruction.dendrite ? props.reconstruction.dendrite.nodeCount : "upload"}</TableCell>
             <TableCell>{props.reconstruction.annotator.firstName} {props.reconstruction.annotator.lastName}</TableCell>
+            <TableCell textAlign={proofAlign}>{proof}</TableCell>
+            <TableCell textAlign={peerAlign}>{peer}</TableCell>
             <TableCell>
                 <Label basic size="tiny"
                        color={reconstructionStatusColor(props.reconstruction.status)}>{reconstructionStatusString(props.reconstruction.status)}</Label>
             </TableCell>
             <TableCell>
-                {/*<Button icon="eye" size="mini" color='blue' content="View"/>*/}
                 {completeButton}
                 {approveButton}
                 <Button icon="cancel" size="mini" color='red' content={decline} onClick={() => declineAnnotation({variables: {id: props.reconstruction.id}})}/>
