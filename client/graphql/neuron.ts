@@ -180,3 +180,41 @@ export type DeleteNeuronMutationData = {
 export type DeleteNeuronMutationResponse = {
     deleteNeuron: DeleteNeuronMutationData;
 }
+
+///
+/// Import Somas Mutation
+///
+
+export const IMPORT_SOMAS_MUTATION = gql`mutation($file: Upload!, $options: ImportSomasOptions!) {
+    importSomas(file: $file, options: $options) {
+        count
+        idStrings
+        error {
+            name
+            message
+        }
+    }
+}`;
+
+export type ImportSomasVariables = {
+    file: File;
+    options: {
+        sampleId: string;
+        tag: string;
+        shouldLookupSoma: boolean;
+        noEmit: boolean;
+    }
+}
+
+export type ImportSomasMutationData = {
+    count: number;
+    idStrings: string[];
+    error: {
+        name: string;
+        message: string;
+    }
+}
+
+export type ImportSomasMutationResponse = {
+    importSomas: ImportSomasMutationData;
+}

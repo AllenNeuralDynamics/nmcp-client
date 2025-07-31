@@ -106,7 +106,7 @@ export const SwcDropZone = (props: SwcDropZoneProps) => {
     );
 }
 
-const NoFileStyle = (isMissing: boolean, loading: boolean) => {
+export const NoFileStyle = (isMissing: boolean, loading: boolean) => {
     return {
         textAlign: "center" as const,
         width: "100%",

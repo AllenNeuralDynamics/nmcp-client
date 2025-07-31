@@ -16,6 +16,7 @@ import {displaySample, ISample} from "../../models/sample";
 import {NeuronsTable} from "./NeuronsTable";
 import {displayNeuron, INeuron} from "../../models/neuron";
 import {UserPreferences} from "../../util/userPreferences";
+import {ImportSomasModal} from "./soma/ImportSomasModal";
 
 interface INeuronsProps {
     samples: ISample[];
@@ -28,8 +29,9 @@ interface INeuronsState {
     isSampleLocked: boolean;
     limitSamples: boolean;
     sampleIds: string[];
-    requestedNeuronForDelete?: INeuron;
-    requestedNeuronForAnnotations?: INeuron;
+    requestedNeuronForDelete: INeuron;
+    requestedNeuronForAnnotations: INeuron;
+    isUploadSomaPropertiesOpen: boolean;
 }
 
 export const Neurons = (props: INeuronsProps) => {
@@ -49,7 +51,8 @@ export const Neurons = (props: INeuronsProps) => {
         limitSamples: false,
         sampleIds: [],
         requestedNeuronForDelete: null,
-        requestedNeuronForAnnotations: null
+        requestedNeuronForAnnotations: null,
+        isUploadSomaPropertiesOpen: false
     });
 
     useEffect(() => {
@@ -133,6 +136,10 @@ export const Neurons = (props: INeuronsProps) => {
         setState({...state, sampleIds: data, offset: 0});
     }
 
+    const uploadSomaProperties = () => {
+        setState({...state, isUploadSomaPropertiesOpen: true});
+    }
+
     const renderCreateNeuron = () => {
         const items = props.samples.map(s => {
             return {value: s.id, text: displaySample(s)}
@@ -143,7 +150,7 @@ export const Neurons = (props: INeuronsProps) => {
                 border: "none",
                 background: "transparent",
                 marginTop: 0,
-                maxWidth: "480px",
+                maxWidth: "580px",
                 textAlign: "right"
             }}>
                 <Table.Body>
@@ -169,6 +176,11 @@ export const Neurons = (props: INeuronsProps) => {
                                     disabled={state.sample === null}
                                     onClick={() => createNeuron({variables: {neuron: {sampleId: state.sample.id}}})}/>
                         </Table.Cell>
+
+                        <Table.Cell style={{padding: 0}}>
+                            <Button content="Import..." icon="upload" size="small" labelPosition="right" color="green"
+                                    disabled={state.sample === null} onClick={() => uploadSomaProperties()}/>
+                        </Table.Cell>
                     </Table.Row>
                 </Table.Body>
             </Table>
@@ -191,6 +203,18 @@ export const Neurons = (props: INeuronsProps) => {
                         }}/>
     }
 
+    const renderUploadSomaProperties = () => {
+        if (!state.isUploadSomaPropertiesOpen || !state.sample) {
+            return null;
+        }
+
+        const onClose = () => {setState({...state, isUploadSomaPropertiesOpen: false});};
+
+        return (
+            <ImportSomasModal sampleId={sample?.id} onClose={onClose}/>
+        );
+    }
+
     if (error || loading) {
         return null
     }
@@ -210,6 +234,7 @@ export const Neurons = (props: INeuronsProps) => {
     return (
         <div>
             {renderDeleteConfirmationModal()}
+            {renderUploadSomaProperties()}
             <Segment.Group>
                 <Segment secondary style={{
                     display: "flex",
