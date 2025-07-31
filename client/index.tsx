@@ -1,6 +1,6 @@
 import * as React from "react";
-import * as ReactDOM from "react-dom";
 import {BrowserRouter} from "react-router-dom";
+import {createTheme, MantineProvider} from "@mantine/core";
 import {MsalProvider} from "@azure/msal-react";
 import {AuthenticationResult, EventMessage, EventType, PublicClientApplication} from "@azure/msal-browser";
 
@@ -17,6 +17,10 @@ import "../assets/style.css";
 import "neuroglancer/unstable/layer/enabled_frontend_modules.js";
 import "neuroglancer/unstable/datasource/enabled_frontend_modules.js";
 import {createRoot} from "react-dom/client";
+
+import "@mantine/core/styles.css";
+
+const theme = createTheme({});
 
 const msalInstance = new PublicClientApplication(msalConfig);
 
@@ -43,8 +47,10 @@ const root = createRoot(rootEl);
 
 root.render(
     <BrowserRouter>
-        <MsalProvider instance={msalInstance}>
-            <App/>
-        </MsalProvider>
+        <MantineProvider theme={theme}>
+            <MsalProvider instance={msalInstance}>
+                <App/>
+            </MsalProvider>
+        </MantineProvider>
     </BrowserRouter>
 );
