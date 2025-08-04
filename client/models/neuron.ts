@@ -5,6 +5,20 @@ import {IReconstruction} from "./reconstruction";
 import {ConsensusStatus} from "./consensusStatus";
 import {ITracing} from "./tracing";
 
+export enum SomaPropertyOperator {
+    None = 0,
+    Equals = 1,
+    LessThan = 2,
+    GreaterThan = 3
+}
+
+export type SomaProperties = {
+    brightnessOperator?: SomaPropertyOperator;
+    brightness?: number;
+    volumeOperator?: SomaPropertyOperator;
+    volume?: number;
+}
+
 export interface INeuron {
     id: string;
     idNumber: number;

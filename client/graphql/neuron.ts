@@ -1,5 +1,5 @@
 import gql from "graphql-tag";
-import {INeuron} from "../models/neuron";
+import {INeuron, SomaProperties} from "../models/neuron";
 import {ConsensusStatus} from "../models/consensusStatus";
 
 

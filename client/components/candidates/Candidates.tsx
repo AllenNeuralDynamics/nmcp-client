@@ -2,16 +2,15 @@ import * as React from "react";
 import {useContext, useState} from "react";
 import {useQuery} from "@apollo/client";
 import {
-    Button,
     Checkbox,
     Dropdown,
     Header,
-    Icon, Input,
+    Icon,
     List,
     Message,
-    Popup,
     Segment
 } from "semantic-ui-react";
+import {Title, Select, NumberInput, Group as MGroup} from "@mantine/core";
 
 import {CANDIDATE_NEURONS_QUERY, CandidateNeuronsResponse, NeuronsQueryVariables} from "../../graphql/candidates";
 import {PaginationHeader} from "../editors/PaginationHeader";
@@ -23,6 +22,34 @@ import {ConstantsContext} from "../app/AppConstants";
 import {CandidateActionPanel} from "./CandidateActionPanel";
 import {SAMPLES_QUERY, SamplesQueryResponse} from "../../graphql/sample";
 import {NeuronTagFilter} from "../editors/NeuronTagFilter";
+import {SomaProperties} from "../../models/neuron";
+
+function defaultSomaPropertyFilter() {
+    return {
+        limitBrightness: false,
+        brightnessOperator: "3",
+        brightness: 0,
+        limitVolume: false,
+        volumeOperator: "3",
+        volume: 0
+    };
+}
+
+function somaPropertyInputFromFilter(filter: any): SomaProperties {
+    const input: any = {};
+
+    if (filter.limitBrightness) {
+        input.brightnessOperator = parseInt(filter.brightnessOperator);
+        input.brightness = filter.brightness;
+    }
+
+    if (filter.limitVolume) {
+        input.volumeOperator = parseInt(filter.volumeOperator);
+        input.volume = filter.volume;
+    }
+
+    return input;
+}
 
 export const Candidates = () => {
     const [state, setState] = useState({
@@ -39,6 +66,8 @@ export const Candidates = () => {
         selectedCandidate: null
     });
 
+    const [somaPropertiesState, setSomaPropertiesState] = useState(defaultSomaPropertyFilter());
+
     const constants = useContext(ConstantsContext);
 
     const sampleFilter = state.limitSamples ? state.sampleFilter : []
@@ -52,7 +81,8 @@ export const Candidates = () => {
                 limit: state.limit,
                 sampleIds: sampleFilter,
                 brainStructureIds: brainAreaFilter,
-                tag: state.limitTags ? state.tagFilter : ""
+                tag: state.limitTags ? state.tagFilter : "",
+                somaProperties: somaPropertyInputFromFilter(somaPropertiesState),
             },
             includeInProgress: state.includeInProgress
         },
@@ -70,7 +100,7 @@ export const Candidates = () => {
             <Icon name="circle notched" loading/>
             <Message.Content>
                 <Message.Header content="Error"/>s
-                {error.graphQLErrors.map(({ message }, i) => (
+                {error.graphQLErrors.map(({message}, i) => (
                     <span key={i}>{message}</span>))}
             </Message.Content>
         </Message>
@@ -184,6 +214,65 @@ export const Candidates = () => {
                                 onCheckedChange={(checked) => setState({...state, limitTags: checked, offset: 0})}
                                 onValueChange={(value) => setState({...state, tagFilter: value, offset: 0})}
                             />
+                        </List.Item>
+                    </List>
+                </Segment>
+                <Segment secondary>
+                    <Title order={4}>Use Metrics</Title>
+                    <List horizontal divided>
+                        <List.Item>
+                            <MGroup>
+                                <Checkbox style={{verticalAlign: "middle"}} toggle label="Brightness"
+                                          checked={somaPropertiesState.limitBrightness}
+                                          onChange={(_, data) => {
+                                              setSomaPropertiesState({...somaPropertiesState, limitBrightness: data.checked});
+                                              setState({...state, offset: 0});
+                                          }}/>
+                                <Select style={{maxWidth: "80px"}} disabled={!somaPropertiesState.limitBrightness} withCheckIcon={false} data={[{value: "2", label: "≤"}, {value: "3", label: "≥"}]}
+                                        value={somaPropertiesState.brightnessOperator}
+                                        onChange={(value) => {
+                                            setSomaPropertiesState({...somaPropertiesState, brightnessOperator: value});
+                                            setState({...state, offset: 0});
+                                        }}/>
+                                <NumberInput style={{maxWidth: "80px"}} disabled={!somaPropertiesState.limitBrightness} min={0} hideControls value={somaPropertiesState.brightness} onChange={(value) => {
+                                    let v: number;
+                                    if (typeof value === "string") {
+                                        v = parseFloat(value);
+                                    } else {
+                                        v = value;
+                                    }
+                                    if (!isNaN(v)) {
+                                        setSomaPropertiesState({...somaPropertiesState, brightness: v});
+                                    }
+                                }}/>
+                            </MGroup>
+                        </List.Item>
+                        <List.Item>
+                            <MGroup>
+                                <Checkbox style={{verticalAlign: "middle"}} toggle label="Volume"
+                                          checked={somaPropertiesState.limitVolume}
+                                          onChange={(_, data) => {
+                                              setSomaPropertiesState({...somaPropertiesState, limitVolume: data.checked});
+                                              setState({...state, offset: 0});
+                                          }}/>
+                                <Select style={{maxWidth: "80px"}} disabled={!somaPropertiesState.limitVolume} withCheckIcon={false} data={[{value: "2", label: "≤"}, {value: "3", label: "≥"}]}
+                                        value={somaPropertiesState.volumeOperator}
+                                        onChange={(value) => {
+                                            setSomaPropertiesState({...somaPropertiesState, volumeOperator: value});
+                                            setState({...state, offset: 0});
+                                        }}/>
+                                <NumberInput style={{maxWidth: "80px"}} disabled={!somaPropertiesState.limitVolume} min={0} hideControls value={somaPropertiesState.volume} onChange={(value) => {
+                                    let v: number;
+                                    if (typeof value === "string") {
+                                        v = parseFloat(value);
+                                    } else {
+                                        v = value;
+                                    }
+                                    if (!isNaN(v)) {
+                                        setSomaPropertiesState({...somaPropertiesState, volume: v});
+                                    }
+                                }}/>
+                            </MGroup>
                         </List.Item>
                     </List>
                 </Segment>

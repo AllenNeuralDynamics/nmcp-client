@@ -1,6 +1,6 @@
 import gql from "graphql-tag";
 
-import {INeuron} from "../models/neuron";
+import {INeuron, SomaProperties} from "../models/neuron";
 import {ReconstructionFieldsFragment} from "./reconstruction";
 
 export const NeuronFieldsFragment = gql`fragment NeuronFields on Neuron {
@@ -47,6 +47,7 @@ export type NeuronsQueryVariables = {
         sampleIds?: string[]
         brainStructureIds?: string[]
         tag?: string
+        somaProperties?: SomaProperties;
     },
     includeInProgress: boolean;
 }
