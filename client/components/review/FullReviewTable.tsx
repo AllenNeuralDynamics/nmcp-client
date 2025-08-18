@@ -23,7 +23,7 @@ export type ReviewTableProps = {
     onRowClick(id: IReconstruction): void;
 }
 
-export const ReviewTable = (props: ReviewTableProps) => {
+export const FullReviewTable = (props: ReviewTableProps) => {
     const rows = props.reconstructions.map((r: IReconstruction) => {
         return <ReviewRow key={`tt_${r.id}`} reconstruction={r} isSelected={r == props.selected} onRowClick={props.onRowClick}/>
     });

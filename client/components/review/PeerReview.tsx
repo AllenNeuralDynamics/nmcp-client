@@ -7,6 +7,10 @@ import {Checkbox, Dropdown, Header, Input, List, Segment} from "semantic-ui-reac
 import {PaginationHeader} from "../editors/PaginationHeader";
 import {PeerReviewTable} from "./PeerReviewTable";
 import {NeuronTagFilter} from "../editors/NeuronTagFilter";
+import {IReconstruction} from "../../models/reconstruction";
+import {SelectedReconstruction} from "./SelectedReconstruction";
+import {UPLOAD_TRACING_MUTATION} from "../../graphql/tracings";
+import {UPLOAD_UNREGISTERED_TRACING_MUTATION} from "../../graphql/unregisteredTracing";
 
 interface PeerReviewState {
     offset: number;
@@ -16,6 +20,7 @@ interface PeerReviewState {
     limitTag: boolean;
     tag: string;
     tempTagFilter: string;
+    selected: IReconstruction;
 }
 
 export const PeerReview = () => {
@@ -26,7 +31,8 @@ export const PeerReview = () => {
         sampleId: [],
         limitTag: false,
         tag: "",
-        tempTagFilter: ""
+        tempTagFilter: "",
+        selected: null
     });
 
     const sampleIds = state.limitSamples ? state.sampleId : [];
@@ -88,6 +94,12 @@ export const PeerReview = () => {
         }
     };
 
+
+    const onRowClick = (reconstruction: IReconstruction) => {
+        // TODO enable when ready
+        // setState({...state, selected: reconstruction});
+    }
+
     const totalCount = data.peerReviewableReconstructions.totalCount;
 
     const pageCount = Math.max(Math.ceil(totalCount / state.limit), 1);
@@ -95,46 +107,48 @@ export const PeerReview = () => {
     const activePage = Math.min(state.offset ? (Math.floor(state.offset / state.limit) + 1) : 1, pageCount);
 
     return (
-        <div>
-            <div style={{margin: "20px"}}>
-                <Segment.Group>
-                    <Segment secondary>
-                        <List horizontal divided>
-                            <List.Item>
-                                <Checkbox style={{verticalAlign: "middle"}} toggle label="Limit samples to "
-                                          checked={state.limitSamples}
-                                          onChange={(_, data) => setState({...state, limitSamples: data.checked})}/>
+        <div style={{margin: "20px"}}>
+            <Segment.Group>
+                <Segment secondary>
+                    <Header style={{margin: "0"}}>Reconstructions Submitted for Peer Review</Header>
+                </Segment>
+                <Segment secondary>
+                    <List horizontal divided>
+                        <List.Item>
+                            <Checkbox style={{verticalAlign: "middle"}} toggle label="Limit samples to "
+                                      checked={state.limitSamples}
+                                      onChange={(_, data) => setState({...state, limitSamples: data.checked})}/>
 
-                                <Dropdown placeholder="Select..." style={{marginLeft: "8px"}} multiple selection
-                                          options={sampleFilterOptions}
-                                          value={state.sampleId}
-                                          disabled={!state.limitSamples}
-                                          onChange={(_, d) => onSampleFilterChange(d.value)}/>
-                            </List.Item>
-                            <List.Item>
-                                <NeuronTagFilter
-                                    checked={state.limitTag}
-                                    initialValue={state.tag}
-                                    onCheckedChange={(checked) => setState({...state, limitTag: checked, offset: 0})}
-                                    onValueChange={(value) => setState({...state, tag: value, offset: 0})}
-                                />
-                            </List.Item>
-                        </List>
-                    </Segment>
-                    <Segment>
-                        <PaginationHeader pageCount={pageCount} activePage={activePage}
-                                          limit={state.limit}
-                                          onUpdateLimitForPage={onUpdateLimit}
-                                          onUpdateOffsetForPage={onUpdateOffsetForPage}/>
-                    </Segment>
-                    <Segment secondary>
-                        <Header style={{margin: "0"}}>Reconstructions Submitted for Peer Review</Header>
-                    </Segment>
-                    <PeerReviewTable reconstructions={data.peerReviewableReconstructions.reconstructions}
-                                     totalCount={totalCount} offset={state.offset} limit={state.limit}
-                                     isFiltered={state.limitTag || state.limitSamples}/>
-                </Segment.Group>
-            </div>
+                            <Dropdown placeholder="Select..." style={{marginLeft: "8px"}} multiple selection
+                                      options={sampleFilterOptions}
+                                      value={state.sampleId}
+                                      disabled={!state.limitSamples}
+                                      onChange={(_, d) => onSampleFilterChange(d.value)}/>
+                        </List.Item>
+                        <List.Item>
+                            <NeuronTagFilter
+                                checked={state.limitTag}
+                                initialValue={state.tag}
+                                onCheckedChange={(checked) => setState({...state, limitTag: checked, offset: 0})}
+                                onValueChange={(value) => setState({...state, tag: value, offset: 0})}
+                            />
+                        </List.Item>
+                    </List>
+                </Segment>
+                <Segment>
+                    <PaginationHeader pageCount={pageCount} activePage={activePage}
+                                      limit={state.limit}
+                                      onUpdateLimitForPage={onUpdateLimit}
+                                      onUpdateOffsetForPage={onUpdateOffsetForPage}/>
+                </Segment>
+                <PeerReviewTable reconstructions={data.peerReviewableReconstructions.reconstructions} selected={state.selected}
+                                 totalCount={totalCount} offset={state.offset} limit={state.limit}
+                                 isFiltered={state.limitTag || state.limitSamples} onRowClick={onRowClick}/>
+            </Segment.Group>
+
+            {totalCount > 0 ?
+                <SelectedReconstruction reconstruction={state.selected} nameModifier="Unregistered " mutation={UPLOAD_UNREGISTERED_TRACING_MUTATION}
+                                        refetchQueries={["PeerReviewableReconstructions", "CandidatesForReview"]}/> : null}
         </div>
     );
 }

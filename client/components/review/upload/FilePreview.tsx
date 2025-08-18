@@ -10,6 +10,7 @@ export class SwcInputFile {
 
 type FilePreviewProps = {
     style?: CSSProperties
+    elementName: string;
     file: File;
 
     onFileReceived(file: File): void;
@@ -21,7 +22,7 @@ export const FilePreview = (props: FilePreviewProps) => {
     const [sceneViewer, setSceneViewer] = useState<SceneViewer>(null);
 
     useEffect(() => {
-        setSceneViewer(new SceneViewer("viewer-container"));
+        setSceneViewer(new SceneViewer(props.elementName));
     }, []);
 
     useEffect(() => {
@@ -37,7 +38,7 @@ export const FilePreview = (props: FilePreviewProps) => {
     });
 
     return (
-        <div id="viewer-container" onDrop={(evt: any) => {
+        <div id={props.elementName} onDrop={(evt: any) => {
             evt.preventDefault();
             if (evt.dataTransfer.items.length > 0 && evt.dataTransfer.items[0].kind == "file") {
                 props.onFileReceived(evt.dataTransfer.items[0].getAsFile());

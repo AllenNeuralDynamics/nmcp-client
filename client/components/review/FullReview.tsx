@@ -4,11 +4,12 @@ import {useQuery} from "@apollo/client";
 import {Checkbox, Dropdown, Header, List, Segment} from "semantic-ui-react";
 
 import {IReconstruction} from "../../models/reconstruction";
-import {ReviewTable} from "./ReviewTable";
+import {FullReviewTable} from "./FullReviewTable";
 import {SelectedReconstruction} from "./SelectedReconstruction";
 import {REVIEWABLE_ANNOTATIONS_QUERY, ReviewableResponse, ReviewableVariables} from "../../graphql/reconstruction";
 import {PaginationHeader} from "../editors/PaginationHeader";
 import {SAMPLES_QUERY, SamplesQueryResponse} from "../../graphql/sample";
+import {UPLOAD_TRACING_MUTATION} from "../../graphql/tracings";
 
 const statusFilterOptions = [
     {key: "in-review", text: "In Review", value: 3},
@@ -57,7 +58,7 @@ export const FullReview = () => {
 
     if (error || sampleError) {
         return (<div>
-            {error.graphQLErrors.map(({ message }, i) => (
+            {error.graphQLErrors.map(({message}, i) => (
                 <span key={i}>{message}</span>))}
         </div>)
     }
@@ -110,6 +111,9 @@ export const FullReview = () => {
         <div style={{margin: "20px"}}>
             <Segment.Group>
                 <Segment secondary>
+                    <Header style={{margin: "0"}}>Reconstructions Submitted for Review</Header>
+                </Segment>
+                <Segment secondary>
                     <List horizontal divided>
                         <List.Item>
                             <Checkbox style={{verticalAlign: "middle"}} toggle label="Limit samples to "
@@ -139,15 +143,13 @@ export const FullReview = () => {
                                       onUpdateLimitForPage={onUpdateLimit}
                                       onUpdateOffsetForPage={onUpdateOffsetForPage}/>
                 </Segment>
-                <Segment secondary>
-                    <Header style={{margin: "0"}}>Reconstructions Submitted for Review</Header>
-                </Segment>
-                <ReviewTable reconstructions={data.reviewableReconstructions.reconstructions} selected={state.selected}
-                             totalCount={totalCount} offset={state.offset} limit={state.limit} onRowClick={onRowClick}
-                             isFiltered={state.limitStatus || state.limitSamples}/>
+                <FullReviewTable reconstructions={data.reviewableReconstructions.reconstructions} selected={state.selected}
+                                 totalCount={totalCount} offset={state.offset} limit={state.limit} onRowClick={onRowClick}
+                                 isFiltered={state.limitStatus || state.limitSamples}/>
             </Segment.Group>
 
-            {totalCount > 0 ? <SelectedReconstruction reconstruction={state.selected}/> : null}
+            {totalCount > 0 ? <SelectedReconstruction reconstruction={state.selected} mutation={UPLOAD_TRACING_MUTATION}
+                                                      refetchQueries={["ReviewableReconstructions", "CandidatesForReview"]}/> : null}
         </div>
     );
 }

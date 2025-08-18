@@ -21,11 +21,14 @@ export type ReviewTableProps = {
     offset: number;
     limit: number;
     isFiltered: boolean;
+    selected: IReconstruction;
+
+    onRowClick(id: IReconstruction): void;
 }
 
 export const PeerReviewTable = (props: ReviewTableProps) => {
     const rows = props.reconstructions.map((r: IReconstruction) => {
-        return <PeerReviewRow key={`tt_${r.id}`} reconstruction={r}/>
+        return <PeerReviewRow key={`tt_${r.id}`} reconstruction={r} isSelected={r == props.selected} onRowClick={props.onRowClick}/>
     });
 
     let totalMessage = "There are no reconstructions awaiting peer review";
@@ -82,7 +85,10 @@ export const PeerReviewTable = (props: ReviewTableProps) => {
 }
 
 type PeerReviewRowProps = {
+    isSelected: boolean;
     reconstruction: IReconstruction;
+
+    onRowClick(id: IReconstruction): void;
 }
 
 const PeerReviewRow = (props: PeerReviewRowProps) => {
@@ -101,7 +107,7 @@ const PeerReviewRow = (props: PeerReviewRowProps) => {
                 onClick={() => approvePeerReview({variables: {id: props.reconstruction.id}})}/>);
 
     return (
-        <TableRow>
+        <TableRow onClick={() => props.onRowClick(props.reconstruction)} active={props.isSelected}>
             <TableCell>{displayNeuron(props.reconstruction.neuron)}</TableCell>
             <TableCell>{props.reconstruction.neuron.sample.animalId}</TableCell>
             <TableCell>{displayBrainArea(props.reconstruction.neuron.brainArea, "(unspecified)")}</TableCell>

@@ -61,5 +61,6 @@ export type UploadTracingMutationData = {
 }
 
 export type UploadTracingMutationResponse = {
-    uploadSwc: UploadTracingMutationData;
+    uploadSwc?: UploadTracingMutationData;
+    uploadUnregisteredSwc?: UploadTracingMutationData;
 }

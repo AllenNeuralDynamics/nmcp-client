@@ -1,6 +1,6 @@
 import * as React from "react";
 import {useContext, useEffect, useState} from "react";
-import {useMutation} from "@apollo/client";
+import {DocumentNode, useMutation} from "@apollo/client";
 import {
     Button,
     Grid,
@@ -28,30 +28,33 @@ import {toastCreateError, toastUpdateSuccess} from "../editors/Toasts";
 
 export type SelectedReconstructionProps = {
     reconstruction: IReconstruction;
+    nameModifier?: string;
+    mutation: DocumentNode;
+    refetchQueries: string[];
 }
 
-export const SelectedReconstruction = (props: SelectedReconstructionProps) => {
-    if (props.reconstruction == null) {
-        return <NoSelectedReconstruction/>
+export const SelectedReconstruction: React.FC<SelectedReconstructionProps> = ({reconstruction = null, nameModifier = "", mutation, refetchQueries}) => {
+    if (reconstruction == null) {
+        return <NoSelectedReconstruction nameModifier={nameModifier}/>
     }
 
     const constants = useContext(ConstantsContext);
 
     const [state, setState] = useState({
-        duration: props.reconstruction.durationHours.toString(),
-        length: props.reconstruction.lengthMillimeters.toString(),
-        notes: props.reconstruction.notes,
-        checks: props.reconstruction.checks,
+        duration: reconstruction.durationHours.toString(),
+        length: reconstruction.lengthMillimeters.toString(),
+        notes: reconstruction.notes,
+        checks: reconstruction.checks,
     })
 
     useEffect(() => {
         setState({
-            duration: props.reconstruction.durationHours.toString(),
-            length: props.reconstruction.lengthMillimeters.toString(),
-            notes: props.reconstruction.notes,
-            checks: props.reconstruction.checks,
+            duration: reconstruction.durationHours.toString(),
+            length: reconstruction.lengthMillimeters.toString(),
+            notes: reconstruction.notes,
+            checks: reconstruction.checks,
         })
-    }, [props.reconstruction]);
+    }, [reconstruction]);
 
     const [updateReconstruction, {data: completeData}] = useMutation<UpdateReconstructionResponse, UpdateReconstructionVariables>(UPDATE_RECONSTRUCTION_MUTATION,
         {
@@ -74,7 +77,7 @@ export const SelectedReconstruction = (props: SelectedReconstructionProps) => {
 
         await updateReconstruction({
             variables: {
-                id: props.reconstruction.id,
+                id: reconstruction.id,
                 duration: duration,
                 length: length,
                 notes: state.notes,
@@ -83,24 +86,22 @@ export const SelectedReconstruction = (props: SelectedReconstructionProps) => {
         });
     }
 
-    const axonIcon = props.reconstruction.axon ? <Icon name="check" color="green"/> :
+    const axonIcon = reconstruction.axon ? <Icon name="check" color="green"/> :
         <Icon name="attention" color="red"/>
-    const dendriteIcon = props.reconstruction.dendrite ? <Icon name="check" color="green"/> :
+    const dendriteIcon = reconstruction.dendrite ? <Icon name="check" color="green"/> :
         <Icon name="attention" color="red"/>
 
     return (
         <Grid fluid="true">
             <Grid.Row style={{paddingBottom: 10}}>
                 <Grid.Column width={8}>
-                    <CreateTracing reconstruction={props.reconstruction}
-                                   tracingStructures={constants.TracingStructures}/>
+                    <CreateTracing reconstruction={reconstruction} elementName={`create-view-container-${nameModifier.toLowerCase()}`} mutation={mutation} refetchQueries={refetchQueries}/>
                 </Grid.Column>
                 <Grid.Column width={8}>
                     <Segment.Group>
                         <Segment secondary>
-                            <div style={{display: "flex", flexDirection: "row", width: "100%"}}>
-                                <Header style={{margin: 0, marginTop: "6px", verticalAlign: "middle"}}>Reconstruction
-                                    Metadata</Header>
+                            <div style={{display: "flex", flexDirection: "row"}}>
+                                <Header style={{margin: 0, marginTop: "6px", verticalAlign: "middle"}}>{nameModifier}Reconstruction Metadata</Header>
                                 <div style={{order: 2, flexGrow: 1, flexShrink: 1}}/>
                                 <div style={{order: 3, flexGrow: 0, flexShrink: 0, marginRight: "12px"}}>
                                     <Button size="tiny" color="green" disabled={!canUpdate}
@@ -113,21 +114,21 @@ export const SelectedReconstruction = (props: SelectedReconstructionProps) => {
                                 <GridRow>
                                     <Grid.Column>
                                         <Header as="h5">Axon Source</Header>
-                                        {axonIcon}{props.reconstruction.axon ? props.reconstruction.axon.filename : "(requires upload)"}
+                                        {axonIcon}{reconstruction.axon ? reconstruction.axon.filename : "(requires upload)"}
                                     </Grid.Column>
                                     <Grid.Column>
                                         <Header as="h5">Dendrite Source</Header>
-                                        {dendriteIcon}{props.reconstruction.dendrite ? props.reconstruction.dendrite.filename : "(requires upload)"}
+                                        {dendriteIcon}{reconstruction.dendrite ? reconstruction.dendrite.filename : "(requires upload)"}
                                     </Grid.Column>
                                 </GridRow>
                             </Grid>
-                            <RequestReviewPanel id={props.reconstruction.id} data={state}
+                            <RequestReviewPanel id={reconstruction.id} data={state}
                                                 updateChecks={updateChecks} updateLength={updateLength}
                                                 updateNotes={updateNotes} updateDuration={updateDuration}/>
                             <br/> <br/>
                             <Label>
                                 <Icon name="info circle" color="blue"/>
-                                {props.reconstruction.id}
+                                {reconstruction.id}
                             </Label>
                         </Segment>
                     </Segment.Group>
@@ -138,15 +139,18 @@ export const SelectedReconstruction = (props: SelectedReconstructionProps) => {
         ;
 }
 
-const NoSelectedReconstruction = () => (
-    <Segment>
-        <h5><Icon name="info circle"/>Select a reconstruction from the table to review and upload the reconstruction
-            data.</h5>
-        <Placeholder>
-            <PlaceholderHeader image>
-                <PlaceholderLine/>
-                <PlaceholderLine/>
-            </PlaceholderHeader>
-        </Placeholder>
-    </Segment>
-);
+
+const NoSelectedReconstruction = ({nameModifier = ""}) => {
+    return (
+        <Segment>
+            <h5><Icon name="info circle"/>Select a reconstruction from the table to review and upload {nameModifier.toLowerCase()}reconstruction
+                data.</h5>
+            <Placeholder>
+                <PlaceholderHeader image>
+                    <PlaceholderLine/>
+                    <PlaceholderLine/>
+                </PlaceholderHeader>
+            </Placeholder>
+        </Segment>
+    )
+};

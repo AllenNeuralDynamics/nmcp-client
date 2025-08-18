@@ -1,6 +1,6 @@
 import * as React from "react";
-import {useState} from "react";
-import {useMutation} from "@apollo/client";
+import {useContext, useState} from "react";
+import {DocumentNode, useMutation} from "@apollo/client";
 import {ApolloError} from "@apollo/client";
 import {Grid, Confirm} from "semantic-ui-react";
 import {toast} from "react-toastify";
@@ -9,14 +9,17 @@ import {SwcDropZone} from "./SwcDropZone";
 import {IReconstruction} from "../../../models/reconstruction";
 import {ITracingStructure} from "../../../models/tracingStructure";
 import {ISwcUploadOutput} from "../../../models/swcTracing";
-import {UPLOAD_TRACING_MUTATION, UploadTracingMutationResponse, UploadTracingVariables} from "../../../graphql/tracings";
+import {UploadTracingMutationResponse, UploadTracingVariables} from "../../../graphql/tracings";
+import {ConstantsContext} from "../../app/AppConstants";
 
 export interface ICreateTracingProps {
     reconstruction: IReconstruction;
-    tracingStructures: ITracingStructure[];
+    elementName: string;
+    mutation: DocumentNode;
+    refetchQueries: string[];
 }
 
-interface ICreateTracingState {
+export interface ICreateTracingState {
     isFileAlertOpen: boolean;
     invalidFileName: string;
     isSwcFile: boolean;
@@ -24,7 +27,7 @@ interface ICreateTracingState {
     structure: ITracingStructure;
 }
 
-export const CreateTracing = (props: ICreateTracingProps) => {
+export const CreateTracing: React.FC<ICreateTracingProps> = (props) => {
     const [state, setState] = useState<ICreateTracingState>({
         isFileAlertOpen: false,
         invalidFileName: "",
@@ -33,16 +36,18 @@ export const CreateTracing = (props: ICreateTracingProps) => {
         structure: null,
     });
 
-    const [uploadSwc, {loading}] = useMutation<UploadTracingMutationResponse, UploadTracingVariables>(UPLOAD_TRACING_MUTATION,
+    const constants = useContext(ConstantsContext);
+
+    const [uploadSwc, {loading}] = useMutation<UploadTracingMutationResponse, UploadTracingVariables>(props.mutation,
         {
             onCompleted: (data: any) => onUploadComplete(data),
             onError: (error: any) => onUploadError(error),
-            refetchQueries: ["ReviewableReconstructions", "CandidatesForReview"]
+            refetchQueries: props.refetchQueries
         });
 
     function onTracingStructureChange(structureId: string) {
         if (!state.structure || structureId !== state.structure.id) {
-            setState({...state, structure: props.tracingStructures.find(t => t.id === structureId)});
+            setState({...state, structure: constants.TracingStructures.find(t => t.id === structureId)});
         }
     }
 
@@ -79,12 +84,20 @@ export const CreateTracing = (props: ICreateTracingProps) => {
     }
 
     async function onUploadComplete(data: UploadTracingMutationResponse) {
-        if (data.uploadSwc.error != null) {
-            console.log(data.uploadSwc.error);
-            toast.error(uploadErrorContent(data.uploadSwc.error), {autoClose: false});
+        if (data.uploadSwc) {
+            useUploadComplete(data.uploadSwc);
+        } else if (data.uploadUnregisteredSwc) {
+            useUploadComplete(data.uploadUnregisteredSwc);
+        }
+    }
+
+    function useUploadComplete(data: any) {
+        if (data.error != null) {
+            console.log(data.error);
+            toast.error(uploadErrorContent(data.error), {autoClose: false});
         } else {
             resetUploadState();
-            toast.success(uploadSuccessContent(data.uploadSwc), {});
+            toast.success(uploadSuccessContent(data), {});
         }
     }
 
@@ -102,10 +115,10 @@ export const CreateTracing = (props: ICreateTracingProps) => {
             <Grid fluid="true">
                 <Grid.Row>
                     <Grid.Column width={16}>
-                        <SwcDropZone isLoading={loading} isSwcFile={state.isSwcFile}
+                        <SwcDropZone isLoading={loading} isSwcFile={state.isSwcFile} elementName={props.elementName}
                                      isDisabled={loading} file={state.file}
                                      selectedTracingStructure={state.structure}
-                                     tracingStructures={props.tracingStructures}
+                                     tracingStructures={constants.TracingStructures}
                                      onTracingStructureChanged={(s) => onTracingStructureChange(s)}
                                      onFileReceived={files => setSwcFile(files)}
                                      tryUploadSwc={tryUploadSwc}

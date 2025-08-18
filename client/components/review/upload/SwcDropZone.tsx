@@ -18,6 +18,7 @@ export type SwcDropZoneProps = {
     file: File;
     isLoading: boolean;
     isSwcFile: boolean;
+    elementName: string;
 
     selectedTracingStructure: ITracingStructure;
 
@@ -91,9 +92,9 @@ export const SwcDropZone = (props: SwcDropZoneProps) => {
             </Segment>
             {structure}
             <Segment style={{padding: 0}}>
-                <div style={{display: "flex", flexDirection: "column", height: "500px"}}>
+                <div style={{display: "flex", flexDirection: "column", height:"280px"}}>
                     <FilePreview style={{order: 1, flexGrow: 1, border: "none", margin: 0}}
-                                 file={props.file}
+                                 file={props.file} elementName={props.elementName}
                                  onFileReceived={(file: File) => props.onFileReceived([file])}
                                  onFileIsInvalid={() => props.onFileIsInvalid()}
                                  onFileLoaded={(inputFile) => setSwcInputFile(inputFile)}/>
