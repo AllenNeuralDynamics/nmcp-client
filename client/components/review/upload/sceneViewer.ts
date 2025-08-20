@@ -149,9 +149,9 @@ function parseNodes(nodes: any[]): SwcNodeData[] {
 
         node.type = n.structureIdentifier;
 
-        node.x = n.z;
+        node.x = n.x;
         node.y = n.y;
-        node.z = n.x;
+        node.z = n.z;
 
         node.radius = n.radius;
 
