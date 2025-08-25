@@ -10,7 +10,7 @@ import {NEURON_VIEW_MODE_ALL, NEURON_VIEW_MODE_AXON, NEURON_VIEW_MODE_DENDRITE, 
 import {ITracingNode} from "../../models/tracingNode";
 
 // TODO: env var
-const PRECOMPUTED_URL = "precomputed://s3://aind-neuron-morphology-community-portal-dev-u5u0i5";
+const PRECOMPUTED_URL = "precomputed://s3://aind-neuron-morphology-community-portal-dev-u5u0i5/ngv01";
 
 export type NeuronSelectionDelegate = {
     (neuron: NeuronViewModel, position: number[]): void;

@@ -8,7 +8,7 @@ const NeuronPageOffset = "neuron.page.offset";
 const NeuronPageLimit = "neuron.page.limit";
 const LockedSampleId = "neuron.upload.locked.sample";
 const CandidateViewerState = "candidates.viewer.state.v3";
-const SearchViewerState = "search.viewer.state.v5";
+const SearchViewerState = "search.viewer.state.v6";
 const ShouldAutoCollapseOnQuery = "viewer.shouldAutoCollapseOnQuery";
 const ShouldAlwaysShowSoma = "viewer.shouldAlwaysShowSoma";
 const ShouldAlwaysShowFullTracing = "viewer.shouldAlwaysShowFullTracing";
@@ -206,7 +206,8 @@ export class UserPreferences extends PreferencesManager {
     }
 
     public get ViewerStyle(): ViewerStyle {
-        return this.loadLocalValue(ViewerStylePreference, ViewerStyle.Default) as ViewerStyle;
+        return ViewerStyle.Neuroglancer;
+        // return this.loadLocalValue(ViewerStylePreference, ViewerStyle.Default) as ViewerStyle;
     }
 
     public set ViewerStyle(n: ViewerStyle) {

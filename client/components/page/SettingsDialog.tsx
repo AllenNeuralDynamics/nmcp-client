@@ -104,11 +104,11 @@ const SettingsDialog = (props: SettingsDialogProps) => {
                                    disabled={!state.shouldAlwaysShowSoma}
                                    label="Display full tracing in addition to soma"
                                    onChange={(_, props) => onSetAlwaysShowFullTracing(props.checked)}/>
+                    {/**
                     {Constants.EnabledUpdatedViewer ?
                         <Form.Checkbox width={16} checked={state.useNeuroglancer}
                                        label="Use Neuroglancer as viewer (browser refresh recommended)"
                                        onChange={(_, props) => onUseNeuroglancer(props.checked)}/> : null}
-
                     <div style={{display: "flex", flexDirection: "row", alignItems: "center", marginTop: "20px"}}>
                         <div style={styles.swatch} onClick={() => handleClick()}>
                             <div style={rowStyles.color}/>
@@ -120,6 +120,7 @@ const SettingsDialog = (props: SettingsDialogProps) => {
                         </div> : null}
                         <span style={styles.text}> Viewer background color</span>
                     </div>
+                     **/}
                 </Form>
             </Modal.Content>
             <Modal.Actions>
