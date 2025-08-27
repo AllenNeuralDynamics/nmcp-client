@@ -39,7 +39,7 @@ export const NeuroglancerContainer = (props: NeuroglancerContainerProps) => {
     useEffect(() => {
         if (ngProxy) {
             const somas = props.neuronViewModels.filter(n => n.CurrentViewMode == NEURON_VIEW_MODE_SOMA)
-                .filter(n => n.somaOnlyTracing.soma);
+                .filter(n => n.somaOnlyTracing?.soma);
 
             ngProxy.updateSearchReconstructions(somas, props.neuronViewModels);
         }

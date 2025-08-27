@@ -8,7 +8,10 @@ export enum ReconstructionStatus {
     InPeerReview = 4,
     Approved = 5,
     Rejected = 6,
-    Published = 8,
+    PendingStructureAssignment = 10,
+    PendingSearchContents = 11,
+    PendingPrecomputed = 12,
+    Published = 20,
     Invalid = 99
 }
 
@@ -26,6 +29,12 @@ export function reconstructionStatusString(status: ReconstructionStatus): string
             return "Approved";
         case ReconstructionStatus.Rejected:
             return "Rejected";
+        case ReconstructionStatus.PendingStructureAssignment:
+            return "Publishing (Pending Structure Assignment)";
+        case ReconstructionStatus.PendingSearchContents:
+            return "Publishing (Pending Search Contents)";
+        case ReconstructionStatus.PendingPrecomputed:
+            return "Publishing (Pending Precomputed Generation)";
         case ReconstructionStatus.Published:
             return "Published";
         default:
