@@ -273,9 +273,9 @@ export class NeuroglancerProxy {
                     type: "point",
                     id: soma.id,
                     point: [
-                        soma.z / 10,
+                        soma.x / 10,
                         soma.y / 10,
-                        soma.x / 10
+                        soma.z / 10
                     ],
                     props: [n.baseColor, 3]
                 };
