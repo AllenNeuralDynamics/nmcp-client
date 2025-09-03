@@ -1,6 +1,7 @@
 import * as React from "react";
 import {useState} from "react";
 import {Button, Dropdown, DropdownItemProps, Form, FormField, FormGroup, Header, Segment} from "semantic-ui-react";
+import {Text} from "@mantine/core"
 import Dropzone from "react-dropzone";
 
 import {FilePreview, SwcInputFile} from "./FilePreview";
@@ -68,7 +69,8 @@ export const SwcDropZone = (props: SwcDropZoneProps) => {
         <Segment.Group>
             <Segment secondary>
                 <div style={{display: "flex", flexDirection: "row", width: "100%"}}>
-                    <Header style={{verticalAlign: "middle", order: 1, flexGrow: 0, flexShrink: 0, marginLeft: "12px", marginBottom: "0px", marginTop: "6px"}}>Reconstruction Data</Header>
+                    <Header style={{verticalAlign: "middle", order: 1, flexGrow: 0, flexShrink: 0, marginLeft: "12px", marginBottom: "0px", marginTop: "6px"}}>Reconstruction
+                        Data</Header>
                     <div style={{order: 2, flexGrow: 1, flexShrink: 1}}/>
                     <div style={{order: 3, flexGrow: 0, flexShrink: 0, marginRight: "12px"}}>
                         <Button content="Upload" icon="upload" size="tiny" labelPosition="right"
@@ -76,6 +78,9 @@ export const SwcDropZone = (props: SwcDropZoneProps) => {
                                 disabled={!canUploadTracing() || props.isLoading}
                                 onClick={() => props.tryUploadSwc()}/>
                     </div>
+                </div>
+                <div style={{marginTop: "12px", marginLeft: "13px"}}>
+                    <Text size="xs">SWC files must be uploaded as separate axon and dendrite reconstructions. NMCP JSON files must contain both structures.</Text>
                 </div>
             </Segment>
             <Segment style={{padding: 0}} secondary>
@@ -92,7 +97,7 @@ export const SwcDropZone = (props: SwcDropZoneProps) => {
             </Segment>
             {structure}
             <Segment style={{padding: 0}}>
-                <div style={{display: "flex", flexDirection: "column", height:"280px"}}>
+                <div style={{display: "flex", flexDirection: "column", height: "280px"}}>
                     <FilePreview style={{order: 1, flexGrow: 1, border: "none", margin: 0}}
                                  file={props.file} elementName={props.elementName}
                                  onFileReceived={(file: File) => props.onFileReceived([file])}
