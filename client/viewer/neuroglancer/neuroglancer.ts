@@ -6,7 +6,7 @@ import {registerEventListener} from "neuroglancer/unstable/util/disposable.js";
 import {UserPreferences} from "../../util/userPreferences";
 import {NeuronViewModel} from "../../viewmodel/neuronViewModel";
 import {getSegmentColorMap} from "../../util/colors";
-import {NEURON_VIEW_MODE_ALL, NEURON_VIEW_MODE_AXON, NEURON_VIEW_MODE_DENDRITE, NEURON_VIEW_MODE_SOMA} from "../../viewmodel/neuronViewMode";
+import {NEURON_VIEW_MODE_ALL, NEURON_VIEW_MODE_AXON, NEURON_VIEW_MODE_DENDRITE} from "../../viewmodel/neuronViewMode";
 import {ITracingNode} from "../../models/tracingNode";
 
 // TODO: env var
@@ -55,6 +55,8 @@ export class NeuroglancerProxy {
     private _somaNodeMap = new Map<string, ITracingNode>();
 
     public static SearchNeuroglancer?: NeuroglancerProxy = null;
+
+    private static _cachedQueryParamsState: any = null;
 
     public static configureCandidateNeuroglancer(id: string, state: any, annotations: any, selectionDelegate: CandidateSelectionDelegate): NeuroglancerProxy {
         const [proxy, target] = NeuroglancerProxy.createCommon(id);
@@ -139,6 +141,7 @@ export class NeuroglancerProxy {
                 }
             });
         }
+
         const ccf_layer = defaultSearchState.layers.find(s => s.name == "CCF")
 
         if (ccf_layer) {
@@ -157,7 +160,9 @@ export class NeuroglancerProxy {
             state["projectionScale"] = defaultSearchState.projectionScale;
         }
 
-        const s = state || defaultSearchState;
+        const s = NeuroglancerProxy._cachedQueryParamsState || state || defaultSearchState;
+
+        NeuroglancerProxy._cachedQueryParamsState = null;
 
         let reset = false;
 
@@ -206,9 +211,22 @@ export class NeuroglancerProxy {
         proxy._viewer.inputEventBindings.global.bindings["at:wheel"] = {action: "zoom-via-wheel", preventDefault: true};
         proxy._viewer.inputEventBindings.global.bindings["wheel"] = {action: "zoom-via-wheel", preventDefault: true};
 
-        console.log(proxy._viewer);
+        // console.log(proxy._viewer);
 
         return proxy;
+    }
+
+    public static applyQueryParameterState(state) {
+        if (!state) {
+            return;
+        }
+
+        if (NeuroglancerProxy.SearchNeuroglancer) {
+            NeuroglancerProxy.SearchNeuroglancer._viewer.state.reset();
+            NeuroglancerProxy.SearchNeuroglancer._viewer.state.restoreState(state);
+        } else {
+            NeuroglancerProxy._cachedQueryParamsState = state;
+        }
     }
 
     private static createCommon(id: string): [NeuroglancerProxy, HTMLElement] {
@@ -225,6 +243,10 @@ export class NeuroglancerProxy {
         });
 
         return [proxy, target];
+    }
+
+    public get State() {
+        return this._viewer ? this._viewer.state : null;
     }
 
     public updateCandidateAnnotations(annotations: any, selectedSkeletonSegmentId: number = null) {

@@ -13,6 +13,7 @@ import {UIQueryPredicate, UIQueryPredicates} from "../../models/uiQueryPredicate
 import {BRAIN_AREA_FILTER_TYPE_SPHERE} from "../../models/brainAreaFilterType";
 import {ViewerMeshVersion} from "../../models/compartmentMeshSet";
 import {UserPreferences} from "../../util/userPreferences";
+import {NeuroglancerProxy} from "../../viewer/neuroglancer/neuroglancer";
 
 interface IPageProps {
     constants: NdbConstants;
@@ -87,7 +88,13 @@ export const QueryPage = React.forwardRef<QueryPageRef, IPageProps>((props, ref)
         
         const encodedQuery = btoa(JSON.stringify(queryData));
         const baseUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname}`;
-        const shareUrl = `${baseUrl}?q=${encodedQuery}`;
+        let shareUrl = `${baseUrl}?q=${encodedQuery}`;
+
+        const ngState = NeuroglancerProxy.SearchNeuroglancer?.State;
+
+        if (ngState) {
+            shareUrl += `#!${btoa(JSON.stringify(ngState))}`;
+        }
         
         if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(shareUrl).then(() => {

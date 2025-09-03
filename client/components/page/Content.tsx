@@ -10,6 +10,7 @@ import {INeuron} from "../../models/neuron";
 import {UIQueryPredicate, UIQueryPredicates} from "../../models/uiQueryPredicate";
 import {UserPreferences} from "../../util/userPreferences";
 import {Footer} from "./Footer";
+import {NeuroglancerProxy} from "../../viewer/neuroglancer/neuroglancer";
 
 interface IContentProps {
     constants: NdbConstants;
@@ -39,22 +40,34 @@ export class Content extends React.Component<IContentProps, IContentState> {
 
     private parseUrlQuery(): UIQueryPredicate[] | null {
         const urlParams = new URLSearchParams(window.location.search);
-        const queryParam = urlParams.get('q');
-        
-        if (!queryParam) {
-            return null;
-        }
-        
-        try {
-            const decodedQuery = JSON.parse(atob(queryParam));
-            if (decodedQuery && decodedQuery.filters && Array.isArray(decodedQuery.filters)) {
-                return decodedQuery.filters.map(f => UIQueryPredicate.deserialize(f, this.props.constants));
+        const queryParam = urlParams.get("q");
+        const ngParam = window.location.hash;
+
+        let predicates: UIQueryPredicate[] = [];
+
+        if (ngParam) {
+            try {
+                const decodedState = JSON.parse(atob(ngParam.slice(2)));
+                NeuroglancerProxy.applyQueryParameterState(decodedState);
+            } catch (e) {
+                console.warn("Invalid Neuroglancer query parameter:", e);
             }
-        } catch (e) {
-            console.warn('Invalid URL query parameter:', e);
         }
-        
-        return null;
+
+        if (queryParam) {
+            try {
+                const decodedQuery = JSON.parse(atob(queryParam));
+                if (decodedQuery && decodedQuery.filters && Array.isArray(decodedQuery.filters)) {
+                    predicates = decodedQuery.filters.map(f => UIQueryPredicate.deserialize(f, this.props.constants));
+                }
+            } catch (e) {
+                console.warn("Invalid URL query parameter:", e);
+            }
+        }
+
+        window.history.replaceState({}, document.title, "/");
+
+        return predicates;
     }
 
     private updateUrlWithQuery = (predicates: UIQueryPredicate[]) => {
@@ -65,9 +78,9 @@ export class Content extends React.Component<IContentProps, IContentState> {
         
         const encodedQuery = btoa(JSON.stringify(queryData));
         const url = new URL(window.location.href);
-        url.searchParams.set('q', encodedQuery);
+        url.searchParams.set("q", encodedQuery);
         
-        window.history.replaceState({}, '', url.toString());
+        window.history.replaceState({}, "", url.toString());
     };
 
     public constructor(props: IContentProps) {
@@ -102,7 +115,7 @@ export class Content extends React.Component<IContentProps, IContentState> {
     private initializeQueryFilters(props: IContentProps): UIQueryPredicate[] {
         if (!this.state) {
             const urlQuery = this.parseUrlQuery();
-            if (urlQuery) {
+            if (urlQuery && urlQuery.length > 0) {
                 this._shouldAutoExecuteFromUrl = true;
                 this._uiPredicates = new UIQueryPredicates(urlQuery, null, props.constants);
             } else {
@@ -125,8 +138,8 @@ export class Content extends React.Component<IContentProps, IContentState> {
         this._uiPredicates.clearPredicates();
 
         const url = new URL(window.location.href);
-        url.searchParams.delete('q');
-        window.history.replaceState({}, '', url.toString());
+        url.searchParams.delete("q");
+        window.history.replaceState({}, "", url.toString());
 
         this.setState({neurons: [], queryTime: -1});
     };
