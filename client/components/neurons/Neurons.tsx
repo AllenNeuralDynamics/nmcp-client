@@ -211,7 +211,7 @@ export const Neurons = (props: INeuronsProps) => {
         const onClose = () => {setState({...state, isUploadSomaPropertiesOpen: false});};
 
         return (
-            <ImportSomasModal sampleId={sample?.id} onClose={onClose}/>
+            <ImportSomasModal sampleId={state.sample?.id} onClose={onClose}/>
         );
     }
 
