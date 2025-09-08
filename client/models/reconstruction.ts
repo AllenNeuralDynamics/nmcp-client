@@ -12,6 +12,7 @@ export interface IReconstruction {
     lengthMillimeters: number;
     startedAt: Date;
     completedAt: Date;
+    qualityCheckStatus: number;
     annotatorId: string;
     annotator: IUser;
     proofreaderId: string;

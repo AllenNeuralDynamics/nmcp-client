@@ -1,4 +1,4 @@
-import {Button, Icon, Label, Table, TableCell, TableRow} from "semantic-ui-react";
+import {Button, Icon, Label, Popup, Table, TableCell, TableRow} from "semantic-ui-react";
 import * as React from "react";
 import {useMutation} from "@apollo/client";
 
@@ -11,6 +11,7 @@ import {displayNeuron} from "../../models/neuron";
 import {displayBrainArea} from "../../models/brainArea";
 import {ReconstructionStatus, reconstructionStatusColor, reconstructionStatusString} from "../../models/reconstructionStatus";
 import {IUser} from "../../models/user";
+import {QualityCheckStatus, qualityCheckStatusColor, qualityCheckStatusString} from "../../models/qualityCheckStatus";
 
 export type ReviewTableProps = {
     reconstructions: IReconstruction[]
@@ -57,6 +58,7 @@ export const FullReviewTable = (props: ReviewTableProps) => {
                     <Table.HeaderCell rowSpan={2}>Annotator</Table.HeaderCell>
                     <Table.HeaderCell rowSpan={2}>Proofreader</Table.HeaderCell>
                     <Table.HeaderCell rowSpan={2}>Peer Reviewer</Table.HeaderCell>
+                    <Table.HeaderCell rowSpan={2}>Quality Check</Table.HeaderCell>
                     <Table.HeaderCell rowSpan={2}>Status</Table.HeaderCell>
                     <Table.HeaderCell rowSpan={2}>Actions</Table.HeaderCell>
                 </Table.Row>
@@ -112,7 +114,7 @@ const ReviewRow = (props: ReviewRowProps) => {
     let decline = "Reject";
     let approveButton = null;
     let approveDisabled = true;
-    let completeButton = null;
+    let publishButton = null;
 
     if (props.reconstruction.axon != null && props.reconstruction.dendrite != null) {
         approveDisabled = false;
@@ -129,8 +131,9 @@ const ReviewRow = (props: ReviewRowProps) => {
     }
 
     if (props.reconstruction.status == ReconstructionStatus.Approved && props.reconstruction.axon != null && props.reconstruction.dendrite != null) {
-        completeButton = (<Button icon="cancel" size="mini" color='teal' content="Publish"
-                                  onClick={() => completeReconstruction({variables: {id: props.reconstruction.id}})}/>)
+        const enabled = props.reconstruction.qualityCheckStatus == QualityCheckStatus.Complete;
+        publishButton = (<Popup content="Publish disabled until quality control checks are complete" trigger={<div style={{display:"inline"}}><Button icon="cancel" size="mini" color='teal' content="Publish" disabled={!enabled}
+                                                                                                                            onClick={() => completeReconstruction({variables: {id: props.reconstruction.id}})}/></div>}/>);
     }
 
     const haveAxon = props.reconstruction.axon != null
@@ -161,10 +164,14 @@ const ReviewRow = (props: ReviewRowProps) => {
             <TableCell textAlign={peerAlign}>{peer}</TableCell>
             <TableCell>
                 <Label basic size="tiny"
+                       color={qualityCheckStatusColor(props.reconstruction.qualityCheckStatus)}>{qualityCheckStatusString(props.reconstruction.qualityCheckStatus)}</Label>
+            </TableCell>
+            <TableCell>
+                <Label basic size="tiny"
                        color={reconstructionStatusColor(props.reconstruction.status)}>{reconstructionStatusString(props.reconstruction.status)}</Label>
             </TableCell>
             <TableCell>
-                {completeButton}
+                {publishButton}
                 {approveButton}
                 <Button icon="cancel" size="mini" color='red' content={decline} onClick={() => declineAnnotation({variables: {id: props.reconstruction.id}})}/>
             </TableCell>

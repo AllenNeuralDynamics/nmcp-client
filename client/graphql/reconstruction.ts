@@ -11,6 +11,7 @@ export const ReconstructionFieldsFragment = gql`fragment ReconstructionFields on
     lengthMillimeters
     startedAt
     completedAt
+    qualityCheckStatus
     annotatorId
     annotator {
         id
