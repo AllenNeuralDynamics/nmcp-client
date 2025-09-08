@@ -17,13 +17,13 @@ import {
     MessageHeader, Statistic, StatisticLabel, StatisticValue
 } from "semantic-ui-react"
 
-import {UNPUBLISH_MUTATION} from "../../graphql/admin";
-import {SAMPLES_QUERY, SamplesQueryResponse, SamplesQueryVariables} from "../../graphql/sample";
-import {NEURONS_QUERY, NeuronsQueryResponse, NeuronsQueryVariables} from "../../graphql/neuron";
-import {ReconstructionStatus} from "../../models/reconstructionStatus";
+import {UNPUBLISH_MUTATION} from "../../../graphql/admin";
+import {SAMPLES_QUERY, SamplesQueryResponse, SamplesQueryVariables} from "../../../graphql/sample";
+import {NEURONS_QUERY, NeuronsQueryResponse, NeuronsQueryVariables} from "../../../graphql/neuron";
+import {ReconstructionStatus} from "../../../models/reconstructionStatus";
 import {toast} from "react-toastify";
 
-export const Published = () => {
+export const Unpublish = () => {
     const [state, setState] = useState({reconstructionId: ""});
 
     const [unpublish, {data, loading, error}] = useMutation(UNPUBLISH_MUTATION, {

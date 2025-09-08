@@ -5,7 +5,7 @@ import {UserPreferences} from "../../util/userPreferences";
 import {Users} from "./Users";
 import {Collections} from "./Collections";
 import {Manage} from "./Manage";
-import {Published} from "./Published";
+import {Published} from "./published/Published";
 import {Issues} from "./Issues";
 import {NotificationContext} from "../app/NotificationsApp";
 
