@@ -30,11 +30,11 @@ export function reconstructionStatusString(status: ReconstructionStatus): string
         case ReconstructionStatus.Rejected:
             return "Rejected";
         case ReconstructionStatus.PendingStructureAssignment:
-            return "Publishing (Pending Structure Assignment)";
+            return "Publishing (Structure Assignment)";
         case ReconstructionStatus.PendingSearchContents:
-            return "Publishing (Pending Search Contents)";
+            return "Publishing (Search Contents)";
         case ReconstructionStatus.PendingPrecomputed:
-            return "Publishing (Pending Precomputed Generation)";
+            return "Publishing (Precomputed Generation)";
         case ReconstructionStatus.Published:
             return "Published";
         default:

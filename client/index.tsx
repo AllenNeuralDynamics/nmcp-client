@@ -1,6 +1,6 @@
 import * as React from "react";
 import {BrowserRouter} from "react-router-dom";
-import {createTheme, MantineProvider} from "@mantine/core";
+import {createTheme, MantineColorsTuple, MantineProvider, virtualColor} from "@mantine/core";
 import {MsalProvider} from "@azure/msal-react";
 import {AuthenticationResult, EventMessage, EventType, PublicClientApplication} from "@azure/msal-browser";
 
@@ -20,7 +20,25 @@ import {createRoot} from "react-dom/client";
 
 import "@mantine/core/styles.css";
 
-const theme = createTheme({});
+const segment: MantineColorsTuple =  [
+    '#4f575f',
+    '#5f6469',
+    '#6d7175',
+    '#808387',
+    '#898a8c',
+    '#99999a',
+    '#b1b1b1',
+    '#cdcdcd',
+    '#e7e7e7',
+    '#f3f4f5',
+];
+
+const theme = createTheme(
+    {
+        colors: {
+            segment
+        }
+    });
 
 const msalInstance = new PublicClientApplication(msalConfig);
 

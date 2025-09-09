@@ -1,6 +1,6 @@
 {
   "name": "nmcp-client",
-  "version": "2.0.33",
+  "version": "2.0.34",
   "main": "server/app.js",
   "private": true,
   "repository": "https://github.com/AllenNeuralDynamics/nmcp-search-client",
