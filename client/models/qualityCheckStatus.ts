@@ -6,7 +6,8 @@ export enum QualityCheckStatus {
     InProgress = 2,
     Errored = 10,
     Failed = 20,
-    Complete = 30
+    Complete = 30,
+    CompleteWithWarnings = 34
 }
 
 export function qualityCheckStatusString(status: QualityCheckStatus): string {
@@ -16,13 +17,15 @@ export function qualityCheckStatusString(status: QualityCheckStatus): string {
         case QualityCheckStatus.Pending:
             return "Pending"
         case QualityCheckStatus.InProgress:
-            return "In Review";
+            return "In Progress";
         case QualityCheckStatus.Errored:
             return "Errored";
         case QualityCheckStatus.Failed:
             return "Failed";
         case QualityCheckStatus.Complete:
             return "Complete";
+        case QualityCheckStatus.CompleteWithWarnings:
+            return "Complete (warnings)";
         default:
             return "Unknown";
     }
@@ -33,15 +36,17 @@ export function qualityCheckStatusColor(status: QualityCheckStatus): SemanticCOL
         case QualityCheckStatus.NotReady:
             return "olive";
         case QualityCheckStatus.Pending:
-            return "teal";
-        case QualityCheckStatus.InProgress:
             return "blue";
+        case QualityCheckStatus.InProgress:
+            return "purple";
         case QualityCheckStatus.Errored:
             return "red";
         case QualityCheckStatus.Failed:
             return "orange";
         case QualityCheckStatus.Complete:
             return "green";
+        case QualityCheckStatus.CompleteWithWarnings:
+            return "teal";
         default:
             return null;
     }

@@ -103,6 +103,14 @@ export const FullReview = () => {
 
     const activePage = Math.min(state.offset ? (Math.floor(state.offset / state.limit) + 1) : 1, pageCount);
 
+    if (state.selected) {
+        const stillAvailable = data.reviewableReconstructions.reconstructions.some(r => r.id === state.selected.id);
+
+        if (!stillAvailable) {
+            setState({...state, selected: null});
+        }
+    }
+
     const onRowClick = (reconstruction: IReconstruction) => {
         setState({...state, selected: reconstruction});
     }

@@ -1,6 +1,7 @@
 import gql from "graphql-tag";
 import {IReconstruction} from "../models/reconstruction";
 import {INeuron} from "../models/neuron";
+import {QualityCheckStatus} from "../models/qualityCheckStatus";
 
 export const ReconstructionFieldsFragment = gql`fragment ReconstructionFields on Reconstruction {
     id
@@ -329,6 +330,7 @@ export const CANCEL_ANNOTATION_MUTATION = gql`mutation CancelAnnotation($id: Str
 }`;
 
 type ErrorOutput = {
+    kind?: number;
     message: string;
     name: string;
 }
@@ -358,3 +360,28 @@ export type PublishReconstructionVariables = {
 export type PublishReconstructionResponse = {
     publishReconstruction: ErrorOutput;
 }
+
+// Request Quality Check Mutation
+export const QUALITY_CHECK_MUTATION = gql`mutation QualityCheck($id: String!) {
+    requestQualityCheck(id: $id) {
+        id
+        qualityCheckStatus
+        error {
+            kind
+            message
+        }
+    }
+}`;
+
+export type QualityCheckVariables = {
+    id: string;
+}
+
+export type QualityCheckResponse = {
+    requestQualityCheck: {
+        id: string,
+        qualityCheckStatus: QualityCheckStatus,
+        error: ErrorOutput
+    };
+}
+

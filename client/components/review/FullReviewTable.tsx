@@ -1,10 +1,21 @@
-import {Button, Icon, Label, Popup, Table, TableCell, TableRow} from "semantic-ui-react";
+import {Button, Icon, Label, Table, TableCell, TableRow, Loader, Header} from "semantic-ui-react";
 import * as React from "react";
+import {useState} from "react";
 import {useMutation} from "@apollo/client";
 
 import {
-    APPROVE_ANNOTATION_MUTATION, ApproveAnnotationResponse, ApproveAnnotationVariables, PUBLISH_RECONSTRUCTION_MUTATION, PublishReconstructionResponse,
-    PublishReconstructionVariables, DECLINE_ANNOTATION_MUTATION, DeclineAnnotationResponse, DeclineAnnotationVariables
+    APPROVE_ANNOTATION_MUTATION,
+    ApproveAnnotationResponse,
+    ApproveAnnotationVariables,
+    DECLINE_ANNOTATION_MUTATION,
+    DeclineAnnotationResponse,
+    DeclineAnnotationVariables,
+    PUBLISH_RECONSTRUCTION_MUTATION,
+    PublishReconstructionResponse,
+    PublishReconstructionVariables,
+    QUALITY_CHECK_MUTATION,
+    QualityCheckResponse,
+    QualityCheckVariables
 } from "../../graphql/reconstruction";
 import {IReconstruction} from "../../models/reconstruction";
 import {displayNeuron} from "../../models/neuron";
@@ -96,6 +107,10 @@ type ReviewRowProps = {
 }
 
 const ReviewRow = (props: ReviewRowProps) => {
+    const [qualityStatus, setQualityStatus] = useState<QualityCheckStatus>(props.reconstruction.qualityCheckStatus);
+    const [actionInProgress, setActionInProgress] = useState<boolean>(false);
+    const [actionMessage, setActionMessage] = useState<string>("");
+
     const [approveAnnotation, {data: approveData}] = useMutation<ApproveAnnotationResponse, ApproveAnnotationVariables>(APPROVE_ANNOTATION_MUTATION,
         {
             refetchQueries: ["ReviewableReconstructions", "CandidatesForReview"]
@@ -106,34 +121,61 @@ const ReviewRow = (props: ReviewRowProps) => {
             refetchQueries: ["ReviewableReconstructions"]
         });
 
-    const [completeReconstruction, {data: completeData}] = useMutation<PublishReconstructionResponse, PublishReconstructionVariables>(PUBLISH_RECONSTRUCTION_MUTATION,
+    const [publishReconstruction, {data: completeData}] = useMutation<PublishReconstructionResponse, PublishReconstructionVariables>(PUBLISH_RECONSTRUCTION_MUTATION,
         {
             refetchQueries: ["ReviewableReconstructions", "CandidatesForReview"]
         });
 
+    const [qualityCheck, {data: qualityData}] = useMutation<QualityCheckResponse, QualityCheckVariables>(QUALITY_CHECK_MUTATION,
+        {
+            refetchQueries: ["ReviewableReconstructions", "CandidatesForReview"],
+            onCompleted: (data) => {
+                setQualityStatus(data.requestQualityCheck.qualityCheckStatus);
+                setActionInProgress(false);
+            },
+            onError: () => {
+                setQualityStatus(props.reconstruction.qualityCheckStatus);
+                setActionInProgress(false);
+            }
+        });
+
     let decline = "Reject";
-    let approveButton = null;
+    let approveButton = (<div/>);
     let approveDisabled = true;
-    let publishButton = null;
+    let qualityControlButton = (<div/>);
+    let publishButton = (<div/>);
 
     if (props.reconstruction.axon != null && props.reconstruction.dendrite != null) {
         approveDisabled = false;
+
+        if (qualityStatus != QualityCheckStatus.Complete && qualityStatus != QualityCheckStatus.InProgress) {
+            qualityControlButton = (<Button icon="check" size="mini" color='olive' content="Request QC"
+                                            onClick={async (e) => {
+                                                e.stopPropagation();
+                                                setActionInProgress(true);
+                                                setActionMessage("Quality Check In Progress");
+                                                setQualityStatus(QualityCheckStatus.InProgress);
+                                                await qualityCheck({variables: {id: props.reconstruction.id}});
+                                            }}/>)
+        }
     }
 
-    if (props.reconstruction.status != ReconstructionStatus.Approved) {
+    if (props.reconstruction.status == ReconstructionStatus.InReview) {
         approveButton = (
-            <Button icon="check" size="mini" color="green" disabled={approveDisabled} content="Approve"
+            <Button icon="thumbs up" size="mini" color="green" disabled={approveDisabled} content="Approve"
                     onClick={() => approveAnnotation({variables: {id: props.reconstruction.id}})}/>)
     }
 
-    if (props.reconstruction.status == ReconstructionStatus.Approved) {
+    if (props.reconstruction.status == ReconstructionStatus.Approved || props.reconstruction.status == ReconstructionStatus.ApprovedAndReady) {
         decline = "Rescind"
     }
 
-    if (props.reconstruction.status == ReconstructionStatus.Approved && props.reconstruction.axon != null && props.reconstruction.dendrite != null) {
-        const enabled = props.reconstruction.qualityCheckStatus == QualityCheckStatus.Complete;
-        publishButton = (<Popup content="Publish disabled until quality control checks are complete" trigger={<div style={{display:"inline"}}><Button icon="cancel" size="mini" color='teal' content="Publish" disabled={!enabled}
-                                                                                                                            onClick={() => completeReconstruction({variables: {id: props.reconstruction.id}})}/></div>}/>);
+    if (props.reconstruction.status == ReconstructionStatus.ApprovedAndReady && qualityStatus != QualityCheckStatus.InProgress) {
+        publishButton = (<Button icon="cloud upload" size="mini" color='green' content="Publish"
+                                 onClick={async (e) => {
+                                     e.stopPropagation();
+                                     await publishReconstruction({variables: {id: props.reconstruction.id}});
+                                 }}/>);
     }
 
     const haveAxon = props.reconstruction.axon != null
@@ -164,16 +206,24 @@ const ReviewRow = (props: ReviewRowProps) => {
             <TableCell textAlign={peerAlign}>{peer}</TableCell>
             <TableCell>
                 <Label basic size="tiny"
-                       color={qualityCheckStatusColor(props.reconstruction.qualityCheckStatus)}>{qualityCheckStatusString(props.reconstruction.qualityCheckStatus)}</Label>
+                       color={qualityCheckStatusColor(qualityStatus)}>{qualityCheckStatusString(qualityStatus)}</Label>
             </TableCell>
             <TableCell>
                 <Label basic size="tiny"
                        color={reconstructionStatusColor(props.reconstruction.status)}>{reconstructionStatusString(props.reconstruction.status)}</Label>
             </TableCell>
             <TableCell>
-                {publishButton}
-                {approveButton}
-                <Button icon="cancel" size="mini" color='red' content={decline} onClick={() => declineAnnotation({variables: {id: props.reconstruction.id}})}/>
+                {!actionInProgress ?
+                    <div style={{display: "flex", alignItems: "center", justifyContent: "end"}}>
+                        {publishButton}
+                        {approveButton}
+                        {qualityControlButton}
+                        <Button icon="cancel" size="mini" color='red' content={decline}
+                                onClick={() => declineAnnotation({variables: {id: props.reconstruction.id}})}/>
+                    </div> : <div style={{display: "flex", alignItems: "center", justifyContent: "space-between"}}>
+                        <Loader active inline size="tiny"/>
+                        <Header as="h5" color="grey" floated="left">{actionMessage}</Header>
+                    </div>}
             </TableCell>
         </TableRow>
     );

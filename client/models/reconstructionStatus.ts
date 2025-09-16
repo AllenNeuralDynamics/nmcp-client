@@ -7,7 +7,8 @@ export enum ReconstructionStatus {
     InReview = 3,
     InPeerReview = 4,
     Approved = 5,
-    Rejected = 6,
+    ApprovedAndReady = 6,
+    Rejected = 7,
     PendingStructureAssignment = 10,
     PendingSearchContents = 11,
     PendingPrecomputed = 12,
@@ -27,6 +28,8 @@ export function reconstructionStatusString(status: ReconstructionStatus): string
             return "In Peer Review";
         case ReconstructionStatus.Approved:
             return "Approved";
+        case ReconstructionStatus.ApprovedAndReady:
+            return "Ready";
         case ReconstructionStatus.Rejected:
             return "Rejected";
         case ReconstructionStatus.PendingStructureAssignment:
@@ -45,7 +48,7 @@ export function reconstructionStatusString(status: ReconstructionStatus): string
 export function reconstructionStatusColor(status: ReconstructionStatus): SemanticCOLORS {
     switch (status) {
         case ReconstructionStatus.InProgress:
-            return "green";
+            return "teal";
         case ReconstructionStatus.OnHold:
             return "orange";
         case ReconstructionStatus.InReview:
@@ -54,10 +57,12 @@ export function reconstructionStatusColor(status: ReconstructionStatus): Semanti
             return "orange";
         case ReconstructionStatus.Approved:
             return "purple";
+        case ReconstructionStatus.ApprovedAndReady:
+            return "green";
         case ReconstructionStatus.Rejected:
             return "red";
         case ReconstructionStatus.Published:
-            return "teal";
+            return "green";
         default:
             return null;
     }
