@@ -1,6 +1,6 @@
-import {rootDataStore} from "../store/system/systemDataStore";
+import {SystemConfiguration} from "../store/system/systemConfiguration";
 
-export const querySystemSettings = async (): Promise<void> => {
+export const querySystemSettings = async (systemConfiguration: SystemConfiguration): Promise<void> => {
     const resp = await fetch('/system', {
         method: 'GET',
         headers: {
@@ -10,11 +10,11 @@ export const querySystemSettings = async (): Promise<void> => {
 
     try {
         if (resp.status === 200) {
-            rootDataStore.SystemConfiguration.update(await resp.json());
+            systemConfiguration.update(await resp.json());
         } else {
-            setTimeout(() => querySystemSettings(), 10000);
+            setTimeout(() => querySystemSettings(systemConfiguration), 10000);
         }
     } catch (err) {
-        setTimeout(() => querySystemSettings(), 10000);
+        setTimeout(() => querySystemSettings(systemConfiguration), 10000);
     }
 };

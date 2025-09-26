@@ -8,7 +8,7 @@ import {QueryStatus} from "../query/QueryHeader";
 import {primaryBackground} from "../../util/styles";
 import {ExportFormat} from "../../models/tracing";
 
-interface INeuronListContainerProps extends INeuronTableProps {
+export interface INeuronListContainerProps extends INeuronTableProps {
     isDocked: boolean;
     queryStatus: QueryStatus;
     exportLimit: number;

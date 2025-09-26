@@ -34,7 +34,7 @@ interface IContentState {
 export class Content extends React.Component<IContentProps, IContentState> {
     private _uiPredicates: UIQueryPredicates;
 
-    private _queryPage: React.RefObject<QueryPageRef>;
+    private readonly _queryPage: React.RefObject<QueryPageRef>;
 
     private _shouldAutoExecuteFromUrl: boolean = false;
 

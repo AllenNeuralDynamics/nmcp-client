@@ -6,13 +6,13 @@ import {useIsAuthenticated} from "@azure/msal-react";
 import {observer} from "mobx-react-lite";
 
 import {PreferencesManager} from "../../util/preferencesManager";
-import {useViewModel} from "../app/App";
 import {SignInSignOutButton} from "../app/SignInSignOutButton";
 import {UserPermissions} from "../../graphql/user";
 
 import logo from "../../../assets/nmcp_logo.png";
 import {UserContext} from "../app/UserApp";
 import {NotificationContext} from "../app/NotificationsApp";
+import {useViewModel} from "../../hooks/useViewModel";
 
 type PageHeaderState = {
     showShortcuts?: boolean;

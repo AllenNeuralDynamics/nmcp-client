@@ -3,12 +3,12 @@ import {observer} from "mobx-react-lite";
 import {useQuery} from "@apollo/client";
 import { Message} from "semantic-ui-react";
 
-import {useStore} from "./App";
 import {TOMOGRAPHY_QUERY, TomographyApiResponse} from "../../graphql/tomography";
 import {AppLoading} from "./AppLoading";
+import {useTomography} from "../../hooks/useTomography";
 
 export const AppTomography = observer((props: any) => {
-    const Store = useStore();
+    const Tomography = useTomography();
 
     const {data, error, loading} = useQuery<TomographyApiResponse>(TOMOGRAPHY_QUERY);
 
@@ -25,7 +25,7 @@ export const AppTomography = observer((props: any) => {
         );
     }
 
-    Store.Tomography.fromSource(data.tomographyMetadata);
+    Tomography.fromSource(data.tomographyMetadata);
 
     return props.children;
 });

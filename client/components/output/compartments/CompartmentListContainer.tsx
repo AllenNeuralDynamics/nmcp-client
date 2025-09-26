@@ -6,9 +6,8 @@ import {BrainCompartmentSelectionTree, IBrainAreaGeometryProps} from "./BrainCom
 import {BrainVolumesTable, IBrainVolumesTableProps} from "./BrainCompartmentViewHistoryList";
 import {DrawerState} from "../MainView";
 import {primaryBackground, secondaryBackground} from "../../../util/styles";
-import {TomographyControls} from "../../tomography/TomographyPanel";
-import {useViewModel} from "../../app/App";
 import { ViewerMeshVersion} from "../../../models/compartmentMeshSet";
+import {useViewModel} from "../../../hooks/useViewModel";
 
 type CompartmentHeaderProps = {
     isDocked: boolean;
@@ -50,7 +49,7 @@ const CompartmentHeader = (props: CompartmentHeaderProps) => {
     );
 };
 
-interface ICompartmentListContainerProps extends IBrainVolumesTableProps, IBrainAreaGeometryProps {
+export interface ICompartmentListContainerProps extends IBrainVolumesTableProps, IBrainAreaGeometryProps {
     isDocked: boolean;
     compartmentMeshVersion?: ViewerMeshVersion;
 
@@ -60,7 +59,7 @@ interface ICompartmentListContainerProps extends IBrainVolumesTableProps, IBrain
 export const CompartmentListContainer = observer((props: ICompartmentListContainerProps) => {
     const color = secondaryBackground;
 
-    const {Tomography, CompartmentHistory} = useViewModel();
+    const {CompartmentHistory} = useViewModel();
 
     return (
         <div style={{
@@ -80,7 +79,7 @@ export const CompartmentListContainer = observer((props: ICompartmentListContain
         }}>
             <CompartmentHeader {...props}/>
             <div style={{order: 2, flexGrow: 1, width: "100%", overflow: "auto"}}>
-                <TomographyControls tomography={Tomography}/>
+                {/*<TomographyControls tomography={Tomography}/>*/}
                 <div style={{
                     display: "flex",
                     backgroundColor: color,

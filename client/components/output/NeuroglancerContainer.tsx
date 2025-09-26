@@ -1,5 +1,5 @@
 import * as React from "react";
-import {useEffect, useState} from "react";
+import {useContext, useEffect, useState} from "react";
 import {useLazyQuery} from "@apollo/client";
 
 import {NeuroglancerProxy} from "../../viewer/neuroglancer/neuroglancer";
@@ -9,7 +9,7 @@ import {NEURON_VIEW_MODE_SOMA} from "../../viewmodel/neuronViewMode";
 import {ITracingNode} from "../../models/tracingNode";
 import {TracingViewModel} from "../../viewmodel/tracingViewModel";
 import {NEAREST_NODE_QUERY, NearestNodeQueryResponse, NearestNodeQueryVariables} from "../../graphql/search";
-import {useStore} from "../app/App";
+import {ConstantsContext} from "../app/AppConstants";
 
 export type NeuroglancerContainerProps = {
     neuronViewModels: NeuronViewModel[]
@@ -25,7 +25,7 @@ export type NeuroglancerContainerProps = {
 export const NeuroglancerContainer = (props: NeuroglancerContainerProps) => {
     const [ngProxy, setNgProxy] = useState<NeuroglancerProxy>(null);
 
-    const {Constants} = useStore();
+    const Constants = useContext(ConstantsContext);
 
     const [getNearest] = useLazyQuery<NearestNodeQueryResponse, NearestNodeQueryVariables>(NEAREST_NODE_QUERY);
 

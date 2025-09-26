@@ -1,40 +1,25 @@
 import * as React from "react";
 
 import {ITracingViewerBaseProps, TracingViewer} from "./TracingViewer";
-import {FetchState} from "./MainView";
 import {primaryBackground} from "../../util/styles";
 import {Icon} from "semantic-ui-react";
-import {UserPreferences} from "../../util/userPreferences";
-import {ViewerStyle} from "../../viewer/viewerStyle";
 import {NeuroglancerProxy} from "../../viewer/neuroglancer/neuroglancer";
 
-interface IViewerProps extends ITracingViewerBaseProps {
+export interface IViewerProps extends ITracingViewerBaseProps {
     isQueryCollapsed: boolean;
     isNeuronListDocked: boolean;
     isCompartmentListDocked: boolean;
     isNeuronListOpen: boolean;
     isCompartmentListOpen: boolean;
 
-    fetchState: FetchState;
-    fetchCount: number;
-    isRendering: boolean;
-
     onFloatNeuronList(): void;
 
     onFloatCompartmentList(): void;
 
     onToggleQueryCollapsed(): void;
-
-    onSetFetchState(fetchState: FetchState): void;
-
-    onCancelFetch(): void;
 }
 
-export const ViewerContainer = React.forwardRef<TracingViewer, IViewerProps>((props, ref) => {
-    const myRef = React.useRef<TracingViewer>(null);
-
-    React.useImperativeHandle(ref, () => myRef.current!, []);
-
+export const ViewerContainer: React.FC<IViewerProps> = ((props) => {
     const renderFloatNeuronListGlyph = () => {
         if (!props.isNeuronListDocked && !props.isNeuronListOpen) {
             return (
@@ -75,90 +60,17 @@ export const ViewerContainer = React.forwardRef<TracingViewer, IViewerProps>((pr
                       onClick={() => props.onToggleQueryCollapsed()}/>)
     };
 
-    const renderProgress = () => {
-        if ((props.fetchCount > 0 && props.fetchState === FetchState.Running) || props.isRendering) {
-            return (<div style={spinnerStyle}/>);
-        }
-
-        return null;
-    };
-
-    const renderMessage = () => {
-        const isPaused = props.fetchState === FetchState.Paused;
-
-        if (props.fetchCount > 0) {
-            const iconName = isPaused ? "play" : "pause";
-
-            return (
-                <div style={{display: "flex", flexDirection: "row", alignItems: "center"}}>
-                    <div style={{
-                        flex: "", marginLeft: "10px", height: "100%", color: "white"
-                    }}>
-                        {`Fetching neuron tracings ( ${props.fetchCount} remaining ${isPaused ? "- paused" : ""})`}
-                    </div>
-                    <div style={{
-                        display: "inline-block",
-                        verticalAlign: "middle",
-                        height: "100%",
-                        color: "white",
-                        marginLeft: "10px"
-                    }}>
-                        <div style={{
-                            display: "inline-block",
-                            verticalAlign: "middle",
-                            height: "100%",
-                            border: "1px solid #ccc",
-                            padding: "0px 10px"
-                        }}>
-                            <Icon name={iconName}
-                                  style={{paddingTop: "2px", paddingBottom: "0px", paddingLeft: "1px"}}
-                                  onClick={() => props.onSetFetchState(isPaused ? FetchState.Running : FetchState.Paused)}/>
-                        </div>
-                        <div style={{
-                            display: "inline-block",
-                            verticalAlign: "middle",
-                            height: "100%",
-                            border: "1px solid #ccc", marginLeft: "10px",
-                            padding: "0px 10px"
-                        }}>
-                            <Icon name="remove"
-                                  style={{paddingTop: "2px", paddingBottom: "0px", paddingLeft: "1px"}}
-                                  onClick={() => props.onCancelFetch()}/>
-                        </div>
-                    </div>
-                </div>
-            );
-        }
-
-        if (props.isRendering) {
-            return (
-                <div>
-                    <span style={{color: "white"}}>
-                        Submitting tracing content for render...
-                    </span>
-                </div>
-            );
-        }
-
-    };
-
     const renderResetView = () => {
-        if (UserPreferences.Instance.ViewerStyle == ViewerStyle.Neuroglancer) {
-            return (
-                <span style={{marginRight: "6px", textDecoration: "underline"}} onClick={() => {
-                    if (NeuroglancerProxy.SearchNeuroglancer) {
-                        NeuroglancerProxy.SearchNeuroglancer.resetView();
-                    }
-                }}>Reset View</span>
-            );
-        }
-
-        return null;
+        return (
+            <span style={{marginRight: "6px", textDecoration: "underline"}} onClick={() => {
+                if (NeuroglancerProxy.SearchNeuroglancer) {
+                    NeuroglancerProxy.SearchNeuroglancer.resetView();
+                }
+            }}>Reset View</span>
+        );
     }
 
     const renderHeader = () => {
-        const isLeftGlyphVisible = !props.isNeuronListDocked && !props.isNeuronListOpen;
-        const progressMarginLeft = isLeftGlyphVisible ? "20px" : "0px";
         return (
             <div style={{
                 backgroundColor: primaryBackground,
@@ -179,19 +91,6 @@ export const ViewerContainer = React.forwardRef<TracingViewer, IViewerProps>((pr
                     <div style={{display: "flex", flexDirection: "column", flex: "1 1 auto", order: 2, width: "100%"}}>
                         <div style={{flex: "0 0 auto", order: 1, textAlign: "center", height: "15px"}}>
                             {renderCollapseQueryGlyph()}
-                        </div>
-                        <div style={{display: "flex", flexDirection: "row", flex: "1 1 auto", order: 2}}>
-                            <div style={{
-                                flex: "0 0 auto",
-                                order: 1,
-                                marginRight: "6px",
-                                marginLeft: progressMarginLeft
-                            }}>
-                                {renderProgress()}
-                            </div>
-                            <div style={{flex: "1 1 auto", margin: "auto", order: 2, textAlign: "left"}}>
-                                {renderMessage()}
-                            </div>
                         </div>
                         <div style={{flex: "1 1 auto", order: 2, textAlign: "center", width: "100%"}}>
                             {props.isQueryCollapsed ?
@@ -229,22 +128,8 @@ export const ViewerContainer = React.forwardRef<TracingViewer, IViewerProps>((pr
         }}>
             {renderHeader()}
             <div style={{order: 2, flexGrow: 1, width: "100%", height: "100%"}}>
-                <TracingViewer {...props} ref={myRef}/>
+                <TracingViewer {...props}/>
             </div>
         </div>
     );
 });
-
-const spinnerStyle = {
-    width: 20,
-    height: 20,
-    border: "3px solid",
-    borderColor: "white",
-    borderBottomColor: "transparent",
-    borderRadius: "100%",
-    background: "transparent !important",
-    verticalAlign: "middle",
-    animation: "spinner 0.75s 0s infinite linear",
-    animationFillMode: 'both',
-    display: "inline-block",
-};

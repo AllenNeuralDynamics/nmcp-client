@@ -194,7 +194,7 @@ function filterBrainArea(option: DropdownItemProps, filterValue: string) {
     });
 }
 
-const brainAreaDeepSearch = (options: DropdownItemProps[], query: string) => {
+const brainAreaDeepSearch = (options: DropdownItemProps[], query: string, constants: NdbConstants) => {
     const filterValue = query.toLowerCase();
 
     const optionsInList = filterValue ? options.filter(option => {
@@ -218,12 +218,12 @@ const brainAreaDeepSearch = (options: DropdownItemProps[], query: string) => {
         const partsA = labelA.split(/\s+/);
         const partsB = labelB.split(/\s+/);
 
-        const areaA = NdbConstants.DefaultConstants.findBrainArea(a.value as string);
+        const areaA = constants.findBrainArea(a.value as string);
         if (!areaA) {
             return -1;
         }
 
-        const areaB = NdbConstants.DefaultConstants.findBrainArea(b.value as string);
+        const areaB = constants.findBrainArea(b.value as string);
         if (!areaB) {
             return 1;
         }

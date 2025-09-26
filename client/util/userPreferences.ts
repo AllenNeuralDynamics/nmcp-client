@@ -1,6 +1,5 @@
 import {PreferencesManager} from "./preferencesManager";
 import {UIQueryPredicate} from "../models/uiQueryPredicate";
-import {ViewerStyle} from "../viewer/viewerStyle";
 
 const SamplePageOffset = "sample.page.offset";
 const SamplePageLimit = "sample.page.limit";
@@ -205,17 +204,6 @@ export class UserPreferences extends PreferencesManager {
         return this.loadLocalValue(HideCursorOnPage, false);
     }
 
-    public get ViewerStyle(): ViewerStyle {
-        return ViewerStyle.Neuroglancer;
-        // return this.loadLocalValue(ViewerStylePreference, ViewerStyle.Default) as ViewerStyle;
-    }
-
-    public set ViewerStyle(n: ViewerStyle) {
-        this.saveLocalValue(ViewerStylePreference, n.valueOf().toFixed(0));
-
-        this.notifyListeners("viewerStyle", n);
-    }
-
     public get AdminPageSelectedTab(): number {
         return this.loadLocalValue(AdminPageSelectedTab, 0);
     }
@@ -268,7 +256,6 @@ export class UserPreferences extends PreferencesManager {
         this.setDefaultLocalValue(ViewPresets, []);
         this.setDefaultLocalValue(HideCursorInViewer, false);
         this.setDefaultLocalValue(HideCursorOnPage, false);
-        this.setDefaultLocalValue(ViewerStylePreference, ViewerStyle.Default);
         this.setDefaultLocalValue(AdminPageSelectedTab, 0);
         this.setDefaultLocalValue(ShowReferenceIds, false);
     }

@@ -4,15 +4,15 @@ import {Dropdown, Icon, List, MenuItem, Popup} from "semantic-ui-react";
 import {ITracingNode} from "../../models/tracingNode";
 import {StructureIdentifier} from "../../models/structureIdentifier";
 import {IPositionInput} from "../../models/queryFilter";
-import {NdbConstants} from "../../models/constants";
 import {TracingViewModel} from "../../viewmodel/tracingViewModel";
 import {TracingStructure} from "../../models/tracingStructure";
 import {IBrainArea} from "../../models/brainArea";
 import {HighlightSelectionMode} from "./TracingViewer";
 import {NeuronViewModel} from "../../viewmodel/neuronViewModel";
 import {NEURON_VIEW_MODES, NeuronViewMode} from "../../viewmodel/neuronViewMode";
-import {INotificationListener} from "../../util/preferencesManager";
 import {UserPreferences} from "../../util/userPreferences";
+import {useContext, useReducer, useRef, useState} from "react";
+import {ConstantsContext} from "../app/AppConstants";
 
 interface IActiveTracingItemProps {
     viewModel: NeuronViewModel;
@@ -117,8 +117,6 @@ function ActiveTracingItemList(props: IActiveTracingItemProps) {
 }
 
 interface IViewerSelectionProps {
-    constants: NdbConstants;
-
     selectedTracing: TracingViewModel;
     selectedNode: ITracingNode;
     activeNeurons: NeuronViewModel[];
@@ -145,26 +143,20 @@ interface IViewerSelectionProps {
     onChangeNeuronViewMode(neuron: NeuronViewModel, viewMode: NeuronViewMode): void;
 }
 
-interface IViewerSelectionState {
-    isCenterPointCollapsed?: boolean;
-    isActiveTracingsVisible?: boolean;
-    top?;
-    left?;
-    isDragging?;
-}
+export const ViewerSelection = (props: IViewerSelectionProps) => {
+    const [isCenterPointCollapsed, setIsCenterPointCollapsed] = useState<boolean>(false);
+    const [isActiveTracingsVisible, setIsActiveTracingsVisible] = useState<boolean>(true);
+    const [top, setTop] = useState<number>(10);
+    const [left, setLeft] = useState<number>(10);
+    const [isDragging, setIsDragging] = useState<boolean>(false);
 
-export function ViewerSelection(props: IViewerSelectionProps) {
-    const [isCenterPointCollapsed, setIsCenterPointCollapsed] = React.useState<boolean>(false);
-    const [isActiveTracingsVisible, setIsActiveTracingsVisible] = React.useState<boolean>(true);
-    const [top, setTop] = React.useState<number>(10);
-    const [left, setLeft] = React.useState<number>(10);
-    const [isDragging, setIsDragging] = React.useState<boolean>(false);
+    const isTrackingRef = useRef<boolean>(false);
+    const startTopRef = useRef<number>(0);
+    const startLeftRef = useRef<number>(0);
+    const startMouseRef = useRef<{x: number, y: number}>({x: 0, y: 0});
+    const [, forceUpdate] = useReducer(x => x + 1, 0);
 
-    const isTrackingRef = React.useRef<boolean>(false);
-    const startTopRef = React.useRef<number>(0);
-    const startLeftRef = React.useRef<number>(0);
-    const startMouseRef = React.useRef<{x: number, y: number}>({x: 0, y: 0});
-    const [, forceUpdate] = React.useReducer(x => x + 1, 0);
+    const constants = useContext(ConstantsContext);
 
     React.useEffect(() => {
         const preferenceChanged = (name: string) => {
@@ -181,11 +173,11 @@ export function ViewerSelection(props: IViewerSelectionProps) {
     }, []);
 
     const lookupStructureIdentifier = (id: string) => {
-        return props.constants.findStructureIdentifier(id);
+        return constants.findStructureIdentifier(id);
     };
 
     const lookupBrainArea = (id: string | number) => {
-        return props.constants.findBrainArea(id);
+        return constants.findBrainArea(id);
     };
 
     const renderSelection = () => {

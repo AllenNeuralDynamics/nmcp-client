@@ -1,6 +1,6 @@
 import {observable, makeObservable} from "mobx";
 
-export class SystemConfigurationStore {
+export class SystemConfiguration {
     systemVersion: string;
     exportLimit: number;
 

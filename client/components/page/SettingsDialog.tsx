@@ -1,12 +1,12 @@
 import * as React from "react";
-import {useState} from "react";
+import {useContext, useState} from "react";
 import {observer} from "mobx-react-lite";
 import {Button, Form, Header, Label, Modal} from "semantic-ui-react";
-import {SketchPicker} from 'react-color';
 
-import {useStore, useViewModel} from "../app/App";
+import {useViewModel} from "../../hooks/useViewModel";
 import {UserPreferences} from "../../util/userPreferences";
-import {ViewerStyle} from "../../viewer/viewerStyle";
+import {ConstantsContext} from "../app/AppConstants";
+import {useSystemConfiguration} from "../../hooks/useSystemConfiguration";
 
 export const SettingsDialogContainer = observer(() => {
     const viewModel = useViewModel();
@@ -25,7 +25,6 @@ type SettingsDialogState = {
     shouldAlwaysShowSoma?: boolean;
     shouldAlwaysShowFullTracing?: boolean;
     displayColorPicker?: boolean;
-    useNeuroglancer?: boolean;
 }
 
 const SettingsDialog = (props: SettingsDialogProps) => {
@@ -33,11 +32,11 @@ const SettingsDialog = (props: SettingsDialogProps) => {
         shouldAutoCollapseOnQuery: UserPreferences.Instance.ShouldAutoCollapseOnQuery,
         shouldAlwaysShowSoma: UserPreferences.Instance.ShouldAlwaysShowSoma,
         shouldAlwaysShowFullTracing: UserPreferences.Instance.ShouldAlwaysShowFullTracing,
-        useNeuroglancer: UserPreferences.Instance.ViewerStyle == ViewerStyle.Neuroglancer,
         displayColorPicker: false
     });
+    const Constants = useContext(ConstantsContext);
 
-    const {SystemConfiguration, Constants} = useStore();
+    const systemConfiguration = useSystemConfiguration();
 
     const onSetAutoCollapseOnQuery = (b: boolean) => {
         UserPreferences.Instance.ShouldAutoCollapseOnQuery = b;
@@ -66,11 +65,6 @@ const SettingsDialog = (props: SettingsDialogProps) => {
         UserPreferences.Instance.ViewerBackgroundColor = color.hex;
     }
 
-    const onUseNeuroglancer = (b: boolean) => {
-        UserPreferences.Instance.ViewerStyle = b ? ViewerStyle.Neuroglancer : ViewerStyle.Default;
-        setState({useNeuroglancer: b});
-    }
-
     const rowStyles = {
         color: {
             width: "16px",
@@ -85,7 +79,7 @@ const SettingsDialog = (props: SettingsDialogProps) => {
             <Modal.Header style={{display: "flex", alignItems: "center", justifyContent: "space-between"}}>
                 <Header style={{margin: "0"}}>Settings</Header>
                 <div>
-                    <Label color="blue">Client v{SystemConfiguration.systemVersion}</Label>
+                    <Label color="blue">Client v{systemConfiguration.systemVersion}</Label>
                     <br/>
                     <Label color="teal">API v{Constants.ApiVersion}</Label>
                 </div>
@@ -104,23 +98,6 @@ const SettingsDialog = (props: SettingsDialogProps) => {
                                    disabled={!state.shouldAlwaysShowSoma}
                                    label="Display full tracing in addition to soma"
                                    onChange={(_, props) => onSetAlwaysShowFullTracing(props.checked)}/>
-                    {/**
-                    {Constants.EnabledUpdatedViewer ?
-                        <Form.Checkbox width={16} checked={state.useNeuroglancer}
-                                       label="Use Neuroglancer as viewer (browser refresh recommended)"
-                                       onChange={(_, props) => onUseNeuroglancer(props.checked)}/> : null}
-                    <div style={{display: "flex", flexDirection: "row", alignItems: "center", marginTop: "20px"}}>
-                        <div style={styles.swatch} onClick={() => handleClick()}>
-                            <div style={rowStyles.color}/>
-                        </div>
-                        {state.displayColorPicker ? <div style={styles.popover}>
-                            <div style={styles.cover} onClick={() => handleClose()}/>
-                            <SketchPicker color={UserPreferences.Instance.ViewerBackgroundColor}
-                                          onChange={(color: any) => onChangeNeuronColor(color)}/>
-                        </div> : null}
-                        <span style={styles.text}> Viewer background color</span>
-                    </div>
-                     **/}
                 </Form>
             </Modal.Content>
             <Modal.Actions>

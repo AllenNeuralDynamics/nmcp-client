@@ -4,7 +4,6 @@ import {NeuronalStructure} from "./neuronalStructure";
 import {ConstantsQueryResponse} from "../graphql/constants";
 import {ITracingStructure, TracingStructure} from "./tracingStructure";
 import {IQueryOperator} from "./queryOperator";
-import {CompartmentMeshSet, ViewerMeshVersion} from "./compartmentMeshSet";
 
 export class NdbConstants {
     private _QueryOperators: IQueryOperator[] = [];
@@ -15,7 +14,6 @@ export class NdbConstants {
     private _brainAreaIdMap = new Map<string, IBrainArea>();
     private _brainAreaStructureIdMap = new Map<number, IBrainArea>();
 
-    private _compartmentMeshSets: CompartmentMeshSet[] = [];
     private _brainStructureColorMap: Map<string, string> = new Map();
 
     private _structureIdentifierMap = new Map<string, IStructureIdentifier>();
@@ -29,13 +27,9 @@ export class NdbConstants {
 
     private _neuronCount = -1;
 
-    private _enableUpdatedViewer: boolean = false;
-
     private _isLoaded: boolean;
 
-    public static DefaultConstants = new NdbConstants();
-
-    protected constructor() {
+    public constructor() {
         this._isLoaded = false;
     }
 
@@ -46,15 +40,12 @@ export class NdbConstants {
 
         this._apiVersion = data.systemSettings.apiVersion;
         this._neuronCount = data.systemSettings.neuronCount;
-        this._enableUpdatedViewer = data.systemSettings.features.enableUpdatedViewer;
 
         this.loadQueryOperators(data.queryOperators);
         this.loadBrainAreas(data.brainAreas);
         this.loadStructureIdentifiers(data.structureIdentifiers)
         this.loadTracingStructures(data.tracingStructures);
         this.loadNeuronalStructures(data.tracingStructures, data.structureIdentifiers);
-
-        this.loadCompartmentMeshSets();
 
         this._isLoaded = true;
     }
@@ -71,10 +62,6 @@ export class NdbConstants {
         return this._neuronCount;
     }
 
-    public get EnabledUpdatedViewer(): boolean {
-        return this._enableUpdatedViewer;
-    }
-
     public get QueryOperators(): IQueryOperator[] {
         return this._QueryOperators;
     }
@@ -89,10 +76,6 @@ export class NdbConstants {
 
     public get NeuronStructures(): NeuronalStructure[] {
         return this._NeuronStructures;
-    }
-
-    public get CompartmentMeshSets(): CompartmentMeshSet[] {
-        return this._compartmentMeshSets;
     }
 
     public get BrainStructureColorMap(): Map<string, string> {
@@ -120,10 +103,6 @@ export class NdbConstants {
 
     public findNeuronalStructure(id: string) {
         return this._neuronStructureMap.get(id);
-    }
-
-    public findCompartmentMeshSet(v: ViewerMeshVersion): CompartmentMeshSet {
-        return this._compartmentMeshSets.filter(m => m.Version == v).pop();
     }
 
     private loadBrainAreas(brainAreas: IBrainArea[]): void {
@@ -173,10 +152,6 @@ export class NdbConstants {
         this._neuronStructureMap.set(pair.id, pair);
 
         return pair;
-    }
-
-    private loadCompartmentMeshSets() {
-        this._compartmentMeshSets.push(new CompartmentMeshSet(ViewerMeshVersion.AibsCcf));
     }
 
     private loadQueryOperators(queryOperators: IQueryOperator[]) {

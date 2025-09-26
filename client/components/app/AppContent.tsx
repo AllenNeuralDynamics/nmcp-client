@@ -1,16 +1,20 @@
 import * as React from "react";
 import {observer} from "mobx-react-lite";
 
-import {useStore} from "./App";
 import {Content} from "../page/Content";
 import {AppTomography} from "./AppTomography";
+import {useContext} from "react";
+import {ConstantsContext} from "./AppConstants";
+import {useSystemConfiguration} from "../../hooks/useSystemConfiguration";
 
 export const AppContent = observer(() => {
-    const {SystemConfiguration, Constants} = useStore();
+    const Constants = useContext(ConstantsContext);
+
+    const systemConfiguration = useSystemConfiguration();
 
     return (
         <AppTomography>
-            <Content constants={Constants} systemVersion={SystemConfiguration.systemVersion} exportLimit={SystemConfiguration.exportLimit}/>
+            <Content constants={Constants} systemVersion={systemConfiguration.systemVersion} exportLimit={systemConfiguration.exportLimit}/>
         </AppTomography>
     );
 });

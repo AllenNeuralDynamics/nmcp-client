@@ -6,8 +6,9 @@ import {SketchPicker} from 'react-color';
 import {NEURON_VIEW_MODES, NeuronViewMode} from "../../viewmodel/neuronViewMode";
 import {NeuronViewModel} from "../../viewmodel/neuronViewModel";
 import {ChangeAllStructureDisplayDialog} from "./ChangeAllStructureDisplayDialog";
-import {useViewModel} from "../app/App";
 import {ConsensusStatus} from "../../models/consensusStatus";
+import {TomographyViewModel} from "../../store/viewModel/tomographyViewModel";
+import {useTomography} from "../../hooks/useTomography";
 
 type position = "initial" | "inherit" | "unset" | "relative" | "absolute" | "fixed" | "static" | "sticky";
 type zIndex = number | "initial" | "inherit" | "unset" | "auto";
@@ -25,7 +26,7 @@ interface IOutputTableRowProps {
 }
 
 export const OutputTableRow = observer((props: IOutputTableRowProps) => {
-    const {Tomography} = useViewModel();
+    const Tomography = new TomographyViewModel(useTomography());
 
     const v = props.neuronViewModel;
 

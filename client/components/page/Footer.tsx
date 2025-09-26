@@ -2,16 +2,11 @@ import * as React from "react";
 import {useContext} from "react";
 
 import {ConstantsContext} from "../app/AppConstants";
-import {useLoadSystemConfiguration} from "../../hooks/useLoadSystemConfiguration";
-import {useStore} from "../app/App";
 import {Card, Popup} from "semantic-ui-react";
-import {formatHortaLocation} from "../../models/neuron";
 import {toast} from "react-toastify";
 
 export const Footer = () => {
-    const constants = useContext(ConstantsContext)
-
-    const {SystemConfiguration} = useStore();
+    const constants = useContext(ConstantsContext);
 
     let totalMessage = "There are no reconstructions available";
 
