@@ -2,6 +2,7 @@ import {IUser} from "./user";
 import {INeuron} from "./neuron";
 import {ISwcTracing} from "./swcTracing";
 import {Precomputed} from "./precomputed";
+import {QualityCheck} from "./qualityCheck";
 
 export interface IReconstruction {
     id: string;
@@ -12,7 +13,10 @@ export interface IReconstruction {
     lengthMillimeters: number;
     startedAt: Date;
     completedAt: Date;
+    qualityCheckAt: Date;
     qualityCheckStatus: number;
+    qualityCheckVersion: string;
+    qualityCheck: QualityCheck;
     annotatorId: string;
     annotator: IUser;
     proofreaderId: string;

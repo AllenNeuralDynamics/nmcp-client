@@ -2,6 +2,7 @@ import gql from "graphql-tag";
 import {IReconstruction} from "../models/reconstruction";
 import {INeuron} from "../models/neuron";
 import {QualityCheckStatus} from "../models/qualityCheckStatus";
+import {QualityCheck} from "../models/qualityCheck";
 
 export const ReconstructionFieldsFragment = gql`fragment ReconstructionFields on Reconstruction {
     id
@@ -12,7 +13,21 @@ export const ReconstructionFieldsFragment = gql`fragment ReconstructionFields on
     lengthMillimeters
     startedAt
     completedAt
+    qualityCheckAt
     qualityCheckStatus
+    qualityCheckVersion
+    qualityCheck {
+        warnings {
+            testName
+            testDescription
+            affectedNodes
+        }
+        errors {
+            testName
+            testDescription
+            affectedNodes
+        }
+    }
     annotatorId
     annotator {
         id
@@ -366,6 +381,19 @@ export const QUALITY_CHECK_MUTATION = gql`mutation QualityCheck($id: String!) {
     requestQualityCheck(id: $id) {
         id
         qualityCheckStatus
+        qualityCheck {
+            warnings {
+                testName
+                testDescription
+                affectedNodes
+            }
+            errors {
+                testName
+                testDescription
+                affectedNodes
+            }
+        }
+        qualityCheckAt
         error {
             kind
             message
@@ -381,6 +409,8 @@ export type QualityCheckResponse = {
     requestQualityCheck: {
         id: string,
         qualityCheckStatus: QualityCheckStatus,
+        qualityCheck: QualityCheck;
+        qualityCheckAt: Date;
         error: ErrorOutput
     };
 }

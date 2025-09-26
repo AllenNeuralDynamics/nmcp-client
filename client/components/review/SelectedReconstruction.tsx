@@ -25,6 +25,7 @@ import {
     UpdateReconstructionVariables
 } from "../../graphql/reconstruction";
 import {toastCreateError, toastUpdateSuccess} from "../editors/Toasts";
+import {QualityCheck} from "./QualityCheck";
 
 export type SelectedReconstructionProps = {
     reconstruction: IReconstruction;
@@ -91,11 +92,19 @@ export const SelectedReconstruction: React.FC<SelectedReconstructionProps> = ({r
     const dendriteIcon = reconstruction.dendrite ? <Icon name="check" color="green"/> :
         <Icon name="attention" color="red"/>
 
+    const quality = reconstruction.qualityCheck ? <QualityCheck key={reconstruction.id} reconstruction={reconstruction}/> : null;
+
     return (
         <Grid fluid="true">
+            <Grid.Row>
+                <Grid.Column width={16}>
+                    {quality}
+                </Grid.Column>
+            </Grid.Row>
             <Grid.Row style={{paddingBottom: 10}}>
                 <Grid.Column width={8}>
-                    <CreateTracing reconstruction={reconstruction} elementName={`create-view-container-${nameModifier.toLowerCase()}`} mutation={mutation} refetchQueries={refetchQueries}/>
+                    <CreateTracing reconstruction={reconstruction} elementName={`create-view-container-${nameModifier.toLowerCase()}`} mutation={mutation}
+                                   refetchQueries={refetchQueries}/>
                 </Grid.Column>
                 <Grid.Column width={8}>
                     <Segment.Group>
@@ -140,7 +149,9 @@ export const SelectedReconstruction: React.FC<SelectedReconstructionProps> = ({r
 }
 
 
-const NoSelectedReconstruction = ({nameModifier = ""}) => {
+const NoSelectedReconstruction = ({
+                                      nameModifier = ""
+                                  }) => {
     return (
         <Segment>
             <h5><Icon name="info circle"/>Select a reconstruction from the table to review and upload {nameModifier.toLowerCase()}reconstruction
