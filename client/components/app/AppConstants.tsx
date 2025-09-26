@@ -33,7 +33,9 @@ export const AppConstants = observer((props: any) => {
         );
     }
 
+    console.log("loading NdbConstants");
     NdbConstants.DefaultConstants.load(data!);
+    console.log("NdbConstants loaded");
 
     return (
         <ConstantsContext.Provider value={NdbConstants.DefaultConstants}>

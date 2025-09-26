@@ -1,12 +1,13 @@
 import {debounce} from "lodash-es";
+
 import {makeMinimalViewer} from "neuroglancer/unstable/ui/minimal_viewer.js";
 import {getDefaultRenderedDataPanelBindings, setDefaultInputEventBindings} from "neuroglancer/unstable/ui/default_input_event_bindings.js";
 import {disableWheel} from "neuroglancer/unstable/ui/disable_default_actions.js";
 import {registerEventListener} from "neuroglancer/unstable/util/disposable.js";
+
+import {NEURON_VIEW_MODE_ALL, NEURON_VIEW_MODE_AXON, NEURON_VIEW_MODE_DENDRITE} from "../../viewmodel/neuronViewMode";
 import {UserPreferences} from "../../util/userPreferences";
 import {NeuronViewModel} from "../../viewmodel/neuronViewModel";
-import {getSegmentColorMap} from "../../util/colors";
-import {NEURON_VIEW_MODE_ALL, NEURON_VIEW_MODE_AXON, NEURON_VIEW_MODE_DENDRITE} from "../../viewmodel/neuronViewMode";
 import {ITracingNode} from "../../models/tracingNode";
 
 // TODO: env var
@@ -54,12 +55,14 @@ export class NeuroglancerProxy {
     private _somaModelMap = new Map<string, NeuronViewModel>();
     private _somaNodeMap = new Map<string, ITracingNode>();
 
+    private _segmentColors = new Map<string, string>();
+
     public static SearchNeuroglancer?: NeuroglancerProxy = null;
 
     private static _cachedQueryParamsState: any = null;
 
-    public static configureCandidateNeuroglancer(id: string, state: any, annotations: any, selectionDelegate: CandidateSelectionDelegate): NeuroglancerProxy {
-        const [proxy, target] = NeuroglancerProxy.createCommon(id);
+    public static configureCandidateNeuroglancer(id: string, state: any, annotations: any, selectionDelegate: CandidateSelectionDelegate, segmentColors: Map<string, string>): NeuroglancerProxy {
+        const [proxy, target] = NeuroglancerProxy.createCommon(id, segmentColors);
 
         registerEventListener(target, "click", (e: Event) => {
             if (proxy._viewer && selectionDelegate) {
@@ -74,7 +77,7 @@ export class NeuroglancerProxy {
         const ccf_layer = defaultCandidateState.layers.find(s => s.name == "CCF")
 
         if (ccf_layer) {
-            ccf_layer["segmentColors"] = getSegmentColorMap()
+            ccf_layer["segmentColors"] = proxy._segmentColors;
         }
 
         disableWheel();
@@ -106,11 +109,11 @@ export class NeuroglancerProxy {
         return proxy;
     }
 
-    public static configureSearchNeuroglancer(id: string, state: any, neuronSelectionDelegate: NeuronSelectionDelegate, somaSelectionDelegate: SomaSelectionDelegate): NeuroglancerProxy {
+    public static configureSearchNeuroglancer(id: string, state: any, neuronSelectionDelegate: NeuronSelectionDelegate, somaSelectionDelegate: SomaSelectionDelegate, segmentColors: Map<string, string>): NeuroglancerProxy {
         const map = getDefaultRenderedDataPanelBindings();
         map.set("at:wheel", {action: "zoom-via-wheel", originalEventIdentifier: "wheel", preventDefault: true});
 
-        const [proxy, target] = NeuroglancerProxy.createCommon(id);
+        const [proxy, target] = NeuroglancerProxy.createCommon(id, segmentColors);
 
         if (neuronSelectionDelegate) {
             registerEventListener(target, "click", (e: Event) => {
@@ -145,7 +148,7 @@ export class NeuroglancerProxy {
         const ccf_layer = defaultSearchState.layers.find(s => s.name == "CCF")
 
         if (ccf_layer) {
-            ccf_layer["segmentColors"] = getSegmentColorMap()
+            ccf_layer["segmentColors"] = proxy._segmentColors;
         }
 
         disableWheel();
@@ -229,8 +232,10 @@ export class NeuroglancerProxy {
         }
     }
 
-    private static createCommon(id: string): [NeuroglancerProxy, HTMLElement] {
+    private static createCommon(id: string, segmentColors: Map<string, string>): [NeuroglancerProxy, HTMLElement] {
         const proxy = new NeuroglancerProxy()
+
+        proxy._segmentColors = segmentColors;
 
         const target = document.getElementById(id)
 

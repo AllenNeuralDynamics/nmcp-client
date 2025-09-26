@@ -5,6 +5,7 @@ import {createCandidateAnnotationLayer, INeuron} from "../../models/neuron";
 import {NeuroglancerProxy} from "../../viewer/neuroglancer/neuroglancer";
 import {Button} from "semantic-ui-react";
 import {UserPreferences} from "../../util/userPreferences";
+import {useStore} from "../app/App";
 
 export interface ITracingsTableProps {
     neurons: INeuron[];
@@ -14,12 +15,14 @@ export interface ITracingsTableProps {
 }
 
 export const CandidatesViewer = (props: ITracingsTableProps) => {
-    const [ngProxy, setNgProxy] = useState<NeuroglancerProxy>(null)
+    const [ngProxy, setNgProxy] = useState<NeuroglancerProxy>(null);
+
+    const {Constants} = useStore();
 
     useEffect(() => {
         const annotations = createCandidateAnnotationLayer(props.neurons, props.selectedId);
 
-        const proxy = NeuroglancerProxy.configureCandidateNeuroglancer("neuroglancer-container", UserPreferences.Instance.candidateViewerState, annotations, selectNeuron);
+        const proxy = NeuroglancerProxy.configureCandidateNeuroglancer("neuroglancer-container", UserPreferences.Instance.candidateViewerState, annotations, selectNeuron, Constants.BrainStructureColorMap);
 
         setNgProxy(proxy);
 

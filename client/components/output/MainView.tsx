@@ -8,7 +8,7 @@ import "../../util/override.css";
 import {INeuron} from "../../models/neuron";
 import {TracingViewModel} from "../../viewmodel/tracingViewModel";
 import {NeuronViewModel} from "../../viewmodel/neuronViewModel";
-import {getNeuronColorTable, jet} from "../../util/colors";
+import {jet} from "../../util/colors";
 import {NEURON_VIEW_MODE_SOMA, NeuronViewMode} from "../../viewmodel/neuronViewMode";
 import {TracingStructure, TracingStructures} from "../../models/tracingStructure";
 import {BrainCompartmentViewModel} from "../../viewmodel/brainCompartmentViewModel";

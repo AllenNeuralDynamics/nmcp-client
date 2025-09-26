@@ -1,38 +1,3 @@
-import {NdbConstants} from "../models/constants";
-import {SegmentColorHash} from "neuroglancer/unstable/segment_color.js";
-import {Uint64} from "neuroglancer/unstable/util/uint64.js";
-
-let colorMap = null;
-
-export function getSegmentColorMap() {
-    if (colorMap == null) {
-        colorMap = {};
-
-        NdbConstants.DefaultConstants.BrainAreas.map(b => {
-            if (b.geometryEnable) {
-                colorMap[b.structureId.toString()] = "#" + b.geometryColor;
-            }
-        });
-    }
-
-    return colorMap;
-}
-
-let neuronColorTable = null;
-
-export function getNeuronColorTable() {
-    if (neuronColorTable == null) {
-        neuronColorTable = [];
-        const segmentHash = new SegmentColorHash(0);
-
-        for (let idx = 0; idx < 256; idx++) {
-            neuronColorTable.push(segmentHash.computeCssColor(Uint64.random()))
-        }
-    }
-
-    return neuronColorTable;
-}
-
 export const jet = [
     "#0050FF",
     "#FF0000",

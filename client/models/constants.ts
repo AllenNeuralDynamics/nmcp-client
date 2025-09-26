@@ -15,14 +15,15 @@ export class NdbConstants {
     private _brainAreaIdMap = new Map<string, IBrainArea>();
     private _brainAreaStructureIdMap = new Map<number, IBrainArea>();
 
+    private _compartmentMeshSets: CompartmentMeshSet[] = [];
+    private _brainStructureColorMap: Map<string, string> = new Map();
+
     private _structureIdentifierMap = new Map<string, IStructureIdentifier>();
 
     private _tracingStructures: ITracingStructure[] = [];
 
     private _NeuronStructures: NeuronalStructure[] = [];
     private _neuronStructureMap = new Map<string, NeuronalStructure>();
-
-    private _compartmentMeshSets: CompartmentMeshSet[] = [];
 
     private _apiVersion: string = "";
 
@@ -94,6 +95,10 @@ export class NdbConstants {
         return this._compartmentMeshSets;
     }
 
+    public get BrainStructureColorMap(): Map<string, string> {
+        return this._brainStructureColorMap;
+    }
+
     public get TracingStructures(): ITracingStructure[] {
         return this._tracingStructures;
     }
@@ -135,6 +140,12 @@ export class NdbConstants {
             }
 
             return a.depth - b.depth;
+        });
+
+        this._BrainAreas.forEach(b => {
+            if (b.geometryEnable) {
+                this._brainAreaStructureIdMap[b.structureId.toString()] = "#" + b.geometryColor;
+            }
         });
     }
 
