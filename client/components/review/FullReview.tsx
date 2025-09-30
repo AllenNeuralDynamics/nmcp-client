@@ -7,7 +7,7 @@ import {IReconstruction} from "../../models/reconstruction";
 import {FullReviewTable} from "./FullReviewTable";
 import {SelectedReconstruction} from "./SelectedReconstruction";
 import {REVIEWABLE_ANNOTATIONS_QUERY, ReviewableResponse, ReviewableVariables} from "../../graphql/reconstruction";
-import {PaginationHeader} from "../editors/PaginationHeader";
+import {PaginationHeader} from "../common/PaginationHeader";
 import {SAMPLES_QUERY, SamplesQueryResponse} from "../../graphql/sample";
 import {UPLOAD_TRACING_MUTATION} from "../../graphql/tracings";
 

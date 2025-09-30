@@ -1,5 +1,5 @@
 import {PreferencesManager} from "./preferencesManager";
-import {UIQueryPredicate} from "../models/uiQueryPredicate";
+import {UIQueryPredicate} from "../viewmodel/uiQueryPredicate";
 
 const SamplePageOffset = "sample.page.offset";
 const SamplePageLimit = "sample.page.limit";
@@ -23,7 +23,6 @@ const RootCompartmentColor = "viewer.rootCompartmentColor";
 const ViewPresets = "viewer.viewPresets";
 const HideCursorInViewer = "viewer.hideCursorInViewer";
 const HideCursorOnPage = "viewer.hideCursorOnPage";
-const ViewerStylePreference = "viewer.viewerStyle";
 const AdminPageSelectedTab = "admin.selectedTab";
 const ShowReferenceIds = "selection.showReferenceIds";
 const ReconstructionNeuronsUserOnly = "reconstruct.neurons.userOnly";

@@ -4,7 +4,6 @@ import {Icon, Label, MenuItem, Tab} from "semantic-ui-react"
 import {UserPreferences} from "../../util/userPreferences";
 import {Users} from "./Users";
 import {Collections} from "./Collections";
-import {Manage} from "./Manage";
 import {Published} from "./published/Published";
 import {Issues} from "./Issues";
 import {NotificationContext} from "../app/NotificationsApp";
@@ -29,15 +28,15 @@ const panes = [
                 Issues<Label>0</Label>
             </MenuItem>),
         render: () => <Issues/>
-    },
+    } /*,
     {
         menuItem: {key: "manage", icon: "settings", content: "Manage"},
         render: () => <Manage/>
-    }
+    }*/
 ];
 
 export const Admin = () => {
-    const [state, setState] = useState<number>(UserPreferences.Instance.AdminPageSelectedTab);
+    const [state, setState] = useState<number>(Math.min(panes.length - 1, UserPreferences.Instance.AdminPageSelectedTab));
 
     const notifications = useContext(NotificationContext);
 

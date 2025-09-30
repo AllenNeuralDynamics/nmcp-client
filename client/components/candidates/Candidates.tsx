@@ -13,15 +13,15 @@ import {
 import {Title, Select, NumberInput, Group as MGroup} from "@mantine/core";
 
 import {CANDIDATE_NEURONS_QUERY, CandidateNeuronsResponse, NeuronsQueryVariables} from "../../graphql/candidates";
-import {PaginationHeader} from "../editors/PaginationHeader";
+import {PaginationHeader} from "../common/PaginationHeader";
 import {CandidateTracingsTable} from "./CandidatesTable";
 import {CandidatesViewer} from "./CandidateViewer";
 import {IBrainArea} from "../../models/brainArea";
-import {BrainAreaMultiSelect} from "../editors/BrainAreaMultiSelect";
+import {BrainAreaMultiSelect} from "../common/BrainAreaMultiSelect";
 import {ConstantsContext} from "../app/AppConstants";
 import {CandidateActionPanel} from "./CandidateActionPanel";
 import {SAMPLES_QUERY, SamplesQueryResponse} from "../../graphql/sample";
-import {NeuronTagFilter} from "../editors/NeuronTagFilter";
+import {NeuronTagFilter} from "../common/NeuronTagFilter";
 import {SomaProperties} from "../../models/neuron";
 
 function defaultSomaPropertyFilter() {

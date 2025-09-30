@@ -2,7 +2,7 @@ import React, {useContext, useState} from "react";
 import {useMutation, useQuery} from "@apollo/client";
 import {Checkbox, Dropdown, Header, List, Segment, Table, TableCell, TableRow} from "semantic-ui-react";
 
-import {PaginationHeader} from "../editors/PaginationHeader";
+import {PaginationHeader} from "../common/PaginationHeader";
 import {IUser} from "../../models/user";
 import {
     UPDATE_PERMISSIONS_MUTATION,

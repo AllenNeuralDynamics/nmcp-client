@@ -4,7 +4,7 @@ import {toast} from "react-toastify";
 
 import {displayNeuron, formatHortaLocation, INeuron} from "../../models/neuron";
 import {displayBrainArea} from "../../models/brainArea";
-import {AnnotatorList} from "../annotator/AnnotatorList";
+import {AnnotatorList} from "../common/AnnotatorList";
 
 export interface ICandidateRowProps {
     key: string

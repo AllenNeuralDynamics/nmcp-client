@@ -53,7 +53,7 @@ export class NeuroglancerProxy {
             }
         });
 
-        proxy._searchLayers = new SearchLayers(precomputedLocation);
+        proxy._searchLayers = new SearchLayers(`precomputed://${precomputedLocation}`);
 
         disableWheel();
 
@@ -93,7 +93,7 @@ export class NeuroglancerProxy {
 
         const [proxy, target] = NeuroglancerProxy.createCommon(id, segmentColors);
 
-        proxy._searchLayers = new SearchLayers(precomputedLocation);
+        proxy._searchLayers = new SearchLayers(`precomputed://${precomputedLocation}`);
 
         if (neuronSelectionDelegate) {
             registerEventListener(target, "click", (_: Event) => {
@@ -283,9 +283,9 @@ export class NeuroglancerProxy {
             });
         }
 
-        this.updateSearchReconstructionLayers(state, neurons.filter(n => n.CurrentViewMode == NEURON_VIEW_MODE_ALL), this._searchLayers.SearchReconstructionLayer, this._searchLayers.SearchReconstructionMirrorLayer);
-        this.updateSearchReconstructionLayers(state, neurons.filter(n => n.CurrentViewMode == NEURON_VIEW_MODE_AXON), this._searchLayers.SearchAxonLayer, this._searchLayers.SearchAxonMirrorLayer);
-        this.updateSearchReconstructionLayers(state, neurons.filter(n => n.CurrentViewMode == NEURON_VIEW_MODE_DENDRITE), this._searchLayers.SearchDendritesLayer, this._searchLayers.SearchDendritesMirrorLayer);
+        this.updateSearchReconstructionLayers(state, neurons.filter(n => n.viewMode == NEURON_VIEW_MODE_ALL), this._searchLayers.SearchReconstructionLayer, this._searchLayers.SearchReconstructionMirrorLayer);
+        this.updateSearchReconstructionLayers(state, neurons.filter(n => n.viewMode == NEURON_VIEW_MODE_AXON), this._searchLayers.SearchAxonLayer, this._searchLayers.SearchAxonMirrorLayer);
+        this.updateSearchReconstructionLayers(state, neurons.filter(n => n.viewMode == NEURON_VIEW_MODE_DENDRITE), this._searchLayers.SearchDendritesLayer, this._searchLayers.SearchDendritesMirrorLayer);
 
         this._viewer.state.reset();
         this._viewer.state.restoreState(state);

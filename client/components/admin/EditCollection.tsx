@@ -6,7 +6,7 @@ import {toast} from "react-toastify";
 
 import {ICollection} from "../../models/collection";
 import {CREATE_COLLECTION_MUTATION, MutateCollectionOutput, MutateCollectionVariables, UPDATE_COLLECTION_MUTATION} from "../../graphql/collections";
-import {toastCreateError, toastUpdateSuccess} from "../editors/Toasts";
+import {toastCreateError, toastUpdateSuccess} from "../common/Toasts";
 
 type EditCollectionProps = {
     collection?: ICollection;

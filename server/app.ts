@@ -12,7 +12,7 @@ import webpackDevServer from "webpack-dev-server";
 
 import Debug from "debug";
 
-const debug = Debug("ndb:search-client:app");
+const debug = Debug("nmcp:client:app");
 
 import {ServerConfiguration} from "./serverConfig.js";
 
@@ -32,7 +32,9 @@ const maintainBaseUrl = (req: { baseUrl: any; }) => req.baseUrl;
 if (process.env.NODE_ENV !== "production") {
     devServer();
 } else {
-    debug("configuring production express server");
+    debug("configuring production express server")
+
+    debug(`using precomputed root ${ServerConfiguration.precomputedLocation}`);
 
     const rootPath = path.resolve(path.join(__dirname, "public"));
 
@@ -82,6 +84,8 @@ if (process.env.NODE_ENV !== "production") {
 
 function devServer() {
     debug("configuring webpack dev server");
+
+    debug(`using precomputed root ${ServerConfiguration.precomputedLocation}`);
 
     // @ts-ignore
     const compiler = webpack(webpackConfig);

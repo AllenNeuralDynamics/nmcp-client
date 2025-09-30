@@ -7,11 +7,16 @@ import {Message} from "semantic-ui-react";
 import {NdbConstants} from "../../models/constants";
 import {CONSTANTS_QUERY, ConstantsQueryResponse} from "../../graphql/constants";
 import {AppLoading} from "./AppLoading";
+import {useAtlas} from "../../hooks/useAtlas";
+import {useQueryPredicates} from "../../hooks/useQueryPredicates";
 
 export const ConstantsContext = createContext<NdbConstants>(null);
 
 export const AppConstants = observer((props: any) => {
     const {data, error, loading} = useQuery<ConstantsQueryResponse>(CONSTANTS_QUERY);
+
+    const atlas = useAtlas();
+    const uiPredicates = useQueryPredicates();
 
     if (loading) {
         return <AppLoading message="initializing system data"/>;
@@ -28,6 +33,9 @@ export const AppConstants = observer((props: any) => {
     const constants = new NdbConstants();
 
     constants.load(data!);
+
+    uiPredicates.Constants = constants;
+    atlas.initialize(constants);
 
     return (
         <ConstantsContext.Provider value={constants}>

@@ -4,12 +4,11 @@ import {useQuery} from "@apollo/client";
 import {SAMPLES_QUERY, SamplesQueryResponse} from "../../graphql/sample";
 import {PEER_REVIEWABLE_ANNOTATIONS_QUERY, PeerReviewableVariables, PeerReviewableResponse} from "../../graphql/reconstruction";
 import {Checkbox, Dropdown, Header, Input, List, Segment} from "semantic-ui-react";
-import {PaginationHeader} from "../editors/PaginationHeader";
+import {PaginationHeader} from "../common/PaginationHeader";
 import {PeerReviewTable} from "./PeerReviewTable";
-import {NeuronTagFilter} from "../editors/NeuronTagFilter";
+import {NeuronTagFilter} from "../common/NeuronTagFilter";
 import {IReconstruction} from "../../models/reconstruction";
 import {SelectedReconstruction} from "./SelectedReconstruction";
-import {UPLOAD_TRACING_MUTATION} from "../../graphql/tracings";
 import {UPLOAD_UNREGISTERED_TRACING_MUTATION} from "../../graphql/unregisteredTracing";
 
 interface PeerReviewState {

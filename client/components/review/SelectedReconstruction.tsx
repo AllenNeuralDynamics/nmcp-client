@@ -24,7 +24,7 @@ import {
     UpdateReconstructionResponse,
     UpdateReconstructionVariables
 } from "../../graphql/reconstruction";
-import {toastCreateError, toastUpdateSuccess} from "../editors/Toasts";
+import {toastCreateError, toastUpdateSuccess} from "../common/Toasts";
 import {QualityCheck} from "./QualityCheck";
 
 export type SelectedReconstructionProps = {

@@ -1,22 +1,7 @@
-import {createContext, useContext, useEffect} from "react";
+import {createContext, useContext} from "react";
 
-import {UserPreferences} from "../util/userPreferences";
-import {INotificationListener} from "../util/preferencesManager";
+import {PreferencesViewModel} from "../viewmodel/preferencesViewModel";
 
-const preferences = createContext<UserPreferences>(UserPreferences.Instance);
+const preferencesContext = createContext(new PreferencesViewModel());
 
-export const usePreferences = (listener: INotificationListener = null): UserPreferences => {
-    const context = useContext(preferences);
-
-    if (listener != null) {
-        useEffect(() => {
-            context.addListener(listener);
-
-            return () => {
-                context.removeListener(listener);
-            }
-        }, []);
-    }
-
-    return context;
-};
+export const usePreferences = () => useContext(preferencesContext);

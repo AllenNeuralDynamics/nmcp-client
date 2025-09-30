@@ -1,4 +1,4 @@
-import {SystemConfiguration} from "../store/system/systemConfiguration";
+import {SystemConfiguration} from "../viewmodel/systemConfiguration";
 
 export const querySystemSettings = async (systemConfiguration: SystemConfiguration): Promise<void> => {
     const resp = await fetch('/system', {

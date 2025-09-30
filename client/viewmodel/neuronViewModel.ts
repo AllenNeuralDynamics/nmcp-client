@@ -3,41 +3,36 @@ import {
     NEURON_VIEW_MODE_ALL, NEURON_VIEW_MODE_AXON, NEURON_VIEW_MODE_DENDRITE, NEURON_VIEW_MODE_SOMA, NeuronViewMode
 } from "./neuronViewMode";
 import {TracingViewModel} from "./tracingViewModel";
-import {TracingStructure} from "../models/tracingStructure";
-import {IReconstruction} from "../models/reconstruction";
+import {TracingStructure, TracingStructures} from "../models/tracingStructure";
+import {makeObservable, observable} from "mobx";
 
 export class NeuronViewModel {
-    neuron: INeuron;
+    neuron: INeuron = null;
 
-    toggleViewMode: NeuronViewMode;
+    isSelected: boolean = true;
 
-    isSelected: boolean;
-    isInHighlightList: boolean;
+    baseColor: string = "#000000";
 
-    baseColor: string;
+    mirror: boolean = false;
 
-    mirror: boolean;
+    hasAxonTracing: boolean = false;
+    hasDendriteTracing: boolean = false;
 
-    hasAxonTracing: boolean;
-    hasDendriteTracing: boolean;
+    somaOnlyTracing: TracingViewModel = null;
 
-    somaOnlyTracing: TracingViewModel;
-    tracings: TracingViewModel[];
+    tracings: TracingViewModel[] = [];
 
-    private readonly reconstruction: IReconstruction = null;
+    viewMode: NeuronViewMode;
 
-    private viewMode: NeuronViewMode;
-    private requestedViewMode: NeuronViewMode | null;
+    private readonly reconstructionId: string = null;
+    private readonly skeletonId: number = null;
 
     public constructor(neuron: INeuron, color: string | null = null) {
         this.neuron = neuron;
 
         this.viewMode = NEURON_VIEW_MODE_ALL;
-        this.requestedViewMode = null;
-        this.toggleViewMode = NEURON_VIEW_MODE_ALL;
 
         this.isSelected = false;
-        this.isInHighlightList = false;
 
         this.baseColor = color || "#000000";
 
@@ -47,82 +42,80 @@ export class NeuronViewModel {
         this.hasDendriteTracing = false;
 
         this.somaOnlyTracing = null;
-        this.tracings = []
 
         if (this.neuron.reconstructions?.length > 0) {
-            this.reconstruction = this.neuron.reconstructions[0]
+            this.reconstructionId = this.neuron.reconstructions[0].id;
+            this.skeletonId = this.neuron.reconstructions[0].precomputed?.skeletonSegmentId;
         }
+
+        makeObservable(this, {
+            viewMode: observable,
+            isSelected: observable,
+            baseColor: observable,
+            mirror: observable
+        })
+
+        this.assignTracings();
     }
 
     public get Id() {
         return this.neuron.id;
     }
 
-    public get Reconstruction() {
-        return this.reconstruction;
+    public get ReconstructionId(): string {
+        return this.reconstructionId;
     }
 
-    public get RequestedViewMode() {
-        return this.requestedViewMode;
+    public get SkeletonSegmentId(): number {
+        return this.skeletonId;
     }
 
-    public get SkeletonSegmentId() {
-        return this.reconstruction?.precomputed?.skeletonSegmentId;
-    }
+    private assignTracings() {
+        if (!this.neuron) {
+            return;
+        }
 
-    public get ViewMode() {
-        return this.requestedViewMode || this.viewMode;
-    }
+        this.neuron.tracings.map(t => {
+            if (!t) {
+                return;
+            }
 
-    public get CurrentViewMode() {
-        return this.viewMode;
-    }
+            const model = new TracingViewModel(t.id, this);
 
-    public requestViewMode(mode: TracingStructure) {
-        switch (mode) {
-            case TracingStructure.all:
-                if (this.hasAxonTracing) {
-                    if (this.hasDendriteTracing) {
-                        this.requestedViewMode = NEURON_VIEW_MODE_ALL;
-                    } else {
-                        this.requestedViewMode = NEURON_VIEW_MODE_AXON;
-                    }
-                } else if (this.hasDendriteTracing) {
-                    this.requestedViewMode = NEURON_VIEW_MODE_DENDRITE;
-                } else {
-                    this.requestedViewMode = NEURON_VIEW_MODE_SOMA;
-                }
-                break;
-            case TracingStructure.axon:
-                if (!this.hasAxonTracing) {
-                    this.requestedViewMode = NEURON_VIEW_MODE_SOMA;
-                } else {
-                    this.requestedViewMode = NEURON_VIEW_MODE_AXON;
-                }
-                break;
-            case TracingStructure.dendrite:
-                if (!this.hasDendriteTracing) {
-                    this.requestedViewMode = NEURON_VIEW_MODE_SOMA;
-                } else {
-                    this.requestedViewMode = NEURON_VIEW_MODE_DENDRITE;
-                }
-                break;
-            case TracingStructure.soma:
-                // Can always grant immediately - it comes with the neuron data itself.
-                this.viewMode = NEURON_VIEW_MODE_SOMA;
-                this.requestedViewMode = null;
-                break;
+            model.soma = t.soma;
+            model.structure = t.tracingStructure;
+
+            this.tracings.push(model);
+
+            if (t.tracingStructure.value === TracingStructure.axon) {
+                this.hasAxonTracing = true;
+            }
+
+            if (t.tracingStructure.value === TracingStructure.dendrite) {
+                this.hasDendriteTracing = true;
+            }
+        });
+
+        if (this.tracings.length > 0) {
+            if (this.neuron.tracings[0]) {
+                const somaTracingModel = new TracingViewModel(this.neuron.id, this);
+
+                // Borrow soma data from one of the tracings.
+                somaTracingModel.soma = this.neuron.tracings[0].soma;
+
+                somaTracingModel.structure = TracingStructures.Soma;
+
+                this.somaOnlyTracing = somaTracingModel;
+            }
         }
     }
 
-    public completedViewModeRequest() {
-        if (this.requestedViewMode !== null) {
-            this.viewMode = this.requestedViewMode;
-            this.requestedViewMode = null;
-        }
-    }
-
-    public cancelRequestedViewMode() {
-        this.requestedViewMode = null;
+    public get State() {
+        return {
+            id: this.Id,
+            isSelected: this.isSelected,
+            baseColor: this.baseColor,
+            mirror: this.mirror
+        };
     }
 }

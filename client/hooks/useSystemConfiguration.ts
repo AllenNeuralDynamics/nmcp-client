@@ -1,9 +1,7 @@
-import * as React from "react";
+import {createContext, useContext} from "react";
 
-import {SystemConfiguration} from "../store/system/systemConfiguration";
+import {SystemConfiguration} from "../viewmodel/systemConfiguration";
 
-const systemConfiguration = React.createContext<SystemConfiguration>(new SystemConfiguration())
+const systemConfiguration = createContext<SystemConfiguration>(new SystemConfiguration())
 
-export const useSystemConfiguration = () => {
-    return React.useContext(systemConfiguration);
-};
+export const useSystemConfiguration = () => useContext(systemConfiguration);

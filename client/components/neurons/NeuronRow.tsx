@@ -9,10 +9,10 @@ import {ConsensusStatus, ConsensusStatusOptions, FindConsensusStatusOption} from
 import {formatHortaLocation, formatSomaLocation, INeuron, parseSomaLocation} from "../../models/neuron";
 import {displaySample} from "../../models/sample";
 import {IBrainArea} from "../../models/brainArea";
-import {toastCreateError, toastUpdateError} from "../editors/Toasts";
-import {BrainAreaDropdown} from "../editors/BrainAreaDropdown";
+import {toastCreateError, toastUpdateError} from "../common/Toasts";
+import {BrainAreaDropdown} from "../common/BrainAreaDropdown";
 import {UPDATE_NEURON_MUTATION, UpdateNeuronMutationData, UpdateNeuronMutationResponse, UpdateNeuronVariables} from "../../graphql/neuron";
-import {InputPopup} from "../editors/InputPopup";
+import {InputPopup} from "../common/InputPopup";
 
 interface INeuronRowProps {
     neuron: INeuron;

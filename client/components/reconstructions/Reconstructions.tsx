@@ -8,11 +8,11 @@ import {RECONSTRUCTIONS_QUERY, ReconstructionsResponse, ReconstructionVariables}
 import {displayNeuron} from "../../models/neuron";
 import {displayBrainArea} from "../../models/brainArea";
 import {IReconstruction} from "../../models/reconstruction";
-import {PaginationHeader} from "../editors/PaginationHeader";
+import {PaginationHeader} from "../common/PaginationHeader";
 import {RequestReviewDialog} from "./RequestReviewDialog";
 import {UserContext} from "../app/UserApp";
 import {ReconstructionStatus, reconstructionStatusColor, reconstructionStatusString} from "../../models/reconstructionStatus";
-import {AnnotatorList} from "../annotator/AnnotatorList";
+import {AnnotatorList} from "../common/AnnotatorList";
 import {ReconstructionActionPanel} from "./ReconstructionActionPanel";
 import {SAMPLES_QUERY, SamplesQueryResponse} from "../../graphql/sample";
 import {UserPreferences} from "../../util/userPreferences";

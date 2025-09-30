@@ -10,8 +10,8 @@ import {AppConstants} from "./AppConstants";
 import {loginRequest} from "../../authConfig";
 import {UserApp} from "./UserApp";
 import {AppRouter} from "./AppRouter";
-import {PageHeader} from "../page/PageHeader";
-import {SettingsDialogContainer} from "../page/SettingsDialog";
+import {PageHeader} from "./PageHeader";
+import {SettingsDialogContainer} from "../search/SettingsDialog";
 import {AppSystemConfiguration} from "./AppSystemConfiguration";
 import {NotificationsApp} from "./NotificationsApp";
 

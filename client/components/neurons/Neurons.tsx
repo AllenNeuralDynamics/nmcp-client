@@ -4,8 +4,8 @@ import {useMutation, useQuery} from "@apollo/client";
 import {Button, Dropdown, Segment, Confirm, Table, Header, List, Checkbox} from "semantic-ui-react";
 import {toast} from "react-toastify";
 
-import {toastCreateError, toastDeleteError} from "../editors/Toasts";
-import {PaginationHeader} from "../editors/PaginationHeader";
+import {toastCreateError, toastDeleteError} from "../common/Toasts";
+import {PaginationHeader} from "../common/PaginationHeader";
 import {
     CREATE_NEURON_MUTATION,
     CreateNeuronMutationData, CreateNeuronMutationResponse, CreateNeuronVariables,

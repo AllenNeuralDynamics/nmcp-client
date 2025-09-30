@@ -1,7 +1,7 @@
 import gql from "graphql-tag";
 
 import {INeuron} from "../models/neuron";
-import {IPositionInput} from "../models/queryFilter";
+import {IPositionInput} from "../viewmodel/queryFilter";
 import {PredicateTypeValue} from "../models/brainAreaFilterType";
 import {ReconstructionFieldsFragment} from "./reconstruction";
 import {ITracingNode} from "../models/tracingNode";

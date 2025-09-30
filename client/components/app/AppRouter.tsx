@@ -4,7 +4,7 @@ import {Route, Routes} from "react-router-dom";
 import {AppContent} from "./AppContent";
 import {Candidates} from "../candidates/Candidates";
 import {Reconstructions} from "../reconstructions/Reconstructions";
-import {Samples} from "../samples/Samples";
+import {Samples} from "../neurons/samples/Samples";
 import {Admin} from "../admin/Admin";
 import {Review} from "../review/Review";
 
