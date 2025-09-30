@@ -8,11 +8,10 @@ export interface IServiceOptions {
     port: number;
     systemEndpoint: string;
     graphQLService: ServiceLocation;
-    tracingsService: ServiceLocation;
     staticService: ServiceLocation;
     exportService: ServiceLocation;
-    downloadService: ServiceLocation;
     exportLimit: number;
+    precomputedLocation: string;
 }
 
 const configuration: IServiceOptions = {
@@ -22,11 +21,6 @@ const configuration: IServiceOptions = {
         hostname: "nmcp-api",
         port: 5000,
         endpoint: "/graphql"
-    },
-    tracingsService: {
-        hostname: "nmcp-api",
-        port: 5000,
-        endpoint: "/tracings",
     },
     staticService: {
         hostname: "nmcp-static",
@@ -38,12 +32,8 @@ const configuration: IServiceOptions = {
         port: 5000,
         endpoint: "/export"
     },
-    downloadService: {
-        hostname: "nmcp-export",
-        port: 5000,
-        endpoint: "/download"
-    },
-    exportLimit: 20
+    exportLimit: 20,
+    precomputedLocation: ""
 };
 
 function loadServerConfiguration() {
@@ -54,19 +44,15 @@ function loadServerConfiguration() {
     options.graphQLService.hostname = process.env.NMCP_API_HOST || options.graphQLService.hostname;
     options.graphQLService.port = parseInt(process.env.NMCP_API_PORT) || options.graphQLService.port;
 
-    options.tracingsService.hostname = process.env.NMCP_API_HOST || options.tracingsService.hostname;
-    options.tracingsService.port = parseInt(process.env.NMCP_API_PORT) || options.tracingsService.port;
-
     options.staticService.hostname = process.env.STATIC_API_HOST || options.staticService.hostname;
     options.staticService.port = parseInt(process.env.STATIC_API_PORT) || options.staticService.port;
 
     options.exportService.hostname = process.env.EXPORT_API_HOST || options.exportService.hostname;
     options.exportService.port = parseInt(process.env.EXPORT_API_PORT) || options.exportService.port;
 
-    options.downloadService.hostname = process.env.EXPORT_API_HOST || options.exportService.hostname;
-    options.downloadService.port = parseInt(process.env.EXPORT_API_PORT) || options.exportService.port;
-
     options.exportLimit = parseInt(process.env.NMCP_CLIENT_EXPORT_LIMIT) || options.exportLimit;
+
+    options.precomputedLocation = process.env.NMCP_PRECOMPUTED_OUTPUT || options.precomputedLocation;
 
     return options;
 }

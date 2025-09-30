@@ -13,7 +13,7 @@ import {UIQueryPredicate, UIQueryPredicates} from "../../models/uiQueryPredicate
 import {BRAIN_AREA_FILTER_TYPE_SPHERE} from "../../models/brainAreaFilterType";
 import {ViewerMeshVersion} from "../../models/compartmentMeshSet";
 import {UserPreferences} from "../../util/userPreferences";
-import {NeuroglancerProxy} from "../../viewer/neuroglancer/neuroglancer";
+import {NeuroglancerProxy} from "../../viewer/neuroglancer";
 
 interface IPageProps {
     constants: NdbConstants;

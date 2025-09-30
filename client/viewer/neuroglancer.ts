@@ -5,13 +5,11 @@ import {getDefaultRenderedDataPanelBindings, setDefaultInputEventBindings} from 
 import {disableWheel} from "neuroglancer/unstable/ui/disable_default_actions.js";
 import {registerEventListener} from "neuroglancer/unstable/util/disposable.js";
 
-import {NEURON_VIEW_MODE_ALL, NEURON_VIEW_MODE_AXON, NEURON_VIEW_MODE_DENDRITE} from "../../viewmodel/neuronViewMode";
-import {UserPreferences} from "../../util/userPreferences";
-import {NeuronViewModel} from "../../viewmodel/neuronViewModel";
-import {ITracingNode} from "../../models/tracingNode";
-
-// TODO: env var
-const PRECOMPUTED_URL = "precomputed://s3://aind-neuron-morphology-community-portal-dev-u5u0i5/ngv01";
+import {NEURON_VIEW_MODE_ALL, NEURON_VIEW_MODE_AXON, NEURON_VIEW_MODE_DENDRITE} from "../viewmodel/neuronViewMode";
+import {UserPreferences} from "../util/userPreferences";
+import {NeuronViewModel} from "../viewmodel/neuronViewModel";
+import {ITracingNode} from "../models/tracingNode";
+import {SearchLayer, SearchLayers} from "./layerDefinitions";
 
 export type NeuronSelectionDelegate = {
     (neuron: NeuronViewModel, position: number[]): void;
@@ -25,27 +23,6 @@ export type CandidateSelectionDelegate = {
     (annotationId: string): void;
 }
 
-type SearchLayer = {
-    name: string;
-    index: number;
-    source: string;
-    isMirror: boolean;
-}
-
-const CandidateReconstructionLayer: SearchLayer = {name: "Pending Reconstructions", index: 2, isMirror: false, source: PRECOMPUTED_URL};
-
-const SearchCcfLayer: SearchLayer = {name: "CCF", index: 0, isMirror: false, source: "precomputed://gs://allen_neuroglancer_ccf/ccf_test1"};
-const SearchSomaAnnotationLayer: SearchLayer = {name: "Soma", index: 1, isMirror: false, source: "local://annotations"};
-const SearchReconstructionLayer: SearchLayer = {name: "Reconstruction", index: 2, isMirror: false, source: `${PRECOMPUTED_URL}/full`};
-const SearchReconstructionMirrorLayer: SearchLayer = {name: "Reconstruction Mirror", index: 3, isMirror: true, source: `${PRECOMPUTED_URL}/full`};
-const SearchAxonLayer: SearchLayer = {name: "Axon", index: 4, isMirror: false, source: `${PRECOMPUTED_URL}/axon`};
-const SearchAxonMirrorLayer: SearchLayer = {name: "Axon Mirror", index: 5, isMirror: true, source: `${PRECOMPUTED_URL}/axon`};
-const SearchDendritesLayer: SearchLayer = {name: "Dendrite", index: 6, isMirror: false, source: `${PRECOMPUTED_URL}/dendrite`};
-const SearchDendritesMirrorLayer: SearchLayer = {name: "Dendrite Mirror", index: 7, isMirror: true, source: `${PRECOMPUTED_URL}/dendrite`};
-
-const SearchSelectionLayers = [SearchReconstructionLayer, SearchReconstructionMirrorLayer, SearchAxonLayer, SearchAxonMirrorLayer, SearchDendritesLayer, SearchDendritesMirrorLayer];
-
-
 export class NeuroglancerProxy {
     private _viewer: any = null;
     private _changeHandler: any = null;
@@ -57,14 +34,16 @@ export class NeuroglancerProxy {
 
     private _segmentColors = new Map<string, string>();
 
+    private _searchLayers: SearchLayers;
+
     public static SearchNeuroglancer?: NeuroglancerProxy = null;
 
     private static _cachedQueryParamsState: any = null;
 
-    public static configureCandidateNeuroglancer(id: string, state: any, annotations: any, selectionDelegate: CandidateSelectionDelegate, segmentColors: Map<string, string>): NeuroglancerProxy {
+    public static configureCandidateNeuroglancer(id: string, state: any, annotations: any, selectionDelegate: CandidateSelectionDelegate, precomputedLocation: string, segmentColors: Map<string, string>): NeuroglancerProxy {
         const [proxy, target] = NeuroglancerProxy.createCommon(id, segmentColors);
 
-        registerEventListener(target, "click", (e: Event) => {
+        registerEventListener(target, "click", (_: Event) => {
             if (proxy._viewer && selectionDelegate) {
                 const selected = proxy._viewer.layerSelectedValues.toJSON();
 
@@ -74,11 +53,7 @@ export class NeuroglancerProxy {
             }
         });
 
-        const ccf_layer = defaultCandidateState.layers.find(s => s.name == "CCF")
-
-        if (ccf_layer) {
-            ccf_layer["segmentColors"] = proxy._segmentColors;
-        }
+        proxy._searchLayers = new SearchLayers(precomputedLocation);
 
         disableWheel();
 
@@ -86,12 +61,14 @@ export class NeuroglancerProxy {
 
         setDefaultInputEventBindings(proxy._viewer.inputEventBindings);
 
-        let s = state || defaultCandidateState;
+        let s = state || defaultCandidateState(proxy._searchLayers, proxy._segmentColors);
+
+        // proxy.applyCcfSegmentColors(s, proxy._searchLayers.CandidateCcfLayer, proxy._segmentColors);
 
         if (s?.layers?.length > 0) {
             s.layers[0].annotations = annotations;
         } else {
-            s = defaultCandidateState;
+            s = defaultCandidateState(proxy._searchLayers);
             s.layers[0].annotations = annotations;
         }
 
@@ -104,19 +81,22 @@ export class NeuroglancerProxy {
 
         proxy._changeHandler = proxy._viewer.state.changed.add(throttledSetUrlHash);
 
-        proxy._defaultState = defaultCandidateState;
+        proxy._defaultState = defaultCandidateState(proxy._searchLayers, proxy._segmentColors);
 
         return proxy;
     }
 
-    public static configureSearchNeuroglancer(id: string, state: any, neuronSelectionDelegate: NeuronSelectionDelegate, somaSelectionDelegate: SomaSelectionDelegate, segmentColors: Map<string, string>): NeuroglancerProxy {
+    public static configureSearchNeuroglancer(id: string, state: any, neuronSelectionDelegate: NeuronSelectionDelegate, somaSelectionDelegate: SomaSelectionDelegate, precomputedLocation: string, segmentColors: Map<string, string>): NeuroglancerProxy {
         const map = getDefaultRenderedDataPanelBindings();
+
         map.set("at:wheel", {action: "zoom-via-wheel", originalEventIdentifier: "wheel", preventDefault: true});
 
         const [proxy, target] = NeuroglancerProxy.createCommon(id, segmentColors);
 
+        proxy._searchLayers = new SearchLayers(precomputedLocation);
+
         if (neuronSelectionDelegate) {
-            registerEventListener(target, "click", (e: Event) => {
+            registerEventListener(target, "click", (_: Event) => {
                 if (proxy._viewer) {
                     const selected = proxy._viewer.layerSelectedValues.toJSON();
 
@@ -126,7 +106,7 @@ export class NeuroglancerProxy {
 
                     let found = false;
 
-                    SearchSelectionLayers.forEach(layer => {
+                    proxy._searchLayers.SearchSelectionLayers.forEach(layer => {
                         if (!found && selected[layer.name] && selected[layer.name]["value"] && selected[layer.name]["value"]["key"]) {
                             try {
                                 const id = parseInt(selected[layer.name]["value"]["key"]);
@@ -137,18 +117,12 @@ export class NeuroglancerProxy {
                             }
                         }
                     });
-                    if (!found && selected[SearchSomaAnnotationLayer.name] && selected[SearchSomaAnnotationLayer.name]["annotationId"]) {
-                        const somaId = selected[SearchSomaAnnotationLayer.name]["annotationId"];
+                    if (!found && selected[proxy._searchLayers.SearchSomaAnnotationLayer.name] && selected[proxy._searchLayers.SearchSomaAnnotationLayer.name]["annotationId"]) {
+                        const somaId = selected[proxy._searchLayers.SearchSomaAnnotationLayer.name]["annotationId"];
                         somaSelectionDelegate(proxy._somaNodeMap.get(somaId), proxy._somaModelMap.get(somaId));
                     }
                 }
             });
-        }
-
-        const ccf_layer = defaultSearchState.layers.find(s => s.name == "CCF")
-
-        if (ccf_layer) {
-            ccf_layer["segmentColors"] = proxy._segmentColors;
         }
 
         disableWheel();
@@ -158,31 +132,33 @@ export class NeuroglancerProxy {
         setDefaultInputEventBindings(proxy._viewer.inputEventBindings);
 
         if (state) {
-            state["position"] = defaultSearchState.position;
-            state["projectionOrientation"] = defaultSearchState.projectionOrientation;
-            state["projectionScale"] = defaultSearchState.projectionScale;
+            state["position"] = immutableDefaultSearchState.position;
+            state["projectionOrientation"] = immutableDefaultSearchState.projectionOrientation;
+            state["projectionScale"] = immutableDefaultSearchState.projectionScale;
         }
 
-        const s = NeuroglancerProxy._cachedQueryParamsState || state || defaultSearchState;
+        const s = NeuroglancerProxy._cachedQueryParamsState || state || defaultSearchState(proxy._searchLayers, proxy._segmentColors);
+
+        // proxy.applyCcfSegmentColors(s, proxy._searchLayers.SearchCcfLayer);
 
         NeuroglancerProxy._cachedQueryParamsState = null;
 
         let reset = false;
 
         // Default compartment visibility.
-        if (s.layers?.length >= SearchCcfLayer.index) {
-            s.layers[SearchCcfLayer.index].segments = [997];
+        if (s.layers?.length >= proxy._searchLayers.SearchCcfLayer.index) {
+            s.layers[proxy._searchLayers.SearchCcfLayer.index].segments = [997];
             reset = true;
         }
 
         // Clear any stored soma annotations from last session.
-        if (s.layers?.length >= SearchSomaAnnotationLayer.index) {
-            s.layers[SearchSomaAnnotationLayer.index].annotations = [];
+        if (s.layers?.length >= proxy._searchLayers.SearchSomaAnnotationLayer.index) {
+            s.layers[proxy._searchLayers.SearchSomaAnnotationLayer.index].annotations = [];
             reset = true;
         }
 
         // Clear any stored segments from last session.
-        for (let idx = SearchReconstructionLayer.index; idx < SearchDendritesMirrorLayer.index; idx++) {
+        for (let idx = proxy._searchLayers.SearchReconstructionLayer.index; idx < proxy._searchLayers.SearchDendritesMirrorLayer.index; idx++) {
             if (s.layers?.length >= idx) {
                 s.layers[idx].segments = [];
                 s.layers[idx].segmentColors = {};
@@ -205,7 +181,7 @@ export class NeuroglancerProxy {
 
         proxy._changeHandler = proxy._viewer.state.changed.add(throttledSetUrlHash);
 
-        proxy._defaultState = defaultSearchState;
+        proxy._defaultState = defaultSearchState(proxy._searchLayers, proxy._segmentColors);
 
         NeuroglancerProxy.SearchNeuroglancer = proxy;
 
@@ -214,12 +190,10 @@ export class NeuroglancerProxy {
         proxy._viewer.inputEventBindings.global.bindings["at:wheel"] = {action: "zoom-via-wheel", preventDefault: true};
         proxy._viewer.inputEventBindings.global.bindings["wheel"] = {action: "zoom-via-wheel", preventDefault: true};
 
-        // console.log(proxy._viewer);
-
         return proxy;
     }
 
-    public static applyQueryParameterState(state) {
+    public static applyQueryParameterState(state: any) {
         if (!state) {
             return;
         }
@@ -289,8 +263,8 @@ export class NeuroglancerProxy {
 
         neurons.forEach(n => this._modelMap.set(n.SkeletonSegmentId, n));
 
-        if (state.layers?.length >= SearchSomaAnnotationLayer.index) {
-            const annotations = somas.map(n => {
+        if (state.layers?.length >= this._searchLayers.SearchSomaAnnotationLayer.index) {
+            state.layers[this._searchLayers.SearchSomaAnnotationLayer.index].annotations = somas.map(n => {
                 const soma = n.somaOnlyTracing.soma;
 
                 this._somaModelMap.set(soma.id, n);
@@ -307,13 +281,11 @@ export class NeuroglancerProxy {
                     props: [n.baseColor, 3]
                 };
             });
-
-            state.layers[SearchSomaAnnotationLayer.index].annotations = annotations;
         }
 
-        this.updateSearchReconstructionLayers(state, neurons.filter(n => n.CurrentViewMode == NEURON_VIEW_MODE_ALL), SearchReconstructionLayer, SearchReconstructionMirrorLayer);
-        this.updateSearchReconstructionLayers(state, neurons.filter(n => n.CurrentViewMode == NEURON_VIEW_MODE_AXON), SearchAxonLayer, SearchAxonMirrorLayer);
-        this.updateSearchReconstructionLayers(state, neurons.filter(n => n.CurrentViewMode == NEURON_VIEW_MODE_DENDRITE), SearchDendritesLayer, SearchDendritesMirrorLayer);
+        this.updateSearchReconstructionLayers(state, neurons.filter(n => n.CurrentViewMode == NEURON_VIEW_MODE_ALL), this._searchLayers.SearchReconstructionLayer, this._searchLayers.SearchReconstructionMirrorLayer);
+        this.updateSearchReconstructionLayers(state, neurons.filter(n => n.CurrentViewMode == NEURON_VIEW_MODE_AXON), this._searchLayers.SearchAxonLayer, this._searchLayers.SearchAxonMirrorLayer);
+        this.updateSearchReconstructionLayers(state, neurons.filter(n => n.CurrentViewMode == NEURON_VIEW_MODE_DENDRITE), this._searchLayers.SearchDendritesLayer, this._searchLayers.SearchDendritesMirrorLayer);
 
         this._viewer.state.reset();
         this._viewer.state.restoreState(state);
@@ -343,7 +315,8 @@ export class NeuroglancerProxy {
         let stateChanged = false;
 
         if (state.layers?.length > 0) {
-            state.layers[SearchCcfLayer.index].segments = compartmentIds;
+            state.layers[this._searchLayers.SearchCcfLayer.index].segments = compartmentIds;
+            state.layers[this._searchLayers.SearchCcfLayer.index].segments = compartmentIds;
             stateChanged = true;
         }
 
@@ -354,6 +327,7 @@ export class NeuroglancerProxy {
     }
 
     public resetNeuroglancerState() {
+        this._viewer.state.reset();
         this._viewer.state.restoreState(this._defaultState);
     }
 
@@ -432,7 +406,7 @@ function reconstructionLayer(layerDefinition: SearchLayer) {
     return layer;
 }
 
-const defaultCandidateState = {
+const immutableDefaultCandidateState = {
     dimensions: {
         "x": [
             0.00001,
@@ -460,69 +434,6 @@ const defaultCandidateState = {
     "crossSectionScale": 2.7182818284590446,
     "projectionScale": 2048,
     "showAxisLines": false,
-    "layers": [
-        {
-            "type": "annotation",
-            "source": {
-                "url": "local://annotations",
-                "transform": {
-                    "outputDimensions": {
-                        "x": [
-                            0.00001,
-                            "m"
-                        ],
-                        "y": [
-                            0.00001,
-                            "m"
-                        ],
-                        "z": [
-                            0.00001,
-                            "m"
-                        ]
-                    }
-                }
-            },
-            "tool": "annotatePoint",
-            "tab": "annotations",
-            "annotationColor": "#2184d0",
-            "annotations": [],
-            "annotationProperties": [
-                {
-                    "id": "color",
-                    "type": "rgba",
-                    "default": "#ff0000ff"
-                },
-                {
-                    "id": "size",
-                    "type": "float32",
-                    "default": 10
-                }
-            ],
-            "shader": "\nvoid main() {\n  setColor(prop_color());\n  setPointMarkerSize(prop_size());\n}\n",
-            "name": "Candidates"
-        },
-        {
-            "type": "segmentation",
-            "source": {
-                "url": "precomputed://gs://allen_neuroglancer_ccf/ccf_test1",
-                "subsources": {
-                    "default": true,
-                    "properties": true,
-                    "mesh": true
-                },
-                "enableDefaultSubsources": false
-            },
-            "tab": "source",
-            "segments": [997],
-            "objectAlpha": 0.20,
-            "name": "CCF",
-            "visible": true
-        },
-        reconstructionLayer(CandidateReconstructionLayer),
-    ],
-    "selectedLayer": {
-        "layer": "CCF"
-    },
     "layout": "3d",
     "layerListPanel": {
         "visible": false
@@ -533,9 +444,84 @@ const defaultCandidateState = {
     "showDefaultAnnotations": false,
     "crossSectionBackgroundColor": "#ffffff",
     "projectionBackgroundColor": "#ffffff"
-};
+}
 
-const defaultSearchState = {
+function defaultCandidateState(layers: SearchLayers, segmentColors: Map<string, string> = null) {
+    const state = {
+        ...immutableDefaultCandidateState,
+        "layers": [
+            {
+                "type": "annotation",
+                "source": {
+                    "url": layers.CandidateAnnotationLayer.source,
+                    "transform": {
+                        "outputDimensions": {
+                            "x": [
+                                0.00001,
+                                "m"
+                            ],
+                            "y": [
+                                0.00001,
+                                "m"
+                            ],
+                            "z": [
+                                0.00001,
+                                "m"
+                            ]
+                        }
+                    }
+                },
+                "tool": "annotatePoint",
+                "tab": "annotations",
+                "annotationColor": "#2184d0",
+                "annotations": [],
+                "annotationProperties": [
+                    {
+                        "id": "color",
+                        "type": "rgba",
+                        "default": "#ff0000ff"
+                    },
+                    {
+                        "id": "size",
+                        "type": "float32",
+                        "default": 10
+                    }
+                ],
+                "shader": "\nvoid main() {\n  setColor(prop_color());\n  setPointMarkerSize(prop_size());\n}\n",
+                "name": layers.CandidateAnnotationLayer.name
+            },
+            {
+                "type": "segmentation",
+                "source": {
+                    "url": layers.CandidateCcfLayer.source,
+                    "subsources": {
+                        "default": true,
+                        "properties": true,
+                        "mesh": true
+                    },
+                    "enableDefaultSubsources": false
+                },
+                "tab": "source",
+                "segments": [997],
+                "objectAlpha": 0.20,
+                "name": layers.CandidateCcfLayer.name,
+                "visible": true
+            },
+            reconstructionLayer(layers.CandidateReconstructionLayer),
+        ],
+        "selectedLayer": {
+            "layer": layers.CandidateCcfLayer.name,
+        }
+    };
+
+    if (segmentColors) {
+        state.layers[1]["segmentColors"] = segmentColors;
+    }
+
+    return state;
+}
+
+const immutableDefaultSearchState = {
     dimensions: {
         "x": [
             0.00001,
@@ -567,73 +553,6 @@ const defaultSearchState = {
     ],
     "projectionScale": 2048,
     "showAxisLines": false,
-    "layers": [
-        {
-            "type": "segmentation",
-            "source": {
-                "url": "precomputed://gs://allen_neuroglancer_ccf/ccf_test1",
-                "subsources": {
-                    "default": true,
-                    "properties": true,
-                    "mesh": true
-                },
-                "enableDefaultSubsources": false
-            },
-            "tab": "source",
-            "segments": [997],
-            "objectAlpha": 0.20,
-            "name": "CCF",
-            "visible": true
-        }, {
-            "type": "annotation",
-            "source": {
-                "url": "local://annotations",
-                "transform": {
-                    "outputDimensions": {
-                        "x": [
-                            0.00001,
-                            "m"
-                        ],
-                        "y": [
-                            0.00001,
-                            "m"
-                        ],
-                        "z": [
-                            0.00001,
-                            "m"
-                        ]
-                    }
-                }
-            },
-            "tool": "annotatePoint",
-            "tab": "annotations",
-            "annotationColor": "#2184d0",
-            "annotations": [],
-            "annotationProperties": [
-                {
-                    "id": "color",
-                    "type": "rgba",
-                    "default": "#ff0000ff"
-                },
-                {
-                    "id": "size",
-                    "type": "float32",
-                    "default": 10
-                }
-            ],
-            "shader": "\nvoid main() {\n  setColor(prop_color());\n  setPointMarkerSize(prop_size());\n}\n",
-            "name": "Soma"
-        },
-        reconstructionLayer(SearchReconstructionLayer),
-        reconstructionLayer(SearchReconstructionMirrorLayer),
-        reconstructionLayer(SearchAxonLayer),
-        reconstructionLayer(SearchAxonMirrorLayer),
-        reconstructionLayer(SearchDendritesLayer),
-        reconstructionLayer(SearchDendritesMirrorLayer)
-    ],
-    "selectedLayer": {
-        "layer": "CCF"
-    },
     "layout": "3d",
     "layerListPanel": {
         "visible": false
@@ -644,4 +563,83 @@ const defaultSearchState = {
     "showDefaultAnnotations": false,
     "crossSectionBackgroundColor": "#ffffff",
     "projectionBackgroundColor": "#ffffff"
-};
+}
+
+function defaultSearchState(layers: SearchLayers, segmentColors: Map<string, string> = null) {
+    const state = {
+        ...immutableDefaultSearchState,
+        "layers": [
+            {
+                "type": "segmentation",
+                "source": {
+                    "url": layers.SearchCcfLayer.source,
+                    "subsources": {
+                        "default": true,
+                        "properties": true,
+                        "mesh": true
+                    },
+                    "enableDefaultSubsources": false
+                },
+                "tab": "source",
+                "segments": [997],
+                "objectAlpha": 0.20,
+                "name": layers.SearchCcfLayer.name,
+                "visible": true
+            }, {
+                "type": "annotation",
+                "source": {
+                    "url": layers.SearchSomaAnnotationLayer.source,
+                    "transform": {
+                        "outputDimensions": {
+                            "x": [
+                                0.00001,
+                                "m"
+                            ],
+                            "y": [
+                                0.00001,
+                                "m"
+                            ],
+                            "z": [
+                                0.00001,
+                                "m"
+                            ]
+                        }
+                    }
+                },
+                "tool": "annotatePoint",
+                "tab": "annotations",
+                "annotationColor": "#2184d0",
+                "annotations": [],
+                "annotationProperties": [
+                    {
+                        "id": "color",
+                        "type": "rgba",
+                        "default": "#ff0000ff"
+                    },
+                    {
+                        "id": "size",
+                        "type": "float32",
+                        "default": 10
+                    }
+                ],
+                "shader": "\nvoid main() {\n  setColor(prop_color());\n  setPointMarkerSize(prop_size());\n}\n",
+                "name": layers.SearchSomaAnnotationLayer.name
+            },
+            reconstructionLayer(layers.SearchReconstructionLayer),
+            reconstructionLayer(layers.SearchReconstructionMirrorLayer),
+            reconstructionLayer(layers.SearchAxonLayer),
+            reconstructionLayer(layers.SearchAxonMirrorLayer),
+            reconstructionLayer(layers.SearchDendritesLayer),
+            reconstructionLayer(layers.SearchDendritesMirrorLayer)
+        ],
+        "selectedLayer": {
+            "layer": layers.SearchCcfLayer.name
+        }
+    };
+
+    if (segmentColors) {
+        state.layers[0]["segmentColors"] = segmentColors;
+    }
+
+    return state;
+}

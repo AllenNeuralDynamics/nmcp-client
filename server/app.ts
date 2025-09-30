@@ -24,27 +24,24 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const version = readSystemVersion();
 
 const apiUri = `http://${ServerConfiguration.graphQLService.hostname}:${ServerConfiguration.graphQLService.port}`;
-const tracingsUri = `http://${ServerConfiguration.tracingsService.hostname}:${ServerConfiguration.tracingsService.port}`;
 const staticUri = `http://${ServerConfiguration.staticService.hostname}:${ServerConfiguration.staticService.port}`;
 const exportUri = `http://${ServerConfiguration.exportService.hostname}:${ServerConfiguration.exportService.port}`;
-const downloadUri = `http://${ServerConfiguration.exportService.hostname}:${ServerConfiguration.exportService.port}`;
-
-let app = null;
 
 const maintainBaseUrl = (req: { baseUrl: any; }) => req.baseUrl;
 
 if (process.env.NODE_ENV !== "production") {
-    app = devServer();
+    devServer();
 } else {
     debug("configuring production express server");
 
     const rootPath = path.resolve(path.join(__dirname, "public"));
 
-    app = express();
+    const app = express();
 
-    app.use(ServerConfiguration.systemEndpoint, (req, res) => {
+    app.use(ServerConfiguration.systemEndpoint, (_, res) => {
         res.json({
             systemVersion: version,
+            precomputedLocation: ServerConfiguration.precomputedLocation,
             exportLimit: ServerConfiguration.exportLimit
         });
     });
@@ -55,13 +52,11 @@ if (process.env.NODE_ENV !== "production") {
     debug(`proxying ${ServerConfiguration.graphQLService.endpoint} to ${apiUri}`);
     app.use(`${ServerConfiguration.graphQLService.endpoint}`, proxy(`${apiUri}`, {
         limit: "100mb",
-        proxyReqPathResolver: maintainBaseUrl, proxyReqOptDecorator: (proxyReqOpts: any) => {
+        proxyReqPathResolver: maintainBaseUrl,
+        proxyReqOptDecorator: (proxyReqOpts: any) => {
             return proxyReqOpts;
         }
     }));
-
-    debug(`proxying ${ServerConfiguration.tracingsService.endpoint} to ${tracingsUri}`);
-    app.use(`${ServerConfiguration.tracingsService.endpoint}`, proxy(`${tracingsUri}`, {proxyReqPathResolver: maintainBaseUrl}));
 
     debug(`proxying ${ServerConfiguration.staticService.endpoint} to ${staticUri}`);
     app.use(`${ServerConfiguration.staticService.endpoint}`, proxy(`${staticUri}`, {proxyReqPathResolver: req => "/static" + req.url}));
@@ -71,9 +66,6 @@ if (process.env.NODE_ENV !== "production") {
 
     debug(`proxying ${ServerConfiguration.exportService.endpoint} to ${exportUri}`);
     app.use(`${ServerConfiguration.exportService.endpoint}`, proxy(`${exportUri}`, {proxyReqPathResolver: req => "/export" + req.url}));
-
-    debug(`proxying ${ServerConfiguration.downloadService.endpoint} to ${downloadUri}`);
-    app.use(`${ServerConfiguration.downloadService.endpoint}`, proxy(`${downloadUri}`, {proxyReqPathResolver: req => "/download" + req.url}));
 
     app.use(express.static(rootPath));
 
@@ -99,17 +91,11 @@ function devServer() {
             [ServerConfiguration.graphQLService.endpoint]: {
                 target: apiUri
             },
-            [ServerConfiguration.tracingsService.endpoint]: {
-                target: tracingsUri
-            },
             [ServerConfiguration.staticService.endpoint]: {
                 target: staticUri
             },
             [ServerConfiguration.exportService.endpoint]: {
                 target: exportUri
-            },
-            [ServerConfiguration.downloadService.endpoint]: {
-                target: downloadUri
             },
             ["/slice"]: {
                 target: staticUri
@@ -124,6 +110,7 @@ function devServer() {
             devServer.app.use(ServerConfiguration.systemEndpoint, (req, res) => {
                 res.json({
                     systemVersion: version,
+                    precomputedLocation: ServerConfiguration.precomputedLocation,
                     exportLimit: ServerConfiguration.exportLimit
                 });
             });

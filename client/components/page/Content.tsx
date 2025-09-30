@@ -10,7 +10,7 @@ import {INeuron} from "../../models/neuron";
 import {UIQueryPredicate, UIQueryPredicates} from "../../models/uiQueryPredicate";
 import {UserPreferences} from "../../util/userPreferences";
 import {Footer} from "./Footer";
-import {NeuroglancerProxy} from "../../viewer/neuroglancer/neuroglancer";
+import {NeuroglancerProxy} from "../../viewer/neuroglancer";
 
 interface IContentProps {
     constants: NdbConstants;

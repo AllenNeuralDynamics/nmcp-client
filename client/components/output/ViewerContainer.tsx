@@ -3,7 +3,7 @@ import * as React from "react";
 import {ITracingViewerBaseProps, TracingViewer} from "./TracingViewer";
 import {primaryBackground} from "../../util/styles";
 import {Icon} from "semantic-ui-react";
-import {NeuroglancerProxy} from "../../viewer/neuroglancer/neuroglancer";
+import {NeuroglancerProxy} from "../../viewer/neuroglancer";
 
 export interface IViewerProps extends ITracingViewerBaseProps {
     isQueryCollapsed: boolean;

@@ -123,7 +123,7 @@ export class NdbConstants {
 
         this._BrainAreas.forEach(b => {
             if (b.geometryEnable) {
-                this._brainAreaStructureIdMap[b.structureId.toString()] = "#" + b.geometryColor;
+                this._brainStructureColorMap[b.structureId.toString()] = "#" + b.geometryColor;
             }
         });
     }
