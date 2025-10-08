@@ -93,6 +93,10 @@ export class NdbConstants {
             return this._brainAreaStructureIdMap.get(id);
     }
 
+    public findAtlasStructures(id: string[]): IBrainArea[] {
+        return id.map(s => this._brainAreaIdMap.get(s));
+    }
+
     public findStructureIdentifier(id: string) {
         return this._structureIdentifierMap.get(id);
     }

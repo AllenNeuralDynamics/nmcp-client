@@ -2,6 +2,8 @@ import * as React from "react";
 import Select from "react-select";
 
 import {displayBrainArea, IBrainArea} from "../../models/brainArea";
+import {useEffect, useRef} from "react";
+import {useConstants} from "../../hooks/useConstants";
 
 const customStyles = {
     dropdownIndicator: (provided: any) => ({
@@ -18,25 +20,26 @@ const customStyles = {
     }),
     control: (provided: any) => ({
         ...provided,
-        boxShadow: "none",
+        // boxShadow: "none",
         minHeight: "34px",
         maxHeight: "34px"
     }),
     multiValue: (provided: any) => ({
         ...provided,
-        color: "rgb(0, 126, 255)",
-        backgroundColor: "rgba(0, 126, 255, 0.0784314)",
-        border: " 1px solid rgba(0, 126, 255, 0.239216)",
-        borderRadius: "2px"
+        // color: "rgb(0, 126, 255)",
+        // backgroundColor: "rgba(0, 126, 255, 0.0784314)",
+        // border: " 1px solid rgba(0, 126, 255, 0.239216)",
+        padding: "4px",
+        borderRadius: "8px"
     }),
     multiValueLabel: (provided: any) => ({
         ...provided,
-        color: "rgb(0, 126, 255)",
+        // color: "rgb(0, 126, 255)",
         padding: 0
     }),
     multiValueRemove: (provided: any) => ({
         ...provided,
-        borderLeft: "1px solid rgba(0, 126, 255, 0.239216)",
+        // borderLeft: "1px solid rgba(0, 126, 255, 0.239216)",
     })
 };
 
@@ -55,56 +58,50 @@ class CompartmentSelectOption {
 const compartmentOptionMap = new Map<string, CompartmentSelectOption>();
 
 export type BrainAreaMultiSelectProps = {
-    compartments: IBrainArea[];
     selection: IBrainArea[];
-    isDisabled?: boolean;
+    disabled?: boolean;
 
     onSelectionChange(selection: IBrainArea[]): void;
 }
 
-export class BrainAreaMultiSelect extends React.Component<BrainAreaMultiSelectProps, {}> {
-    public constructor(props: BrainAreaMultiSelectProps) {
-        super(props);
+export const BrainAreaMultiSelect: React.FC<BrainAreaMultiSelectProps> = (props) => {
+    const constants = useConstants();
 
-        this.createCompartmentMap(props);
-    }
+    const options = useRef<CompartmentSelectOption[]>([]);
 
-    public componentWillReceiveProps(props: Readonly<BrainAreaMultiSelectProps>): void {
-        this.createCompartmentMap(props);
-    }
+    const compartments = constants.BrainAreas;
 
-    public createCompartmentMap(props: BrainAreaMultiSelectProps) {
-        if (!props.compartments || compartmentOptionMap.size > 0) {
+    useEffect(() => {
+        if (!compartments || compartmentOptionMap.size > 0) {
             return;
         }
 
-        props.compartments.map(c => {
+        compartments.map(c => {
             compartmentOptionMap.set(c.id, new CompartmentSelectOption(displayBrainArea(c), c.id, c));
         });
+    }, []);
+
+    if (options.current.length == 0 && compartmentOptionMap.size > 0) {
+        options.current = Array.from(compartmentOptionMap.values()).sort((s1, s2) => s1.label.localeCompare(s2.label));
     }
 
-    public render() {
-        const options: any[] = this.props.compartments.map(o => compartmentOptionMap.get(o.id));
+    const values: any[] = props.selection.map(s => compartmentOptionMap.get(s.id));
 
-        const values: any[] = this.props.selection.map(s => compartmentOptionMap.get(s.id));
+    const selectProps = {
+        name: `brain-area-multi-select`,
+        placeholder: "Select...",
+        value: values,
+        options: options.current,
+        isClearable: true,
+        isSearchable: true,
+        isMulti: true,
+        isDisabled: props.disabled,
+        styles: customStyles,
+        filterOption: (option: any, filter: string) => filterBrainArea(option.data.data, filter),
+        onChange: (selection: any[]) => props.onSelectionChange(selection.map(s => s.data))
+    };
 
-        const props = {
-            name: `brain-area-multi-select`,
-            placeholder: "Select...",
-            value: values,
-            options,
-            isClearable: true,
-            isSearchable: true,
-            isMulti: true,
-            isDisabled: this.props.isDisabled,
-            styles: customStyles,
-            filterOption: (option: any, filter: string) => filterBrainArea(option.data.data, filter),
-            onChange: (selection: any[]) => this.props.onSelectionChange(selection.map(s => s.data))
-        };
-
-        return <Select {...props}/>;
-    }
-
+    return <Select {...selectProps}/>;
 }
 
 function filterBrainArea(compartment: IBrainArea, value: string) {

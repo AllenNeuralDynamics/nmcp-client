@@ -17,12 +17,13 @@ import {PaginationHeader} from "../common/PaginationHeader";
 import {CandidateTracingsTable} from "./CandidatesTable";
 import {CandidatesViewer} from "./CandidateViewer";
 import {IBrainArea} from "../../models/brainArea";
-import {BrainAreaMultiSelect} from "../common/BrainAreaMultiSelect";
 import {ConstantsContext} from "../app/AppConstants";
 import {CandidateActionPanel} from "./CandidateActionPanel";
 import {SAMPLES_QUERY, SamplesQueryResponse} from "../../graphql/sample";
 import {NeuronTagFilter} from "../common/NeuronTagFilter";
 import {SomaProperties} from "../../models/neuron";
+import {AtlasStructureMultiselect} from "../common/AtlasStructureMultiselect";
+import {BrainAreaMultiSelect} from "../common/BrainAreaMultiSelect";
 
 function defaultSomaPropertyFilter() {
     return {
@@ -200,9 +201,7 @@ export const Candidates = () => {
                                           onChange={(_, data) => setState({...state, limitBrainAreas: data.checked, offset: 0})}/>
 
                                 <div style={{marginLeft: "8px", minWidth: "200px"}}>
-                                    <BrainAreaMultiSelect compartments={constants.BrainAreasWithGeometry}
-                                                          selection={state.brainAreaFilter}
-                                                          isDisabled={!state.limitBrainAreas}
+                                    <BrainAreaMultiSelect selection={state.brainAreaFilter} disabled={!state.limitBrainAreas}
                                                           onSelectionChange={(brainAreas: IBrainArea[]) => onBrainAreaFilterChange(brainAreas)}/>
                                 </div>
                             </div>

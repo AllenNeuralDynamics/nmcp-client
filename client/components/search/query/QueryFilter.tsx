@@ -3,7 +3,6 @@ import {Form, Grid, Icon, Input} from "semantic-ui-react";
 
 import {IBrainArea} from "../../../models/brainArea";
 
-import {BrainAreaMultiSelect} from "../../common/BrainAreaMultiSelect";
 import {IQueryOperator} from "../../../models/queryOperator";
 import {QueryOperatorSelect} from "./editors/QueryOperatorSelect";
 import {FilterComposition} from "../../../viewmodel/filterContents";
@@ -18,6 +17,8 @@ import {CompositionSelect} from "./editors/CompositionSelect";
 import {useConstants} from "../../../hooks/useConstants";
 import {observer} from "mobx-react";
 import {UIQueryPredicate} from "../../../viewmodel/uiQueryPredicate";
+import {AtlasStructureMultiselect} from "../../common/AtlasStructureMultiselect";
+import {BrainAreaMultiSelect} from "../../common/BrainAreaMultiSelect";
 
 interface IQueryFilterProps {
     isRemovable: boolean;
@@ -310,9 +311,8 @@ export const QueryFilter = observer((props: IQueryFilterProps) => {
 
                             <Form.Field width={7}>
                                 <label>Source or Target Locations (multiple treated as or condition)</label>
-                                <BrainAreaMultiSelect compartments={constants.BrainAreasWithGeometry}
-                                                      selection={filter.brainAreas}
-                                                      onSelectionChange={(brainAreas: IBrainArea[]) => onBrainAreaChange(brainAreas)}/>
+                                <BrainAreaMultiSelect selection={filter.brainAreas}
+                                                           onSelectionChange={(brainAreas: IBrainArea[]) => onBrainAreaChange(brainAreas)}/>
                             </Form.Field>
 
                             <Form.Field width={3}>
