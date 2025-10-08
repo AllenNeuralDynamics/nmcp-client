@@ -4,7 +4,7 @@ import {observer} from "mobx-react";
 
 import {ITracingNode} from "../../../models/tracingNode";
 import {TracingViewModel} from "../../../viewmodel/tracingViewModel";
-import {IPositionInput} from "../../../viewmodel/queryFilter";
+import {IPositionInput} from "../../../viewmodel/filterContents";
 import {ViewerSelection} from "./ViewerSelection";
 import {NeuroglancerContainer} from "./NeuroglancerContainer";
 import {UserPreferences} from "../../../util/userPreferences";

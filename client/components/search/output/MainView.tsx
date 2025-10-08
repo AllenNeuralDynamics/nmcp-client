@@ -4,7 +4,7 @@ import {observer} from "mobx-react";
 import {Button, Message, Modal} from "semantic-ui-react";
 
 import "../../../util/override.css";
-import {IPositionInput} from "../../../viewmodel/queryFilter";
+import {IPositionInput} from "../../../viewmodel/filterContents";
 import {INeuronListContainerProps, NeuronListContainer} from "./NeuronListContainer";
 import {IViewerProps, ViewerContainer} from "./ViewerContainer";
 import {Atlas, ICompartmentListContainerProps} from "./atlas/Atlas";

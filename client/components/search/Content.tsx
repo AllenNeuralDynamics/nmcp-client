@@ -4,20 +4,20 @@ import {observer} from "mobx-react";
 import {useApolloClient} from "@apollo/client";
 
 import {QueryPage} from "./QueryPage";
-import {UIQueryPredicate} from "../../viewmodel/uiQueryPredicate";
 import {UserPreferences} from "../../util/userPreferences";
-import {NeuroglancerProxy} from "../../viewer/neuroglancer";
+import {NeuroglancerProxy} from "../../viewer/neuroglancerProxy";
 import {useConstants} from "../../hooks/useConstants";
-import {useQueryPredicates} from "../../hooks/useQueryPredicates";
+import {useUIQuery} from "../../hooks/useUIQuery";
 import {useQueryResponseViewModel} from "../../hooks/useQueryResponseViewModel";
 import {Footer} from "./Footer";
+import {UIQueryPredicate} from "../../viewmodel/uiQueryPredicate";
 
 export const Content = observer(() => {
     const client = useApolloClient();
 
     const constants = useConstants();
 
-    const uiPredicates = useQueryPredicates();
+    const uiPredicates = useUIQuery();
 
     const queryResponseViewModel = useQueryResponseViewModel();
 

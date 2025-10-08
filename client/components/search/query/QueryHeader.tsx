@@ -5,7 +5,7 @@ import {primaryBackground, spinnerStyle} from "../../../util/styles";
 import {QueryStatus} from "../../../viewmodel/queryResponseViewModel";
 import {useQueryResponseViewModel} from "../../../hooks/useQueryResponseViewModel";
 import {observer} from "mobx-react";
-import {useQueryPredicates} from "../../../hooks/useQueryPredicates";
+import {useUIQuery} from "../../../hooks/useUIQuery";
 
 
 const styles = {
@@ -30,7 +30,7 @@ export interface IQueryHeaderBaseProps {
 export const QueryHeader = observer((props: IQueryHeaderBaseProps) => {
     const queryResponse = useQueryResponseViewModel();
 
-    const uiPredicates = useQueryPredicates();
+    const uiPredicates = useUIQuery();
 
     const renderToggleButton = () => {
         if (queryResponse.status === QueryStatus.Loading) {

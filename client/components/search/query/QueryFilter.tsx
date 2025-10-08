@@ -6,18 +6,18 @@ import {IBrainArea} from "../../../models/brainArea";
 import {BrainAreaMultiSelect} from "../../common/BrainAreaMultiSelect";
 import {IQueryOperator} from "../../../models/queryOperator";
 import {QueryOperatorSelect} from "./editors/QueryOperatorSelect";
-import {FilterComposition} from "../../../viewmodel/queryFilter";
+import {FilterComposition} from "../../../viewmodel/filterContents";
 import {NeuronalStructure} from "../../../models/neuronalStructure";
 import {NeuronalStructureSelect} from "./editors/NeuronalStructureSelect";
-import {BrainAreaFilterTypeSelect} from "./editors/BrainAreaFilterTypeSelect";
+import {QueryPredicateKindSelect} from "./editors/QueryPredicateKindSelect";
 import {
-    BRAIN_AREA_FILTER_TYPES, BrainAreaFilterType,
+    QUERY_PREDICATE_KINDS, QueryPredicateKind,
     PredicateType
-} from "../../../models/brainAreaFilterType";
+} from "../../../viewmodel/queryPredicateKind";
 import {CompositionSelect} from "./editors/CompositionSelect";
-import {UIQueryPredicate} from "../../../viewmodel/uiQueryPredicate";
 import {useConstants} from "../../../hooks/useConstants";
 import {observer} from "mobx-react";
+import {UIQueryPredicate} from "../../../viewmodel/uiQueryPredicate";
 
 interface IQueryFilterProps {
     isRemovable: boolean;
@@ -90,7 +90,7 @@ export const QueryFilter = observer((props: IQueryFilterProps) => {
         props.onChangeFilter?.(filter);
     };
 
-    const onBrainAreaFilterTypeChanged = (b: BrainAreaFilterType) => {
+    const onBrainAreaFilterTypeChanged = (b: QueryPredicateKind) => {
         const filter = props.queryFilter;
         filter.brainAreaFilterType = b;
         props.onChangeFilter?.(filter);
@@ -173,13 +173,13 @@ export const QueryFilter = observer((props: IQueryFilterProps) => {
                         <Form.Group>
                             <Form.Field width={3}>
                                 <label>Query Type</label>
-                                <BrainAreaFilterTypeSelect idName="filter-mode"
-                                                           options={BRAIN_AREA_FILTER_TYPES}
-                                                           placeholder="required"
-                                                           clearable={false}
-                                                           searchable={false}
-                                                           selectedOption={props.queryFilter.brainAreaFilterType}
-                                                           onSelect={(v: BrainAreaFilterType) => onBrainAreaFilterTypeChanged(v)}/>
+                                <QueryPredicateKindSelect idName="filter-mode"
+                                                          options={QUERY_PREDICATE_KINDS}
+                                                          placeholder="required"
+                                                          clearable={false}
+                                                          searchable={false}
+                                                          selectedOption={props.queryFilter.brainAreaFilterType}
+                                                          onSelect={(v: QueryPredicateKind) => onBrainAreaFilterTypeChanged(v)}/>
                             </Form.Field>
 
                             <Form.Field width={2}>
@@ -258,13 +258,13 @@ export const QueryFilter = observer((props: IQueryFilterProps) => {
                         <Form.Group>
                             <Form.Field width={3}>
                                 <label>Query Type</label>
-                                <BrainAreaFilterTypeSelect idName="filter-mode"
-                                                           options={BRAIN_AREA_FILTER_TYPES}
-                                                           placeholder="required"
-                                                           clearable={false}
-                                                           searchable={false}
-                                                           selectedOption={props.queryFilter.brainAreaFilterType}
-                                                           onSelect={(v: BrainAreaFilterType) => onBrainAreaFilterTypeChanged(v)}/>
+                                <QueryPredicateKindSelect idName="filter-mode"
+                                                          options={QUERY_PREDICATE_KINDS}
+                                                          placeholder="required"
+                                                          clearable={false}
+                                                          searchable={false}
+                                                          selectedOption={props.queryFilter.brainAreaFilterType}
+                                                          onSelect={(v: QueryPredicateKind) => onBrainAreaFilterTypeChanged(v)}/>
                             </Form.Field>
 
                             <Form.Field width={11}>
@@ -298,13 +298,13 @@ export const QueryFilter = observer((props: IQueryFilterProps) => {
                         <Form.Group>
                             <Form.Field width={3}>
                                 <label>Query Type</label>
-                                <BrainAreaFilterTypeSelect idName="filter-mode"
-                                                           options={BRAIN_AREA_FILTER_TYPES}
-                                                           placeholder="required"
-                                                           clearable={false}
-                                                           searchable={false}
-                                                           selectedOption={props.queryFilter.brainAreaFilterType}
-                                                           onSelect={(v: BrainAreaFilterType) => onBrainAreaFilterTypeChanged(v)}/>
+                                <QueryPredicateKindSelect idName="filter-mode"
+                                                          options={QUERY_PREDICATE_KINDS}
+                                                          placeholder="required"
+                                                          clearable={false}
+                                                          searchable={false}
+                                                          selectedOption={props.queryFilter.brainAreaFilterType}
+                                                          onSelect={(v: QueryPredicateKind) => onBrainAreaFilterTypeChanged(v)}/>
                             </Form.Field>
 
 

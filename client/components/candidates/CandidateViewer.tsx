@@ -2,7 +2,7 @@ import * as React from "react";
 import {useContext, useEffect, useState} from "react";
 
 import {createCandidateAnnotationLayer, INeuron} from "../../models/neuron";
-import {NeuroglancerProxy} from "../../viewer/neuroglancer";
+import {NeuroglancerProxy} from "../../viewer/neuroglancerProxy";
 import {Button} from "semantic-ui-react";
 import {UserPreferences} from "../../util/userPreferences";
 import {ConstantsContext} from "../app/AppConstants";

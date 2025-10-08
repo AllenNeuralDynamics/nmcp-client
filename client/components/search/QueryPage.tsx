@@ -3,20 +3,20 @@ import {useState} from "react";
 import {useApolloClient} from "@apollo/client";
 import {observer} from "mobx-react";
 
-import {FilterComposition, IPositionInput} from "../../viewmodel/queryFilter";
+import {FilterComposition, IPositionInput} from "../../viewmodel/filterContents";
 import {IQueryFilterContainerProps, QueryFilterContainer} from "./query/QueryFilterContainer";
 import {MainView, MainViewProps} from "./output/MainView";
-import {BRAIN_AREA_FILTER_TYPE_SPHERE} from "../../models/brainAreaFilterType";
+import {QUERY_PREDICATE_KIND_SPHERE} from "../../viewmodel/queryPredicateKind";
 import {UserPreferences} from "../../util/userPreferences";
-import {NeuroglancerProxy} from "../../viewer/neuroglancer";
+import {NeuroglancerProxy} from "../../viewer/neuroglancerProxy";
 import {useQueryResponseViewModel} from "../../hooks/useQueryResponseViewModel";
-import {useQueryPredicates} from "../../hooks/useQueryPredicates";
+import {useUIQuery} from "../../hooks/useUIQuery";
 import {useAtlas} from "../../hooks/useAtlas";
 
 export const QueryPage = observer(() => {
     const queryResponse = useQueryResponseViewModel();
 
-    const uiPredicates = useQueryPredicates();
+    const uiPredicates = useUIQuery();
 
     const client = useApolloClient();
 
@@ -72,7 +72,7 @@ export const QueryPage = observer(() => {
 
         if (replace) {
             const filter = uiPredicates.predicates[uiPredicates.predicates.length - 1];
-            filter.brainAreaFilterType = BRAIN_AREA_FILTER_TYPE_SPHERE;
+            filter.brainAreaFilterType = QUERY_PREDICATE_KIND_SPHERE;
             filter.filter.arbCenter = {
                 x: position.x.toFixed(1),
                 y: position.y.toFixed(1),
@@ -81,7 +81,7 @@ export const QueryPage = observer(() => {
             uiPredicates.replacePredicate(filter);
         } else {
             uiPredicates.addPredicate({
-                brainAreaFilterType: BRAIN_AREA_FILTER_TYPE_SPHERE
+                brainAreaFilterType: QUERY_PREDICATE_KIND_SPHERE
             }, {
                 composition: FilterComposition.and,
                 arbCenter: {

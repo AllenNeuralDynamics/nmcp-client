@@ -181,32 +181,3 @@ export class DynamicSingleSelect<T extends IDynamicSelectOption, U> extends Dyna
 
 export class DynamicSimpleSelect<T extends IDynamicSelectOption> extends DynamicSingleSelect<T, any> {
 }
-
-export class DynamicMultiSelect<T extends IDynamicSelectOption, U> extends DynamicSelect<T, T[], any[], U> {
-    protected findSelectedObject(option: any[]): T[] {
-        return option.map(o => {
-            return this.props.options.find(s => s.id === o.value.id);
-        });
-    }
-
-    protected selectValueForOption(option: T): string | number {
-        return option.id;
-    }
-
-    protected isSelectedOption(object: T, selectedOption: T[]) {
-        return selectedOption && (selectedOption.length > 0) && (selectedOption.find(s => s.id === object.id)) !=null;
-    }
-
-    protected addToSelection(option: T, selection: T[]) {
-        if (selection) {
-            selection.push(option);
-        } else {
-            selection = [option];
-        }
-
-        return selection;
-    }
-}
-
-export class DynamicSimpleMultiSelect<T extends IDynamicSelectOption> extends DynamicMultiSelect<T, any> {
-}

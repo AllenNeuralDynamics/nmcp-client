@@ -24,6 +24,8 @@ export interface IPosition {
     [key: string]: string;
 }
 
+// TODO This is from an older version of the API that has been subsumed by UIQueryPredicate and is now used as a child in that class.  Some refactor is needed
+// to consolidate.
 export class FilterContents {
     public tracingIdsOrDOIs: string;
     public tracingIdsOrDOIsExactMatch: boolean;

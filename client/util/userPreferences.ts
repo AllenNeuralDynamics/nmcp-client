@@ -1,4 +1,5 @@
 import {PreferencesManager} from "./preferencesManager";
+
 import {UIQueryPredicate} from "../viewmodel/uiQueryPredicate";
 
 const SamplePageOffset = "sample.page.offset";

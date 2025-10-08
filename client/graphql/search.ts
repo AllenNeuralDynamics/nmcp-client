@@ -1,10 +1,9 @@
 import gql from "graphql-tag";
 
 import {INeuron} from "../models/neuron";
-import {IPositionInput} from "../viewmodel/queryFilter";
-import {PredicateTypeValue} from "../models/brainAreaFilterType";
 import {ReconstructionFieldsFragment} from "./reconstruction";
 import {ITracingNode} from "../models/tracingNode";
+import {SearchPredicate} from "../models/searchPredicate";
 
 export const SEARCH_NEURONS_QUERY = gql`query SearchNeurons($context: SearchContext) {
   searchNeurons(context: $context) {
@@ -56,21 +55,6 @@ export const SEARCH_NEURONS_QUERY = gql`query SearchNeurons($context: SearchCont
   }
 }
 ${ReconstructionFieldsFragment}`;
-
-export type SearchPredicate = {
-    predicateType: PredicateTypeValue;
-    tracingIdsOrDOIs: string[];
-    tracingIdsOrDOIsExactMatch: boolean;
-    tracingStructureIds: string[];
-    nodeStructureIds: string[];
-    operatorId: string;
-    amount: number;
-    brainAreaIds: string[];
-    arbCenter: IPositionInput;
-    arbSize: number;
-    invert: boolean;
-    composition: number;
-}
 
 export type SearchContext = {
     nonce: string,

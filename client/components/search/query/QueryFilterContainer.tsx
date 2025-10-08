@@ -5,7 +5,7 @@ import {useConstants} from "../../../hooks/useConstants";
 import {QueryFilter} from "./QueryFilter";
 import {IQueryHeaderBaseProps, QueryHeader} from "./QueryHeader";
 import {columnStyle} from "../../../util/styles";
-import {useQueryPredicates} from "../../../hooks/useQueryPredicates";
+import {useUIQuery} from "../../../hooks/useUIQuery";
 import {observer} from "mobx-react";
 
 export interface IQueryFilterContainerProps extends IQueryHeaderBaseProps {
@@ -22,7 +22,7 @@ const styles = {
 export const QueryFilterContainer = observer((props: IQueryFilterContainerProps) => {
     const constants = useConstants();
 
-    const uiPredicates = useQueryPredicates();
+    const uiPredicates = useUIQuery();
 
     const predicates = uiPredicates.predicates;
 

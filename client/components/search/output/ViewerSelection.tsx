@@ -4,7 +4,7 @@ import {Icon, Popup} from "semantic-ui-react";
 
 import {ITracingNode} from "../../../models/tracingNode";
 import {StructureIdentifier} from "../../../models/structureIdentifier";
-import {IPositionInput} from "../../../viewmodel/queryFilter";
+import {IPositionInput} from "../../../viewmodel/filterContents";
 import {TracingViewModel} from "../../../viewmodel/tracingViewModel";
 import {useConstants} from "../../../hooks/useConstants";
 import {useAtlas} from "../../../hooks/useAtlas";

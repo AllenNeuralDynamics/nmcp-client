@@ -2,7 +2,7 @@ import * as React from "react";
 import {useEffect, useState} from "react";
 import {useLazyQuery} from "@apollo/client";
 
-import {NeuroglancerProxy} from "../../../viewer/neuroglancer";
+import {NeuroglancerProxy} from "../../../viewer/neuroglancerProxy";
 import {UserPreferences} from "../../../util/userPreferences";
 import {NeuronViewModel} from "../../../viewmodel/neuronViewModel";
 import {NEURON_VIEW_MODE_SOMA} from "../../../viewmodel/neuronViewMode";

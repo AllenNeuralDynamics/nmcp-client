@@ -8,7 +8,7 @@ import {NdbConstants} from "../../models/constants";
 import {CONSTANTS_QUERY, ConstantsQueryResponse} from "../../graphql/constants";
 import {AppLoading} from "./AppLoading";
 import {useAtlas} from "../../hooks/useAtlas";
-import {useQueryPredicates} from "../../hooks/useQueryPredicates";
+import {useUIQuery} from "../../hooks/useUIQuery";
 
 export const ConstantsContext = createContext<NdbConstants>(null);
 
@@ -16,7 +16,7 @@ export const AppConstants = observer((props: any) => {
     const {data, error, loading} = useQuery<ConstantsQueryResponse>(CONSTANTS_QUERY);
 
     const atlas = useAtlas();
-    const uiPredicates = useQueryPredicates();
+    const uiPredicates = useUIQuery();
 
     if (loading) {
         return <AppLoading message="initializing system data"/>;
