@@ -2,21 +2,18 @@ import * as React from "react";
 import {observer} from "mobx-react-lite";
 import {Icon} from "semantic-ui-react";
 
-import {StructureHistory} from "./StructureHistory";
-import {DrawerState} from "../MainView";
 import {primaryBackground, secondaryBackground} from "../../../../util/styles";
 import {useAppLayout} from "../../../../hooks/useAppLayout";
+import {DrawerState} from "../../../../viewmodel/appLayout";
+import {StructureHistory} from "./StructureHistory";
 import {AtlasTree} from "./AtlasTree";
 
-type CompartmentHeaderProps = {
-    isDocked: boolean;
 
-    onClickCloseOrPin(state: DrawerState): void;
-}
+const CompartmentHeader = () => {
+    const appLayout = useAppLayout();
 
-const CompartmentHeader = (props: CompartmentHeaderProps) => {
-    const transform = props.isDocked ? "" : "rotate(-45deg)";
-    const state = props.isDocked ? DrawerState.Float : DrawerState.Dock;
+    const transform = appLayout.isCompartmentListDocked ? "" : "rotate(-45deg)";
+    const state = appLayout.isCompartmentListDocked ? DrawerState.Float : DrawerState.Dock;
 
     return (
         <div style={{
@@ -41,20 +38,14 @@ const CompartmentHeader = (props: CompartmentHeaderProps) => {
                 order: 3
             }}>Compartments</h4>
             <Icon name="pin" style={{margin: "auto", order: 2, marginLeft: "10px", transform: transform}}
-                  onClick={() => props.onClickCloseOrPin(state)}/>
+                  onClick={() => appLayout.setAtlasStructureDrawerState(state)}/>
             <Icon name="chevron right" style={{margin: "auto", order: 1}}
-                  onClick={() => props.onClickCloseOrPin(DrawerState.Hidden)}/>
+                  onClick={() => appLayout.setAtlasStructureDrawerState(DrawerState.Hidden)}/>
         </div>
     );
 };
 
-export interface ICompartmentListContainerProps {
-    isDocked: boolean;
-
-    onClickCloseOrPin(state: DrawerState): void;
-}
-
-export const Atlas = observer((props: ICompartmentListContainerProps) => {
+export const Atlas = observer(() => {
     const color = secondaryBackground;
 
     const appLayout = useAppLayout();
@@ -62,7 +53,7 @@ export const Atlas = observer((props: ICompartmentListContainerProps) => {
     return (
         <div style={{
             backgroundColor: "#efefef",
-            opacity: props.isDocked ? 1.0 : 0.75,
+            opacity: appLayout.isCompartmentListDocked ? 1.0 : 0.75,
             flexDirection: "column",
             flexWrap: "nowrap",
             alignItems: "flex-start",
@@ -75,7 +66,7 @@ export const Atlas = observer((props: ICompartmentListContainerProps) => {
             display: "flex",
             border: "1px solid"
         }}>
-            <CompartmentHeader {...props}/>
+            <CompartmentHeader/>
             <div style={{order: 2, flexGrow: 1, width: "100%", overflow: "auto"}}>
                 <div style={{display: "flex", backgroundColor: color, color: "white", margin: 0, padding: "8px"}}>
                     <h5 style={{color: "white", margin: "auto", textAlign: "center", order: 0, flexGrow: 1}}> History </h5>

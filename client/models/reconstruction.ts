@@ -1,8 +1,8 @@
 import {IUser} from "./user";
 import {INeuron} from "./neuron";
-import {ISwcTracing} from "./swcTracing";
 import {Precomputed} from "./precomputed";
 import {QualityCheck} from "./qualityCheck";
+import {ITracing} from "./tracing";
 
 export interface IReconstruction {
     id: string;
@@ -24,9 +24,8 @@ export interface IReconstruction {
     peerReviewerId: string;
     peerReviewer: IUser;
     neuron: INeuron;
-    axon: ISwcTracing;
-    dendrite: ISwcTracing;
-    tracings: ISwcTracing[];
+    axon: ITracing;
+    dendrite: ITracing;
     precomputed?: Precomputed;
 }
 

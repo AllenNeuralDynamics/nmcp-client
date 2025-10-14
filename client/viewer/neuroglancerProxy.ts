@@ -265,7 +265,7 @@ export class NeuroglancerProxy {
 
         if (state.layers?.length >= this._searchLayers.SearchSomaAnnotationLayer.index) {
             state.layers[this._searchLayers.SearchSomaAnnotationLayer.index].annotations = somas.map(n => {
-                const soma = n.somaOnlyTracing.soma;
+                const soma = n.soma;
 
                 this._somaModelMap.set(soma.id, n);
                 this._somaNodeMap.set(soma.id, soma);

@@ -1,30 +1,22 @@
 import * as React from "react";
-
-import {ITracingViewerBaseProps, TracingViewer} from "./TracingViewer";
-import {primaryBackground} from "../../../util/styles";
+import {observer} from "mobx-react";
 import {Icon} from "semantic-ui-react";
+
+import {primaryBackground} from "../../../util/styles";
 import {NeuroglancerProxy} from "../../../viewer/neuroglancerProxy";
 import {useAppLayout} from "../../../hooks/useAppLayout";
+import {DrawerState} from "../../../viewmodel/appLayout";
+import {TracingViewer} from "./TracingViewer";
 
-export interface IViewerProps extends ITracingViewerBaseProps {
-    isNeuronListDocked: boolean;
-    isCompartmentListDocked: boolean;
-    isNeuronListOpen: boolean;
-    isCompartmentListOpen: boolean;
 
-    onFloatNeuronList(): void;
-
-    onFloatCompartmentList(): void;
-}
-
-export const ViewerContainer: React.FC<IViewerProps> = ((props) => {
+export const ViewerContainer = observer(() => {
     const appLayout = useAppLayout();
 
     const renderFloatNeuronListGlyph = () => {
-        if (!props.isNeuronListDocked && !props.isNeuronListOpen) {
+        if (!appLayout.isNeuronListDocked && !appLayout.isNeuronListOpen) {
             return (
                 <div style={{display: "flex", alignItems: "center", height: "100%"}}
-                     onClick={() => props.onFloatNeuronList()}>
+                     onClick={() => appLayout.setNeuronDrawerState(DrawerState.Float)}>
                     <h5 style={{color: "white", fontWeight: "lighter", margin: "0 6px 0 10px"}}>
                         Neurons</h5>
                     <Icon name="chevron right" style={{top: -1, order: 2}}
@@ -36,10 +28,10 @@ export const ViewerContainer: React.FC<IViewerProps> = ((props) => {
     };
 
     const renderFloatCompartmentListGlyph = () => {
-        if (!props.isCompartmentListDocked && !props.isCompartmentListOpen) {
+        if (!appLayout.isCompartmentListDocked && !appLayout.isCompartmentListOpen) {
             return (
                 <div style={{display: "flex", alignItems: "center", height: "100%"}}
-                     onClick={() => props.onFloatCompartmentList()}>
+                     onClick={() => appLayout.setAtlasStructureDrawerState(DrawerState.Float)}>
                     <Icon name="chevron left" style={{order: 1, top: -1}}/>
                     <h5 style={{
                         color: "white",
@@ -128,7 +120,7 @@ export const ViewerContainer: React.FC<IViewerProps> = ((props) => {
         }}>
             {renderHeader()}
             <div style={{order: 2, flexGrow: 1, width: "100%", height: "100%"}}>
-                <TracingViewer {...props}/>
+                <TracingViewer/>
             </div>
         </div>
     );

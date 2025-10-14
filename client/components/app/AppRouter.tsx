@@ -7,6 +7,7 @@ import {Reconstructions} from "../reconstructions/Reconstructions";
 import {Samples} from "../neurons/samples/Samples";
 import {Admin} from "../admin/Admin";
 import {Review} from "../review/Review";
+import {NeuronVersions} from "../neurons/versions/NeuronVersions";
 
 export const AppRouter = () => {
     return (
@@ -16,6 +17,7 @@ export const AppRouter = () => {
             <Route path="/samples" element={<Samples/>}/>
             <Route path="/review" element={<Review/>}/>
             <Route path="/admin" element={<Admin/>}/>
+            <Route path="/neuron/:neuronId/:versionId?" element={<NeuronVersions/>}/>
             <Route path="/" element={<AppContent/>}/>
         </Routes>
     );

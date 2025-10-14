@@ -8,18 +8,16 @@ export class TracingViewModel {
     tracing: ITracing;
     structure: ITracingStructure;
     soma: ITracingNode;
-    nodeLookup: Map<number, ITracingNode>;
 
     private readonly _neuron: NeuronViewModel;
 
-    public constructor(id: string, neuron: NeuronViewModel) {
+    public constructor(tracing: ITracing, neuron: NeuronViewModel) {
         this._neuron = neuron;
 
-        this.id = id;
-        this.tracing = null;
-        this.structure = null;
-        this.soma = null;
-        this.nodeLookup = null;
+        this.id = tracing.id;
+        this.tracing = tracing;
+        this.structure = tracing.tracingStructure;
+        this.soma = tracing.soma;
     }
 
     public get neuron() {

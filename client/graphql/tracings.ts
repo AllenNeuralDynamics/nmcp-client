@@ -1,6 +1,6 @@
 import gql from "graphql-tag";
 
-import {ISwcTracing} from "../models/swcTracing";
+import {ITracing} from "../models/tracing";
 
 const TracingFieldsFragment = gql`fragment TracingFields on Tracing {
     id
@@ -53,7 +53,7 @@ export type UploadTracingVariables = {
 }
 
 export type UploadTracingMutationData = {
-    tracings: ISwcTracing[];
+    tracings: ITracing[];
     error: {
         name: string;
         message: string;

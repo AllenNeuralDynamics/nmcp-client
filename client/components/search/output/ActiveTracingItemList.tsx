@@ -37,7 +37,7 @@ export function ActiveTracingItemList(props: IActiveTracingItemProps) {
 
     const viewMode = n.viewMode;
 
-    const soma = n.somaOnlyTracing.soma;
+    const soma = n.soma;
 
     let somaBrainAreaLabel = null;
 

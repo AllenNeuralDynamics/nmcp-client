@@ -8,9 +8,9 @@ import {SwcDropZone} from "./SwcDropZone";
 
 import {IReconstruction} from "../../../models/reconstruction";
 import {ITracingStructure} from "../../../models/tracingStructure";
-import {ISwcUploadOutput} from "../../../models/swcTracing";
 import {UploadTracingMutationResponse, UploadTracingVariables} from "../../../graphql/tracings";
 import {ConstantsContext} from "../../app/AppConstants";
+import {ITracingUploadOutput} from "../../../models/tracing";
 
 export interface ICreateTracingProps {
     reconstruction: IReconstruction;
@@ -137,7 +137,7 @@ export const CreateTracing: React.FC<ICreateTracingProps> = (props) => {
     );
 }
 
-const uploadSuccessContent = (output: ISwcUploadOutput) => {
+const uploadSuccessContent = (output: ITracingUploadOutput) => {
     return (
         <div>
             <h3>Upload successful</h3>

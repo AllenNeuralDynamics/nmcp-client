@@ -53,7 +53,7 @@ export const NeuroglancerContainer = observer<React.FC<NeuroglancerContainerProp
         const known = queryViewModel.neuronViewModels.filter(n => n.isSelected);
 
         const somas = known.filter(n => n.viewMode == NEURON_VIEW_MODE_SOMA)
-            .filter(n => n.somaOnlyTracing?.soma);
+            .filter(n => n.soma);
 
         ngProxy.updateSearchReconstructions(somas, known);
     }

@@ -1,4 +1,3 @@
-import {ISwcTracing} from "./swcTracing";
 import {IRegistrationTransform} from "./registrationTransform";
 import {ITracingNode} from "./tracingNode";
 import {ITracingStructure} from "./tracingStructure";
@@ -16,10 +15,10 @@ export interface ITransformProgress {
 
 export interface ITracing {
     id: string;
+    filename: string;
     nodeCount?: number;
     firstNode?: ITracingNode;
     soma?: ITracingNode;
-    swcTracing?: ISwcTracing;
     nodes?: ITracingNode[];
     keyNodes?: ITracingNode[];
     registrationTransform?: IRegistrationTransform;
@@ -37,3 +36,9 @@ export interface ITracingPage {
     matchCount: number;
     tracings: ITracing[];
 }
+
+export interface ITracingUploadOutput {
+    tracings: ITracing[];
+    error: Error;
+}
+

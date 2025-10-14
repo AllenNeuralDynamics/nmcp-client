@@ -2,37 +2,33 @@ import * as React from "react";
 import {useCallback} from "react";
 import {observer} from "mobx-react";
 import {Dropdown, Icon, Message} from "semantic-ui-react";
-
-import {NeuronTable} from "./NeuronTable";
-import {DrawerState} from "./MainView";
-import {primaryBackground} from "../../../util/styles";
-import {ExportFormat} from "../../../models/tracing";
-import {useSystemConfiguration} from "../../../hooks/useSystemConfiguration";
-import {QueryStatus} from "../../../viewmodel/queryResponseViewModel";
-import {useQueryResponseViewModel} from "../../../hooks/useQueryResponseViewModel";
-import {requestExport} from "../../../services/exportService";
 import {toast} from "react-toastify";
 
-export interface INeuronListContainerProps {
-    isDocked: boolean;
+import {primaryBackground} from "../../../util/styles";
+import {requestExport} from "../../../services/exportService";
+import {DrawerState} from "../../../viewmodel/appLayout";
+import {useSystemConfiguration} from "../../../hooks/useSystemConfiguration";
+import {useAppLayout} from "../../../hooks/useAppLayout";
+import {useQueryResponseViewModel} from "../../../hooks/useQueryResponseViewModel";
+import {NeuronTable} from "./NeuronTable";
+import {ExportFormat} from "../../../models/tracing";
+import {QueryStatus} from "../../../viewmodel/queryResponseViewModel";
 
-    onClickCloseOrPin(state: DrawerState): void;
-}
-
-export const NeuronListContainer = observer<React.FC<INeuronListContainerProps>>((props) => {
+export const NeuronListContainer = observer(() => {
     const systemConfiguration = useSystemConfiguration();
+    const appLayout = useAppLayout();
 
     const queryResponse = useQueryResponseViewModel();
 
     const renderCloseGlyph = useCallback(() => {
-        const transform = props.isDocked ? "" : "rotate(-45deg)";
-        const state = props.isDocked ? DrawerState.Float : DrawerState.Dock;
+        const transform = appLayout.isNeuronListDocked ? "" : "rotate(-45deg)";
+        const state = appLayout.isNeuronListDocked ? DrawerState.Float : DrawerState.Dock;
 
         return (
             <Icon name="pin" style={{margin: "auto", order: 3, marginRight: "10px", transform: transform}}
-                  onClick={() => props.onClickCloseOrPin(state)}/>
+                  onClick={() => appLayout.setNeuronDrawerState(state)}/>
         );
-    }, [props.isDocked, props.onClickCloseOrPin]);
+    }, [appLayout.isNeuronListDocked]);
 
     async function exportNeurons(ids: string[], format: ExportFormat) {
         if (ids.length === 0) {
@@ -71,34 +67,34 @@ export const NeuronListContainer = observer<React.FC<INeuronListContainerProps>>
         </Dropdown.Menu>
     </Dropdown>)
 
-    const renderedHeader =  (
-            <div style={{
-                backgroundColor: primaryBackground,
+    const renderedHeader = (
+        <div style={{
+            backgroundColor: primaryBackground,
+            color: "white",
+            maxHeight: "40px",
+            minHeight: "40px",
+            width: "100%",
+            margin: 0,
+            padding: "6px",
+            display: "flex",
+            order: 1,
+            flexDirection: "row"
+        }}>
+            {renderedExport}
+            <h4 style={{
                 color: "white",
-                maxHeight: "40px",
-                minHeight: "40px",
-                width: "100%",
-                margin: 0,
-                padding: "6px",
-                display: "flex",
-                order: 1,
-                flexDirection: "row"
-            }}>
-                {renderedExport}
-                <h4 style={{
-                    color: "white",
-                    fontWeight: "lighter",
-                    margin: "auto",
-                    marginLeft: "33px",
-                    textAlign: "center",
-                    flexGrow: 1,
-                    order: 2
-                }}>Neurons</h4>
-                {renderCloseGlyph()}
-                <Icon name="chevron left" style={{margin: "auto", order: 4}}
-                      onClick={() => props.onClickCloseOrPin(DrawerState.Hidden)}/>
-            </div>
-        );
+                fontWeight: "lighter",
+                margin: "auto",
+                marginLeft: "33px",
+                textAlign: "center",
+                flexGrow: 1,
+                order: 2
+            }}>Neurons</h4>
+            {renderCloseGlyph()}
+            <Icon name="chevron left" style={{margin: "auto", order: 4}}
+                  onClick={() => appLayout.setNeuronDrawerState(DrawerState.Hidden)}/>
+        </div>
+    );
 
     let content: React.JSX.Element;
 
@@ -126,7 +122,7 @@ export const NeuronListContainer = observer<React.FC<INeuronListContainerProps>>
     return (
         <div style={{
             backgroundColor: "#efefef",
-            opacity: props.isDocked ? 1.0 : 0.75,
+            opacity: appLayout.isNeuronListDocked ? 1.0 : 0.75,
             flexDirection: "column",
             flexWrap: "nowrap",
             order: 1,

@@ -6,53 +6,34 @@ import {ITracingNode} from "../models/tracingNode";
 import {SearchPredicate} from "../models/searchPredicate";
 
 export const SEARCH_NEURONS_QUERY = gql`query SearchNeurons($context: SearchContext) {
-  searchNeurons(context: $context) {
-    nonce
-    queryTime
-    totalCount
-    
-    neurons {
-      id
-      idString
-      consensus
-      brainArea {
-        id
-        acronym
-      }
-      sample {
-        id
-        idNumber
-        animalId
-      }
-      tracings {
-        id
-        tracingStructure {
-          id
-          name
-          value
+    searchNeurons(context: $context) {
+        nonce
+        queryTime
+        totalCount
+
+        neurons {
+            id
+            idString
+            consensus
+            brainArea {
+                id
+                acronym
+            }
+            sample {
+                id
+                idNumber
+                animalId
+            }
+            latest {
+                ...ReconstructionFields
+            }
         }
-        soma {
-          id
-          x
-          y
-          z
-          radius
-          parentNumber
-          sampleNumber
-          brainStructureId
-          structureIdentifierId
-        }
-      }
-        reconstructions {
-            ...ReconstructionFields
+
+        error {
+            name
+            message
         }
     }
-    
-    error {
-      name
-      message
-    }
-  }
 }
 ${ReconstructionFieldsFragment}`;
 

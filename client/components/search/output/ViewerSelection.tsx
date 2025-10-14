@@ -2,21 +2,20 @@ import * as React from "react";
 import {useRef, useState} from "react";
 import {Icon, Popup} from "semantic-ui-react";
 
-import {ITracingNode} from "../../../models/tracingNode";
-import {StructureIdentifier} from "../../../models/structureIdentifier";
-import {IPositionInput} from "../../../viewmodel/filterContents";
-import {TracingViewModel} from "../../../viewmodel/tracingViewModel";
 import {useConstants} from "../../../hooks/useConstants";
 import {useAtlas} from "../../../hooks/useAtlas";
+import {ITracingNode} from "../../../models/tracingNode";
+import {StructureIdentifier} from "../../../models/structureIdentifier";
+import {TracingViewModel} from "../../../viewmodel/tracingViewModel";
+import {observer} from "mobx-react";
+import {useUIQuery} from "../../../hooks/useUIQuery";
 
 interface IViewerSelectionProps {
     selectedTracing: TracingViewModel;
     selectedNode: ITracingNode;
-
-    populateCustomPredicate(position: IPositionInput, replace: boolean): void;
 }
 
-export const ViewerSelection = (props: IViewerSelectionProps) => {
+export const ViewerSelection = observer<React.FC<IViewerSelectionProps>>((props: IViewerSelectionProps) => {
     const [isCenterPointCollapsed, setIsCenterPointCollapsed] = useState<boolean>(false);
     const [top, setTop] = useState<number>(10);
     const [left, setLeft] = useState<number>(10);
@@ -29,6 +28,7 @@ export const ViewerSelection = (props: IViewerSelectionProps) => {
 
     const constants = useConstants();
     const atlas = useAtlas();
+    const uiQuery = useUIQuery();
 
     const lookupStructureIdentifier = (id: string) => {
         return constants.findStructureIdentifier(id);
@@ -51,21 +51,7 @@ export const ViewerSelection = (props: IViewerSelectionProps) => {
             }
         }
 
-        let structureName = "path";
-
         const structure = lookupStructureIdentifier(node.structureIdentifierId);
-
-        switch (structure.value) {
-            case StructureIdentifier.forkPoint:
-                structureName = "branch";
-                break;
-            case StructureIdentifier.endPoint:
-                structureName = "end point";
-                break;
-            case StructureIdentifier.soma:
-                structureName = "Soma";
-                break;
-        }
 
         const position = {
             x: node.x,
@@ -138,11 +124,11 @@ export const ViewerSelection = (props: IViewerSelectionProps) => {
                 </div>
                 <div style={{order: 2, marginTop: "4px", paddingTop: "4px", borderTop: "1px solid #ddd"}}>
                     <strong>{`Update filter with custom region: `}</strong>
-                    <a onClick={() => props.populateCustomPredicate(position, true)}>
+                    <a onClick={() => uiQuery.createCustomRegionPredicate(position, true)}>
                         replace
                     </a>
                     {` or `}
-                    <a onClick={() => props.populateCustomPredicate(position, false)}>
+                    <a onClick={() => uiQuery.createCustomRegionPredicate(position, false)}>
                         add
                     </a>
                 </div>
@@ -233,4 +219,4 @@ export const ViewerSelection = (props: IViewerSelectionProps) => {
             {content1}
         </div>
     );
-}
+});

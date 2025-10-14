@@ -2,27 +2,23 @@ import * as React from "react";
 import {useEffect, useRef, useState} from "react";
 import {observer} from "mobx-react";
 
+import {usePreferences} from "../../../hooks/usePreferences";
 import {ITracingNode} from "../../../models/tracingNode";
 import {TracingViewModel} from "../../../viewmodel/tracingViewModel";
-import {IPositionInput} from "../../../viewmodel/filterContents";
 import {ViewerSelection} from "./ViewerSelection";
 import {NeuroglancerContainer} from "./NeuroglancerContainer";
-import {UserPreferences} from "../../../util/userPreferences";
-
-export interface ITracingViewerBaseProps {
-    populateCustomPredicate(position: IPositionInput, replace: boolean): void;
-}
-
 
 export type TracingViewerState = {
     renderWidth?: number;
     renderHeight?: number;
 }
 
-export const TracingViewer = observer<React.FC<ITracingViewerBaseProps>>((props: ITracingViewerBaseProps) => {
+export const TracingViewer = observer(() => {
     const size = calculateDimensions();
 
     const ref = useRef(null);
+
+    const preferences = usePreferences();
 
     const [state, setState] = useState<TracingViewerState>({
         renderWidth: size.width,
@@ -35,7 +31,7 @@ export const TracingViewer = observer<React.FC<ITracingViewerBaseProps>>((props:
     });
 
     useEffect(() => {
-        const observer = new ResizeObserver(entries => {
+        const observer = new ResizeObserver(() => {
             updateDimensions();
         });
 
@@ -65,8 +61,6 @@ export const TracingViewer = observer<React.FC<ITracingViewerBaseProps>>((props:
         let width = container.clientWidth;
         let height = container.clientHeight;
 
-        console.log(`calculate dimensions ${width} x ${height}`);
-
         return {width, height};
     }
 
@@ -92,15 +86,14 @@ export const TracingViewer = observer<React.FC<ITracingViewerBaseProps>>((props:
         height: "100%",
         width: "100%",
         position: relative
-    }, UserPreferences.Instance.HideCursorInViewer ? {cursor: "none"} : {});
+    }, preferences.preferences.HideCursorInViewer ? {cursor: "none"} : {});
 
     const viewerContainer = <NeuroglancerContainer elementName="neuroglancer-viewer-container" height={state.renderHeight} width={state.renderWidth}
                                                    onSelectNode={(n, t, a, b, c) => onSelectNodeFromTracingNode(n, t, a, b, c)}/>
 
     return (
         <div id="viewer-parent" ref={ref} style={style}>
-            <ViewerSelection selectedNode={selectedState.selectedNode} selectedTracing={selectedState.selectedTracing}
-                             populateCustomPredicate={props.populateCustomPredicate}/>
+            <ViewerSelection selectedNode={selectedState.selectedNode} selectedTracing={selectedState.selectedTracing}/>
             {viewerContainer}
         </div>
     );

@@ -36,8 +36,8 @@ export interface INeuron {
     metadata?: string;
     sample: ISample;
     brainArea: IBrainArea;
-    tracings?: ITracing[];
-    reconstructions: IReconstruction[];
+    latest?: IReconstruction;
+    reconstructions?: IReconstruction[];
     createdAt: number;
     updatedAt: number;
 }

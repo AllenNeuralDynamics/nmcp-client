@@ -1,10 +1,9 @@
-import {INeuron} from "../models/neuron";
-import {
-    NEURON_VIEW_MODE_ALL, NEURON_VIEW_MODE_AXON, NEURON_VIEW_MODE_DENDRITE, NEURON_VIEW_MODE_SOMA, NeuronViewMode
-} from "./neuronViewMode";
-import {TracingViewModel} from "./tracingViewModel";
-import {TracingStructure, TracingStructures} from "../models/tracingStructure";
 import {makeObservable, observable} from "mobx";
+
+import {INeuron} from "../models/neuron";
+import {NEURON_VIEW_MODE_ALL, NeuronViewMode} from "./neuronViewMode";
+import {TracingViewModel} from "./tracingViewModel";
+import {ITracingNode} from "../models/tracingNode";
 
 export class NeuronViewModel {
     neuron: INeuron = null;
@@ -18,7 +17,7 @@ export class NeuronViewModel {
     hasAxonTracing: boolean = false;
     hasDendriteTracing: boolean = false;
 
-    somaOnlyTracing: TracingViewModel = null;
+    soma: ITracingNode = null;
 
     tracings: TracingViewModel[] = [];
 
@@ -41,11 +40,11 @@ export class NeuronViewModel {
         this.hasAxonTracing = false;
         this.hasDendriteTracing = false;
 
-        this.somaOnlyTracing = null;
+        this.soma = null;
 
-        if (this.neuron.reconstructions?.length > 0) {
-            this.reconstructionId = this.neuron.reconstructions[0].id;
-            this.skeletonId = this.neuron.reconstructions[0].precomputed?.skeletonSegmentId;
+        if (this.neuron.latest) {
+            this.reconstructionId = this.neuron.latest.id;
+            this.skeletonId = this.neuron.latest.precomputed?.skeletonSegmentId;
         }
 
         makeObservable(this, {
@@ -75,37 +74,19 @@ export class NeuronViewModel {
             return;
         }
 
-        this.neuron.tracings.map(t => {
-            if (!t) {
-                return;
-            }
-
-            const model = new TracingViewModel(t.id, this);
-
-            model.soma = t.soma;
-            model.structure = t.tracingStructure;
-
+        if (this.neuron.latest?.axon) {
+            const model = new TracingViewModel(this.neuron.latest.axon, this);
             this.tracings.push(model);
+            this.hasAxonTracing = true;
+            this.soma = model.soma;
+        }
 
-            if (t.tracingStructure.value === TracingStructure.axon) {
-                this.hasAxonTracing = true;
-            }
-
-            if (t.tracingStructure.value === TracingStructure.dendrite) {
-                this.hasDendriteTracing = true;
-            }
-        });
-
-        if (this.tracings.length > 0) {
-            if (this.neuron.tracings[0]) {
-                const somaTracingModel = new TracingViewModel(this.neuron.id, this);
-
-                // Borrow soma data from one of the tracings.
-                somaTracingModel.soma = this.neuron.tracings[0].soma;
-
-                somaTracingModel.structure = TracingStructures.Soma;
-
-                this.somaOnlyTracing = somaTracingModel;
+        if (this.neuron.latest?.dendrite) {
+            const model = new TracingViewModel(this.neuron.latest.dendrite, this);
+            this.tracings.push(model);
+            this.hasDendriteTracing = true;
+            if (!this.soma) {
+                this.soma = model.soma;
             }
         }
     }
