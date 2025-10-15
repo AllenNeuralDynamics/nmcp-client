@@ -67,7 +67,7 @@ export const Atlas = observer((props: ICompartmentListContainerProps) => {
             flexWrap: "nowrap",
             alignItems: "flex-start",
             alignContent: "flex-start",
-            order: 3,
+            order: 2,
             width: "400px",
             height: "100%",
             flexGrow: 0,
@@ -77,44 +77,15 @@ export const Atlas = observer((props: ICompartmentListContainerProps) => {
         }}>
             <CompartmentHeader {...props}/>
             <div style={{order: 2, flexGrow: 1, width: "100%", overflow: "auto"}}>
-                <div style={{
-                    display: "flex",
-                    backgroundColor: color,
-                    color: "white",
-                    height: "30px",
-                    margin: 0,
-                    padding: "6px"
-                }}>
-                    <h5 style={{
-                        color: "white",
-                        margin: "auto",
-                        textAlign: "center",
-                        order: 0,
-                        flexGrow: 1
-                    }}>History</h5>
+                <div style={{display: "flex", backgroundColor: color, color: "white", margin: 0, padding: "8px"}}>
+                    <h5 style={{color: "white", margin: "auto", textAlign: "center", order: 0, flexGrow: 1}}> History </h5>
                     <Icon style={{order: 1, flexGrow: 0, verticalAlign: "middle"}}
                           name={appLayout.isAtlasStructureHistoryExpanded ? "angle up" : "angle down"}
                           onClick={() => appLayout.isAtlasStructureHistoryExpanded = !appLayout.isAtlasStructureHistoryExpanded}/>
                 </div>
                 {appLayout.isAtlasStructureHistoryExpanded ? <StructureHistory/> : null}
-                <div style={{
-                    backgroundColor: color,
-                    color: "white",
-                    height: "44px",
-                    margin: 0,
-                    padding: "6px"
-                }}>
-                    <h5 style={{
-                        color: "white",
-                        margin: "auto",
-                        textAlign: "center"
-                    }}>All Compartments</h5>
-                    <h6 style={{
-                        color: "white",
-                        margin: "auto",
-                        textAlign: "left"
-                    }}>
-                    </h6>
+                <div style={{backgroundColor: color, color: "white", margin: 0, padding: "8px"}}>
+                    <h5 style={{color: "white", margin: "auto", textAlign: "center"}}>All Compartments</h5>
                 </div>
                 <AtlasTree/>
             </div>

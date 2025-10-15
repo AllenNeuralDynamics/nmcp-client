@@ -7,6 +7,7 @@ import {IQueryHeaderBaseProps, QueryHeader} from "./QueryHeader";
 import {columnStyle} from "../../../util/styles";
 import {useUIQuery} from "../../../hooks/useUIQuery";
 import {observer} from "mobx-react";
+import {useAppLayout} from "../../../hooks/useAppLayout";
 
 export interface IQueryFilterContainerProps extends IQueryHeaderBaseProps {
 
@@ -21,7 +22,7 @@ const styles = {
 
 export const QueryFilterContainer = observer((props: IQueryFilterContainerProps) => {
     const constants = useConstants();
-
+    const appLayout = useAppLayout();
     const uiPredicates = useUIQuery();
 
     const predicates = uiPredicates.predicates;
@@ -63,7 +64,7 @@ export const QueryFilterContainer = observer((props: IQueryFilterContainerProps)
             <div style={{width: "100%", order: 1, flexBasis: "auto"}}>
                 <QueryHeader {...props}/>
             </div>
-            {props.isCollapsed ? null : renderPredicates(flexStyle)}
+            {appLayout.isQueryExpanded ? renderPredicates(flexStyle): null}
         </div>
     );
 });

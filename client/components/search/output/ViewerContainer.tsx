@@ -4,9 +4,9 @@ import {ITracingViewerBaseProps, TracingViewer} from "./TracingViewer";
 import {primaryBackground} from "../../../util/styles";
 import {Icon} from "semantic-ui-react";
 import {NeuroglancerProxy} from "../../../viewer/neuroglancerProxy";
+import {useAppLayout} from "../../../hooks/useAppLayout";
 
 export interface IViewerProps extends ITracingViewerBaseProps {
-    isQueryCollapsed: boolean;
     isNeuronListDocked: boolean;
     isCompartmentListDocked: boolean;
     isNeuronListOpen: boolean;
@@ -15,11 +15,11 @@ export interface IViewerProps extends ITracingViewerBaseProps {
     onFloatNeuronList(): void;
 
     onFloatCompartmentList(): void;
-
-    onToggleQueryCollapsed(): void;
 }
 
 export const ViewerContainer: React.FC<IViewerProps> = ((props) => {
+    const appLayout = useAppLayout();
+
     const renderFloatNeuronListGlyph = () => {
         if (!props.isNeuronListDocked && !props.isNeuronListOpen) {
             return (
@@ -55,9 +55,9 @@ export const ViewerContainer: React.FC<IViewerProps> = ((props) => {
     };
 
     const renderCollapseQueryGlyph = () => {
-        return (<Icon name={props.isQueryCollapsed ? "chevron down" : "chevron up"}
+        return (<Icon name={appLayout.isQueryExpanded ? "chevron up" : "chevron down"}
                       style={{margin: "auto", order: 3}}
-                      onClick={() => props.onToggleQueryCollapsed()}/>)
+                      onClick={() => appLayout.isQueryExpanded = !appLayout.isQueryExpanded}/>)
     };
 
     const renderResetView = () => {
@@ -93,8 +93,8 @@ export const ViewerContainer: React.FC<IViewerProps> = ((props) => {
                             {renderCollapseQueryGlyph()}
                         </div>
                         <div style={{flex: "1 1 auto", order: 2, textAlign: "center", width: "100%"}}>
-                            {props.isQueryCollapsed ?
-                                <span onClick={() => props.onToggleQueryCollapsed()}>
+                            {!appLayout.isQueryExpanded ?
+                                <span onClick={() => appLayout.isQueryExpanded = !appLayout.isQueryExpanded}>
                                     Show Search
                                 </span> : null}
                         </div>

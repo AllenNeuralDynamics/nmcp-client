@@ -1,5 +1,6 @@
 import * as React from "react";
 import {List, Icon} from "semantic-ui-react";
+import {Text} from "@mantine/core"
 
 import {AtlasStructureViewModel} from "../../../../viewmodel/atlasStructureViewModel";
 import {observer} from "mobx-react";
@@ -33,6 +34,10 @@ export const StructureHistory = observer(() => {
     const rows: any = atlas.structureHistory.map(v => {
         return (<StructureHistoryRow key={`bv_${v.structure.id}`} structure={v}/>)
     });
+
+    if (rows.length === 0) {
+        return (<Text size="sm" fs="italic" c="gray.8" p="8">History will appear as additional brain structures are displayed</Text>);
+    }
 
     return (
         <List divided relaxed style={{margin: 0, paddingTop: "6px", paddingBottom: "6px"}}>

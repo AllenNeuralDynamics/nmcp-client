@@ -6,6 +6,7 @@ import {QueryStatus} from "../../../viewmodel/queryResponseViewModel";
 import {useQueryResponseViewModel} from "../../../hooks/useQueryResponseViewModel";
 import {observer} from "mobx-react";
 import {useUIQuery} from "../../../hooks/useUIQuery";
+import {useAppLayout} from "../../../hooks/useAppLayout";
 
 
 const styles = {
@@ -19,17 +20,14 @@ const styles = {
 };
 
 export interface IQueryHeaderBaseProps {
-    isCollapsed: boolean;
-
-    onToggleCollapsed(): void;
     onPerformQuery(): void;
     onResetPage(): void;
     onShare(): void;
 }
 
 export const QueryHeader = observer((props: IQueryHeaderBaseProps) => {
+    const appLayout = useAppLayout();
     const queryResponse = useQueryResponseViewModel();
-
     const uiPredicates = useUIQuery();
 
     const renderToggleButton = () => {
@@ -44,11 +42,11 @@ export const QueryHeader = observer((props: IQueryHeaderBaseProps) => {
 
     const renderMessage = () => {
         if (queryResponse.status === QueryStatus.NeverQueried) {
-            if (props.isCollapsed) {
+            if (!appLayout.isQueryExpanded) {
                 return (
                     <div>
                         <Icon name="expand arrows alternate" style={styles.toggle}
-                              onClick={() => props.onToggleCollapsed()}/>
+                              onClick={() => appLayout.isQueryExpanded = true}/>
                         <span style={{paddingLeft: "6px"}}>Expand to perform a query</span>
                     </div>
 

@@ -1,49 +1,49 @@
 import * as React from "react";
-import {useState} from "react";
 import {useApolloClient} from "@apollo/client";
 import {observer} from "mobx-react";
 
+import {useAppLayout} from "../../hooks/useAppLayout";
+import {useUIQuery} from "../../hooks/useUIQuery";
+import {useAtlas} from "../../hooks/useAtlas";
+import {useQueryResponseViewModel} from "../../hooks/useQueryResponseViewModel";
 import {FilterComposition, IPositionInput} from "../../viewmodel/filterContents";
 import {IQueryFilterContainerProps, QueryFilterContainer} from "./query/QueryFilterContainer";
 import {MainView, MainViewProps} from "./output/MainView";
 import {QUERY_PREDICATE_KIND_SPHERE} from "../../viewmodel/queryPredicateKind";
 import {UserPreferences} from "../../util/userPreferences";
 import {NeuroglancerProxy} from "../../viewer/neuroglancerProxy";
-import {useQueryResponseViewModel} from "../../hooks/useQueryResponseViewModel";
-import {useUIQuery} from "../../hooks/useUIQuery";
-import {useAtlas} from "../../hooks/useAtlas";
 
 export const QueryPage = observer(() => {
+    const appLayout = useAppLayout();
+
     const queryResponse = useQueryResponseViewModel();
 
-    const uiPredicates = useUIQuery();
+    const uiQuery = useUIQuery();
 
     const client = useApolloClient();
 
     const atlas = useAtlas();
 
-    const [isQueryCollapsed, setIsQueryCollapsed] = useState<boolean>(false);
-
     const onPerformQuery = async () => {
-        if (isQueryCollapsed && !UserPreferences.Instance.ShouldAutoCollapseOnQuery) {
-            setIsQueryCollapsed(!isQueryCollapsed);
+        if (!appLayout.isQueryExpanded && !UserPreferences.Instance.ShouldAutoCollapseOnQuery) {
+            appLayout.isQueryExpanded = true;
         }
-        await uiPredicates.execute(queryResponse, client);
+        await uiQuery.execute(queryResponse, client);
     };
 
     const onResetPage = () => {
-        uiPredicates.reset();
+        uiQuery.reset();
         queryResponse.reset();
 
         atlas.clear();
 
-        setIsQueryCollapsed(false);
+        appLayout.isQueryExpanded = true;
     };
 
     const onShare = async () => {
         const queryData = {
             timestamp: Date.now(),
-            filters: uiPredicates.predicates.map(p => p.serialize())
+            filters: uiQuery.predicates.map(p => p.serialize())
         };
 
         const encodedQuery = btoa(JSON.stringify(queryData));
@@ -68,43 +68,17 @@ export const QueryPage = observer(() => {
     };
 
     const populateCustomPredicate = (position: IPositionInput, replace: boolean) => {
-        setIsQueryCollapsed(false);
-
-        if (replace) {
-            const filter = uiPredicates.predicates[uiPredicates.predicates.length - 1];
-            filter.brainAreaFilterType = QUERY_PREDICATE_KIND_SPHERE;
-            filter.filter.arbCenter = {
-                x: position.x.toFixed(1),
-                y: position.y.toFixed(1),
-                z: position.z.toFixed(1)
-            };
-            uiPredicates.replacePredicate(filter);
-        } else {
-            uiPredicates.addPredicate({
-                brainAreaFilterType: QUERY_PREDICATE_KIND_SPHERE
-            }, {
-                composition: FilterComposition.and,
-                arbCenter: {
-                    x: position.x.toFixed(1),
-                    y: position.y.toFixed(1),
-                    z: position.z.toFixed(1)
-                }
-            });
-        }
+        appLayout.isQueryExpanded = true;
+        uiQuery.createCustomRegionPredicate(position, replace);
     };
 
     const queryProps: IQueryFilterContainerProps = {
-        isCollapsed: isQueryCollapsed,
         onPerformQuery: onPerformQuery,
         onResetPage: onResetPage,
-        onShare: onShare,
-        onToggleCollapsed: () => setIsQueryCollapsed(!isQueryCollapsed),
+        onShare: onShare
     };
 
     const viewerProps: MainViewProps = {
-        isQueryCollapsed: isQueryCollapsed,
-        // visibleBrainAreas: atlas.visibleStructures,
-        onToggleQueryCollapsed: () => setIsQueryCollapsed(!isQueryCollapsed),
         populateCustomPredicate: (p: IPositionInput, b: boolean) => populateCustomPredicate(p, b)
     };
 

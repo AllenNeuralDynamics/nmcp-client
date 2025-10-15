@@ -18,13 +18,14 @@ import {SAMPLES_QUERY, SamplesQueryResponse} from "../../graphql/sample";
 import {UserPreferences} from "../../util/userPreferences";
 
 const statusFilterOptions = [
-    {key: "complete", text: "Published", value: 8},
-    {key: "in-progress", text: "In Progress", value: 1},
-    {key: "on-hold", text: "On Hold", value: 2},
-    {key: "in-review", text: "In Review", value: 3},
-    {key: "approved", text: "Approved", value: 5},
-    {key: "rejected", text: "Rejected", value: 6},
-    {key: "invalid", text: "Invalid", value: 9}
+    {key: "complete", text: "Published", value: ReconstructionStatus.Published},
+    {key: "in-progress", text: "In Progress", value: ReconstructionStatus.InProgress},
+    {key: "on-hold", text: "On Hold", value: ReconstructionStatus.OnHold},
+    {key: "in-review", text: "In Review", value: ReconstructionStatus.InReview},
+    {key: "approved", text: "Approved", value: ReconstructionStatus.Approved},
+    {key: "approved", text: "Ready to Publish", value: ReconstructionStatus.ApprovedAndReady},
+    {key: "rejected", text: "Rejected", value: ReconstructionStatus.Rejected},
+    {key: "invalid", text: "Invalid", value: ReconstructionStatus.Invalid}
 ]
 
 function noReconstructionsText(userOnly: boolean, haveFilters: boolean) {

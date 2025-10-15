@@ -3,9 +3,9 @@ import {ApolloClient} from "@apollo/client";
 import cuid from "cuid";
 
 import {NdbConstants} from "../models/constants";
-import {QUERY_PREDICATE_KIND_COMPARTMENT} from "./queryPredicateKind";
+import {QUERY_PREDICATE_KIND_COMPARTMENT, QUERY_PREDICATE_KIND_SPHERE} from "./queryPredicateKind";
 import {SEARCH_NEURONS_QUERY, SearchContext, SearchNeuronsQueryResponse, SearchNeuronsQueryVariables} from "../graphql/search";
-import {FilterContents} from "./filterContents";
+import {FilterComposition, FilterContents, IPositionInput} from "./filterContents";
 import {UserPreferences} from "../util/userPreferences";
 import {QueryResponseViewModel} from "./queryResponseViewModel";
 import {UIQueryPredicate} from "./uiQueryPredicate";
@@ -71,6 +71,30 @@ export class UIQuery {
             this.predicates[filter.index] = filter;
         }
     }
+
+    public createCustomRegionPredicate(position: IPositionInput, replace: boolean) {
+        if (replace) {
+            const filter = this.predicates[this.predicates.length - 1];
+            filter.brainAreaFilterType = QUERY_PREDICATE_KIND_SPHERE;
+            filter.filter.arbCenter = {
+                x: position.x.toFixed(1),
+                y: position.y.toFixed(1),
+                z: position.z.toFixed(1)
+            };
+            this.replacePredicate(filter);
+        } else {
+            this.addPredicate({
+                brainAreaFilterType: QUERY_PREDICATE_KIND_SPHERE
+            }, {
+                composition: FilterComposition.and,
+                arbCenter: {
+                    x: position.x.toFixed(1),
+                    y: position.y.toFixed(1),
+                    z: position.z.toFixed(1)
+                }
+            });
+        }
+    };
 
     public async execute(queryResponseViewModel: QueryResponseViewModel, client: ApolloClient<object>) {
         queryResponseViewModel.initiate(cuid());

@@ -1,5 +1,5 @@
 import * as React from "react";
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import {observer} from "mobx-react";
 
 import {ITracingNode} from "../../../models/tracingNode";
@@ -22,6 +22,8 @@ export type TracingViewerState = {
 export const TracingViewer = observer<React.FC<ITracingViewerBaseProps>>((props: ITracingViewerBaseProps) => {
     const size = calculateDimensions();
 
+    const ref = useRef(null);
+
     const [state, setState] = useState<TracingViewerState>({
         renderWidth: size.width,
         renderHeight: size.height
@@ -33,13 +35,20 @@ export const TracingViewer = observer<React.FC<ITracingViewerBaseProps>>((props:
     });
 
     useEffect(() => {
-        updateDimensions();
+        const observer = new ResizeObserver(entries => {
+            updateDimensions();
+        });
 
-        window.addEventListener("resize", updateDimensions);
+        if (ref.current) {
+            observer.observe(ref.current);
+        }
 
         return () => {
-            window.removeEventListener("resize", () => updateDimensions);
-        }
+            if (ref.current) {
+                observer.unobserve(ref.current);
+            }
+            observer.disconnect();
+        };
     }, []);
 
     function reset() {
@@ -55,6 +64,8 @@ export const TracingViewer = observer<React.FC<ITracingViewerBaseProps>>((props:
 
         let width = container.clientWidth;
         let height = container.clientHeight;
+
+        console.log(`calculate dimensions ${width} x ${height}`);
 
         return {width, height};
     }
@@ -87,7 +98,7 @@ export const TracingViewer = observer<React.FC<ITracingViewerBaseProps>>((props:
                                                    onSelectNode={(n, t, a, b, c) => onSelectNodeFromTracingNode(n, t, a, b, c)}/>
 
     return (
-        <div id="viewer-parent" style={style}>
+        <div id="viewer-parent" ref={ref} style={style}>
             <ViewerSelection selectedNode={selectedState.selectedNode} selectedTracing={selectedState.selectedTracing}
                              populateCustomPredicate={props.populateCustomPredicate}/>
             {viewerContainer}

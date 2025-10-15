@@ -10,6 +10,7 @@ import {IViewerProps, ViewerContainer} from "./ViewerContainer";
 import {Atlas, ICompartmentListContainerProps} from "./atlas/Atlas";
 import {fullRowStyle} from "../../../util/styles";
 import {UserPreferences} from "../../../util/userPreferences";
+import {useAppLayout} from "../../../hooks/useAppLayout";
 
 export enum DrawerState {
     Hidden,
@@ -18,10 +19,7 @@ export enum DrawerState {
 }
 
 export type MainViewProps = {
-    isQueryCollapsed: boolean;
-
     populateCustomPredicate?(position: IPositionInput, replace: boolean): void;
-    onToggleQueryCollapsed(): void;
 }
 
 type MainViewState = {
@@ -33,6 +31,8 @@ type MainViewState = {
 }
 
 export const MainView = observer<React.FC<MainViewProps>>((props) => {
+    const appLayout = useAppLayout();
+
     const [state, setState] = useState<MainViewState>({
         isNeuronListOpen: false,
         isNeuronListDocked: UserPreferences.Instance.IsNeuronListDocked,
@@ -81,8 +81,6 @@ export const MainView = observer<React.FC<MainViewProps>>((props) => {
         isCompartmentListDocked: state.isCompartmentListDocked,
         isNeuronListOpen: state.isNeuronListOpen,
         isCompartmentListOpen: state.isCompartmentListOpen,
-        isQueryCollapsed: props.isQueryCollapsed,
-        onToggleQueryCollapsed: props.onToggleQueryCollapsed,
         populateCustomPredicate: (p: IPositionInput, b: boolean) => props.populateCustomPredicate(p, b),
         onFloatNeuronList: () => onNeuronListCloseOrPin(DrawerState.Float),
         onFloatCompartmentList: () => onCompartmentListCloseOrPin(DrawerState.Float)
@@ -95,7 +93,7 @@ export const MainView = observer<React.FC<MainViewProps>>((props) => {
 
     const is_chrome = navigator.userAgent.toLowerCase().indexOf('chrome') > -1;
     // Navbar @ 79, fixed query header @ 40, and if expanded, query area at 300 => 119 or 419
-    let offset = props.isQueryCollapsed ? 119 : 419;
+    let offset = !appLayout.isQueryExpanded ? 119 : 419;
 
     if (is_chrome) {
         offset -= 0;
