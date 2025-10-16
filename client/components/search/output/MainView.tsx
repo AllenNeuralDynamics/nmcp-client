@@ -6,16 +6,11 @@ import {Button, Message, Modal} from "semantic-ui-react";
 import "../../../util/override.css";
 import {fullRowStyle} from "../../../util/styles";
 import {useAppLayout} from "../../../hooks/useAppLayout";
-import {IPositionInput} from "../../../viewmodel/filterContents";
 import {NeuronListContainer} from "./NeuronListContainer";
 import {ViewerContainer} from "./ViewerContainer";
 import {Atlas} from "./atlas/Atlas";
 
-export type MainViewProps = {
-    populateCustomPredicate?(position: IPositionInput, replace: boolean): void;
-}
-
-export const MainView = observer<React.FC<MainViewProps>>((props) => {
+export const MainView = observer(() => {
     const appLayout = useAppLayout();
 
     const [isExportMessageOpen, setIsExportMessageOpen] = useState<boolean>(false);

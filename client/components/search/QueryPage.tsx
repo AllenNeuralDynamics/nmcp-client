@@ -6,10 +6,9 @@ import {useAppLayout} from "../../hooks/useAppLayout";
 import {useUIQuery} from "../../hooks/useUIQuery";
 import {useAtlas} from "../../hooks/useAtlas";
 import {useQueryResponseViewModel} from "../../hooks/useQueryResponseViewModel";
-import {FilterComposition, IPositionInput} from "../../viewmodel/filterContents";
+import {IPositionInput} from "../../viewmodel/filterContents";
 import {IQueryFilterContainerProps, QueryFilterContainer} from "./query/QueryFilterContainer";
-import {MainView, MainViewProps} from "./output/MainView";
-import {QUERY_PREDICATE_KIND_SPHERE} from "../../viewmodel/queryPredicateKind";
+import {MainView} from "./output/MainView";
 import {UserPreferences} from "../../util/userPreferences";
 import {NeuroglancerProxy} from "../../viewer/neuroglancerProxy";
 
@@ -67,19 +66,10 @@ export const QueryPage = observer(() => {
         }
     };
 
-    const populateCustomPredicate = (position: IPositionInput, replace: boolean) => {
-        appLayout.isQueryExpanded = true;
-        uiQuery.createCustomRegionPredicate(position, replace);
-    };
-
     const queryProps: IQueryFilterContainerProps = {
         onPerformQuery: onPerformQuery,
         onResetPage: onResetPage,
         onShare: onShare
-    };
-
-    const viewerProps: MainViewProps = {
-        populateCustomPredicate: (p: IPositionInput, b: boolean) => populateCustomPredicate(p, b)
     };
 
     return (
@@ -96,7 +86,7 @@ export const QueryPage = observer(() => {
                 <QueryFilterContainer {...queryProps}/>
             </div>
             <div style={{height: "100px", width: "100%", flexGrow: 1, flexShrink: 1, order: 2}}>
-                <MainView{...viewerProps}/>
+                <MainView/>
             </div>
         </div>
     );

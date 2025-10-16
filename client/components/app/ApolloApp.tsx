@@ -14,6 +14,7 @@ import {PageHeader} from "./PageHeader";
 import {SettingsDialogContainer} from "../search/SettingsDialog";
 import {AppSystemConfiguration} from "./AppSystemConfiguration";
 import {NotificationsApp} from "./NotificationsApp";
+import {PolledData} from "./PolledData";
 
 const toastStyleOverride = {
     minWidth: "600px",
@@ -70,6 +71,7 @@ export const ApolloApp = () => {
         <UserApp>
             <AppSystemConfiguration>
                 <AppConstants>
+                    <PolledData/>
                     <NotificationsApp>
                         <PageHeader/>
                         <SettingsDialogContainer/>

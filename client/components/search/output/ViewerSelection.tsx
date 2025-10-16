@@ -9,6 +9,7 @@ import {StructureIdentifier} from "../../../models/structureIdentifier";
 import {TracingViewModel} from "../../../viewmodel/tracingViewModel";
 import {observer} from "mobx-react";
 import {useUIQuery} from "../../../hooks/useUIQuery";
+import {useAppLayout} from "../../../hooks/useAppLayout";
 
 interface IViewerSelectionProps {
     selectedTracing: TracingViewModel;
@@ -27,8 +28,9 @@ export const ViewerSelection = observer<React.FC<IViewerSelectionProps>>((props:
     const startMouseRef = useRef<{ x: number, y: number }>({x: 0, y: 0});
 
     const constants = useConstants();
-    const atlas = useAtlas();
+    const appLayout = useAppLayout();
     const uiQuery = useUIQuery();
+    const atlas = useAtlas();
 
     const lookupStructureIdentifier = (id: string) => {
         return constants.findStructureIdentifier(id);
@@ -124,11 +126,17 @@ export const ViewerSelection = observer<React.FC<IViewerSelectionProps>>((props:
                 </div>
                 <div style={{order: 2, marginTop: "4px", paddingTop: "4px", borderTop: "1px solid #ddd"}}>
                     <strong>{`Update filter with custom region: `}</strong>
-                    <a onClick={() => uiQuery.createCustomRegionPredicate(position, true)}>
+                    <a onClick={() => {
+                        uiQuery.createCustomRegionPredicate(position, true);
+                        appLayout.isQueryExpanded = true;
+                    }}>
                         replace
                     </a>
                     {` or `}
-                    <a onClick={() => uiQuery.createCustomRegionPredicate(position, false)}>
+                    <a onClick={() => {
+                        uiQuery.createCustomRegionPredicate(position, false);
+                        appLayout.isQueryExpanded = true;
+                    }}>
                         add
                     </a>
                 </div>

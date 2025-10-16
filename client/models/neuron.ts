@@ -3,7 +3,6 @@ import {isNullOrUndefined} from "../util/nodeUtil";
 import {ISample} from "./sample";
 import {IReconstruction} from "./reconstruction";
 import {ConsensusStatus} from "./consensusStatus";
-import {ITracing} from "./tracing";
 
 export enum SomaPropertyOperator {
     None = 0,

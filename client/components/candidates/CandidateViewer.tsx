@@ -1,12 +1,12 @@
 import * as React from "react";
-import {useContext, useEffect, useState} from "react";
+import {useEffect, useState} from "react";
+import {Button} from "semantic-ui-react";
 
+import {useConstants} from "../../hooks/useConstants";
+import {useSystemConfiguration} from "../../hooks/useSystemConfiguration";
 import {createCandidateAnnotationLayer, INeuron} from "../../models/neuron";
 import {NeuroglancerProxy} from "../../viewer/neuroglancerProxy";
-import {Button} from "semantic-ui-react";
 import {UserPreferences} from "../../util/userPreferences";
-import {ConstantsContext} from "../app/AppConstants";
-import {useSystemConfiguration} from "../../hooks/useSystemConfiguration";
 
 export interface ITracingsTableProps {
     neurons: INeuron[];
@@ -18,7 +18,7 @@ export interface ITracingsTableProps {
 export const CandidatesViewer = (props: ITracingsTableProps) => {
     const [ngProxy, setNgProxy] = useState<NeuroglancerProxy>(null);
 
-    const constants = useContext(ConstantsContext);
+    const constants = useConstants();
     const systemConfiguration = useSystemConfiguration();
 
     useEffect(() => {
