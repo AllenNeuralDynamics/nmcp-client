@@ -1,47 +1,63 @@
 import gql from "graphql-tag";
-import {INeuron, SomaProperties} from "../models/neuron";
-import {ConsensusStatus} from "../models/consensusStatus";
+
+import {NeuronShape, SomaLocation, SomaProperties} from "../models/neuron";
 
 
-// brainAreaId is used to determine whether the brain area is inherited or not.  brainAreas{} is the resolved brain are
+// brainStructureId is used to determine whether the brain area is inherited or not.  brainAreas{} is the resolved brain are
 // (specified or inherited).
 
-const NEURON_RELATIONSHIP_FIELDS_FRAGMENT = gql`fragment NeuronRelationshipFields on Neuron {
-    brainArea {
+export const NEURON_RELATIONSHIP_FIELDS_FRAGMENT = gql`fragment NeuronRelationshipFields on Neuron {
+    atlasStructure {
         id
         name
     }
-    sample {
+    specimen {
         id
-        idNumber
-        animalId
-        sampleDate
+        label
     }
-    reconstructions {
+    published {
         id
+        status
+        searchIndexedAt
     }
 }`;
 
 export const NEURON_BASE_FIELDS_FRAGMENT = gql`fragment NeuronBaseFields on Neuron {
     id
-    idNumber
-    idString
-    tag
+    label
     keywords
-    x
-    y
-    z
-    sampleX
-    sampleY
-    sampleZ
-    doi
-    consensus
-    metadata
-    tag
-    brainStructureId
+    specimenSoma {
+        x
+        y
+        z
+    }
+    atlasSoma {
+        x
+        y
+        z
+    }
+    atlasStructureId
     createdAt
     updatedAt
 }`;
+
+export const NEURON_VERSIONS_QUERY = gql`query NeuronQuery($id: String!) {
+    neuron(id: $id) {
+        ...NeuronBaseFields
+        ...NeuronRelationshipFields
+    }
+}
+${NEURON_BASE_FIELDS_FRAGMENT}
+${NEURON_RELATIONSHIP_FIELDS_FRAGMENT}
+`;
+
+export type NeuronVersionsQueryVariables = {
+    id: string;
+}
+
+export type NeuronVersionsQueryResponse = {
+    neuron: NeuronShape;
+}
 
 ///
 /// Neurons Query
@@ -53,6 +69,7 @@ export const NEURONS_QUERY = gql`query NeuronsQuery($input: NeuronQueryInput) {
         items {
             ...NeuronBaseFields
             ...NeuronRelationshipFields
+            reconstructionCount
         }
     }
 }
@@ -62,17 +79,18 @@ ${NEURON_RELATIONSHIP_FIELDS_FRAGMENT}
 
 export type NeuronsQueryVariables = {
     input: {
-        offset?: number,
-        limit?: number,
-        sortOrder?: string
-        sampleIds?: string[]
-        reconstructionStatus?: number;
+        ids?: string[];
+        specimenIds?: string[];
+        keywords?: string[];
+        somaProperties?: SomaProperties;
+        offset?: number;
+        limit?: number;
     }
 }
 
 export type NeuronsQueryData = {
     totalCount: number;
-    items: INeuron[];
+    items: NeuronShape[];
 }
 
 export type NeuronsQueryResponse = {
@@ -85,16 +103,12 @@ export type NeuronsQueryResponse = {
 
 type NeuronVariables = {
     id?: string;
-    idNumber?: number;
-    idString?: string;
-    tag?: string;
-    keywords?: string;
-    x?: number;
-    y?: number;
-    z?: number;
-    consensus?: ConsensusStatus;
-    sampleId?: string;
-    brainStructureId?: string;
+    label?: string;
+    keywords?: string[];
+    specimenSoma?: SomaLocation;
+    atlasSoma?: SomaLocation;
+    atlasStructureId?: string;
+    specimenId?: string;
 }
 
 ///
@@ -103,11 +117,8 @@ type NeuronVariables = {
 
 export const CREATE_NEURON_MUTATION = gql`mutation CreateNeuron($neuron: NeuronInput) {
     createNeuron(neuron: $neuron) {
-        source {
-            ...NeuronBaseFields
-            ...NeuronRelationshipFields
-        }
-        error
+        ...NeuronBaseFields
+        ...NeuronRelationshipFields
     }
 }
 ${NEURON_BASE_FIELDS_FRAGMENT}
@@ -118,13 +129,8 @@ export type CreateNeuronVariables = {
     neuron: NeuronVariables;
 }
 
-export type CreateNeuronMutationData = {
-    source: INeuron;
-    error: string;
-}
-
 export type CreateNeuronMutationResponse = {
-    createNeuron: CreateNeuronMutationData;
+    createNeuron: NeuronShape;
 }
 
 ///
@@ -133,11 +139,8 @@ export type CreateNeuronMutationResponse = {
 
 export const UPDATE_NEURON_MUTATION = gql`mutation UpdateNeuron($neuron: NeuronInput) {
     updateNeuron(neuron: $neuron) {
-        source {
-            ...NeuronBaseFields
-            ...NeuronRelationshipFields
-        }
-        error
+        ...NeuronBaseFields
+        ...NeuronRelationshipFields
     }
 }
 ${NEURON_BASE_FIELDS_FRAGMENT}
@@ -148,13 +151,8 @@ export type UpdateNeuronVariables = {
     neuron: NeuronVariables;
 }
 
-export type UpdateNeuronMutationData = {
-    source: INeuron;
-    error: string;
-}
-
 export type UpdateNeuronMutationResponse = {
-    updateNeuron: UpdateNeuronMutationData;
+    updateNeuron: NeuronShape;
 }
 
 ///
@@ -162,23 +160,15 @@ export type UpdateNeuronMutationResponse = {
 ///
 
 export const DELETE_NEURON_MUTATION = gql`mutation DeleteNeuron($id: String!) {
-    deleteNeuron(id: $id) {
-        id
-        error
-    }
+    deleteNeuron(id: $id)
 }`;
 
 export type DeleteNeuronVariables = {
     id: string;
 }
 
-export type DeleteNeuronMutationData = {
-    id: string,
-    error: string;
-}
-
 export type DeleteNeuronMutationResponse = {
-    deleteNeuron: DeleteNeuronMutationData;
+    deleteNeuron: string;
 }
 
 ///
@@ -199,8 +189,8 @@ export const IMPORT_SOMAS_MUTATION = gql`mutation($file: Upload!, $options: Impo
 export type ImportSomasVariables = {
     file: File;
     options: {
-        sampleId: string;
-        tag: string;
+        specimenId: string;
+        keywords: string[];
         shouldLookupSoma: boolean;
         noEmit: boolean;
     }
@@ -218,3 +208,4 @@ export type ImportSomasMutationData = {
 export type ImportSomasMutationResponse = {
     importSomas: ImportSomasMutationData;
 }
+

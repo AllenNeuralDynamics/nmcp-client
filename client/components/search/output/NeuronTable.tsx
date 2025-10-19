@@ -1,111 +1,80 @@
 import * as React from "react";
 import {observer} from "mobx-react-lite";
-import {Dropdown, Header, Icon, Popup, Table} from "semantic-ui-react";
-import {SketchPicker} from 'react-color';
+import {useDisclosure} from "@mantine/hooks";
+import {ActionIcon, Button, ColorPicker, ColorSwatch, Divider, Popover, Stack, Table, Text, Tooltip} from "@mantine/core";
+import {IconSquare, IconSquareCheck} from "@tabler/icons-react";
 
-import {NEURON_VIEW_MODES, NeuronViewMode} from "../../../viewmodel/neuronViewMode";
-import {NeuronViewModel} from "../../../viewmodel/neuronViewModel";
-import {ChangeAllStructureDisplayDialog} from "./ChangeAllStructureDisplayDialog";
-import {ConsensusStatus} from "../../../models/consensusStatus";
-import {useState} from "react";
 import {useQueryResponseViewModel} from "../../../hooks/useQueryResponseViewModel";
+import {getViewMode, NEURON_VIEW_MODES} from "../../../viewmodel/neuronViewMode";
+import {NeuronViewModel} from "../../../viewmodel/neuronViewModel";
+import {NeuronViewModelModal} from "./NeuronViewModelModal";
+import {Dropdown} from "../../common/Dropdown";
 
-type position = "initial" | "inherit" | "unset" | "relative" | "absolute" | "fixed" | "static" | "sticky";
+const swatches = ['#2e2e2e', '#868e96', '#fa5252', '#e64980', '#be4bdb', '#7950f2', '#4c6ef5', '#228be6', '#15aabf', '#12b886', '#40c057', '#82c91e', '#fab005', '#fd7e14'];
 
-interface IOutputTableRowProps {
+type  NeuronRowProps = {
     neuronViewModel: NeuronViewModel;
 }
 
-export const OutputTableRow = observer((props: IOutputTableRowProps) => {
+const isShownIcon = <IconSquareCheck size={14}/>;
+const notShownIcon = <IconSquare size={14}/>;
+
+export function isSelectedIcon(isSelected: boolean) {
+    return isSelected ? isShownIcon : notShownIcon;
+}
+
+const viewModeNames = NEURON_VIEW_MODES.map(n => n.id);
+
+export const NeuronRow = observer((props: NeuronRowProps) => {
     const v = props.neuronViewModel;
 
-    const rowStyles = {
-        color: {
-            width: "16px",
-            height: "16px",
-            borderRadius: "2px",
-            background: v.baseColor
-        }
-    };
-
-    const options = NEURON_VIEW_MODES.slice();
-
-    if (!v.hasDendriteTracing) {
-        options.splice(2, 1);
-    }
-
-    if (!v.hasAxonTracing) {
-        options.splice(1, 1);
-    }
-
-    if (options.length < 4) {
-        options.splice(0, 1);
-    }
-
     return (
-        <tr>
-            <td>
-                <div style={{display: "flex"}}>
-                    <Icon name={v.isSelected ? "check square outline" : "square outline"}
-                          style={{order: 0, paddingTop: "3px", paddingRight: "14px"}}
-                          onClick={() => v.isSelected = !v.isSelected}/>
-                    <div style={{order: 1}}>
-                        <Popup on="click"
-                               trigger={
-                                   <div style={styles.swatch}>
-                                       <div style={rowStyles.color}/>
-                                   </div>
-                               }>
-                            <Popup.Content>
-                                <div>
-                                    <div style={styles.cover}/>
-                                    <SketchPicker color={v.baseColor}
-                                                  onChange={(color: any) => v.baseColor = color.hex}/>
-                                </div>
-                            </Popup.Content>
+        <Table.Tr>
+            <Table.Td>
+                <ActionIcon variant="transparent" onClick={() => v.isSelected = !v.isSelected}>
+                    {isSelectedIcon(v.isSelected)}
+                </ActionIcon>
+            </Table.Td>
+            <Table.Td>
+                <Popover>
+                    <Popover.Target>
+                        <ColorSwatch size={20} color={v.baseColor}/>
+                    </Popover.Target>
+                    <Popover.Dropdown>
+                        <ColorPicker size={"sm"} format="hex" value={v.baseColor} swatches={swatches} onChange={(color: string) => v.baseColor = color}/>
+                    </Popover.Dropdown>
+                </Popover>
+            </Table.Td>
+            <Table.Td style={{verticalAlign: "middle"}}>
+                <Dropdown data={viewModeNames} value={props.neuronViewModel.viewMode.id}
+                          onChange={(value) => {
+                              v.viewMode = getViewMode(value);
+                              console.log(value);
+                          }}/>
+            </Table.Td>
 
-                        </Popup>
-                    </div>
-                </div>
-            </td>
-            <td style={{verticalAlign: "middle"}}>
-                <Dropdown search fluid inline options={options}
-                          value={props.neuronViewModel.viewMode.value}
-                          onChange={(_: any, {value}) => v.viewMode = NEURON_VIEW_MODES[value as number]}/>
-            </td>
-
-            <td style={{verticalAlign: "middle"}}>
-                <Icon name={v.mirror ? "check square outline" : "square outline"}
-                      style={{order: 0, paddingTop: "3px", paddingRight: "14px"}}
-                      onClick={() => v.mirror = !v.mirror}/>
-            </td>
-            <td style={{verticalAlign: "middle"}}>
-                <div>
-                    {v.neuron.idString}{v.neuron.consensus == ConsensusStatus.Single ? "*" : ""}
-                    <Header sub color="grey">{v.neuron.sample.animalId}</Header>
-                </div>
-            </td>
-            <td style={{verticalAlign: "middle"}}>
-                {v.neuron.brainArea ? v.neuron.brainArea.acronym : "unknown"}
-                <br/>
-            </td>
-        </tr>
+            <Table.Td ta="center">
+                <ActionIcon variant="transparent" onClick={() => v.mirror = !v.mirror}>
+                    {isSelectedIcon(v.mirror)}
+                </ActionIcon>
+            </Table.Td>
+            <Table.Td style={{verticalAlign: "middle"}}>
+                <Stack gap={0}>
+                    {v.Label}
+                    <Text size="xs" c="dimmed">{v.neuron.specimen.label}</Text>
+                </Stack>
+            </Table.Td>
+            <Table.Td>
+                {v.neuron.atlasStructure ? v.neuron.atlasStructure.acronym : "unknown"}
+            </Table.Td>
+        </Table.Tr>
     );
 });
 
 export const NeuronTable = observer(() => {
-    const [showChangeAllStructureDisplayDialog, setShowChangeAllStructureDisplayDialog] = useState<boolean>(false);
+    const [opened, {open, close}] = useDisclosure(false);
 
     const queryViewModel = useQueryResponseViewModel();
-
-    const onCancel = () => {
-        setShowChangeAllStructureDisplayDialog(false);
-    };
-
-    const onAccept = (mode: NeuronViewMode) => {
-        setShowChangeAllStructureDisplayDialog(false);
-        queryViewModel.defaultNeuronViewMode = mode;
-    };
 
     if (!queryViewModel.neuronViewModels || queryViewModel.neuronViewModels.length === 0) {
         return null;
@@ -113,58 +82,51 @@ export const NeuronTable = observer(() => {
 
     const areAllNeuronsSelected = queryViewModel.areAllNeuronsSelected;
 
-    const rows: any = queryViewModel.neuronViewModels.map((v) => <OutputTableRow key={`trf_${v.neuron.id}`} neuronViewModel={v}/>);
+    const sameColor = queryViewModel.neuronsSameColor;
+
+    const pickerColor = sameColor ?? "rgba(128, 128, 128, 0.1";
+
+    const rows: any = queryViewModel.neuronViewModels.map((v) => <NeuronRow key={`trf_${v.neuron.id}`} neuronViewModel={v}/>);
 
     return (
-        <Table compact>
-            <ChangeAllStructureDisplayDialog show={showChangeAllStructureDisplayDialog}
-                                             onCancel={() => onCancel()}
-                                             onAccept={(mode: NeuronViewMode) => onAccept(mode)}
-                                             defaultStructureSelection={queryViewModel.defaultNeuronViewMode}/>
-            <thead>
-            <tr>
-                <th>
-                    <Icon name={areAllNeuronsSelected ? "check square outline" : "square outline"}
-                          onClick={() => queryViewModel.areAllNeuronsSelected = !areAllNeuronsSelected}/>
-
-                </th>
-                <th>
-                    <Icon name="edit" style={{marginRight: "6px"}}
-                          onClick={() => setShowChangeAllStructureDisplayDialog(true)}/>
-                    <a onClick={() => setShowChangeAllStructureDisplayDialog(true)}
-                       style={{textDecoration: "underline"}}>
-                        Structures
-                    </a>
-                </th>
-                <th>
-                    Mirror
-                </th>
-                <th>Neuron</th>
-                <th>Compartment</th>
-                <th/>
-            </tr>
-            </thead>
-            <tbody>
-            {rows}
-            </tbody>
+        <Table>
+            <NeuronViewModelModal opened={opened} close={close}/>
+            <Table.Thead>
+                <Table.Tr bg="table-header">
+                    <Table.Th>
+                        <ActionIcon variant="transparent" onClick={() => queryViewModel.areAllNeuronsSelected = !areAllNeuronsSelected}>
+                            {isSelectedIcon(areAllNeuronsSelected)}
+                        </ActionIcon>
+                    </Table.Th>
+                    <Table.Th>
+                        <Popover>
+                            <Popover.Target>
+                                <ColorSwatch size={20} color={pickerColor}/>
+                            </Popover.Target>
+                            <Popover.Dropdown>
+                                <Stack align="center">
+                                    <Text size="sm" c="dimmed">Change color of selected neurons</Text>
+                                    <ColorPicker size={"sm"} format="hex" value={pickerColor} swatches={swatches}
+                                                 onChange={(color: string) => queryViewModel.neuronsSameColor = color}/>
+                                    <Divider label="or" orientation="horizontal"/>
+                                    <Tooltip label="This will affect all neurons including unselected.">
+                                        <Button variant="subtle" size="xs" onClick={() => queryViewModel.resetColors()}>Reset to default colors</Button>
+                                    </Tooltip>
+                                </Stack>
+                            </Popover.Dropdown>
+                        </Popover>
+                    </Table.Th>
+                    <Table.Th>
+                        <Text size="sm" td="underline" c="blue" onClick={() => open()}>View Mode</Text>
+                    </Table.Th>
+                    <Table.Th> Mirror </Table.Th>
+                    <Table.Th>Neuron</Table.Th>
+                    <Table.Th>Structure</Table.Th>
+                </Table.Tr>
+            </Table.Thead>
+            <Table.Tbody bg="table">
+                {rows}
+            </Table.Tbody>
         </Table>
     );
 });
-
-const styles = {
-    swatch: {
-        padding: "4px",
-        background: "#efefef",
-        borderRadius: "2px",
-        boxShadow: "0 0 0 1px rgba(0,0,0,.1)",
-        display: "inline-block",
-        cursor: "pointer"
-    },
-    cover: {
-        position: "fixed" as position,
-        top: "0px",
-        right: "0px",
-        bottom: "0px",
-        left: "-200px"
-    },
-};

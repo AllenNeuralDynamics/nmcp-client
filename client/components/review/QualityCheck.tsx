@@ -1,34 +1,39 @@
 import * as React from "react";
 import {useState} from "react";
 import {useMutation} from "@apollo/client";
-import {Box, Button, Card, Center, Chip, Group, Loader, SimpleGrid, Stack, Table, Text, Title} from "@mantine/core";
+import {Box, Button, Card, Center, Chip, Divider, Group, Loader, SimpleGrid, Stack, Table, Text, Title} from "@mantine/core";
 import {IconRefreshDot} from "@tabler/icons-react";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import localizedFormat from "dayjs/plugin/localizedFormat";
 
-import {IReconstruction} from "../../models/reconstruction";
-import {QUALITY_CHECK_MUTATION, QualityCheckResponse, QualityCheckVariables} from "../../graphql/reconstruction";
-import {QualityCheckStatus} from "../../models/qualityCheckStatus";
-import {QualityCheckError} from "../../models/qualityCheck";
-import moment from "moment";
+import {AtlasReconstruction} from "../../models/atlasReconstruction";
+import {QUALITY_CHECK_MUTATION, QualityCheckResponse, QualityCheckVariables} from "../../graphql/atlasReconstruction";
+import {QualityControlStatus} from "../../models/qualityControlStatus";
+import {QualityCheckError} from "../../models/qualityControl";
+
+dayjs.extend(utc);
+dayjs.extend(localizedFormat);
 
 export type QualityCheckProps = {
-    reconstruction: IReconstruction;
+    reconstruction: AtlasReconstruction;
 }
 
-function messageForStatus(qualityStatus: QualityCheckStatus, when: Date = null): string {
-    if (qualityStatus == QualityCheckStatus.InProgress) {
+function messageForStatus(qualityStatus: QualityControlStatus, when: Date = null): string {
+    if (qualityStatus == QualityControlStatus.Pending) {
         return "Quality check requested";
     } else if (when) {
-        return `Last performed ${moment(when).toLocaleString()}`;
+        return `Last performed ${dayjs(when).local().format("L LT")}`;
     }
 
     return "Quality check not requested";
 }
 
 export const QualityCheck: React.FC<QualityCheckProps> = ({reconstruction = null}) => {
-    const [qualityStatus, setQualityStatus] = useState<QualityCheckStatus>(reconstruction.qualityCheckStatus);
+    const [qualityStatus, setQualityStatus] = useState<QualityControlStatus>(reconstruction.qualityCheckStatus);
     const [message, setMessage] = useState<string>(messageForStatus(qualityStatus, reconstruction.qualityCheckAt));
 
-    const [qualityCheck, {data: qualityCheckData}] = useMutation<QualityCheckResponse, QualityCheckVariables>(QUALITY_CHECK_MUTATION,
+    const [qualityCheck] = useMutation<QualityCheckResponse, QualityCheckVariables>(QUALITY_CHECK_MUTATION,
         {
             refetchQueries: ["ReviewableReconstructions"],
             optimisticResponse: {
@@ -36,24 +41,25 @@ export const QualityCheck: React.FC<QualityCheckProps> = ({reconstruction = null
                     id: reconstruction.id,
                     // @ts-ignore
                     __typename: "Reconstruction",
-                    qualityCheckStatus: QualityCheckStatus.InProgress,
+                    qualityCheckStatus: QualityControlStatus.Pending,
                     error: null
                 }
             },
             onCompleted: (data) => {
                 setQualityStatus(data.requestQualityCheck.qualityCheckStatus);
                 setMessage(messageForStatus(data.requestQualityCheck.qualityCheckStatus, data.requestQualityCheck.qualityCheckAt))
-            }
+            },
+            onError: (e) => console.log(e)
         });
 
     let qualityControlButton = null;
 
-    if (qualityStatus != QualityCheckStatus.Complete) {
-        qualityControlButton = (<Button leftSection={<IconRefreshDot/>} color="yellow" disabled={qualityStatus == QualityCheckStatus.InProgress}
+    if (qualityStatus != QualityControlStatus.Passed) {
+        qualityControlButton = (<Button size="xs" color="yellow" disabled={qualityStatus == QualityControlStatus.Pending} leftSection={<IconRefreshDot/>}
                                         onClick={async (e) => {
                                             e.stopPropagation();
-                                            setQualityStatus(QualityCheckStatus.InProgress);
-                                            setMessage(messageForStatus(QualityCheckStatus.InProgress))
+                                            setQualityStatus(QualityControlStatus.Pending);
+                                            setMessage(messageForStatus(QualityControlStatus.Pending))
                                             await qualityCheck({variables: {id: reconstruction.id}});
                                         }}>Request Again</Button>);
     }
@@ -61,21 +67,21 @@ export const QualityCheck: React.FC<QualityCheckProps> = ({reconstruction = null
     const issueCount = reconstruction.qualityCheck.warnings.length + reconstruction.qualityCheck.errors.length;
 
     return (
-        <Card shadow="md" radius="sm" withBorder={true}>
-            <Card.Section bg="segment.9">
-                <div style={{display: "flex", flexDirection: "row", margin: "12px 20px 12px 20px"}}>
-                    <Text size="xl" fw={500} style={{margin: 0, marginTop: "6px", verticalAlign: "middle"}}>Quality Check</Text>
-                    <div style={{order: 2, flexGrow: 1, flexShrink: 1}}/>
-                    <div style={{order: 3, flexGrow: 0, flexShrink: 0, marginRight: "12px"}}>
-                        <Group>
-                            <Text size="xs">{message}</Text>
-                            {qualityStatus == QualityCheckStatus.InProgress ? <Loader size="xs" color="blue"/> : null}
-                            {qualityControlButton}
-                        </Group>
-                    </div>
-                </div>
+        <Card withBorder>
+            <Card.Section bg="segment" p={12}>
+                <Group justify="space-between" align="center">
+                    <Text size="lg" fw={500}>Quality Check</Text>
+                    <Group>
+                        <Text size="xs">{message}</Text>
+                        {qualityStatus == QualityControlStatus.Pending ? <Loader size="xs" color="blue"/> : null}
+                        {qualityControlButton}
+                    </Group>
+                </Group>
             </Card.Section>
-            <div style={{margin: "12px 8px 0px 0px"}}>
+            <Card.Section>
+                <Divider orientation="horizontal"/>
+            </Card.Section>
+            <div style={{marginTop: "12px"}}>
                 {issueCount > 0 ? <IssuesGrid reconstruction={reconstruction}/> : NoIssues}
             </div>
         </Card>
@@ -87,13 +93,15 @@ enum QualityIssueType {
     Error
 }
 
-const NoIssues = <Chip defaultChecked color="green">No Errors or Warnings</Chip>
-const NoErrors = <Center><Chip m={16} defaultChecked color="green">No Errors</Chip></Center>
-const NoWarnings = <Center><Chip m={16} defaultChecked color="green">No Warnings</Chip></Center>
+const NoIssues = <Chip variant="light" size="sm" defaultChecked color="green">No Errors or Warnings</Chip>
+const NoErrors = <Center><Chip variant="light" m={16} defaultChecked color="green">No Errors</Chip></Center>
+const NoWarnings = <Center><Chip variant="light" m={16} defaultChecked color="green">No Warnings</Chip></Center>
 
-const IssuesGrid: React.FC<QualityCheckProps> = ({reconstruction}) => {
-    const errorTable = <IssuesSection issues={reconstruction.qualityCheck.errors} kind={QualityIssueType.Error}/>
-    const warningTable = <IssuesSection issues={reconstruction.qualityCheck.warnings} kind={QualityIssueType.Warning}/>
+const IssuesGrid = ({reconstruction}: QualityCheckProps) => {
+    const errorTable = reconstruction.qualityCheck.errors.length > 0 ?
+        <IssuesSection issues={reconstruction.qualityCheck.errors} kind={QualityIssueType.Error}/> : NoErrors;
+    const warningTable = reconstruction.qualityCheck.warnings.length > 0 ?
+        <IssuesSection issues={reconstruction.qualityCheck.warnings} kind={QualityIssueType.Warning}/> : NoWarnings;
 
     return (
         <SimpleGrid cols={2}>
@@ -107,30 +115,30 @@ export type IssuesTableProps = {
     issues: QualityCheckError[];
 }
 
-const IssuesSection: React.FC<IssuesTableProps> = ({issues, kind}) => {
+const IssuesSection = ({issues, kind}: IssuesTableProps) => {
     return (
-        <Stack gap={0}>
-            <Box style={{border: "1px solid #ddd"}} bg={kind == QualityIssueType.Error ? "Red" : "Orange"} p={8}>
-                <Title order={6} style={{color: "white"}}>{kind == QualityIssueType.Error ? "Errors" : "Warnings"}</Title>
-            </Box>
-            <Box style={{borderLeft: "1px solid #ddd", borderRight: "1px solid #ddd", borderBottom: "1px solid #ddd"}}>
-                {issues.length == 0 ? (kind == QualityIssueType.Error ? NoErrors : NoWarnings) : <IssuesTable issues={issues}/>}
-            </Box>
-        </Stack>
+        <Card withBorder>
+            <Card.Section bg={kind == QualityIssueType.Error ? "red.4" : "yellow.2"} p={8}>
+                <Text fw={500}>{kind == QualityIssueType.Error ? "Errors" : "Warnings"}</Text>
+            </Card.Section>
+            <Card.Section>
+                <IssuesTable issues={issues}/>
+            </Card.Section>
+        </Card>
     );
 }
 
-const IssuesTable: React.FC<IssuesTableProps> = ({issues}) => {
+const IssuesTable = ({issues}: IssuesTableProps) => {
     return (
         <Table>
-            <Table.Thead>
+            <Table.Thead bg="table-header">
                 <Table.Tr>
                     <Table.Th>Name</Table.Th>
                     <Table.Th>Description</Table.Th>
                     <Table.Th>Affected Nodes</Table.Th>
                 </Table.Tr>
             </Table.Thead>
-            <Table.Tbody>
+            <Table.Tbody bg="table">
                 {issues.map((issue: QualityCheckError, idx: number) => (
                     <Table.Tr key={idx}>
                         <Table.Td>

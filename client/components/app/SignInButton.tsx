@@ -1,6 +1,6 @@
 import * as React from "react";
-import {Button} from "semantic-ui-react";
 import { useMsal } from "@azure/msal-react";
+import {Button} from "@mantine/core";
 
 import { loginRequest } from "../../authConfig";
 
@@ -18,7 +18,7 @@ export const SignInButton = () => {
 
     return (
         <div>
-            <Button content="Sign In" onClick={() => handleLogin("redirect")} icon='sign-in' labelPosition='right' size="small" color="blue"/>
+            <Button variant="light" onClick={() => handleLogin("redirect")} size="small">Sign In</Button>
         </div>
     )
 };

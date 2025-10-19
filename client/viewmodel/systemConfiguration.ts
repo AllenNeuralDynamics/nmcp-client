@@ -1,4 +1,4 @@
-import {observable, makeObservable} from "mobx";
+import {observable, makeObservable, action} from "mobx";
 
 export class SystemConfiguration {
     systemVersion: string;
@@ -14,6 +14,7 @@ export class SystemConfiguration {
             systemVersion: observable,
             precomputedLocation: observable,
             exportLimit: observable,
+            update: action
         });
     }
 

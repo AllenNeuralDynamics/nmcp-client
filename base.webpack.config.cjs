@@ -1,5 +1,5 @@
 const path = require("path");
-const webpack = require('webpack');
+const webpack = require("webpack");
 const src = path.join(__dirname, "client");
 const dist = path.join(__dirname, "dist", "public");
 
@@ -28,11 +28,11 @@ module.exports = {
             { test: /\.css$/, use: "css-loader" },
             {
                 test: /\.png/,
-                type: 'asset/resource'
+                type: "asset/resource"
             },
             {
                 test: /\.svg/,
-                type: 'asset/resource'
+                type: "asset/resource"
             },
             // Needed for .svg?raw imports used for embedding icons.
             {
@@ -52,7 +52,7 @@ module.exports = {
         ]
     },
     resolve: {
-        fallback: { 'path': require.resolve('path-browserify') },
+        fallback: { "path": require.resolve("path-browserify") },
         extensions: [".tsx", ".ts", ".js"]
     },
     devtool: "source-map"

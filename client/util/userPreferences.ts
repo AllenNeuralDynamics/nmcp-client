@@ -1,7 +1,5 @@
 import {PreferencesManager} from "./preferencesManager";
 
-import {UIQueryPredicate} from "../viewmodel/uiQueryPredicate";
-
 const SamplePageOffset = "sample.page.offset";
 const SamplePageLimit = "sample.page.limit";
 const NeuronPageOffset = "neuron.page.offset";
@@ -10,23 +8,12 @@ const LockedSampleId = "neuron.upload.locked.sample";
 const CandidateViewerState = "candidates.viewer.state.v4";
 const SearchViewerState = "search.viewer.state.v7";
 const ShouldAutoCollapseOnQuery = "viewer.shouldAutoCollapseOnQuery";
-const ShouldAlwaysShowSoma = "viewer.shouldAlwaysShowSoma";
-const ShouldAlwaysShowFullTracing = "viewer.shouldAlwaysShowFullTracing";
-const IsNeuronListDocked = "viewer.isNeuronListDocked";
-const IsCompartmentListDocked = "viewer.isCompartmentListDocked";
-const TracingSelectionHiddenOpacity = "viewer.tracingSelectionHiddenOpacity";
-const ZoomSpeed = "viewer.zoomSpeed";
-const TracingFetchBatchSize = "viewer.tracingFetchBatchSize";
-const QueryHistory = "viewer.queryHistory";
-const ViewerBackgroundColor = "viewer.viewerBackgroundColor";
-const TracingRadiusFactor = "viewer.tracingRadiusFactor";
-const RootCompartmentColor = "viewer.rootCompartmentColor";
-const ViewPresets = "viewer.viewPresets";
+const LastQuery = "viewer.lastQuery";
 const HideCursorInViewer = "viewer.hideCursorInViewer";
-const HideCursorOnPage = "viewer.hideCursorOnPage";
-const AdminPageSelectedTab = "admin.selectedTab";
-const ShowReferenceIds = "selection.showReferenceIds";
+const AdminPageTab = "admin.tab";
 const ReconstructionNeuronsUserOnly = "reconstruct.neurons.userOnly";
+
+const AppLayoutState = "app.layout";
 
 export class UserPreferences extends PreferencesManager {
     private static _instance: UserPreferences = null;
@@ -79,20 +66,20 @@ export class UserPreferences extends PreferencesManager {
         this.saveLocalValue(LockedSampleId, id);
     }
 
-    public get candidateViewerState(): any {
+    public get candidateViewerState(): string {
         return this.loadLocalValue(CandidateViewerState, null);
     }
 
     public set candidateViewerState(state: string) {
-        this.saveLocalValue(CandidateViewerState, JSON.stringify(state));
+        this.saveLocalValue(CandidateViewerState, state);
     }
 
-    public get searchViewerState(): any {
+    public get searchViewerState(): string {
         return this.loadLocalValue(SearchViewerState, null);
     }
 
     public set searchViewerState(state: string) {
-        this.saveLocalValue(SearchViewerState, JSON.stringify(state));
+        this.saveLocalValue(SearchViewerState, state);
     }
 
     public get ShouldAutoCollapseOnQuery() {
@@ -103,125 +90,24 @@ export class UserPreferences extends PreferencesManager {
         this.saveLocalValue(ShouldAutoCollapseOnQuery, b);
     }
 
-    public get ShouldAlwaysShowSoma() {
-        return this.loadLocalValue(ShouldAlwaysShowSoma, true);
+    public get LastQuery(): object[] {
+        return this.loadLocalValue(LastQuery, []);
     }
 
-    public set ShouldAlwaysShowSoma(b: boolean) {
-        this.saveLocalValue(ShouldAlwaysShowSoma, b);
-    }
-
-    public get ShouldAlwaysShowFullTracing() {
-        return this.loadLocalValue(ShouldAlwaysShowFullTracing, true);
-    }
-
-    public set ShouldAlwaysShowFullTracing(b: boolean) {
-        this.saveLocalValue(ShouldAlwaysShowFullTracing, b);
-    }
-
-    public get IsNeuronListDocked() {
-        return this.loadLocalValue(IsNeuronListDocked, true);
-    }
-
-    public set IsNeuronListDocked(b: boolean) {
-        this.saveLocalValue(IsNeuronListDocked, b);
-    }
-
-    public get IsCompartmentListDocked() {
-        return this.loadLocalValue(IsCompartmentListDocked, true);
-    }
-
-    public set IsCompartmentListDocked(b: boolean) {
-        this.saveLocalValue(IsCompartmentListDocked, b);
-    }
-
-    public get TracingSelectionHiddenOpacity() {
-        return this.loadLocalValue(TracingSelectionHiddenOpacity, 0.0);
-    }
-
-    public set TracingSelectionHiddenOpacity(n: number) {
-        this.saveLocalValue(TracingSelectionHiddenOpacity, n);
-    }
-
-    public get ZoomSpeed() {
-        return this.loadLocalValue(ZoomSpeed, 1.0);
-    }
-
-    public get TracingFetchBatchSize() {
-        return this.loadLocalValue(TracingFetchBatchSize, 10.0);
-    }
-
-    public set TracingFetchBatchSize(n: number) {
-        this.saveLocalValue(TracingFetchBatchSize, n);
-    }
-
-    public get LastQuery(): UIQueryPredicate[] {
-        const query = this.loadLocalValue(QueryHistory, null);
-
-        if (query) {
-            return query.filters;
-        }
-
-        return null;
-    }
-
-    public AppendQueryHistory(filters: UIQueryPredicate[]) {
-        const obj = {
-            timestamp: new Date(),
-            filters: filters.map(f => f.serialize())
-        };
-
-        this.saveLocalValue(QueryHistory, JSON.stringify(obj));
-    }
-
-    public get ViewerBackgroundColor() {
-        return this.loadLocalValue(ViewerBackgroundColor, "#FFFFFF");
-    }
-
-    public set ViewerBackgroundColor(n: string) {
-        this.saveLocalValue(ViewerBackgroundColor, n);
-
-        this.notifyListeners("viewerBackgroundColor", n);
-    }
-
-    public get TracingRadiusFactor() {
-        return this.loadLocalValue(TracingRadiusFactor, 1.0);
-    }
-
-    public get RootCompartmentColor() {
-        return this.loadLocalValue(RootCompartmentColor, "888888");
-    }
-
-    public get ViewPresets(): any[] {
-        return JSON.parse(this.loadLocalValue(ViewPresets, JSON.stringify([])));
+    public set LastQuery(filters: object[]) {
+        this.saveLocalValue(LastQuery, JSON.stringify(filters));
     }
 
     public get HideCursorInViewer(): boolean {
         return this.loadLocalValue(HideCursorInViewer, false);
     }
 
-    public get HideCursorOnPage(): boolean {
-        return this.loadLocalValue(HideCursorOnPage, false);
+    public get AdminPageTab(): string {
+        return this.loadLocalValue(AdminPageTab, "users");
     }
 
-    public get AdminPageSelectedTab(): number {
-        return this.loadLocalValue(AdminPageSelectedTab, 0);
-    }
-
-    public set AdminPageSelectedTab(n: number) {
-        this.saveLocalValue(AdminPageSelectedTab, n.valueOf().toFixed(0));
-
-        this.notifyListeners("adminPageSelectedTab", n);
-    }
-
-    public get ShowReferenceIds(): boolean {
-        return this.loadLocalValue(ShowReferenceIds, false);
-    }
-
-    public set ShowReferenceIds(b: boolean) {
-        this.saveLocalValue(ShowReferenceIds, b);
-
-        this.notifyListeners("showReferenceIds", b);
+    public set AdminPageTab(n: string) {
+        this.saveLocalValue(AdminPageTab, n);
     }
 
     public get ReconstructionNeuronsUserOnly(): boolean {
@@ -230,33 +116,13 @@ export class UserPreferences extends PreferencesManager {
 
     public set ReconstructionNeuronsUserOnly(b: boolean) {
         this.saveLocalValue(ReconstructionNeuronsUserOnly, b);
-
-        this.notifyListeners("reconstructionNeuronsUserOnly", b);
     }
 
+    public get AppLayoutState(): object {
+        return this.loadLocalValue(AppLayoutState, null);
+    }
 
-    protected validateDefaultPreferences() {
-        this.setDefaultLocalValue(SamplePageOffset, 0);
-        this.setDefaultLocalValue(SamplePageLimit, 10);
-        this.setDefaultLocalValue(NeuronPageOffset, 0);
-        this.setDefaultLocalValue(NeuronPageLimit, 10);
-        this.setDefaultLocalValue(LockedSampleId, "");
-        this.setDefaultLocalValue(CandidateViewerState, null);
-        this.setDefaultLocalValue(ShouldAutoCollapseOnQuery, false);
-        this.setDefaultLocalValue(ShouldAlwaysShowSoma, true);
-        this.setDefaultLocalValue(ShouldAlwaysShowFullTracing, true);
-        this.setDefaultLocalValue(IsNeuronListDocked, true);
-        this.setDefaultLocalValue(IsCompartmentListDocked, true);
-        this.setDefaultLocalValue(TracingSelectionHiddenOpacity, 0.0);
-        this.setDefaultLocalValue(ZoomSpeed, 1.0);
-        this.setDefaultLocalValue(TracingFetchBatchSize, 10.0);
-        this.setDefaultLocalValue(ViewerBackgroundColor, "#FFFFFF");
-        this.setDefaultLocalValue(TracingRadiusFactor, 1.0);
-        this.setDefaultLocalValue(RootCompartmentColor, "888888");
-        this.setDefaultLocalValue(ViewPresets, []);
-        this.setDefaultLocalValue(HideCursorInViewer, false);
-        this.setDefaultLocalValue(HideCursorOnPage, false);
-        this.setDefaultLocalValue(AdminPageSelectedTab, 0);
-        this.setDefaultLocalValue(ShowReferenceIds, false);
+    public set AppLayoutState(obj: object) {
+        this.saveLocalValue(AppLayoutState, obj);
     }
 }

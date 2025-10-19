@@ -8,7 +8,6 @@ export interface IServiceOptions {
     port: number;
     systemEndpoint: string;
     graphQLService: ServiceLocation;
-    staticService: ServiceLocation;
     exportService: ServiceLocation;
     exportLimit: number;
     precomputedLocation: string;
@@ -21,11 +20,6 @@ const configuration: IServiceOptions = {
         hostname: "nmcp-api",
         port: 5000,
         endpoint: "/graphql"
-    },
-    staticService: {
-        hostname: "nmcp-static",
-        port: 5000,
-        endpoint: "/static",
     },
     exportService: {
         hostname: "nmcp-export",
@@ -43,9 +37,6 @@ function loadServerConfiguration() {
 
     options.graphQLService.hostname = process.env.NMCP_API_HOST || options.graphQLService.hostname;
     options.graphQLService.port = parseInt(process.env.NMCP_API_PORT) || options.graphQLService.port;
-
-    options.staticService.hostname = process.env.STATIC_API_HOST || options.staticService.hostname;
-    options.staticService.port = parseInt(process.env.STATIC_API_PORT) || options.staticService.port;
 
     options.exportService.hostname = process.env.EXPORT_API_HOST || options.exportService.hostname;
     options.exportService.port = parseInt(process.env.EXPORT_API_PORT) || options.exportService.port;

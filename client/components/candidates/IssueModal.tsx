@@ -1,15 +1,17 @@
-import {INeuron} from "../../models/neuron";
 import * as React from "react";
 import {useEffect, useState} from "react";
-import {Button, Form, FormField, FormInput, Message, Modal, TextArea} from "semantic-ui-react";
 import {useMutation} from "@apollo/client";
-import {CREATE_ISSUE_MUTATION, CreateIssueResponse, CreateIssueVariables} from "../../graphql/issue";
-import {IssueKind} from "../../models/issue";
-import {toast} from "react-toastify";
+import {Alert, Button, Group, Modal, Stack, Textarea} from "@mantine/core";
+import {IconExclamationCircle} from "@tabler/icons-react";
+
+import {OPEN_ISSUE_MUTATION, OPEN_ISSUES_QUERY, OpenIssueResponse, OpenIssueVariables} from "../../graphql/issue";
+import {errorNotification, successNotification} from "../common/NotificationHelper";
+import {NeuronShape} from "../../models/neuron";
+import {IssueKind, IssueReferenceKind} from "../../models/issue";
 
 type IssueModelProps = {
     show: boolean;
-    neuron: INeuron;
+    neuron: NeuronShape;
 
     onClose(): void;
 }
@@ -23,16 +25,18 @@ export const IssueModal = (props: IssueModelProps) => {
         lastNeuronId: props.neuron.id
     });
 
-    const [createIssue, {data, error}] = useMutation<CreateIssueResponse, CreateIssueVariables>(CREATE_ISSUE_MUTATION, {
+    const [createIssue, {data, error}] = useMutation<OpenIssueResponse, OpenIssueVariables>(OPEN_ISSUE_MUTATION, {
+        refetchQueries: [OPEN_ISSUES_QUERY],
         onCompleted: async (data) => {
-            if (!error && data.createIssue) {
-                toast.success((<div><h3>Report Issue</h3>The issue was successfully reported.</div>), {autoClose: 1000});
+            if (!error && data.openIssue) {
+                successNotification("Report Issue", "The issue was successfully reported");
             } else {
-                toast.error((<div><h3>Report Issue</h3>There was an unknown error reporting this issue.</div>), {autoClose: false});
+                errorNotification("Report Issue", "There was an unknown error reporting this issue");
             }
 
             setState({...state, description: ""});
-        }
+        },
+        onError: (e) => console.log(e)
     });
 
     useEffect(() => {
@@ -45,7 +49,7 @@ export const IssueModal = (props: IssueModelProps) => {
         const description = state.description?.length < MAX_DESCRIPTION_LENGTH ? state.description : state.description.substring(0, MAX_DESCRIPTION_LENGTH);
 
         await createIssue({
-            variables: {description: description, kind: IssueKind.Candidate, neuronId: props.neuron?.id}
+            variables: {kind: IssueKind.Candidate, description: description, references: [{id: props.neuron.id, kind: IssueReferenceKind.Neuron}]}
         });
 
         props.onClose();
@@ -59,28 +63,24 @@ export const IssueModal = (props: IssueModelProps) => {
         const message = `Your description will be truncated due to length.`;
 
         warningMessage = (
-            <Message
-                warning
-                content={message}
-            />);
+            <Alert color="red.3" icon={<IconExclamationCircle/>}>
+                {message}
+            </Alert>);
     }
 
+    const label = `Please describe the issue with neuron ${props.neuron.label}`;
+
     return (
-        <Modal closeIcon centered={false} open={props.show} onClose={props.onClose} dimmer="blurring">
-            <Modal.Header content="Report an issue"/>
-            <Modal.Content>
-                <Form>
-                    <FormField>
-                        <label>Describe the issue with Candidate Neuron {props.neuron.idString}</label>
-                        <TextArea placeholder="Enter description..." value={state.description}
-                                  onChange={(e, {name, value}) => setState({...state, description: value.toString()})}/>
-                    </FormField>
-                </Form>
+        <Modal size="lg" centered opened={props.show} onClose={props.onClose} title="Report an Issue">
+            <Stack>
+                <Textarea label={label} placeholder="Enter a description..." autosize minRows={4} maxRows={20} value={state.description}
+                          onChange={(e) => setState({...state, description: e.currentTarget.value?.toString()})}/>
+
                 {warningMessage}
-            </Modal.Content>
-            <Modal.Actions>
-                <Button color="red" content="Report" disabled={!isValidDescription} onClick={onReportClick}/>
-            </Modal.Actions>
+                <Group justify="flex-end">
+                    <Button disabled={!isValidDescription} onClick={onReportClick}>Report</Button>
+                </Group>
+            </Stack>
         </Modal>
     );
 }

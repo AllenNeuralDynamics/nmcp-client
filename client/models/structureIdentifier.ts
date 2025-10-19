@@ -1,4 +1,5 @@
-export enum StructureIdentifier {
+// These must match swcValue as defined by the API.
+export enum NodeStructureKind {
     any = -1,
     undefined = 0,
     soma = 1,
@@ -9,18 +10,12 @@ export enum StructureIdentifier {
     endPoint = 6
 }
 
-export const AnyStructureIdentifier: IStructureIdentifier = {
-    id: "",
-    name: "any",
-    value: -1
-};
-
-export interface IStructureIdentifier {
+export type NodeStructureShape = {
     id: string;
     name: string;
-    value: number;
+    swcValue: number;
 }
 
-export function displayStructureIdentifier(structureIdentifier: IStructureIdentifier): string {
-    return structureIdentifier ? structureIdentifier.name : "(none)";
+export function displayStructureIdentifier(structure: NodeStructureShape): string {
+    return structure ? structure.name : "(none)";
 }

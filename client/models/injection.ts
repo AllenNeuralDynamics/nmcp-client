@@ -1,34 +1,26 @@
-import {displayBrainArea, IBrainArea} from "./brainArea";
-import {IFluorophore} from "./fluorophore";
-import {IInjectionVirus} from "./injectionVirus";
-import {ISample} from "./sample";
+import {formatAtlasStructure, AtlasStructureShape} from "./atlasStructure";
+import {FluorophoreShape} from "./fluorophore";
+import {InjectionVirusShape} from "./injectionVirus";
+import {SpecimenShape} from "./specimen";
 
-export interface IInjection {
+export type InjectionShape = {
     id: string;
-    brainArea: IBrainArea;
-    injectionVirus: IInjectionVirus;
-    fluorophore: IFluorophore;
-    sample: ISample;
+    specimen: SpecimenShape;
+    atlasStructure: AtlasStructureShape;
+    injectionVirus: InjectionVirusShape;
+    fluorophore: FluorophoreShape;
 }
 
-export function displayInjection(injection: IInjection, truncate: number = 0) {
+export function displayInjection(injection: InjectionShape, truncate: number = 0) {
     if (!injection) {
         return "(none)";
     }
 
-    const str = displayBrainArea(injection.brainArea, "(no brain area)");
+    const str = formatAtlasStructure(injection.atlasStructure, "(missing atlas structure)");
 
     if (truncate > 0 && str.length > truncate + 3) {
         return str.substring(0, truncate) + "...";
     }
 
     return str;
-}
-
-export function displayInjections(injections: IInjection[], missing: string = "(none)") {
-    if (!injections || injections.length === 0) {
-        return missing;
-    }
-
-    return injections.reduce((prev, curr) => prev + `${displayInjection(curr)}, `, "").slice(0, -2);
 }

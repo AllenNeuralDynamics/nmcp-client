@@ -1,98 +1,131 @@
 import * as React from "react";
 import {useEffect, useState} from "react";
+import {observer} from "mobx-react-lite";
 import {useMutation, useQuery} from "@apollo/client";
-import {Button, Dropdown, Segment, Confirm, Table, Header, List, Checkbox} from "semantic-ui-react";
-import {toast} from "react-toastify";
+import {Button, Card, Center, Divider, Group, Loader, SimpleGrid, Text, Tooltip} from "@mantine/core";
+import {IconPlus, IconUpload} from "@tabler/icons-react";
 
-import {toastCreateError, toastDeleteError} from "../common/Toasts";
+import {toastCreateError, toastDeleteError} from "../common/NotificationHelper";
 import {PaginationHeader} from "../common/PaginationHeader";
 import {
     CREATE_NEURON_MUTATION,
-    CreateNeuronMutationData, CreateNeuronMutationResponse, CreateNeuronVariables,
+    CreateNeuronMutationResponse, CreateNeuronVariables,
     DELETE_NEURON_MUTATION, DeleteNeuronMutationResponse, DeleteNeuronVariables,
     NEURONS_QUERY, NeuronsQueryResponse, NeuronsQueryVariables
 } from "../../graphql/neuron";
-import {displaySample, ISample} from "../../models/sample";
+import {SpecimenShape} from "../../models/specimen";
 import {NeuronsTable} from "./NeuronsTable";
-import {displayNeuron, INeuron} from "../../models/neuron";
+import {formatNeuron, NeuronShape} from "../../models/neuron";
 import {UserPreferences} from "../../util/userPreferences";
 import {ImportSomasModal} from "./soma/ImportSomasModal";
-
-interface INeuronsProps {
-    samples: ISample[];
-}
+import {SpecimenFilter} from "../common/filters/SpecimenFilter";
+import {OptionalFilter} from "../../viewmodel/candidateFilter";
+import {SpecimenSelect} from "../common/SpecimenSelect";
+import {SamplesQueryResponse, SPECIMENS_QUERY} from "../../graphql/specimen";
+import {GraphQLErrorAlert} from "../common/GraphQLErrorAlert";
+import {usePreferences} from "../../hooks/usePreferences";
+import {MessageBox} from "../common/MessageBox";
 
 interface INeuronsState {
     offset: number;
     limit: number;
-    sample: ISample;
-    isSampleLocked: boolean;
-    limitSamples: boolean;
-    sampleIds: string[];
-    requestedNeuronForDelete: INeuron;
-    requestedNeuronForAnnotations: INeuron;
+    requestedNeuronForDelete: NeuronShape;
     isUploadSomaPropertiesOpen: boolean;
 }
 
-export const Neurons = (props: INeuronsProps) => {
-    let sample: ISample = null;
-    let isSampleLocked = false;
+export const Neurons = observer(() => {
+    const preferences = usePreferences();
 
-    if (UserPreferences.Instance.neuronCreateLockedSampleId.length > 0) {
-        sample = props.samples.find(s => s.id === UserPreferences.Instance.neuronCreateLockedSampleId) || null;
-        isSampleLocked = sample != null;
-    }
+    const [sampleId, setSampleId] = useState<string>(null);
+    const [isSampleLocked, setIsSampleLocked] = useState<boolean>(false);
+
+    const [specimenFilter] = useState(new OptionalFilter<string[]>([]));
 
     const [state, setState] = useState<INeuronsState>({
         offset: UserPreferences.Instance.neuronPageOffset,
         limit: UserPreferences.Instance.neuronPageLimit,
-        sample,
-        isSampleLocked,
-        limitSamples: false,
-        sampleIds: [],
         requestedNeuronForDelete: null,
-        requestedNeuronForAnnotations: null,
         isUploadSomaPropertiesOpen: false
     });
 
-    useEffect(() => {
-        const lockedSampleId = UserPreferences.Instance.neuronCreateLockedSampleId;
-
-        let sample = state.sample;
-
-        if (lockedSampleId) {
-            sample = props.samples.find((s: ISample) => s.id === lockedSampleId);
-        } else if (state.sample) {
-            sample = props.samples.find((s: ISample) => s.id === sample.id);
-        }
-
-        if (sample) {
-            setState({...state, sample: sample, isSampleLocked: lockedSampleId.length > 0});
-        } else {
-            setState({...state, sample: null, isSampleLocked: false});
-        }
-    }, ["sample", "isSampleLocked"])
-
     const [deleteNeuron] = useMutation<DeleteNeuronMutationResponse, DeleteNeuronVariables>(DELETE_NEURON_MUTATION,
         {
-            refetchQueries: ["NeuronsQuery"],
-            onError: (error) => toast.error(toastDeleteError(error), {autoClose: false})
+            refetchQueries: [NEURONS_QUERY],
+            onError: (error) => toastDeleteError(error)
         });
 
-    const [createNeuron] = useMutation<CreateNeuronMutationResponse, CreateNeuronVariables>(CREATE_NEURON_MUTATION,
+    const [createNeuron, {loading: isCreating}] = useMutation<CreateNeuronMutationResponse, CreateNeuronVariables>(CREATE_NEURON_MUTATION,
         {
-            refetchQueries: ["NeuronsQuery"],
+            refetchQueries: [NEURONS_QUERY],
             onCompleted: (data) => onNeuronCreated(data.createNeuron),
-            onError: (error) => toast.error(toastCreateError(error), {autoClose: false})
+            onError: (error) => toastCreateError(error)
         });
 
-    const sampleIds = state.limitSamples ? state.sampleIds : [];
+    const specimenData = useQuery<SamplesQueryResponse>(SPECIMENS_QUERY, {fetchPolicy: "cache-first"});
 
-    const {loading, error, data} = useQuery<NeuronsQueryResponse, NeuronsQueryVariables>(NEURONS_QUERY,
+    const sampleIds = specimenFilter.isEnabled ? specimenFilter.contents : [];
+
+    const {loading, error, data, previousData} = useQuery<NeuronsQueryResponse, NeuronsQueryVariables>(NEURONS_QUERY,
         {
             pollInterval: 10000,
-            variables: {input: {offset: state.offset, limit: state.limit, sampleIds: sampleIds, sortOrder: "DESC"}}
+            variables: {input: {offset: state.offset, limit: state.limit, specimenIds: sampleIds}}
         });
+
+    useEffect(() => {
+        if (specimenData.data) {
+            let possibleSpecimen = preferences.neuronCreateLockedSampleId;
+            let possibleLock = possibleSpecimen != null;
+
+            const s = specimenData.data.specimens.items;
+
+            if (!possibleLock) {
+                if (s.length > 0) {
+                    possibleSpecimen = s[0].id;
+                }
+            } else {
+                if (!s.find(v => v.id == possibleSpecimen)) {
+                    possibleLock = false;
+                    if (s.length > 0) {
+                        possibleSpecimen = s[0].id;
+                    }
+                }
+            }
+            setSampleId(possibleSpecimen);
+            setIsSampleLocked(possibleLock);
+        } else {
+            setSampleId(null);
+            setIsSampleLocked(false);
+        }
+    }, [specimenData.data]);
+
+    if (specimenData.error || error) {
+        return <GraphQLErrorAlert title={`${error ? "Neuron" : "Specimen"} Data Could not be Loaded`} error={specimenData.error || error}/>;
+    }
+
+    let neurons: NeuronShape[];
+    let totalCount: number;
+
+    if (data) {
+        neurons = data.neurons.items;
+
+        totalCount = data.neurons.totalCount;
+    } else {
+        if (loading && !previousData) {
+            return <Center><Loader type="dots"/></Center>
+        }
+        neurons = previousData.neurons.items;
+        totalCount = previousData.neurons.totalCount;
+    }
+
+    let specimens: SpecimenShape[] = [];
+
+    if (specimenData.data) {
+        specimens = specimenData.data.specimens.items;
+    } else {
+        if (specimenData.previousData) {
+            specimens = specimenData.previousData.specimens.items;
+        }
+    }
 
     const onUpdateOffsetForPage = (page: number) => {
         const offset = state.limit * (page - 1);
@@ -120,20 +153,12 @@ export const Neurons = (props: INeuronsProps) => {
     };
 
     const onSampleChange = (sampleId: string) => {
-        if (!state.sample || sampleId !== state.sample.id) {
-            setState({...state, sample: props.samples.find(s => s.id === sampleId) || null});
-        }
+        setSampleId(sampleId);
     }
 
-    const onLockSample = () => {
-        // Based on current state so if locked, clear locked sample, etc.
-        UserPreferences.Instance.neuronCreateLockedSampleId = state.isSampleLocked ? "" : state.sample.id;
-
-        setState({...state, isSampleLocked: !state.isSampleLocked});
-    }
-
-    const onSampleFilterChange = (data: any) => {
-        setState({...state, sampleIds: data, offset: 0});
+    const onLockSample = (b: boolean) => {
+        setIsSampleLocked(b);
+        UserPreferences.Instance.neuronCreateLockedSampleId = b ? sampleId : "";
     }
 
     const uploadSomaProperties = () => {
@@ -141,49 +166,19 @@ export const Neurons = (props: INeuronsProps) => {
     }
 
     const renderCreateNeuron = () => {
-        const items = props.samples.map(s => {
-            return {value: s.id, text: displaySample(s)}
-        });
-
         return (
-            <Table style={{
-                border: "none",
-                background: "transparent",
-                marginTop: 0,
-                maxWidth: "580px",
-                textAlign: "right"
-            }}>
-                <Table.Body>
-                    <Table.Row>
-                        <Table.Cell style={{padding: 0, width: "300px"}}>
-                            <Button as="div" fluid labelPosition="left">
-                                <Dropdown search fluid selection options={items}
-                                          className="label"
-                                          placeholder="Select sample for new neuron..."
-                                          disabled={state.isSampleLocked || props.samples.length === 0}
-                                          value={state.sample ? state.sample.id : null}
-                                          onChange={(_, {value}) => onSampleChange(value as string)}
-                                          style={{fontWeight: "normal"}}/>
-                                <Button compact icon="lock" color={state.isSampleLocked ? "red" : null}
-                                        disabled={state.sample === null}
-                                        active={state.isSampleLocked}
-                                        onClick={() => onLockSample()}/>
-                            </Button>
-                        </Table.Cell>
-
-                        <Table.Cell style={{padding: 0}}>
-                            <Button content="Add" icon="add" size="small" labelPosition="right" color="blue"
-                                    disabled={state.sample === null}
-                                    onClick={() => createNeuron({variables: {neuron: {sampleId: state.sample.id}}})}/>
-                        </Table.Cell>
-
-                        <Table.Cell style={{padding: 0}}>
-                            <Button content="Import..." icon="upload" size="small" labelPosition="right" color="green"
-                                    disabled={state.sample === null} onClick={() => uploadSomaProperties()}/>
-                        </Table.Cell>
-                    </Table.Row>
-                </Table.Body>
-            </Table>
+            <Group preventGrowOverflow={false}>
+                <Group gap={0}>
+                    <SpecimenSelect value={sampleId} lockable locked={isSampleLocked} onChange={onSampleChange}
+                                    onLock={onLockSample}/>
+                </Group>
+                <Tooltip label="Temporarily disabled pending update">
+                    <Button color="green" leftSection={<IconUpload size={18}/>} disabled={sampleId == null || isCreating || true}
+                            onClick={() => uploadSomaProperties()}>Import...</Button>
+                </Tooltip>
+                <Button leftSection={<IconPlus size={18}/>} disabled={sampleId == null || isCreating} loading={isCreating}
+                        onClick={() => createNeuron({variables: {neuron: {specimenId: sampleId}}})}>Add</Button>
+            </Group>
         );
     }
 
@@ -192,37 +187,29 @@ export const Neurons = (props: INeuronsProps) => {
             return null;
         }
 
-        return <Confirm open={true} dimmer="blurring"
-                        header="Delete Neuron?"
-                        content={`Are you sure you want to delete the neuron ${displayNeuron(state.requestedNeuronForDelete)}?  This action can not be undone.`}
-                        confirmButton="Delete"
-                        onCancel={() => setState({...state, requestedNeuronForDelete: null})}
-                        onConfirm={async () => {
-                            await deleteNeuron({variables: {id: state.requestedNeuronForDelete.id}});
-                            setState({...state, requestedNeuronForDelete: null});
-                        }}/>
+        return <MessageBox opened={true} centered={true} title="Delete Neuron"
+                           message={`Are you sure you want to delete the neuron ${formatNeuron(state.requestedNeuronForDelete)}?  This action can not be undone.`}
+                           confirmText="Delete"
+                           onCancel={() => setState({...state, requestedNeuronForDelete: null})}
+                           onConfirm={async () => {
+                               await deleteNeuron({variables: {id: state.requestedNeuronForDelete.id}});
+                               setState({...state, requestedNeuronForDelete: null});
+                           }}/>
     }
 
     const renderUploadSomaProperties = () => {
-        if (!state.isUploadSomaPropertiesOpen || !state.sample) {
+        if (!state.isUploadSomaPropertiesOpen || !sampleId) {
             return null;
         }
 
-        const onClose = () => {setState({...state, isUploadSomaPropertiesOpen: false});};
+        const onClose = () => {
+            setState({...state, isUploadSomaPropertiesOpen: false});
+        };
 
         return (
-            <ImportSomasModal sampleId={state.sample?.id} onClose={onClose}/>
+            <ImportSomasModal sample={specimens.find(s => s.id == sampleId)} onClose={onClose}/>
         );
     }
-
-    if (error || loading) {
-        return null
-    }
-    const sampleFilterOptions = props.samples.slice().sort((s1, s2) => s1.animalId < s2.animalId ? -1 : 1).map(s => {
-        return {key: s.id, text: s.animalId, value: s.id}
-    });
-
-    const totalCount = data.neurons ? data.neurons.totalCount : 0;
 
     const pageCount = Math.ceil(totalCount / state.limit);
 
@@ -235,46 +222,52 @@ export const Neurons = (props: INeuronsProps) => {
         <div>
             {renderDeleteConfirmationModal()}
             {renderUploadSomaProperties()}
-            <Segment.Group>
-                <Segment secondary style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between"
-                }}>
-                    <Header content="Neurons" style={{margin: "0"}}/>
-                    {renderCreateNeuron()}
-                </Segment>
-                <Segment secondary>
-                    <List horizontal divided>
-                        <List.Item>
-                            <Checkbox style={{verticalAlign: "middle"}} toggle label="Limit list to samples "
-                                      checked={state.limitSamples}
-                                      onChange={(_, data) => setState({...state, limitSamples: data.checked})}/>
-
-                            <Dropdown placeholder="Select..." style={{marginLeft: "8px"}} multiple selection
-                                      options={sampleFilterOptions}
-                                      value={state.sampleIds}
-                                      disabled={!state.limitSamples}
-                                      onChange={(_, d) => onSampleFilterChange(d.value)}/>
-                        </List.Item>
-                    </List>
-                </Segment>
-                <Segment>
-                    <PaginationHeader pageCount={pageCount} activePage={activePage}
-                                      limit={state.limit}
-                                      onUpdateLimitForPage={onUpdateLimit}
-                                      onUpdateOffsetForPage={onUpdateOffsetForPage}/>
-                </Segment>
-                <NeuronsTable neurons={data.neurons ? data.neurons.items : []} pageCount={pageCount} activePage={activePage} start={start} end={end}
-                              totalCount={totalCount} onDeleteNeuron={(n) => setState({...state, requestedNeuronForDelete: n})}
-                              onManageNeuronAnnotations={(n) => setState({...state, requestedNeuronForAnnotations: n})}/>
-            </Segment.Group>
+            <Card withBorder>
+                <Card.Section bg="segment">
+                    <Group justify="space-between" p={12}>
+                        <Text size="lg" fw={500}>Neurons</Text>
+                        {renderCreateNeuron()}
+                    </Group>
+                    <Divider orientation="horizontal"/>
+                </Card.Section>
+                <Card.Section bg="segment">
+                    <Group p={12}>
+                        <SpecimenFilter w={400} filter={specimenFilter}/>
+                    </Group>
+                    <Divider orientation="horizontal"/>
+                </Card.Section>
+                <Card.Section>
+                    <PaginationHeader total={pageCount} value={activePage} limit={state.limit} itemCount={totalCount} onLimitChange={onUpdateLimit}
+                                      onChange={onUpdateOffsetForPage}/>
+                    <Divider orientation="horizontal"/>
+                </Card.Section>
+                <Card.Section>
+                    {neurons.length > 0 ?
+                        <NeuronsTable neurons={neurons} pageCount={pageCount} activePage={activePage} start={start} end={end}
+                                      totalCount={totalCount} onDeleteNeuron={(n) => setState({...state, requestedNeuronForDelete: n})}/> :
+                        <Center><Text c="dimmed" p={24}>{zeroNeuronsMessage(specimenFilter.isEnabled)}</Text></Center>}
+                </Card.Section>
+                {neurons.length > 0 ?
+                    <Card.Section bg="segment">
+                        <Divider orientation="horizontal"/>
+                        <SimpleGrid cols={3} p={8}>
+                            <Text
+                                size="sm">{totalCount >= 0 ? (totalCount > 0 ? `Showing ${start} to ${end} of ${totalCount} neurons` : "There are no neurons") : ""}</Text>
+                            <Text size="sm" ta="center" c="dimmed">Click a cell value to modify a value</Text>
+                            <Text size="sm" ta="end">{`Page ${activePage} of ${pageCount}`}</Text>
+                        </SimpleGrid>
+                    </Card.Section> : null}
+            </Card>
         </div>
     );
+});
+
+function onNeuronCreated(data: NeuronShape) {
+    if (!data) {
+        toastCreateError("The neuron was not created.");
+    }
 }
 
-function onNeuronCreated(data: CreateNeuronMutationData) {
-    if (!data.source || data.error) {
-        toast.error(toastCreateError(data.error), {autoClose: false});
-    }
+function zeroNeuronsMessage(isFiltered: boolean): string {
+    return `There are no neurons${isFiltered ? " for the selected specimen" : "."}`;
 }

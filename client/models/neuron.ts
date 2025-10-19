@@ -1,8 +1,13 @@
-import {displayBrainArea, IBrainArea} from "./brainArea";
+import {AtlasStructureShape} from "./atlasStructure";
 import {isNullOrUndefined} from "../util/nodeUtil";
-import {ISample} from "./sample";
-import {IReconstruction} from "./reconstruction";
-import {ConsensusStatus} from "./consensusStatus";
+import {SpecimenShape} from "./specimen";
+import {Reconstruction} from "./reconstruction";
+import {AtlasReconstruction} from "./atlasReconstruction";
+
+export enum ExportFormat {
+    SWC = 0,
+    JSON = 1
+}
 
 export enum SomaPropertyOperator {
     None = 0,
@@ -11,34 +16,40 @@ export enum SomaPropertyOperator {
     GreaterThan = 3
 }
 
-export type SomaProperties = {
+export type SomaFilterProperties = {
     brightnessOperator?: SomaPropertyOperator;
     brightness?: number;
     volumeOperator?: SomaPropertyOperator;
     volume?: number;
 }
 
-export interface INeuron {
-    id: string;
-    idNumber: number;
-    idString: string;
-    tag: string;
-    keywords: string;
+export type SomaLocation = {
     x: number;
     y: number;
     z: number;
-    sampleX: number;
-    sampleY: number;
-    sampleZ: number;
-    doi: string;
-    consensus: ConsensusStatus;
-    metadata?: string;
-    sample: ISample;
-    brainArea: IBrainArea;
-    latest?: IReconstruction;
-    reconstructions?: IReconstruction[];
-    createdAt: number;
-    updatedAt: number;
+}
+
+export type SomaProperties = {
+    brightness?: number;
+    volume?: number;
+}
+
+export type NeuronShape = {
+    __typename?: string;
+    id?: string;
+    label?: string;
+    keywords?: string[];
+    specimenSoma?: SomaLocation;
+    atlasSoma?: SomaLocation;
+    specimen?: SpecimenShape;
+    atlasStructureId?: string;
+    atlasStructure?: AtlasStructureShape;
+    somaProperties?: SomaProperties;
+    reconstructions?: Reconstruction[];
+    reconstructionCount?: number;
+    published?: AtlasReconstruction;
+    createdAt?: number;
+    updatedAt?: number;
 }
 
 export interface IParseSomaResult {
@@ -48,32 +59,16 @@ export interface IParseSomaResult {
     error: string;
 }
 
-export interface IManualAnnotations {
-    somaCompartmentId: number;
+export function formatNeuron(neuron: NeuronShape, placeholder: string = "(no label)"): string {
+    return neuron?.label ? neuron.label : placeholder;
 }
 
-export interface IAnnotationMetadata {
-    manualAnnotations: IManualAnnotations;
+export function parseKeywords(value: string): string[] {
+    return (value?.trim() ?? "").split(";").map(s => s.trim());
 }
 
-export interface IParsedAnnotationMetadata {
-    somaCompartmentId: number;
-}
-
-export function displayNeuron(neuron: INeuron): string {
-    return neuron?.idString ? neuron.idString : "(unnamed neuron)";
-}
-
-export function displayNeuronWithBrainStructure(neuron: INeuron): string {
-    const name =  neuron?.idString ? neuron.idString : "(unnamed neuron)";
-
-    if (!neuron) {
-        return name;
-    }
-
-    const brainArea = displayBrainArea(neuron.brainArea || null);
-
-    return `${name} (${brainArea})`;
+export function formatKeywords(keywords: string[]): string {
+    return keywords.join(";");
 }
 
 export function formatSomaCoords(x: number, y: number, z: number) {
@@ -84,17 +79,17 @@ export function formatSomaCoords(x: number, y: number, z: number) {
     return `(${nx}, ${ny}, ${nz})`;
 }
 
-export function formatSomaLocation(neuron: INeuron) {
+export function formatSomaLocation(neuron: NeuronShape) {
     if (neuron) {
-        return formatSomaCoords(neuron.x, neuron.y, neuron.z);
+        return formatSomaCoords(neuron.atlasSoma?.x, neuron.atlasSoma?.y, neuron.atlasSoma?.z);
     } else {
         return "(n/a)";
     }
 }
 
-export function formatHortaLocation(neuron: INeuron) {
+export function formatHortaLocation(neuron: NeuronShape) {
     if (neuron) {
-        return formatSomaCoords(neuron.sampleX, neuron.sampleY, neuron.sampleZ);
+        return formatSomaCoords(neuron.specimenSoma?.x, neuron.specimenSoma?.y, neuron.specimenSoma?.z);
     } else {
         return "(n/a)";
     }
@@ -142,35 +137,7 @@ export function parseSomaLocation(location: string): IParseSomaResult {
     return somaParse;
 }
 
-export function parseNeuronAnnotationMetadata(neuron: INeuron): IParsedAnnotationMetadata {
-    if (neuron?.metadata) {
-        const data: IAnnotationMetadata = JSON.parse(neuron.metadata);
-
-        if (data.manualAnnotations?.somaCompartmentId) {
-            return {
-                somaCompartmentId: data.manualAnnotations.somaCompartmentId
-            };
-        }
-    }
-
-    return null;
-}
-
-export function parseAnnotationMetadata(data: string): IParsedAnnotationMetadata {
-    if (data && data.length > 0) {
-        const metadata: IAnnotationMetadata = JSON.parse(data);
-
-        if (metadata.manualAnnotations?.somaCompartmentId) {
-            return {
-                somaCompartmentId: metadata.manualAnnotations.somaCompartmentId
-            };
-        }
-    }
-
-    return null;
-}
-
-export function createCandidateAnnotationLayer(neurons: INeuron[], selectedId: string) {
+export function createCandidateAnnotationLayer(neurons: NeuronShape[], selectedId: string) {
     const defaultColor = selectedId ? "#2184d033" : "#2184d0ff";
     const defaultSize = selectedId ? 3 : 5;
 
@@ -179,9 +146,9 @@ export function createCandidateAnnotationLayer(neurons: INeuron[], selectedId: s
             type: "point",
             id: n.id,
             point: [
-                n.x / 10,
-                n.y / 10,
-                n.z / 10
+                (n.atlasSoma?.x || 0) / 10,
+                (n.atlasSoma?.y || 0) / 10,
+                (n.atlasSoma?.z || 0) / 10
             ],
             props: [n.id == selectedId ? "#00ff00ff" : defaultColor, n.id == selectedId ? 8 : defaultSize]
         }

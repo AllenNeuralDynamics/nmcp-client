@@ -1,7 +1,3 @@
-import {createContext, useContext} from "react";
+import {UserPreferences} from "../util/userPreferences";
 
-import {PreferencesViewModel} from "../viewmodel/preferencesViewModel";
-
-const preferencesContext = createContext(new PreferencesViewModel());
-
-export const usePreferences = () => useContext(preferencesContext);
+export const usePreferences = () => UserPreferences.Instance;

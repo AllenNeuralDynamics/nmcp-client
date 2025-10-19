@@ -1,5 +1,5 @@
 import gql from "graphql-tag";
-import {IUser} from "../models/user";
+import {User} from "../models/user";
 
 /*
     This will toggle display of a top-level tab, but does not affect the data shown or requests that can be made.  That is enforced through authorization
@@ -38,7 +38,7 @@ export const USER_QUERY = gql`
 `;
 
 export type UserQueryResponse = {
-    user: IUser;
+    user: User;
 }
 
 export const USERS_QUERY = gql`
@@ -69,7 +69,7 @@ export type UserQueryVariables = {
 export type UsersQueryResponse = {
     users: {
         totalCount: number,
-        items: IUser[]
+        items: User[]
     }
 }
 
@@ -93,5 +93,5 @@ export type UpdatePermissionsVariables = {
 }
 
 export type UpdatePermissionsResponse = {
-    updatePermissions: IUser;
+    updatePermissions: User;
 }

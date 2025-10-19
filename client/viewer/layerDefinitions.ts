@@ -22,8 +22,8 @@ export class SearchLayers {
     public SearchSelectionLayers: SearchLayer[];
 
     public constructor(precomputedUrl: string) {
-        this.CandidateCcfLayer = {name: "CCF", index: 0, isMirror: false, source: "precomputed://gs://allen_neuroglancer_ccf/ccf_test1"};
-        this.CandidateAnnotationLayer = {name: "Candidates", index: 1, isMirror: false, source: "local://annotations"};
+        this.CandidateAnnotationLayer = {name: "Candidates", index: 0, isMirror: false, source: "local://annotations"};
+        this.CandidateCcfLayer = {name: "CCF", index: 1, isMirror: false, source: "precomputed://gs://allen_neuroglancer_ccf/ccf_test1"};
         this.CandidateReconstructionLayer = {name: "Pending Reconstructions", index: 2, isMirror: false, source: `${precomputedUrl}/candidates`};
 
         this.SearchCcfLayer = {name: "CCF", index: 0, isMirror: false, source: "precomputed://gs://allen_neuroglancer_ccf/ccf_test1"};

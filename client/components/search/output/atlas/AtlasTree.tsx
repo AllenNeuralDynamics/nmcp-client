@@ -1,46 +1,38 @@
 import * as React from "react";
-import {observer} from "mobx-react";
-import {Container, Input, List} from "semantic-ui-react";
+import {observer} from "mobx-react-lite";
 
-import {StructureTreeNode} from "./StructureTreeNode";
+import {StructureListItem} from "./StructureListItem";
 import {useAtlas} from "../../../../hooks/useAtlas";
+import {List, Stack, TextInput} from "@mantine/core";
+import {useState} from "react";
+import {IconSearch, IconX} from "@tabler/icons-react";
+import {StructureTree} from "./StructureTreeNode";
 
 export const AtlasTree = observer(() => {
     const atlas = useAtlas();
 
-    const [filterText, setFilterText] = React.useState<string>("");
+    const [filterText, setFilterText] = useState<string>("");
 
     const listItems = () => {
         if (filterText) {
             const items = atlas.structures.filter(c => c.matches(filterText));
 
-            const listItems = items.map(c => (<StructureTreeNode key={c.structure.id} structure={c} structureOnly={true}/>));
+            const listItems = items.map(c => (<StructureListItem key={c.structure.id} structure={c}/>));
             return (
                 <List>
                     {listItems}
                 </List>
             );
         } else {
-            const root = atlas.rootStructure;
-
-            return (
-                <List>
-                    <StructureTreeNode key={root.structure.id} structure={root} structureOnly={false}/>
-                </List>
-            );
+            return <StructureTree/>;
         }
     };
 
     return (
-        <Container fluid>
-            <div>
-                <Input size="mini" icon="search" iconPosition="left" action={{icon: "cancel", as: "div", onClick: () => setFilterText("")}}
-                       placeholder='Filter compartments...' fluid value={filterText} className="compartment-search"
-                       onChange={(_, {value}) => setFilterText(value.toLowerCase())}/>
-            </div>
-            <div style={{padding: "10px"}}>
-                {listItems()}
-            </div>
-        </Container>
+        <Stack gap={0}>
+            <TextInput radius={0} bd="0px" value={filterText} placeholder="Filter structures..." leftSection={<IconSearch size={18}/>} rightSection={<IconX size={18} onClick={() => setFilterText("")}/>}
+                       onChange={v => setFilterText(v.currentTarget.value?.toLowerCase() ?? "")}/>
+            {listItems()}
+        </Stack>
     );
 });

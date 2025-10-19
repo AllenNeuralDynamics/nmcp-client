@@ -1,40 +1,73 @@
 import * as React from "react";
-import {observer} from "mobx-react";
-import {Icon, List} from "semantic-ui-react";
+import {ActionIcon, getTreeExpandedState, Group, Text, Tree, TreeNodeData, useTree} from '@mantine/core';
+import {IconChevronDown, IconChevronRight} from "@tabler/icons-react";
 
 import {AtlasStructureViewModel} from "../../../../viewmodel/atlasStructureViewModel";
 import {useAtlas} from "../../../../hooks/useAtlas";
+import {AtlasViewModel} from "../../../../viewmodel/atlasViewModel";
+import {isSelectedIcon} from "../NeuronTable";
+import {observer} from "mobx-react-lite";
 
-type StructureTreeNodeProps = {
+interface StructureTreeNodeData extends TreeNodeData {
     structure: AtlasStructureViewModel;
-    structureOnly: boolean;
 }
 
-export const StructureTreeNode = observer<React.FC<StructureTreeNodeProps>>(({structure, structureOnly}) => {
+function generateTree(root: AtlasStructureViewModel): StructureTreeNodeData {
+    const children = root.children.map(c => generateTree(c));
+
+    return {
+        label: root.structure.name,
+        value: root.structure.id,
+        structure: root,
+        children: children
+    }
+}
+
+let staticTree = [];
+
+function getTree(atlas: AtlasViewModel): StructureTreeNodeData[] {
+    if (staticTree.length == 0) {
+        staticTree = [generateTree(atlas.rootStructure)]
+    }
+
+    return staticTree;
+}
+
+export const StructureTree = observer(() => {
     const atlas = useAtlas();
 
-    const isParent = !structureOnly && structure.children?.length > 0;
+    const data = getTree(atlas);
 
-    const iconName = isParent ? (structure.shouldShowChildren ? "folder open" : "folder") : "file";
+    const onClick =(evt: any, n: StructureTreeNodeData) => {
+        evt.stopPropagation();
+        atlas.toggle(n.structure.structure.id);
+    }
 
-    const items = (isParent && structure.shouldShowChildren) ? (
-        <List.List>
-            {structure.children.map(s => (
-                <StructureTreeNode key={s.structure.id} structure={s} structureOnly={structureOnly}/>
-            ))}
-        </List.List>
-    ) : null;
+    const tree = useTree({
+        initialExpandedState: getTreeExpandedState(data, [atlas.rootStructure.structure.id]),
+    });
 
     return (
-        <List.Item>
-            <List.Icon name={iconName} onClick={() => structure.shouldShowChildren = !structure.shouldShowChildren}/>
-            <List.Content>
-                <List.Description onClick={() => atlas.toggle(structure.structure.id)}>
-                    <Icon name={structure.isDisplayed ? "check square outline" : "square outline"}/>
-                    {structure.structure.name}
-                </List.Description>
-                {items}
-            </List.Content>
-        </List.Item>
+        <Tree tree={tree} data={data} levelOffset={23}
+              renderNode={({node, expanded, hasChildren, elementProps}) => {
+                  const n = node as StructureTreeNodeData;
+                  return (
+                      <Group gap={4} {...elementProps}>
+                          {hasChildren && (
+                              <IconChevronRight
+                                  size={18}
+                                  style={{transform: expanded ? 'rotate(90deg)' : 'rotate(0deg)'}}
+                              />
+                          )}
+                          <Group gap={0}>
+                              <ActionIcon variant="transparent" onClick={(e) => onClick(e, n)}>
+                                  {isSelectedIcon(n.structure.isDisplayed)}
+                              </ActionIcon>
+                              <Text size="sm" lineClamp={1} truncate="end" onClick={(e) => onClick(e, n)}>{n.structure.structure.name}</Text>
+                          </Group>
+                      </Group>
+                  )
+              }}
+        />
     );
 });

@@ -1,265 +1,154 @@
 import * as React from "react";
-import {useContext, useState} from "react";
-import moment from "moment";
-import {Checkbox, Dropdown, Header, Label, List, Segment, Table, TableCell, TableRow} from "semantic-ui-react";
+import {useState} from "react";
 import {useQuery} from "@apollo/client";
+import {observer} from "mobx-react-lite";
+import {Card, Center, Divider, Group, Loader, SimpleGrid, Stack, Text} from "@mantine/core";
 
-import {RECONSTRUCTIONS_QUERY, ReconstructionsResponse, ReconstructionVariables} from "../../graphql/reconstruction";
-import {displayNeuron} from "../../models/neuron";
-import {displayBrainArea} from "../../models/brainArea";
-import {IReconstruction} from "../../models/reconstruction";
+import {usePreferences} from "../../hooks/usePreferences";
+import {useUser} from "../../hooks/useUser";
 import {PaginationHeader} from "../common/PaginationHeader";
-import {RequestReviewDialog} from "./RequestReviewDialog";
-import {UserContext} from "../app/UserApp";
-import {ReconstructionStatus, reconstructionStatusColor, reconstructionStatusString} from "../../models/reconstructionStatus";
-import {AnnotatorList} from "../common/AnnotatorList";
-import {ReconstructionActionPanel} from "./ReconstructionActionPanel";
-import {SAMPLES_QUERY, SamplesQueryResponse} from "../../graphql/sample";
-import {UserPreferences} from "../../util/userPreferences";
-
-const statusFilterOptions = [
-    {key: "complete", text: "Published", value: ReconstructionStatus.Published},
-    {key: "in-progress", text: "In Progress", value: ReconstructionStatus.InProgress},
-    {key: "on-hold", text: "On Hold", value: ReconstructionStatus.OnHold},
-    {key: "in-review", text: "In Review", value: ReconstructionStatus.InReview},
-    {key: "approved", text: "Approved", value: ReconstructionStatus.Approved},
-    {key: "approved", text: "Ready to Publish", value: ReconstructionStatus.ApprovedAndReady},
-    {key: "rejected", text: "Rejected", value: ReconstructionStatus.Rejected},
-    {key: "invalid", text: "Invalid", value: ReconstructionStatus.Invalid}
-]
+import {RequestReviewModal} from "./RequestReviewModal";
+import {ReconstructionActions} from "./ReconstructionActions";
+import {OptionalFilter} from "../../viewmodel/candidateFilter";
+import {GraphQLErrorAlert} from "../common/GraphQLErrorAlert";
+import {Reconstruction} from "../../models/reconstruction";
+import {RECONSTRUCTIONS_QUERY, ReconstructionQueryArgs, ReconstructionsResponse} from "../../graphql/reconstruction";
+import {ReconstructionFilters} from "./ReconstructionFilters";
+import {ReconstructionTable} from "./ReconstructionTable";
+import {ReconstructionStatus} from "../../models/reconstructionStatus";
+import {UserPermissions} from "../../graphql/user";
+import {Navigate} from "react-router-dom";
 
 function noReconstructionsText(userOnly: boolean, haveFilters: boolean) {
     return userOnly || haveFilters ? "There are no reconstructions that match the filters" : "There are no reconstructions";
 }
 
-export const Reconstructions = () => {
-    const [state, setState] = useState({
-        offset: 0,
-        limit: 10,
-        userOnly: UserPreferences.Instance.ReconstructionNeuronsUserOnly,
-        limitStatus: false,
-        statusFilter: [],
-        limitSamples: false,
-        sampleIds: [],
-        selectedId: null
-    });
+export const Reconstructions = observer(() => {
+    const preferences = usePreferences();
+    const user = useUser();
+
+    if (!user || ((user.permissions & UserPermissions.ViewReconstructions) == 0)) {
+        return <Navigate to="/" replace/>;
+    }
+
+    const [offset, setOffset] = useState(0);
+    const [limit, setLimit] = useState(10);
+
+    const [userOnly, setUserOnly] = useState(preferences.ReconstructionNeuronsUserOnly);
+
+    const [specimenFilter] = useState(new OptionalFilter<string[]>([]));
+    const [statusFilter] = useState(new OptionalFilter<number[]>([]));
+
+    const [selection, setSelection] = useState<string>(null);
 
     const [isCompleteDialogVisible, setIsCompleteDialogVisible] = useState(false);
 
     const [reviewRequestId, setReviewRequestId] = useState("");
-    const [reviewRequestStatus, setReviewRequestStatus] = useState(ReconstructionStatus.Unknown);
+    const [reviewRequestStatus, setReviewRequestStatus] = useState<ReconstructionStatus>(ReconstructionStatus.Initialized);
 
-    const user = useContext(UserContext);
+    const status: number[] = statusFilter.isEnabled ? statusFilter.contents : []
 
-    const filters: number[] = state.limitStatus ? state.statusFilter : []
+    const sampleIds = specimenFilter.isEnabled ? specimenFilter.contents : [];
 
-    const sampleIds = state.limitSamples ? state.sampleIds : [];
-
-    const {loading, error, data} = useQuery<ReconstructionsResponse, ReconstructionVariables>(RECONSTRUCTIONS_QUERY, {
-        variables: {pageInput: {offset: state.offset, limit: state.limit, userOnly: state.userOnly, filters: filters, sampleIds: sampleIds}},
+    const {data, error, previousData} = useQuery<ReconstructionsResponse, ReconstructionQueryArgs>(RECONSTRUCTIONS_QUERY, {
+        variables: {queryArgs: {offset: offset, limit: limit, userOnly: userOnly, status: status, specimenIds: sampleIds}},
         pollInterval: 10000
     });
 
-    const {
-        loading: sampleLoading,
-        error: sampleError,
-        data: sampleData
-    } = useQuery<SamplesQueryResponse>(SAMPLES_QUERY, {pollInterval: 5000});
-
-    if (loading || sampleLoading) {
-        return (<div/>)
+    if (error) {
+        return <GraphQLErrorAlert title="Candidate Data Could Not Be Loaded" error={error}/>;
     }
 
-    if (error || sampleError) {
-        return (<div>
-            {error.graphQLErrors.map(({message}, i) => (
-                <span key={i}>{message}</span>))}
-        </div>)
+    let reconstructionCache: Reconstruction[];
+    let totalCount: number;
+
+    if (data?.reconstructions.reconstructions) {
+        reconstructionCache = data.reconstructions.reconstructions;
+        totalCount = data.reconstructions.total;
+    } else {
+        if (previousData) {
+            reconstructionCache = previousData.reconstructions.reconstructions;
+            totalCount = previousData.reconstructions.total;
+        } else {
+            return <Center><Loader type="dots"/></Center>;
+        }
     }
-
-    if (!data || !data.reconstructions) {
-        return (<div>Data unavailable</div>)
-    }
-
-    let samples = sampleData.samples.items;
-
-    const sampleFilterOptions = samples.slice().sort((s1, s2) => s1.animalId < s2.animalId ? -1 : 1).map(s => {
-        return {key: s.id, text: s.animalId, value: s.id}
-    });
 
     const onUserOnlyChange = (userOnly: boolean) => {
-        UserPreferences.Instance.ReconstructionNeuronsUserOnly = userOnly;
-        setState({...state, userOnly: userOnly})
+        preferences.ReconstructionNeuronsUserOnly = userOnly;
+        setUserOnly(userOnly)
     }
-
-    const onSampleFilterChange = (data: any) => {
-        setState({...state, sampleIds: data, offset: 0});
-    }
-
-    const onSelected = (reconstruction: IReconstruction) => {
-        setState({...state, selectedId: reconstruction?.id == state.selectedId ? null : reconstruction?.id});
+    const onSelected = (reconstruction: Reconstruction) => {
+        if ((reconstruction?.id ?? null) != selection) {
+            setSelection(reconstruction?.id ?? null);
+        }
     }
 
     let selectedReconstruction = null;
 
-    const rows = data.reconstructions.reconstructions.map((t: IReconstruction) => {
-        if (t.id == state.selectedId) {
-            selectedReconstruction = t;
+    reconstructionCache.map(r => {
+        if (r.id == selection) {
+            selectedReconstruction = r;
         }
-        return <ReconstructionRow key={`tt_${t.id}`} reconstruction={t} isSelected={t.id == state.selectedId} onSelected={onSelected}/>
     });
 
     const completeDialog = isCompleteDialogVisible ? (
-        <RequestReviewDialog id={reviewRequestId} show={true} requestedStatus={reviewRequestStatus} onClose={() => setIsCompleteDialogVisible(false)}/>) : null;
+        <RequestReviewModal id={reviewRequestId} show={true} requestedStatus={reviewRequestStatus} onClose={() => setIsCompleteDialogVisible(false)}/>) : null;
 
-    const onUpdateOffsetForPage = (page: number) => {
-        const offset = state.limit * (page - 1);
+    const pageCount = Math.max(Math.ceil(totalCount / limit), 1);
 
-        if (offset !== state.offset) {
-            setState({...state, offset});
-        }
-    };
+    const activePage = Math.min(offset ? (Math.floor(offset / limit) + 1) : 1, pageCount);
 
-    const onStatusFilterChange = (data: number[]) => {
-        setState({...state, statusFilter: data, offset: 0});
-    }
+    const start = offset + 1;
 
-    const onUpdateLimit = (limit: number) => {
-        if (limit !== state.limit) {
-            let offset = state.offset;
-
-            if (offset < limit) {
-                offset = 0;
-            }
-
-            setState({...state, offset, limit});
-        }
-    };
-
-    const totalCount = data.reconstructions.totalCount;
-
-    const pageCount = Math.max(Math.ceil(totalCount / state.limit), 1);
-
-    const activePage = state.offset ? (Math.floor(state.offset / state.limit) + 1) : 1;
-
-    const start = state.offset + 1;
-
-    const end = Math.min(state.offset + state.limit, totalCount);
+    const end = Math.min(offset + limit, totalCount);
 
     return (
-        <div style={{margin: "16px"}}>
+        <Stack m={16}>
             {completeDialog}
-            <Segment.Group>
-                <Segment secondary>
-                    <Header style={{margin: "0"}}>Reconstructions</Header>
-                </Segment>
-                <Segment secondary>
-                    <List horizontal divided>
-                        <List.Item>
-                            <Checkbox toggle label="My reconstructions only" checked={state.userOnly}
-                                      onChange={(_, data) => onUserOnlyChange(data.checked)}/>
-                        </List.Item>
-                        <List.Item>
-                            <Checkbox style={{verticalAlign: "middle"}} toggle label="Limit samples to "
-                                      checked={state.limitSamples}
-                                      onChange={(_, data) => setState({...state, limitSamples: data.checked})}/>
-
-                            <Dropdown placeholder="Select..." style={{marginLeft: "8px"}} multiple selection
-                                      options={sampleFilterOptions}
-                                      value={state.sampleIds}
-                                      disabled={!state.limitSamples}
-                                      onChange={(_, d) => onSampleFilterChange(d.value)}/>
-                        </List.Item>
-                        <List.Item>
-                            <Checkbox toggle label="Limit status to " checked={state.limitStatus}
-                                      onChange={(_, data) => setState({...state, limitStatus: data.checked})}/>
-                            <Dropdown placeholder="Status" style={{marginLeft: "8px"}} multiple selection options={statusFilterOptions}
-                                      value={state.statusFilter}
-                                      disabled={!state.limitStatus}
-                                      onChange={(_, d) => onStatusFilterChange(d.value as number[])}/>
-                        </List.Item>
-                    </List>
-                </Segment>
-                <Segment>
-                    <PaginationHeader pageCount={pageCount} activePage={activePage}
-                                      limit={state.limit}
-                                      onUpdateLimitForPage={onUpdateLimit}
-                                      onUpdateOffsetForPage={onUpdateOffsetForPage}/>
-                </Segment>
-                <Segment secondary>
-                    <ReconstructionActionPanel reconstruction={selectedReconstruction} userId={user.id} showRequestReviewDialog={(id: string, status: ReconstructionStatus) => {
-                        setReviewRequestId(id);
-                        setReviewRequestStatus(status);
-                        setIsCompleteDialogVisible(true);
-                    }}/>
-                </Segment>
-                <Table attached="bottom" compact="very" size="small" celled structured selectable>
-                    <Table.Header>
-                        <Table.Row>
-                            <Table.HeaderCell rowSpan={2}>Neuron</Table.HeaderCell>
-                            <Table.HeaderCell rowSpan={2}>Subject</Table.HeaderCell>
-                            <Table.HeaderCell colSpan={4} textAlign="center">Soma</Table.HeaderCell>
-                            <Table.HeaderCell colSpan={2} textAlign="center">Node Count</Table.HeaderCell>
-                            <Table.HeaderCell rowSpan={2}>Annotator</Table.HeaderCell>
-                            <Table.HeaderCell rowSpan={2}>Proofreader</Table.HeaderCell>
-                            <Table.HeaderCell rowSpan={2}>Started</Table.HeaderCell>
-                            <Table.HeaderCell rowSpan={2}>Completed</Table.HeaderCell>
-                            <Table.HeaderCell rowSpan={2}>Status</Table.HeaderCell>
-                        </Table.Row>
-                        <Table.Row>
-                            <Table.HeaderCell>Structure</Table.HeaderCell>
-                            <Table.HeaderCell>X</Table.HeaderCell>
-                            <Table.HeaderCell>Y</Table.HeaderCell>
-                            <Table.HeaderCell>Z</Table.HeaderCell>
-                            <Table.HeaderCell>Axon</Table.HeaderCell>
-                            <Table.HeaderCell>Dendrite</Table.HeaderCell>
-                        </Table.Row>
-                    </Table.Header>
-                    <Table.Body>
-                        {rows}
-                    </Table.Body>
-                    <Table.Footer fullwidth="true">
-                        <Table.Row>
-                            <Table.HeaderCell colSpan={7}>
-                                {totalCount >= 0 ? (totalCount > 0 ? `Showing ${start} to ${end} of ${totalCount} reconstructions` : noReconstructionsText(state.userOnly, filters.length > 0)) : ""}
-                            </Table.HeaderCell>
-                            <Table.HeaderCell colSpan={7} textAlign="right">
-                                {`Page ${activePage} of ${pageCount}`}
-                            </Table.HeaderCell>
-                        </Table.Row>
-                    </Table.Footer>
-                </Table>
-            </Segment.Group>
-        </div>
+            <Card withBorder>
+                <Card.Section bg="segment">
+                    <Group p={12}>
+                        <Text size="lg" fw={500}>Reconstructions</Text>
+                    </Group>
+                    <Divider orientation="horizontal"/>
+                </Card.Section>
+                <Card.Section bg="segment">
+                    <ReconstructionFilters checked={userOnly} onChange={evt => onUserOnlyChange(evt.currentTarget.checked)} filter={specimenFilter}
+                                           filter1={statusFilter}/>
+                    <Divider orientation="horizontal"/>
+                </Card.Section>
+                <Card.Section bg="segment">
+                    <PaginationHeader total={pageCount} value={activePage} limit={limit} itemCount={totalCount}
+                                      onLimitChange={v => setLimit(v)} onChange={p => setOffset((p - 1) * limit)}/>
+                    <Divider orientation="horizontal"/>
+                </Card.Section>
+                <Card.Section bg="segment">
+                    <ReconstructionActions reconstruction={selectedReconstruction} userId={user.id}
+                                           showRequestReviewDialog={(id: string, status: ReconstructionStatus) => {
+                                               setReviewRequestId(id);
+                                               setReviewRequestStatus(status);
+                                               setIsCompleteDialogVisible(true);
+                                           }}/>
+                    <Divider orientation="horizontal"/>
+                </Card.Section>
+                <Card.Section>
+                    {reconstructionCache.length > 0 ?
+                        <ReconstructionTable reconstructions={reconstructionCache} selectedId={selection} onSelected={onSelected}/> :
+                        <Center><Text p={12} c="dimmed">{noReconstructionsText(userOnly, status.length > 0)}</Text></Center>}
+                    <Divider orientation="horizontal"/>
+                </Card.Section>
+                {reconstructionCache.length > 0 ?
+                    <Card.Section bg="segment">
+                        <SimpleGrid cols={2} p={8}>
+                            <Text size="sm">
+                                {`Showing ${start} to ${end} of ${totalCount} reconstructions`}
+                            </Text>
+                            <Text size="sm" ta="end">{`Page ${activePage} of ${pageCount}`}</Text>
+                        </SimpleGrid>
+                    </Card.Section> : null}
+            </Card>
+        </Stack>
     );
-}
+});
 
-interface IReconstructionRowProps {
-    reconstruction: IReconstruction;
-    isSelected: boolean;
-
-    onSelected: (reconstruction: IReconstruction) => void;
-}
-
-const ReconstructionRow = (props: IReconstructionRowProps) => {
-    return (
-        <TableRow active={props.isSelected} onClick={() => props.onSelected(props.reconstruction)}>
-            <TableCell>{displayNeuron(props.reconstruction.neuron)}</TableCell>
-            <TableCell>{props.reconstruction.neuron.sample.animalId}</TableCell>
-            <TableCell>{displayBrainArea(props.reconstruction.neuron.brainArea, "(unspecified)")}</TableCell>
-            <TableCell>{props.reconstruction.neuron.x.toFixed(1)}</TableCell>
-            <TableCell>{props.reconstruction.neuron.y.toFixed(1)}</TableCell>
-            <TableCell>{props.reconstruction.neuron.z.toFixed(1)}</TableCell>
-            <TableCell>{props.reconstruction.axon ? props.reconstruction.axon.nodeCount : "N/A"}</TableCell>
-            <TableCell>{props.reconstruction.dendrite ? props.reconstruction.dendrite.nodeCount : "N/A"}</TableCell>
-            <TableCell><AnnotatorList annotations={[props.reconstruction]} showCompleteOnly={false} showStatus={false} showProofreader={false}/></TableCell>
-            <TableCell><AnnotatorList annotations={[props.reconstruction]} showCompleteOnly={false} showStatus={false} showProofreader={true}/></TableCell>
-            <TableCell>{props.reconstruction.startedAt ? moment(props.reconstruction.startedAt).format("YYYY-MM-DD") : "N/A"}</TableCell>
-            <TableCell>{props.reconstruction.completedAt ? moment(props.reconstruction.completedAt).format("YYYY-MM-DD") : "N/A"}</TableCell>
-            <TableCell>
-                <Label basic size="tiny"
-                       color={reconstructionStatusColor(props.reconstruction.status)}>{reconstructionStatusString(props.reconstruction.status)}</Label>
-            </TableCell>
-        </TableRow>
-    );
-}

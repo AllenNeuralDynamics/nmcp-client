@@ -1,64 +1,49 @@
 import * as React from "react";
+import {Table} from "@mantine/core";
 
-import {Table} from "semantic-ui-react";
 import {CandidateRow} from "./CandidateRow";
-import {INeuron} from "../../models/neuron";
+import {NeuronShape} from "../../models/neuron";
 
-export interface ITracingsTableProps {
-    neurons: INeuron[];
+export interface CandidateTableProps {
+    neurons: NeuronShape[];
     showAnnotators: boolean;
     totalCount: number;
     offset: number;
     limit: number;
     activePage: number;
     pageCount: number;
-    selectedCandidate: INeuron;
+    selectedCandidate: NeuronShape;
 
-    onSelected: (neuron: INeuron) => void;
+    onSelected: (neuron: NeuronShape) => void;
 }
 
-export const CandidateTracingsTable = (props: ITracingsTableProps) => {
-    const rows = props.neurons.map((t: INeuron) => {
+export const CandidatesTable = (props: CandidateTableProps) => {
+    const rows = props.neurons.map((t: NeuronShape) => {
         return <CandidateRow key={`tt_${t.id}`} neuron={t} isSelected={t.id == props.selectedCandidate?.id} showAnnotators={props.showAnnotators}
                              onSelected={props.onSelected}/>
     });
 
-    const start = props.offset + 1;
-    const end = Math.min(props.offset + props.limit, props.totalCount);
-
     return (
-        <div>
-            <Table attached="bottom" compact="very" size="small" structured celled selectable>
-                <Table.Header>
-                    <Table.Row>
-                        <Table.HeaderCell rowSpan={2}>Neuron</Table.HeaderCell>
-                        <Table.HeaderCell rowSpan={2}>Subject</Table.HeaderCell>
-                        <Table.HeaderCell rowSpan={2}>Tag(s)</Table.HeaderCell>
-                        <Table.HeaderCell colSpan={4} textAlign="center">Atlas Soma</Table.HeaderCell>
-                        <Table.HeaderCell rowSpan={2} colSpan={1} textAlign="center">Horta Soma (X, Y, Z)</Table.HeaderCell>
-                        {props.showAnnotators ? <Table.HeaderCell rowSpan={2}>Annotator(s)</Table.HeaderCell> : null}
-                    </Table.Row>
-                    <Table.Row>
-                        <Table.HeaderCell>Structure</Table.HeaderCell>
-                        <Table.HeaderCell>X</Table.HeaderCell>
-                        <Table.HeaderCell>Y</Table.HeaderCell>
-                        <Table.HeaderCell>Z</Table.HeaderCell>
-                    </Table.Row>
-                </Table.Header>
-                <Table.Body>
-                    {rows}
-                </Table.Body>
-                <Table.Footer fullwidth="true">
-                    <Table.Row>
-                        <Table.HeaderCell colSpan={5}>
-                            {props.totalCount >= 0 ? (props.totalCount > 0 ? `Showing ${start} to ${end} of ${props.totalCount} candidate neurons` : "There are no candidate neurons") : ""}
-                        </Table.HeaderCell>
-                        <Table.HeaderCell colSpan={6} textAlign="right">
-                            {`Page ${props.activePage} of ${props.pageCount}`}
-                        </Table.HeaderCell>
-                    </Table.Row>
-                </Table.Footer>
-            </Table>
-        </div>
+        <Table withColumnBorders>
+            <Table.Thead bg="table-header">
+                <Table.Tr>
+                    <Table.Th rowSpan={2}>Neuron</Table.Th>
+                    <Table.Th rowSpan={2}>Specimen</Table.Th>
+                    <Table.Th rowSpan={2}>Keywords</Table.Th>
+                    <Table.Th colSpan={4} ta="center">Atlas Soma</Table.Th>
+                    <Table.Th rowSpan={2} colSpan={1} ta="center">Specimen Soma (X, Y, Z)</Table.Th>
+                    {props.showAnnotators ? <Table.Th rowSpan={2}>Annotator(s)</Table.Th> : null}
+                </Table.Tr>
+                <Table.Tr>
+                    <Table.Th>Structure</Table.Th>
+                    <Table.Th ta="center">X</Table.Th>
+                    <Table.Th ta="center">Y</Table.Th>
+                    <Table.Th ta="center">Z</Table.Th>
+                </Table.Tr>
+            </Table.Thead>
+            <Table.Tbody bg="table">
+                {rows}
+            </Table.Tbody>
+        </Table>
     )
 };

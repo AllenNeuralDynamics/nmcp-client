@@ -1,34 +1,30 @@
 import gql from "graphql-tag";
 
-import {ITracingStructure} from "../models/tracingStructure";
-import {IStructureIdentifier} from "../models/structureIdentifier";
+import {NeuronStructureShape} from "../models/neuronStructure";
+import {NodeStructureShape} from "../models/structureIdentifier";
 import {IQueryOperator} from "../models/queryOperator";
-import {IBrainArea} from "../models/brainArea";
+import {AtlasStructureShape} from "../models/atlasStructure";
 
 export const CONSTANTS_QUERY = gql`query ConstantsQuery {
   systemSettings {
     apiVersion
     neuronCount
-    features {
-      enableUpdatedViewer
-    }
   }
-  tracingStructures {
+  neuronStructures {
     id
     name
-    value
   }
-  structureIdentifiers {
+  nodeStructures {
     id
     name
-    value
+    swcValue
   }
   queryOperators {
     id
     display
     operator
   }
-  brainAreas {
+  atlasStructures {
     id
     name
     acronym
@@ -37,24 +33,20 @@ export const CONSTANTS_QUERY = gql`query ConstantsQuery {
     depth
     parentStructureId
     structureIdPath
-    geometryColor
-    geometryFile
-    geometryEnable
+    defaultColor
+    hasGeometry
   }
 }`;
 
-export interface ISystemSettings {
+export type SystemSettings = {
     apiVersion: string;
     neuronCount: number;
-    features: {
-      enableUpdatedViewer: boolean;
-    }
 }
 
-export interface ConstantsQueryResponse {
-    systemSettings: ISystemSettings;
-    tracingStructures: ITracingStructure[];
-    structureIdentifiers: IStructureIdentifier[];
+export type ConstantsQueryResponse = {
+    systemSettings: SystemSettings;
+    neuronStructures: NeuronStructureShape[];
+    nodeStructures: NodeStructureShape[];
     queryOperators: IQueryOperator[];
-    brainAreas: IBrainArea[];
+    atlasStructures: AtlasStructureShape[];
 }

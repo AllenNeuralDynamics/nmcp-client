@@ -1,12 +1,11 @@
 import {makeObservable, observable} from "mobx";
 
-import {INeuron} from "../models/neuron";
+import {NeuronShape} from "../models/neuron";
 import {NEURON_VIEW_MODE_ALL, NeuronViewMode} from "./neuronViewMode";
-import {TracingViewModel} from "./tracingViewModel";
-import {ITracingNode} from "../models/tracingNode";
+import {AtlasNode} from "../models/atlasNode";
 
 export class NeuronViewModel {
-    neuron: INeuron = null;
+    neuron: NeuronShape = null;
 
     isSelected: boolean = true;
 
@@ -14,19 +13,14 @@ export class NeuronViewModel {
 
     mirror: boolean = false;
 
-    hasAxonTracing: boolean = false;
-    hasDendriteTracing: boolean = false;
-
-    soma: ITracingNode = null;
-
-    tracings: TracingViewModel[] = [];
+    soma: AtlasNode = null;
 
     viewMode: NeuronViewMode;
 
     private readonly reconstructionId: string = null;
     private readonly skeletonId: number = null;
 
-    public constructor(neuron: INeuron, color: string | null = null) {
+    public constructor(neuron: NeuronShape, color: string | null = null) {
         this.neuron = neuron;
 
         this.viewMode = NEURON_VIEW_MODE_ALL;
@@ -37,15 +31,10 @@ export class NeuronViewModel {
 
         this.mirror = false;
 
-        this.hasAxonTracing = false;
-        this.hasDendriteTracing = false;
+        this.soma = neuron.published.soma;
 
-        this.soma = null;
-
-        if (this.neuron.latest) {
-            this.reconstructionId = this.neuron.latest.id;
-            this.skeletonId = this.neuron.latest.precomputed?.skeletonSegmentId;
-        }
+        this.reconstructionId = this.neuron.published.id;
+        this.skeletonId = this.neuron.published.precomputed.skeletonId;
 
         makeObservable(this, {
             viewMode: observable,
@@ -53,50 +42,21 @@ export class NeuronViewModel {
             baseColor: observable,
             mirror: observable
         })
-
-        this.assignTracings();
     }
 
-    public get Id() {
-        return this.neuron.id;
+    public get Label(): string {
+        return this.neuron.label;
     }
 
+    /**
+     * A reference to the registered (e.g., CCF-space) reconstruction (not the specimen-space source reconstruction).
+     * @constructor
+     */
     public get ReconstructionId(): string {
         return this.reconstructionId;
     }
 
     public get SkeletonSegmentId(): number {
         return this.skeletonId;
-    }
-
-    private assignTracings() {
-        if (!this.neuron) {
-            return;
-        }
-
-        if (this.neuron.latest?.axon) {
-            const model = new TracingViewModel(this.neuron.latest.axon, this);
-            this.tracings.push(model);
-            this.hasAxonTracing = true;
-            this.soma = model.soma;
-        }
-
-        if (this.neuron.latest?.dendrite) {
-            const model = new TracingViewModel(this.neuron.latest.dendrite, this);
-            this.tracings.push(model);
-            this.hasDendriteTracing = true;
-            if (!this.soma) {
-                this.soma = model.soma;
-            }
-        }
-    }
-
-    public get State() {
-        return {
-            id: this.Id,
-            isSelected: this.isSelected,
-            baseColor: this.baseColor,
-            mirror: this.mirror
-        };
     }
 }

@@ -2,7 +2,7 @@ import {action, makeObservable, observable} from "mobx";
 import {ApolloClient} from "@apollo/client";
 import cuid from "cuid";
 
-import {NdbConstants} from "../models/constants";
+import {DataConstants} from "../models/constants";
 import {QUERY_PREDICATE_KIND_COMPARTMENT, QUERY_PREDICATE_KIND_SPHERE} from "./queryPredicateKind";
 import {SEARCH_NEURONS_QUERY, SearchContext, SearchNeuronsQueryResponse, SearchNeuronsQueryVariables} from "../graphql/search";
 import {FilterComposition, FilterContents, IPositionInput} from "./filterContents";
@@ -15,7 +15,7 @@ export class UIQuery {
 
     public predicates: UIQueryPredicate[] = [];
 
-    private _constants: NdbConstants = null;
+    private _constants: DataConstants = null;
 
     public constructor() {
         makeObservable(this, {
@@ -25,7 +25,8 @@ export class UIQuery {
             addPredicate: action,
             removePredicate: action,
             replacePredicate: action,
-            execute: action
+            execute: action,
+            deserializePredicates: action
         });
 
         this.reset();
@@ -37,7 +38,7 @@ export class UIQuery {
         this.predicates = [Object.assign(new UIQueryPredicate(), DEFAULT_QUERY_FILTER, {id: cuid()})];
     }
 
-    public set Constants(constants: NdbConstants) {
+    public set Constants(constants: DataConstants) {
         this._constants = constants;
     }
 
@@ -100,7 +101,7 @@ export class UIQuery {
         queryResponseViewModel.initiate(cuid());
 
         try {
-            UserPreferences.Instance.AppendQueryHistory(this.predicates);
+            UserPreferences.Instance.LastQuery = this.predicates.map(f => f.serialize());
 
             const context: SearchContext = {
                 nonce: queryResponseViewModel.queryNonce,
@@ -119,7 +120,10 @@ export class UIQuery {
             }
 
             queryResponseViewModel.update(data.searchNeurons.queryTime, data.searchNeurons.neurons, data.searchNeurons.totalCount);
+            this._constants.neuronCount = data.searchNeurons.totalCount;
+
         } catch (err) {
+            queryResponseViewModel.errored(err);
             console.error(err);
         }
     }

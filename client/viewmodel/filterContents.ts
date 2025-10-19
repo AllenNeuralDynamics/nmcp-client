@@ -1,7 +1,7 @@
 import {IQueryOperator} from "../models/queryOperator";
-import {IBrainArea} from "../models/brainArea";
+import {AtlasStructureShape} from "../models/atlasStructure";
 import {NeuronalStructure} from "../models/neuronalStructure";
-import {NdbConstants} from "../models/constants";
+import {DataConstants} from "../models/constants";
 import {makeObservable, observable} from "mobx";
 
 export enum FilterComposition {
@@ -9,6 +9,12 @@ export enum FilterComposition {
     or = 2,
     not = 3
 }
+
+export const FilterCompositions = [
+    {label: "and", value: FilterComposition.and},
+    {label: "or", value: FilterComposition.or},
+    {label: "not", value: FilterComposition.not}
+];
 
 export interface IPositionInput {
     x: number;
@@ -32,7 +38,7 @@ export class FilterContents {
     public neuronalStructure: NeuronalStructure;
     public operator: IQueryOperator;
     public amount: string;
-    public brainAreas: IBrainArea[];
+    public brainAreas: AtlasStructureShape[];
     public arbCenter: IPosition;
     public arbSize: string;
     public invert: boolean;
@@ -94,7 +100,7 @@ export class FilterContents {
         }
     }
 
-    public static deserialize(data: any, constants: NdbConstants): FilterContents {
+    public static deserialize(data: any, constants: DataConstants): FilterContents {
         const filter = new FilterContents();
 
         filter.tracingIdsOrDOIs = data.tracingIdsOrDOIs || "";
@@ -102,7 +108,7 @@ export class FilterContents {
         filter.neuronalStructure = constants.findNeuronalStructure(data.neuronalStructureId);
         filter.operator = constants.findQueryOperator(data.operatorId);
         filter.amount = data.amount || "0";
-        filter.brainAreas = data.brainAreaStructureIds ? data.brainAreaStructureIds.map(s => constants.findBrainArea(s)) : [];
+        filter.brainAreas = data.brainAreaStructureIds ? data.brainAreaStructureIds.map(s => constants.AtlasConstants.findStructure(s)) : [];
         filter.arbCenter = data.arbCenter || {x: "6500", y: "4000", z: "5500"};
         filter.arbSize = data.arbSize || "1000";
         filter.invert = data.invert || false;

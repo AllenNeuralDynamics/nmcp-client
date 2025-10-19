@@ -1,8 +1,8 @@
 import {action, computed, makeObservable, observable} from "mobx";
 
 import {AtlasStructureViewModel} from "./atlasStructureViewModel";
-import {NdbConstants} from "../models/constants";
-import {IBrainArea} from "../models/brainArea";
+import {AtlasConstants, DataConstants} from "../models/constants";
+import {AtlasStructureShape} from "../models/atlasStructure";
 
 const ROOT_ID = 997;
 const RETINA = 304325711;
@@ -35,12 +35,12 @@ export class AtlasViewModel {
         return this.structures.filter(s => s.shouldIncludeInHistory);
     }
 
-    public initialize(constants: NdbConstants) {
+    public initialize(constants: AtlasConstants) {
         if (this.rootStructure) {
             return;
         }
 
-        const structures = constants.BrainAreasWithGeometry;
+        const structures = constants.StructuresWithGeometry;
 
         const structureIdMap = new Map<number, AtlasStructureViewModel>();
 
@@ -99,7 +99,7 @@ export class AtlasViewModel {
         }
     }
 
-    private create(structure: IBrainArea): AtlasStructureViewModel {
+    private create(structure: AtlasStructureShape): AtlasStructureViewModel {
         const viewModel = new AtlasStructureViewModel(structure);
 
         this.structures.push(viewModel);

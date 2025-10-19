@@ -1,24 +1,24 @@
 import * as React from "react";
 import {Route, Routes} from "react-router-dom";
 
-import {AppContent} from "./AppContent";
 import {Candidates} from "../candidates/Candidates";
 import {Reconstructions} from "../reconstructions/Reconstructions";
-import {Samples} from "../neurons/samples/Samples";
+import {ManageNeurons} from "../neurons/ManageNeurons";
 import {Admin} from "../admin/Admin";
-import {Review} from "../review/Review";
+import {ReviewTab} from "../review/ReviewTab";
 import {NeuronVersions} from "../neurons/versions/NeuronVersions";
+import {Home} from "../search/Home";
 
 export const AppRouter = () => {
     return (
         <Routes>
             <Route path="/candidates" element={<Candidates/>}/>
             <Route path="/reconstructions" element={<Reconstructions/>}/>
-            <Route path="/samples" element={<Samples/>}/>
-            <Route path="/review" element={<Review/>}/>
+            <Route path="/specimens" element={<ManageNeurons/>}/>
+            <Route path="/review" element={<ReviewTab/>}/>
             <Route path="/admin" element={<Admin/>}/>
             <Route path="/neuron/:neuronId/:versionId?" element={<NeuronVersions/>}/>
-            <Route path="/" element={<AppContent/>}/>
+            <Route path="/" element={<Home/>}/>
         </Routes>
     );
 }

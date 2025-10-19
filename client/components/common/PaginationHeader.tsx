@@ -1,109 +1,84 @@
 import * as React from "react";
-import {Input, Pagination, Table} from "semantic-ui-react";
+import {Button, Group, Pagination, Slider, TextInput} from "@mantine/core";
+import {IconArrowRight} from "@tabler/icons-react";
 
-const Slider = require("rc-slider").default;
+import {isNullOrUndefined} from "../../util/nodeUtil";
 
-export interface IPaginationHeaderProps {
-    pageCount: number;
-    activePage: number;
+const MIN_PAGE_SIZE = 10;
+
+export interface PaginationHeaderProps {
+    total: number;
+    value: number;
     limit: number;
+    itemCount?: number;
 
-    onUpdateOffsetForPage(page: number): void;
-    onUpdateLimitForPage(limit: number): void;
+    onChange(page: number): void;
+
+    onLimitChange?(limit: number): void;
 }
 
-export interface IPaginationHeaderState {
-    pageJumpText?: string;
-    isValidPageJump?: boolean;
-    limit?: number;
-}
-
-export function PaginationHeader(props: IPaginationHeaderProps) {
-    const [pageJumpText, setPageJumpText] = React.useState<string>(props.activePage.toFixed(0));
-    const [isValidPageJump, setIsValidPageJump] = React.useState<boolean>(isValidJumpText(props.activePage.toFixed(0), props.pageCount));
+export function PaginationHeader(props: PaginationHeaderProps) {
+    const [pageJumpText, setPageJumpText] = React.useState<string>(props.value.toFixed(0));
+    const [isValidPageJump, setIsValidPageJump] = React.useState<boolean>(isValidJumpText(props.value.toFixed(0), props.total));
     const [limit, setLimit] = React.useState<number>(props.limit);
 
-    React.useEffect(() => {
-        setLimit(props.limit);
-        setIsValidPageJump(isValidJumpText(props.activePage.toFixed(0), props.pageCount));
-    }, [props.limit, props.activePage, props.pageCount]);
-
-    const setActivePage = (value: string) => {
-        const page = parseInt(value);
-        props.onUpdateOffsetForPage(page);
+    const setActivePage = (page: number) => {
+        props.onChange(page);
     };
 
     const onPageTextChanged = (value: string) => {
         const page = parseInt(value);
-        const isValid = !isNaN(page) && (page > 0 && page <= props.pageCount);
+        const isValid = !isNaN(page) && (page > 0 && page <= props.total);
         setPageJumpText(value);
         setIsValidPageJump(isValid);
     };
 
     const onKeyPress = (evt: any) => {
-        if (evt.charCode === 13 && isValidJumpText(evt.target.value, props.pageCount)) {
+        if (evt.charCode === 13 && isValidJumpText(evt.target.value, props.total)) {
             setActivePage(evt.target.value);
         }
     };
 
     const renderPageJump = () => {
-        if (props.pageCount > 1) {
-            const action = {
-                color: "blue",
-                content: "Go",
-                labelPosition: "right",
-                icon: "chevron right",
-                size: "mini",
-                disabled: !isValidPageJump,
-                onClick: () => setActivePage(pageJumpText)
-            };
-
-            return (
-                <Input size="mini" action={action} error={!isValidPageJump} type="text" placehoder="Page..."
-                       value={pageJumpText}
-                       onKeyPress={(e: Event) => onKeyPress(e)}
-                       onChange={(e, {value}) => onPageTextChanged(value)}/>
-            );
-        } else {
-            return null;
-        }
+        return (
+            <Group gap={0}>
+                <TextInput size="sm" radius="4 0 0 4" maw={80} error={!isValidPageJump} placeholder="Page..." value={pageJumpText}
+                           onKeyUp={(e) => onKeyPress(e)}
+                           onChange={event => onPageTextChanged(event.currentTarget.value)}/>
+                <Button size="sm" bdrs="0 4 4 0" rightSection={<IconArrowRight size={18}/>} disabled={!isValidPageJump}
+                        onClick={() => setActivePage(parseInt(pageJumpText))}>
+                    Go
+                </Button>
+            </Group>
+        );
     };
 
     const renderPagination = () => {
-        if (props.pageCount > 1) {
-            return (
-                <Pagination size="mini" totalPages={props.pageCount}
-                            activePage={props.activePage}
-                            onPageChange={(e, {activePage}) => {
-                                setActivePage(activePage.toString())
-                            }}/>
-            );
-        } else {
-            return null;
-        }
-    };
+        return (
+            <Pagination size="sm" withEdges={true} total={props.total} value={props.value} onChange={(page) => {
+                setActivePage(page)
+            }}/>
+        );
+    }
+
+    if (!isNullOrUndefined(props.itemCount) && props.itemCount < MIN_PAGE_SIZE) {
+        return null;
+    }
 
     return (
-        <Table style={{border: "none", background: "transparent"}}>
-            <Table.Body>
-                <Table.Row>
-                    <Table.Cell style={{width: "33%", paddingTop: 0}}>
-                        <Slider min={10} max={50} step={5} value={limit} style={{maxWidth: "300px"}}
-                                marks={{10: "10", 20: "20", 30: "30", 40: "40", 50: "50"}}
-                                onChange={(value: number) => setLimit(value)}
-                                onAfterChange={(value: number) => props.onUpdateLimitForPage(value)}/>
-                    </Table.Cell>
-
-                    <Table.Cell style={{width: "34%"}} textAlign="center">
-                        {renderPagination()}
-                    </Table.Cell>
-
-                    <Table.Cell style={{width: "33%", paddingRight: "1px"}} textAlign="right">
-                        {renderPageJump()}
-                    </Table.Cell>
-                </Table.Row>
-            </Table.Body>
-        </Table>
+        <Group justify="space-between" p={12} align="center">
+            {props.onLimitChange ? (
+                <Slider miw={300} mb={14} min={10} max={50} step={5} value={limit}
+                        marks={[{value: 10, label: "10"}, {value: 20, label: "20"}, {value: 30, label: "30"}, {value: 40, label: "40"}, {
+                            value: 50,
+                            label: "50"
+                        }]}
+                        onChange={(value: number) => setLimit(value)}
+                        onChangeEnd={(value: number) => props.onLimitChange(value)}/>
+            ) : null}
+            {props.total > 1 ? renderPagination() : null}
+            {props.total > 1 ? renderPageJump() : null}
+        </Group>
     );
 }
 

@@ -1,15 +1,16 @@
 import * as React from "react";
 import {useEffect, useState} from "react";
-import {Button} from "semantic-ui-react";
+import {Box, Button, Group, Stack, useComputedColorScheme} from "@mantine/core";
+import {IconRestore} from "@tabler/icons-react";
 
 import {useConstants} from "../../hooks/useConstants";
+import {usePreferences} from "../../hooks/usePreferences";
 import {useSystemConfiguration} from "../../hooks/useSystemConfiguration";
-import {createCandidateAnnotationLayer, INeuron} from "../../models/neuron";
-import {NeuroglancerProxy} from "../../viewer/neuroglancerProxy";
-import {UserPreferences} from "../../util/userPreferences";
+import {createCandidateAnnotationLayer, NeuronShape} from "../../models/neuron";
+import {NeuroglancerProxy} from "../../viewer/neuroglancerProxy"
 
 export interface ITracingsTableProps {
-    neurons: INeuron[];
+    neurons: NeuronShape[];
     selectedId: string;
 
     onViewerSelected(id: string): void;
@@ -18,13 +19,16 @@ export interface ITracingsTableProps {
 export const CandidatesViewer = (props: ITracingsTableProps) => {
     const [ngProxy, setNgProxy] = useState<NeuroglancerProxy>(null);
 
-    const constants = useConstants();
-    const systemConfiguration = useSystemConfiguration();
+    const constants = useConstants().AtlasConstants;
+    const preferences = usePreferences();
+    const systemConfiguration = useSystemConfiguration()
+
+    const scheme = useComputedColorScheme();
 
     useEffect(() => {
         const annotations = createCandidateAnnotationLayer(props.neurons, props.selectedId);
 
-        const proxy = NeuroglancerProxy.configureCandidateNeuroglancer("neuroglancer-container", UserPreferences.Instance.candidateViewerState, annotations, selectNeuron, systemConfiguration.precomputedLocation, constants.BrainStructureColorMap);
+        const proxy = NeuroglancerProxy.configureCandidateNeuroglancer("candidate-ng-container", preferences.candidateViewerState, annotations, selectNeuron, systemConfiguration.precomputedLocation, constants.StructureColors, scheme);
 
         setNgProxy(proxy);
 
@@ -32,6 +36,11 @@ export const CandidatesViewer = (props: ITracingsTableProps) => {
             proxy.unlinkNeuroglancerHandler();
         }
     }, []);
+
+    useEffect(() => {
+        ngProxy?.updateColorScheme(scheme);
+    }, [scheme]);
+
 
     useEffect(() => {
         if (ngProxy) {
@@ -42,8 +51,18 @@ export const CandidatesViewer = (props: ITracingsTableProps) => {
             if (props.selectedId) {
                 const selected = props.neurons.find(n => n.id == props.selectedId);
 
-                if (selected?.reconstructions?.length > 0) {
-                    selectedSkeletonSegmentId = selected.reconstructions[0]?.precomputed?.skeletonSegmentId;
+                if (selected?.atlasSoma) {
+                    if (selected.atlasSoma.x && selected.atlasSoma.y && selected.atlasSoma.z) {
+                        ngProxy.setPosition(selected.atlasSoma.x / 10, selected.atlasSoma.y / 10, selected.atlasSoma.z / 10);
+                    }
+                    if (selected.atlasStructure?.structureId) {
+                        ngProxy.setCandidateAtlasStructures([selected.atlasStructure.structureId]);
+                    }
+                    if (selected?.reconstructions?.length > 0) {
+                        selectedSkeletonSegmentId = selected.reconstructions[0]?.atlasReconstruction?.precomputed?.skeletonId;
+                    }
+                } else {
+                    ngProxy.setCandidateAtlasStructures([]);
                 }
             }
 
@@ -66,12 +85,13 @@ export const CandidatesViewer = (props: ITracingsTableProps) => {
     };
 
     return (
-        <div>
-            <div style={{display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px"}}>
-                <div/>
-                <Button negative icon="repeat" size="small" content="Reset View" onClick={() => resetView()}/>
-            </div>
-            <div id="neuroglancer-container" style={{minHeight: "400px", padding: "40px"}}/>
-        </div>
+        <Stack>
+            <Group justify="end">
+                <Button variant="light" leftSection={<IconRestore size={14}/>} size="sm" onClick={() => resetView()}>Reset View</Button>
+            </Group>
+            <Box bd="1px solid var(--mantine-color-segment-6)" bdrs={0}>
+                <div id="candidate-ng-container" style={{minHeight: "400px"}}/>
+            </Box>
+        </Stack>
     );
 }

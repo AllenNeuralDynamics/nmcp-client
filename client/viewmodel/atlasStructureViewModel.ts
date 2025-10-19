@@ -1,16 +1,16 @@
 import {makeObservable, observable} from "mobx";
 
-import {IBrainArea} from "../models/brainArea";
+import {AtlasStructureShape} from "../models/atlasStructure";
 
 export class AtlasStructureViewModel {
-    public structure: IBrainArea;
+    public structure: AtlasStructureShape;
     public children: AtlasStructureViewModel[];
     public isDisplayed: boolean;
     public isFavorite: boolean;
     public shouldIncludeInHistory: boolean;
     public shouldShowChildren: boolean;
 
-    public constructor(structure: IBrainArea) {
+    public constructor(structure: AtlasStructureShape) {
         this.structure = structure;
         this.children = [];
         this.isDisplayed = false;

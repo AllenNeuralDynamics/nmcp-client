@@ -1,10 +1,11 @@
 import * as React from "react";
-import {List, Icon} from "semantic-ui-react";
-import {Text} from "@mantine/core"
+import {ActionIcon, Group, List, Stack, Text} from "@mantine/core"
 
 import {AtlasStructureViewModel} from "../../../../viewmodel/atlasStructureViewModel";
-import {observer} from "mobx-react";
+import {observer} from "mobx-react-lite";
 import {useAtlas} from "../../../../hooks/useAtlas";
+import {isSelectedIcon} from "../NeuronTable";
+import {IconX} from "@tabler/icons-react";
 
 type StructureHistoryRowProps = {
     structure: AtlasStructureViewModel;
@@ -14,17 +15,18 @@ const StructureHistoryRow = observer((props: StructureHistoryRowProps) => {
     const v = props.structure;
 
     return (
-        <List.Item style={{paddingLeft: "12px"}}>
-            <List.Content floated="right">
-                {v.isDisplayed ? null :
-                    <Icon name="remove" color="red" onClick={() => v.shouldIncludeInHistory = false}/>
-                }
-            </List.Content>
-            <List.Icon name={v.isDisplayed ? "check square outline" : "square outline"} onClick={() => v.isDisplayed = !v.isDisplayed}/>
-            <List.Content onClick={() => () => v.isDisplayed = !v.isDisplayed}>
+        <Group justify="space-between" fz={15}>
+            <Group>
+                <ActionIcon variant="transparent" onClick={() => v.isDisplayed = !v.isDisplayed}>
+                    {isSelectedIcon(v.isDisplayed)}
+                </ActionIcon>
                 {v.structure.name}
-            </List.Content>
-        </List.Item>
+            </Group>
+            {v.isDisplayed ? null :
+                <ActionIcon size={28} variant="transparent" onClick={() => v.shouldIncludeInHistory = false}>
+                    <IconX size={14}/>
+                </ActionIcon>}
+        </Group>
     )
 });
 
@@ -36,12 +38,12 @@ export const StructureHistory = observer(() => {
     });
 
     if (rows.length === 0) {
-        return (<Text size="sm" fs="italic" c="gray.8" p="8">History will appear as additional brain structures are displayed</Text>);
+        return (<Text size="sm" fs="italic" c="dimmed" p="8">History will appear as additional atlas structures are displayed</Text>);
     }
 
     return (
-        <List divided relaxed style={{margin: 0, paddingTop: "6px", paddingBottom: "6px"}}>
+        <Stack gap={0} p={4}>
             {rows}
-        </List>
+        </Stack>
     );
 });

@@ -1,20 +1,20 @@
 import * as React from "react";
-import {useContext} from "react";
+import {observer} from "mobx-react-lite";
+import {Flex, HoverCard, Text} from "@mantine/core";
 
-import {ConstantsContext} from "../app/AppConstants";
-import {Card, Popup} from "semantic-ui-react";
-import {toast} from "react-toastify";
+import {useConstants} from "../../hooks/useConstants";
+import {infoNotification} from "../common/NotificationHelper";
 
-export const Footer = () => {
-    const constants = useContext(ConstantsContext);
+export const Footer = observer(() => {
+    const constants = useConstants();
 
     let totalMessage = "There are no reconstructions available";
 
-    if (constants.NeuronCount > 0) {
-        if (constants.NeuronCount > 1) {
-            totalMessage = `There are ${constants.NeuronCount} reconstructions available`
+    if (constants.neuronCount > 0) {
+        if (constants.neuronCount > 1) {
+            totalMessage = `There are ${constants.neuronCount} neurons available`
         } else {
-            totalMessage = `There is 1 reconstruction available`
+            totalMessage = `There is 1 neurons available`
         }
     }
 
@@ -22,7 +22,7 @@ export const Footer = () => {
 
     const citation = (<span style={{textDecoration: "underline"}} onClick={async () => {
         await navigator.clipboard.writeText(citationText);
-        toast.success("Citation copied to clipboard", {autoClose: 1000, position: "bottom-right"});
+        infoNotification("", "Citation copied to clipboard");
     }}>citation</span>);
 
     const content = (
@@ -33,42 +33,32 @@ export const Footer = () => {
             <p style={{marginLeft: "16px", marginRight: "16px", fontStyle: "italic"}}>
                 {citationText}
             </p>
-            <p style={{fontSize: "x-small", color:"darkgray"}}>
-                Data available under <a target="_blank" rel="noopener noreferrer" href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. You are welcome to use, share, and adapt the data,
+            <p style={{fontSize: "x-small", color: "darkgray"}}>
+                Data available under <a target="_blank" rel="noopener noreferrer" href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. You are
+                welcome to use, share, and adapt the data,
                 provided that appropriate credit is given by including the citation above. For more detail and examples, see
                 https://alleninstitute.org/citation-policy/.
             </p>
         </div>
     )
 
-    const reportWithPopup = <Popup style={{minWidth: "600px"}} content={content} trigger={citation}/>
+    const citationPopup = <HoverCard>
+        <HoverCard.Target>
+            {citation}
+        </HoverCard.Target>
+        <HoverCard.Dropdown maw={600}>
+            {content}
+        </HoverCard.Dropdown>
+    </HoverCard>
 
     return (
-        <div style={{
-            display: "flex",
-            order: 1,
-            flexDirection: "row",
-            verticalAlign: "middle",
-            fontSize: "12px",
-            position: "fixed",
-            color: "#ccc",
-            bottom: "0",
-            left: "0",
-            width: "100%",
-            zIndex: 1000,
-            backgroundColor: "#2b2b2b",
-            height: "40px",
-            padding: "10px"
-        }}>
-            <div style={{verticalAlign: "middle", color: "white", order: 1, flexGrow: 0, flexShrink: 0}}>
-                Neuron Morphology Community Portal Copyright © 2023 - {(new Date().getFullYear())} Allen Institute
-            </div>
-            <div style={{order: 2, flexGrow: 1, flexShrink: 1, marginLeft: "10px"}}/>
-            <div style={{verticalAlign: "middle", color: "white", order: 3, flexGrow: 0, flexShrink: 0}}>
-                Data available under <a target="_blank" rel="noopener noreferrer" href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. Free to use with {reportWithPopup}.
-            </div>
-            <div style={{order: 4, flexGrow: 1, flexShrink: 1, marginLeft: "10px"}}/>
-            <div style={{verticalAlign: "middle", color: "white", order: 5, flexGrow: 0, flexShrink: 0}}>{totalMessage}</div>
-        </div>
+        <Flex p={8} bg="section">
+            <Text size="sm">Data available under <a target="_blank" rel="noopener noreferrer" href="https://creativecommons.org/licenses/by/4.0/">CC BY
+                4.0</a>. Free to use
+                with {citationPopup}.
+            </Text>
+            <Text size="sm" ta="center" style={{flexGrow: 1}}>Neuron Morphology Community Portal Copyright © 2023 - {(new Date().getFullYear())} Allen Institute</Text>
+            <Text size="sm" ta="end">{totalMessage}</Text>
+        </Flex>
     )
-};
+});

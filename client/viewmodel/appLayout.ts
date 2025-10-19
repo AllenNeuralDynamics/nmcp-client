@@ -1,67 +1,53 @@
-import {action, makeObservable, observable} from "mobx";
+import {autorun, makeAutoObservable} from "mobx";
 
 import {UserPreferences} from "../util/userPreferences";
 
 export enum DrawerState {
-    Hidden,
-    Float,
-    Dock
+    Dock = 0,
+    Hidden = 1
 }
 
 export class AppLayout {
-    public isNeuronListOpen: boolean = false;
-    public isNeuronListDocked: boolean = UserPreferences.Instance.IsNeuronListDocked;
-    public isCompartmentListOpen: boolean = false;
-    public isCompartmentListDocked: boolean = UserPreferences.Instance.IsCompartmentListDocked;
+    public neuronDrawerState: DrawerState = DrawerState.Dock;
+    public atlasStructureDrawerState: DrawerState = DrawerState.Dock;
     public isQueryExpanded: boolean = true;
     public isAtlasStructureHistoryExpanded: boolean = true;
+    public isPreferencesWindowOpen: boolean = false;
+
+    public showReferenceIds: boolean = false;
 
     public constructor() {
-        makeObservable(this, {
-            isNeuronListOpen: observable,
-            isNeuronListDocked: observable,
-            isCompartmentListOpen: observable,
-            isCompartmentListDocked: observable,
-            isQueryExpanded: observable,
-            isAtlasStructureHistoryExpanded: observable,
-            setNeuronDrawerState: action,
-            setAtlasStructureDrawerState: action
-        });
+        const layout = UserPreferences.Instance.AppLayoutState as any;
+
+        if (layout != null) {
+            this.neuronDrawerState = layout.neuronDrawerState ?? DrawerState.Dock;
+            this.atlasStructureDrawerState = layout.atlasStructureDrawerState ?? DrawerState.Dock;
+            this.isQueryExpanded = layout.isQueryExpanded ?? true;
+            this.isAtlasStructureHistoryExpanded = layout.isAtlasStructureHistoryExpanded ?? false;
+            this.isPreferencesWindowOpen = layout.isPreferencesWindowOpen ?? false;
+            this.showReferenceIds = layout.showReferenceIds ?? false;
+        }
+
+        makeAutoObservable(this);
+
+        autorun(() => {
+            UserPreferences.Instance.AppLayoutState = this;
+        })
+    }
+
+    public openSettingsDialog() {
+        this.isPreferencesWindowOpen = true;
+    }
+
+    public closeSettingsDialog() {
+        this.isPreferencesWindowOpen = false;
     }
 
     public setNeuronDrawerState(drawerState: DrawerState) {
-        if (drawerState === DrawerState.Hidden) {
-            // Close the docked or drawer
-            UserPreferences.Instance.IsNeuronListDocked = false;
-            this.isNeuronListDocked = false;
-            this.isNeuronListOpen = false;
-        } else if (drawerState === DrawerState.Float) {
-            // Pin the float
-            UserPreferences.Instance.IsNeuronListDocked = false;
-            this.isNeuronListDocked = false;
-            this.isNeuronListOpen = true;
-        } else {
-            UserPreferences.Instance.IsNeuronListDocked = true;
-            this.isNeuronListDocked = true;
-            this.isNeuronListOpen = false;
-        }
+        this.neuronDrawerState = drawerState;
     }
 
     public setAtlasStructureDrawerState(drawerState: DrawerState) {
-        if (drawerState === DrawerState.Hidden) {
-            // Close the docked or drawer
-            UserPreferences.Instance.IsCompartmentListDocked = false;
-            this.isCompartmentListDocked = false;
-            this.isCompartmentListOpen = false;
-        } else if (drawerState === DrawerState.Float) {
-            // Pin the float
-            UserPreferences.Instance.IsCompartmentListDocked = false;
-            this.isCompartmentListDocked = false;
-            this.isCompartmentListOpen = true;
-        } else {
-            UserPreferences.Instance.IsCompartmentListDocked = true;
-            this.isCompartmentListDocked = true;
-            this.isCompartmentListOpen = false;
-        }
+        this.atlasStructureDrawerState = drawerState;
     }
 }

@@ -1,7 +1,7 @@
 import {findQueryPredicateKind, PredicateType, QUERY_PREDICATE_KIND_COMPARTMENT, QueryPredicateKind} from "./queryPredicateKind";
 import {FilterContents, IPosition, IPositionInput} from "./filterContents";
 import {makeObservable, observable} from "mobx";
-import {NdbConstants} from "../models/constants";
+import {DataConstants} from "../models/constants";
 import {SearchPredicate} from "../models/searchPredicate";
 
 export function arbNumberToString(isCustomRegion: boolean, valueStr: string): number {
@@ -72,7 +72,7 @@ export class UIQueryPredicate {
     }
 
     // Deserialize for local browser storage or URL sharing.
-    public static deserialize(data: any, constants: NdbConstants): UIQueryPredicate {
+    public static deserialize(data: any, constants: DataConstants): UIQueryPredicate {
         const filter = new UIQueryPredicate();
 
         filter.id = data.id || "";

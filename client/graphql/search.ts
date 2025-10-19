@@ -1,9 +1,9 @@
 import gql from "graphql-tag";
 
-import {INeuron} from "../models/neuron";
-import {ReconstructionFieldsFragment} from "./reconstruction";
-import {ITracingNode} from "../models/tracingNode";
+import {NeuronShape} from "../models/neuron";
 import {SearchPredicate} from "../models/searchPredicate";
+import {AtlasNode} from "../models/atlasNode";
+import {NodeCountsFieldsFragment} from "./reconstruction";
 
 export const SEARCH_NEURONS_QUERY = gql`query SearchNeurons($context: SearchContext) {
     searchNeurons(context: $context) {
@@ -13,19 +13,33 @@ export const SEARCH_NEURONS_QUERY = gql`query SearchNeurons($context: SearchCont
 
         neurons {
             id
-            idString
-            consensus
-            brainArea {
+            label
+            atlasStructure {
                 id
                 acronym
             }
-            sample {
+            specimen {
                 id
-                idNumber
-                animalId
+                label
             }
-            latest {
-                ...ReconstructionFields
+            published {
+                id
+                status
+                soma {
+                    id
+                    x
+                    y
+                    z
+                    nodeStructureId
+                    atlasStructureId
+                }
+                nodeCounts {
+                    ...NodeCountsFields
+                }
+                precomputed {
+                    id
+                    skeletonId
+                }
             }
         }
 
@@ -35,7 +49,8 @@ export const SEARCH_NEURONS_QUERY = gql`query SearchNeurons($context: SearchCont
         }
     }
 }
-${ReconstructionFieldsFragment}`;
+${NodeCountsFieldsFragment}
+`;
 
 export type SearchContext = {
     nonce: string,
@@ -47,7 +62,7 @@ export type SearchNeuronsQueryVariables = {
 }
 
 export type SearchNeuronsQueryData = {
-    neurons: INeuron[];
+    neurons: NeuronShape[];
     totalCount: number;
     queryTime: number;
     nonce: string;
@@ -71,8 +86,8 @@ export const NEAREST_NODE_QUERY = gql`query NearestNode($id: String!, $location:
             x
             y
             z
-            brainStructureId
-            structureIdentifierId
+            atlasStructureId
+            nodeStructureId
         }
         error
     }
@@ -88,7 +103,7 @@ export type NearestNodeQueryResponse = {
     nearestNode: {
         reconstructionId: string;
         location: number[];
-        node: ITracingNode;
-        error: String;
+        node: AtlasNode;
+        error: string;
     }
 }

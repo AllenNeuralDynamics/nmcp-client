@@ -1,39 +1,46 @@
 import gql from "graphql-tag";
-import {IIssue, IssueKind} from "../models/issue";
+import {IssueShape, IssueKind, IssueReference, IssueResolutionKind, IssueStatus} from "../models/issue";
 
-export const OPEN_ISSUES_QUERY = gql`
-    query OPEN_ISSUES_QUERY {
-        openIssues {
+const ISSUE_FIELDS_FRAGMENT = gql`fragment IssueFields on Issue {
+    id
+    issueId
+    kind
+    status
+    description
+    resolutionKind
+    resolution
+    neuron {
+        id
+        label
+        specimen {
             id
-            kind
-            status
-            description
-            response
-            createdAt
-            creator {
-                id
-                firstName
-                lastName
-                emailAddress
-            }
-            neuron {
-                id
-                idString
-                sample {
-                    id
-                    animalId
-                }
-            }
+            label
         }
     }
+    author {
+        id
+        firstName
+        lastName
+        emailAddress
+    }
+    createdAt
+}`;
+
+export const OPEN_ISSUES_QUERY = gql`
+    query OpenIssuesQuery{
+        openIssues {
+            ...IssueFields
+        }
+    }
+    ${ISSUE_FIELDS_FRAGMENT}
 `;
 
 export type IssueQueryResponse = {
-    openIssues: IIssue[];
+    openIssues: IssueShape[];
 }
 
 export const ISSUE_COUNT_QUERY = gql`
-    query ISSUE_COUNT_QUERY {
+    query IssueCountQuery{
         issueCount
     }
 `;
@@ -43,42 +50,63 @@ export type IssueCountResponse = {
 }
 
 //
-// Create Mutation
+// Open
 //
-export const CREATE_ISSUE_MUTATION = gql`mutation CreateIssue($neuronId: String, $reconstructionId: String, $kind: Int!, $description: String!) {
-    createIssue(neuronId: $neuronId, reconstructionId: $reconstructionId, kind: $kind, description: $description) {
-        id
-        kind
-        status
-        description
-        response
+export const OPEN_ISSUE_MUTATION = gql`mutation OpenIssue($kind: Int!, $description: String!, $references: [IssueReferenceInput!]!) {
+    openIssue(kind: $kind, description: $description, references: $references) {
+        ...IssueFields
     }
-}`;
+}
+${ISSUE_FIELDS_FRAGMENT}
+`;
 
-export type CreateIssueVariables = {
-    neuronId?: string;
-    reconstructionId?: string;
-    kind?: IssueKind;
+export type OpenIssueVariables = {
+    kind: IssueKind;
     description: string;
+    references: IssueReference[];
 }
 
-export type CreateIssueResponse = {
-    createIssue: IIssue;
+export type OpenIssueResponse = {
+    openIssue: IssueShape;
 }
 
 //
-// Close Mutation
+// Modify
 //
-export const CLOSE_ISSUE_MUTATION = gql`mutation CloseIssue($id: String!, $reason: String!) {
-    closeIssue(id: $id, reason: $reason)
-}`;
+export const MODIFY_ISSUE_MUTATION = gql`mutation ModifyIssue($id: String!, $status: Int!) {
+    modifyIssue(id: $id, status: $status) {
+        ...IssueFields
+    }
+}
+${ISSUE_FIELDS_FRAGMENT}
+`;
+
+export type ModifyIssueVariables = {
+    id: string;
+    status: IssueStatus;
+}
+
+export type ModifyIssueResponse = {
+    modifyIssue: IssueShape;
+}
+
+//
+// Close
+//
+export const CLOSE_ISSUE_MUTATION = gql`mutation CloseIssue($id: String!, $resolutionKind: Int!, $resolution: String!) {
+    closeIssue(id: $id, resolutionKind: $resolutionKind, resolution: $resolution) {
+        ...IssueFields
+    }
+}
+${ISSUE_FIELDS_FRAGMENT}
+`;
 
 export type CloseIssueVariables = {
     id: string;
-    reason: string;
+    resolutionKind: IssueResolutionKind;
+    resolution: string;
 }
 
 export type CloseIssueResponse = {
-    closeIssue: boolean;
+    closeIssue: IssueShape;
 }
-

@@ -1,38 +1,47 @@
-import {IUser} from "./user";
-import {INeuron} from "./neuron";
-import {Precomputed} from "./precomputed";
-import {QualityCheck} from "./qualityCheck";
-import {ITracing} from "./tracing";
+import {User} from "./user";
+import {AtlasReconstruction} from "./atlasReconstruction";
+import {ReconstructionStatus} from "./reconstructionStatus";
+import {NeuronShape} from "./neuron";
+import {AtlasReconstructionStatus} from "./atlasReconstructionStatus";
+import {QualityControl} from "./qualityControl";
 
-export interface IReconstruction {
-    id: string;
-    status: number;
-    notes: string;
-    checks: string;
-    durationHours: number;
-    lengthMillimeters: number;
-    startedAt: Date;
-    completedAt: Date;
-    qualityCheckAt: Date;
-    qualityCheckStatus: number;
-    qualityCheckVersion: string;
-    qualityCheck: QualityCheck;
-    annotatorId: string;
-    annotator: IUser;
-    proofreaderId: string;
-    proofreader: IUser;
-    peerReviewerId: string;
-    peerReviewer: IUser;
-    neuron: INeuron;
-    axon: ITracing;
-    dendrite: ITracing;
-    precomputed?: Precomputed;
+export type NodeCount = {
+    total: number;
+    soma: number;
+    path: number;
+    branch: number;
+    end: number;
 }
 
-export function isUserReconstruction(userId: string, annotations: IReconstruction[]) {
-    if (!annotations || annotations.length == 0) {
+export type NodeCounts = {
+    axon: NodeCount;
+    dendrite: NodeCount;
+}
+
+export type Reconstruction = {
+    id: string;
+    sourceUrl: string;
+    status: ReconstructionStatus;
+    specimenNodeCounts: NodeCounts;
+    specimenLengthMillimeters: number;
+    durationHours: number;
+    notes: string;
+    startedAt: Date;
+    completedAt: Date;
+    annotatorId: string;
+    annotator: User;
+    reviewer: User;
+    neuron: NeuronShape;
+    atlasReconstruction: AtlasReconstruction;
+    publishedAt: Date;
+    createdAt: Date;
+    updatedAt: Date;
+}
+
+export function isUserReconstruction(userId: string, reconstructions: Reconstruction[]) {
+    if (!reconstructions || reconstructions.length == 0) {
         return false;
     }
 
-    return annotations.some(a => a.annotatorId == userId);
+    return reconstructions.some(a => a.annotatorId == userId);
 }

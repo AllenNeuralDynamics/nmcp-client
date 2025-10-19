@@ -1,44 +1,48 @@
 import * as React from "react";
-import {Icon, TableCell, TableRow} from "semantic-ui-react";
-import {toast} from "react-toastify";
+import {Link} from "react-router-dom";
+import {Group, Table} from "@mantine/core";
 
-import {displayNeuron, formatHortaLocation, INeuron} from "../../models/neuron";
-import {displayBrainArea} from "../../models/brainArea";
-import {AnnotatorList} from "../common/AnnotatorList";
+import {formatNeuron, formatHortaLocation, NeuronShape} from "../../models/neuron";
+import {formatAtlasStructure} from "../../models/atlasStructure";
+import {AnnotatorWithStatus} from "../common/AnnotatorWithStatus";
+import {successNotification} from "../common/NotificationHelper";
+import {IconBrowserShare, IconCopy} from "@tabler/icons-react";
+import {NeuronVersionLink} from "../common/NeuronVersionLink";
 
 export interface ICandidateRowProps {
     key: string
-    neuron: INeuron;
+    neuron: NeuronShape;
     showAnnotators: boolean;
     isSelected: boolean;
 
-    onSelected: (neuron: INeuron) => void;
+    onSelected: (neuron: NeuronShape) => void;
 }
 
 export const CandidateRow = (props: ICandidateRowProps) => {
     const onCopyHorta = async () => {
         await navigator.clipboard.writeText(formatHortaLocation(props.neuron));
-        toast.success((<div>
-            <h3>Location Copied to Clipboard</h3>
-            {formatHortaLocation(props.neuron)}
-        </div>), {autoClose: 1000});
+        successNotification("Location Copied to Clipboard", formatHortaLocation(props.neuron));
     }
 
+    const subProps = props.isSelected ? {bg: "table-selection"} : {};
+
     return (
-        <TableRow onClick={() => props.onSelected(props.neuron)} active={props.isSelected}>
-            <TableCell>{displayNeuron(props.neuron)}</TableCell>
-            <TableCell>{props.neuron.sample.animalId}</TableCell>
-            <TableCell>{props.neuron.tag}</TableCell>
-            <TableCell>{displayBrainArea(props.neuron.brainArea, "(unspecified)")}</TableCell>
-            <TableCell>{props.neuron.x.toFixed(1)}</TableCell>
-            <TableCell>{props.neuron.y.toFixed(1)}</TableCell>
-            <TableCell>{props.neuron.z.toFixed(1)}</TableCell>
-            <TableCell><Icon name="copy" onClick={async () => {await onCopyHorta()}}/>{formatHortaLocation(props.neuron)}</TableCell>
+        <Table.Tr {...subProps} onClick={() => props.onSelected(props.neuron)}>
+            <Table.Td><NeuronVersionLink neuron={props.neuron}/></Table.Td>
+            <Table.Td>{props.neuron.specimen.label}</Table.Td>
+            <Table.Td>{props.neuron.keywords}</Table.Td>
+            <Table.Td>{formatAtlasStructure(props.neuron.atlasStructure, "(unspecified)")}</Table.Td>
+            <Table.Td>{props.neuron.atlasSoma.x.toFixed(1)}</Table.Td>
+            <Table.Td>{props.neuron.atlasSoma.y.toFixed(1)}</Table.Td>
+            <Table.Td>{props.neuron.atlasSoma.z.toFixed(1)}</Table.Td>
+            <Table.Td><Group gap="sm" align="center"><IconBrowserShare size={12} onClick={async () => {
+                await onCopyHorta()
+            }}/>{formatHortaLocation(props.neuron)}</Group></Table.Td>
             {props.showAnnotators ?
-                <TableCell>
-                    <AnnotatorList annotations={props.neuron.reconstructions} showCompleteOnly={false} showStatus={true} showProofreader={false}/>
-                </TableCell>
+                <Table.Td>
+                    <AnnotatorWithStatus reconstructions={props.neuron.reconstructions}/>
+                </Table.Td>
                 : null}
-        </TableRow>
+        </Table.Tr>
     )
 }

@@ -1,4 +1,4 @@
-import {ExportFormat} from "../models/tracing";
+import {ExportFormat} from "../models/neuron";
 
 export async function requestExport(ids: string[], format: ExportFormat): Promise<boolean> {
     try {
@@ -14,9 +14,9 @@ export async function requestExport(ids: string[], format: ExportFormat): Promis
         });
 
         if (response.status !== 200) {
-            this.setState({isExportMessageOpen: true});
-            return;
+            return false;
         }
+
         const data: any = await response.json();
 
         let contents = data.contents;

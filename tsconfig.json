@@ -12,6 +12,7 @@
     "skipLibCheck": true,
     "lib": ["dom", "es2020", "dom.iterable"],
     "typeRoots": [],
+    "useDefineForClassFields": true
   },
   "exclude": [
     "dist",

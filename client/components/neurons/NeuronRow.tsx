@@ -1,141 +1,181 @@
 import * as React from "react";
-import {useContext} from "react";
+import {Link} from "react-router-dom";
 import {useMutation} from "@apollo/client";
-import {Table, Button, Dropdown, Label} from "semantic-ui-react";
-import {toast} from "react-toastify";
+import {Badge, Button, Group, Table} from "@mantine/core";
+import {IconShare3, IconTrash} from "@tabler/icons-react";
 
-import {ConstantsContext} from "../app/AppConstants";
-import {ConsensusStatus, ConsensusStatusOptions, FindConsensusStatusOption} from "../../models/consensusStatus";
-import {formatHortaLocation, formatSomaLocation, INeuron, parseSomaLocation} from "../../models/neuron";
-import {displaySample} from "../../models/sample";
-import {IBrainArea} from "../../models/brainArea";
-import {toastCreateError, toastUpdateError} from "../common/Toasts";
-import {BrainAreaDropdown} from "../common/BrainAreaDropdown";
-import {UPDATE_NEURON_MUTATION, UpdateNeuronMutationData, UpdateNeuronMutationResponse, UpdateNeuronVariables} from "../../graphql/neuron";
+import {useConstants} from "../../hooks/useConstants";
+import {formatHortaLocation, formatKeywords, formatSomaLocation, NeuronShape, parseKeywords, parseSomaLocation} from "../../models/neuron";
+import {AtlasStructureShape} from "../../models/atlasStructure";
+import {toastUpdateError, toastUpdateSuccess} from "../common/NotificationHelper";
+import {UPDATE_NEURON_MUTATION, UpdateNeuronMutationResponse, UpdateNeuronVariables} from "../../graphql/neuron";
 import {InputPopup} from "../common/InputPopup";
+import {AtlasStructureSelect} from "../common/AtlasStructureSelect";
 
-interface INeuronRowProps {
-    neuron: INeuron;
+type NeuronRowProps = {
+    neuron: NeuronShape;
 
-    onDeleteNeuron(neuron: INeuron): void;
-
-    onManageNeuronAnnotations(neuron: INeuron): void;
+    onDelete(neuron: NeuronShape): void;
 }
 
-export const NeuronRow = (props: INeuronRowProps) => {
-    const constants = useContext(ConstantsContext);
-
-    const onAcceptTagEdit = async (value: string, updateFn: any) => {
-        if (value !== props.neuron.tag) {
-            await updateFn({variables: {neuron: {id: props.neuron.id, tag: value}}});
-        }
-    }
-
-    const onAcceptIdStringEdit = async (value: string, updateFn: any) => {
-        if (value !== props.neuron.idString) {
-            await updateFn({variables: {neuron: {id: props.neuron.id, idString: value}}});
-        }
-    }
-
-    const onAcceptConsensusStatus = async (value: ConsensusStatus, updateFn: any) => {
-        if (value !== props.neuron.consensus) {
-            await updateFn({variables: {neuron: {id: props.neuron.id, consensus: value}}});
-        }
-    }
-
-    const onAcceptSomaLocationEdit = async (value: string, updateFn: any) => {
-        const result = parseSomaLocation(value);
-
-        if (result.error) {
-            return;
-        }
-
-        await updateFn({variables: {neuron: {id: props.neuron.id, x: result.x, y: result.y, z: result.z}}});
-    }
-
-    const onAcceptHortaLocationEdit = async (value: string, updateFn: any) => {
-        const result = parseSomaLocation(value);
-
-        if (result.error) {
-            return;
-        }
-
-        await updateFn({variables: {neuron: {id: props.neuron.id, sampleX: result.x, sampleY: result.y, sampleZ: result.z}}});
-    }
-
-    const onBrainAreaChange = async (brainArea: IBrainArea, updateFn: any) => {
-        if (brainArea) {
-            if (!props.neuron.brainArea || brainArea.id !== props.neuron.brainArea.id) {
-                await updateFn({variables: {neuron: {id: props.neuron.id, brainStructureId: brainArea.id}}});
-            }
-        } else {
-            if (props.neuron.brainArea) {
-                await updateFn({variables: {neuron: {id: props.neuron.id, brainStructureId: null}}});
-            }
-        }
-    }
-
-    const n = props.neuron;
-
-    if (!n) {
-        return null;
-    }
-
-    const count = props.neuron.reconstructions.length;
+export const NeuronRow = (props: NeuronRowProps) => {
+    const constants = useConstants().AtlasConstants;
 
     const [updateNeuron] = useMutation<UpdateNeuronMutationResponse, UpdateNeuronVariables>(UPDATE_NEURON_MUTATION,
         {
             onCompleted: (data) => onNeuronUpdated(data.updateNeuron),
-            onError: (error) => toast.error(toastUpdateError(error), {autoClose: false})
+            onError: (error) => toastUpdateError(error)
         });
 
-    return (
-        <Table.Row>
-            <Table.Cell style={{minWidth: "60px", maxWidth: "60px"}}>
-                <InputPopup value={n.idString} placeholder="(none)"
-                            onAccept={v => onAcceptIdStringEdit(v, updateNeuron)}/>
-            </Table.Cell>
-            <Table.Cell style={{maxWidth: "100px"}}>
-                {displaySample(n.sample)}
-            </Table.Cell>
-            <Table.Cell style={{minWidth: "60px", maxWidth: "60px"}}>
-                <InputPopup value={n.tag} placeholder="(none)"
-                            onAccept={v => onAcceptTagEdit(v, updateNeuron)}/>
-            </Table.Cell>
-            <Table.Cell>
-                <BrainAreaDropdown brainArea={n.brainArea ? constants.findBrainArea(n.brainArea.id) : null}
-                                   onBrainAreaChange={(brainArea: IBrainArea) => onBrainAreaChange(brainArea, updateNeuron)}/>
+    const updateLabel = async (value: string) => {
+        if (value !== props.neuron.label) {
+            await updateNeuron({
+                variables: {neuron: {id: props.neuron.id, label: value}},
+                optimisticResponse: {
+                    updateNeuron: {
+                        id: props.neuron.id,
+                        __typename: "Neuron",
+                        label: value
+                    },
+                }
+            });
+        }
+    }
 
-            </Table.Cell>
-            <Table.Cell style={{maxWidth: "140px"}}>
-                <InputPopup value={formatSomaLocation(n)} placeholder="(undefined)"
-                            onAccept={v => onAcceptSomaLocationEdit(v, updateNeuron)}
+    const updateKeywords = async (value: string) => {
+        const parsed = parseKeywords(value);
+        if (parsed !== props.neuron.keywords) {
+            await updateNeuron({
+                variables: {neuron: {id: props.neuron.id, keywords: parsed}},
+                optimisticResponse: {
+                    updateNeuron: {
+                        id: props.neuron.id,
+                        __typename: "Neuron",
+                        keywords: parsed
+                    },
+                }
+            });
+        }
+    }
+
+    const updateAtlasSoma = async (value: string) => {
+        const result = parseSomaLocation(value);
+
+        if (result.error || (result.x == props.neuron.atlasSoma.x && result.y == props.neuron.atlasSoma.y && result.z == props.neuron.atlasSoma.z)) {
+            return;
+        }
+
+        await updateNeuron({
+            variables: {neuron: {id: props.neuron.id, atlasSoma: {x: result.x, y: result.y, z: result.z}}},
+            optimisticResponse: {
+                updateNeuron: {
+                    id: props.neuron.id,
+                    __typename: "Neuron",
+                    atlasSoma: {x: result.x, y: result.y, z: result.z}
+                },
+            }
+        });
+    }
+
+    const updateSampleSoma = async (value: string) => {
+        const result = parseSomaLocation(value);
+
+        if (result.error || (result.x == props.neuron.specimenSoma.x && result.y == props.neuron.specimenSoma.y && result.z == props.neuron.specimenSoma.z)) {
+            return;
+        }
+
+        await updateNeuron({
+            variables: {neuron: {id: props.neuron.id, specimenSoma: {x: result.x, y: result.y, z: result.z}}},
+            optimisticResponse: {
+                updateNeuron: {
+                    id: props.neuron.id,
+                    __typename: "Neuron",
+                    specimenSoma: {x: result.x, y: result.y, z: result.z}
+                }
+            }
+        });
+    }
+
+    const updateAtlasStructure = async (structure: AtlasStructureShape) => {
+        if (structure?.id == props.neuron.atlasStructure?.id) {
+            return;
+        }
+
+        if (structure) {
+            if (!props.neuron.atlasStructure || structure.id !== props.neuron.atlasStructure.id) {
+                await updateNeuron({
+                    variables: {neuron: {id: props.neuron.id, atlasStructureId: structure.id}},
+                    optimisticResponse: {
+                        updateNeuron: {
+                            id: props.neuron.id,
+                            __typename: "Neuron",
+                            atlasStructure: structure,
+                        },
+                    }
+                });
+            }
+        } else {
+            if (props.neuron.atlasStructure) {
+                await updateNeuron({
+                    variables: {neuron: {id: props.neuron.id, atlasStructureId: null}},
+                    optimisticResponse: {
+                        updateNeuron: {
+                            id: props.neuron.id,
+                            __typename: "Neuron",
+                            atlasStructure: null,
+                        },
+                    }
+                });
+            }
+        }
+    }
+
+    if (!props.neuron) {
+        return null;
+    }
+
+    return (
+        <Table.Tr>
+            <Table.Td style={{minWidth: "60px", maxWidth: "60px"}}>
+                <Group align="center" gap="sm">
+                    <InputPopup value={props.neuron.label} placeholder="(none)" onAccept={updateLabel}/>
+                    <Link to={`/neuron/${props.neuron.id}`}><IconShare3 style={{marginTop: "4px"}} size={18}/></Link>
+                </Group>
+            </Table.Td>
+            <Table.Td style={{maxWidth: "100px"}}>
+                {props.neuron.specimen.label}
+            </Table.Td>
+            <Table.Td style={{minWidth: "60px", maxWidth: "60px"}}>
+                <InputPopup value={formatKeywords(props.neuron.keywords)} placeholder="(none)" onAccept={updateKeywords}/>
+            </Table.Td>
+            <Table.Td style={{maxWidth: "140px"}}>
+                <InputPopup value={formatHortaLocation(props.neuron)} placeholder="(undefined)" onAccept={updateSampleSoma}
                             isValidValueFcn={v => !parseSomaLocation(v).error}/>
-            </Table.Cell>
-            <Table.Cell style={{maxWidth: "140px"}}>
-                <InputPopup value={formatHortaLocation(n)} placeholder="(undefined)"
-                            onAccept={v => onAcceptHortaLocationEdit(v, updateNeuron)}
+            </Table.Td>
+            <Table.Td style={{maxWidth: "140px"}}>
+                <InputPopup value={formatSomaLocation(props.neuron)} placeholder="(undefined)" onAccept={updateAtlasSoma}
                             isValidValueFcn={v => !parseSomaLocation(v).error}/>
-            </Table.Cell>
-            <Table.Cell style={{width: "110px"}}>
-                <Dropdown search fluid inline options={ConsensusStatusOptions}
-                          value={FindConsensusStatusOption(n.consensus).value}
-                          onChange={(_, {value}) => onAcceptConsensusStatus(value as ConsensusStatus, updateNeuron)}/>
-            </Table.Cell>
-            <Table.Cell style={{maxWidth: "120px"}}>
-                {n.doi || "(none)"}
-            </Table.Cell>
-            <Table.Cell style={{width: "150px"}}>
-                {count !== undefined ? (count == 0 ?
-                    <Button icon="trash" color="red" size="mini" content="remove" labelPosition="left" onClick={() => props.onDeleteNeuron(n)}/>
-                    : <Label>{count}<Label.Detail>{count == 1 ? "reconstruction" : "reconstructions"}</Label.Detail></Label>) : "?"}
-            </Table.Cell>
-        </Table.Row>
+            </Table.Td>
+            <Table.Td>
+                <AtlasStructureSelect value={props.neuron.atlasStructure ? constants.findStructure(props.neuron.atlasStructure.id) : null} clearable={true}
+                                      onChange={(s) => setTimeout(() => updateAtlasStructure(s), 200)}/>
+            </Table.Td>
+            <Table.Td style={{width: "180px"}}>
+                {props.neuron.reconstructionCount == 0 ?
+                    <Button leftSection={<IconTrash size={18}/>} variant="light" color="red" children="remove" onClick={() => props.onDelete(props.neuron)}/> :
+                    <Badge p={8} variant="light">
+                        {`${props.neuron.reconstructionCount} reconstruction${props.neuron.reconstructionCount != 1 ? "s" : ""}`}
+                    </Badge>
+                }
+            </Table.Td>
+        </Table.Tr>
     );
 }
 
-function onNeuronUpdated(data: UpdateNeuronMutationData) {
-    if (!data.source || data.error) {
-        toast.error(toastCreateError(data.error), {autoClose: false});
+function onNeuronUpdated(data: NeuronShape) {
+    if (!data) {
+        toastUpdateError("The neuron was not updated.");
+    } else {
+        toastUpdateSuccess("The neuron was updated.");
     }
 }

@@ -1,25 +1,22 @@
 import * as React from "react";
-import {Input, Popup} from "semantic-ui-react";
+import {useState} from "react";
+import {Anchor, Popover, Text, TextInput} from "@mantine/core";
 
 type IsValidValueFcn = (value: string) => boolean;
 
 type InputPopupProps = {
-    header?: string;
+    label?: string;
     value?: string;
+    target?: React.JSX.Element | string;
     placeholder?: string;
 
     isValidValueFcn?: IsValidValueFcn
     onAccept?(value: string): void;
 }
 
-type InputPopupState = {
-    value?: string;
-    isOpen?: boolean;
-}
-
 export function InputPopup(props: InputPopupProps) {
-    const [value, setValue] = React.useState<string>(props.value || "");
-    const [isOpen, setIsOpen] = React.useState<boolean>(false);
+    const [value, setValue] = useState<string>(props.value || "");
+    const [isOpen, setIsOpen] = useState<boolean>(false);
 
     React.useEffect(() => {
         if (!isOpen) {
@@ -27,8 +24,8 @@ export function InputPopup(props: InputPopupProps) {
         }
     }, [props.value, isOpen]);
 
-    const onKeyPress = (event: any) => {
-        if ((event.charCode || event.which) === 13 && isValidValue()) {
+    const onKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (event.key == "Enter" && isValidValue()) {
             onAccept();
         }
     };
@@ -49,27 +46,17 @@ export function InputPopup(props: InputPopupProps) {
         setValue(props.value || "");
     };
 
+    const target = (props.target == null || typeof props.target === "string") ? <Text size="sm">{(props.target ?? props.value) || "(none)"}</Text> : props.target;
+
     return (
-        <Popup open={isOpen} onOpen={() => setIsOpen(true)}
-               onClose={onClose} on="click" flowing
-               header={props.header || ""}
-               trigger={<span>{props.value || "(none)"}</span>}
-               content={
-                   <Input size="mini" placeholder={props.placeholder || ""}
-                          style={{minWidth: "100px"}}
-                          value={value}
-                          onKeyPress={onKeyPress}
-                          onChange={(e, data) => {
-                              setValue(data.value.toString());
-                          }}
-                          action={{
-                              icon: "check",
-                              color: "teal",
-                              size: "mini",
-                              disabled: !isValidValue(),
-                              onClick: onAccept
-                          }}
-                   />
-               }/>
+        <Popover width={300} opened={isOpen} onChange={setIsOpen} trapFocus position="bottom" withArrow shadow="md">
+            <Popover.Target>
+                <Text size="sm" onClick={() => setIsOpen(true)}>{target}</Text>
+            </Popover.Target>
+            <Popover.Dropdown>
+                <TextInput label={props.label} placeholder={props.placeholder} size="sm" value={value} onKeyUp={onKeyPress}
+                           onChange={(e) => setValue(e.currentTarget.value)}/>
+            </Popover.Dropdown>
+        </Popover>
     );
 }

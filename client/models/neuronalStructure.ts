@@ -1,5 +1,5 @@
-import {displayTracingStructure, ITracingStructure} from "./tracingStructure";
-import {displayStructureIdentifier, StructureIdentifier} from "./structureIdentifier";
+import {displayNeuronStructure, NeuronStructureShape} from "./neuronStructure";
+import {displayStructureIdentifier, NodeStructureKind, NodeStructureShape} from "./structureIdentifier";
 
 // The subset of tracingStructure:structureIdentifier combinations used for search.  Is not a direct map of either, nor
 // a full mux of both.
@@ -8,10 +8,10 @@ import {displayStructureIdentifier, StructureIdentifier} from "./structureIdenti
 export class NeuronalStructure {
     private readonly _id: string;
 
-    public structureIdentifier: ITracingStructure | null;
-    public tracingStructure: ITracingStructure | null;
+    public structureIdentifier: NodeStructureShape | null;
+    public tracingStructure: NeuronStructureShape | null;
 
-    public constructor(id: string, structureIdentifier: ITracingStructure | null, tracingStructure: ITracingStructure | null) {
+    public constructor(id: string, structureIdentifier: NodeStructureShape | null, tracingStructure: NeuronStructureShape | null) {
         this._id = id;
         this.structureIdentifier = structureIdentifier;
         this.tracingStructure = tracingStructure;
@@ -30,7 +30,7 @@ export class NeuronalStructure {
     }
 
     public get IsSoma() {
-        return this.structureIdentifier && this.structureIdentifier.value === StructureIdentifier.soma;
+        return this.structureIdentifier && this.structureIdentifier.swcValue === NodeStructureKind.soma;
     }
 
     public display(): string {
@@ -41,7 +41,7 @@ export class NeuronalStructure {
         }
 
         if (this.tracingStructure) {
-            str = displayTracingStructure(this.tracingStructure, str.length > 0) + str;
+            str = displayNeuronStructure(this.tracingStructure, str.length > 0) + str;
         }
 
         return str;

@@ -1,81 +1,93 @@
 import * as React from "react";
-import {useContext, useState} from "react";
-import {NavLink} from "react-router-dom";
-import {Icon, Image, Label, Menu, MenuItem, Modal} from "semantic-ui-react";
+import {useContext} from "react";
+import {NavLink, useLocation} from "react-router-dom";
 import {useIsAuthenticated} from "@azure/msal-react";
-import {observer} from "mobx-react-lite";
+import {ActionIcon, Group, Image, Indicator, Text, useMantineColorScheme} from "@mantine/core";
+import {IconMoon, IconSun} from "@tabler/icons-react";
 
-import {PreferencesManager} from "../../util/preferencesManager";
 import {SignInSignOutButton} from "./SignInSignOutButton";
 import {UserPermissions} from "../../graphql/user";
 
 import logo from "../../../assets/nmcp_logo.png";
-import {UserContext} from "./UserApp";
 import {NotificationContext} from "./NotificationsApp";
-import {usePreferences} from "../../hooks/usePreferences";
+import {useUser} from "../../hooks/useUser";
 
-type PageHeaderState = {
-    showShortcuts?: boolean;
-}
-
-export const PageHeader = () => {
-    const [state, setState] = useState<PageHeaderState>({showShortcuts: false});
-    const isAuthenticated = useIsAuthenticated();
-
-    const user = useContext(UserContext);
-
-    const notifications = useContext(NotificationContext);
-
-    const userCanView = user && (user.permissions & UserPermissions.ViewReconstructions) != 0;
-
-    const userCanEdit = user && (user.permissions & UserPermissions.Edit) != 0;
-
-    const userCanReview = user && ((user.permissions & UserPermissions.FullReview) != 0) || ((user.permissions & UserPermissions.PeerReview) != 0);
-
-    const userCanAdmin = user && (user.permissions & UserPermissions.Admin) != 0;
-
-    const issueCountLabel = notifications.issueCount > 0 ? (
-        <Label color="red" key="red" size="small" style={{marginLeft: "4px", marginTop: "2px"}}>{notifications.issueCount}</Label>
-    ) : null;
-
+const TextNavLink = ({text, to}: { text: string, to: string }) => {
     return (
-        <Menu inverted fluid stackable borderless={true} style={{marginBottom: "0px"}}>
-            <Modal open={state.showShortcuts} onClose={() => setState({showShortcuts: false})}>
-                <Modal.Header content="Viewer Shortcuts"/>
-                <Modal.Content>
-                    <ul>
-                        <li>ctrl-click: snap to position</li>
-                        <li>shift-click: add neuron to selection</li>
-                        <li>alt/option-click: toggle neuron on/off</li>
-                    </ul>
-                </Modal.Content>
-            </Modal>
-
-            <Menu.Item fitted="horizontally" as="a" style={{padding: "0px 16px", maxWidth: "214px"}} href="/">
-                <Image size="small" src={logo}/>
-            </Menu.Item>
-
-            {isAuthenticated ? <Menu.Item as={NavLink} exact to="/candidates" name="candidates" key="candidates">Find Candidate Neurons</Menu.Item> : null}
-            {isAuthenticated && userCanView ?
-                <Menu.Item as={NavLink} exact to="/reconstructions" name="reconstructions" key="reconstructions">Reconstruct Neurons</Menu.Item> : null}
-            {isAuthenticated && userCanReview ? <Menu.Item as={NavLink} exact to="/review" name="review" key="review">Review Reconstructions</Menu.Item> : null}
-            {isAuthenticated && userCanEdit ? <Menu.Item as={NavLink} exact to="/samples" name="samples" key="samples">Add Samples</Menu.Item> : null}
-            {isAuthenticated && userCanAdmin ? <Menu.Item as={NavLink} exact to="/admin" name="admin" key="admin">Admin{issueCountLabel}</Menu.Item> : null}
-            <Menu.Menu position="right">
-                {PreferencesManager.HavePreferences ? <PreferencesMenuItem/> : null}
-
-                <MenuItem>
-                    <SignInSignOutButton/>
-                </MenuItem>
-            </Menu.Menu>
-        </Menu>
+        <NavLink to={to} className="header-menu-item">
+            {({isActive}: { isActive: boolean }) => (
+                <Text p={8} size="md" bdrs={4} bg={isActive ? "#343536" : "transparent"}>{text}</Text>
+            )}
+        </NavLink>
+    );
+}
+const HomeNavLink = () => {
+    return (
+        <NavLink to="/">
+            {({isActive}: { isActive: boolean }) => (
+                <div>
+                    <Image mr={16} mb={4} w={214} fit="contain" src={logo}/>
+                </div>
+            )}
+        </NavLink>
     );
 }
 
-const PreferencesMenuItem = observer(() => {
-    const preferences = usePreferences();
+const IssueNavLink = ({text, to}: { text: string, to: string }) => {
+    const notifications = useContext(NotificationContext);
 
-    return <MenuItem onClick={() => preferences.openSettingsDialog()}>
-        <Icon name="cog"/>
-    </MenuItem>;
-});
+    return (
+        <NavLink to={to} className="header-menu-item">
+            {({isActive}: { isActive: boolean }) => (
+                <Indicator inline color="red" size={16} label="!" disabled={notifications.issueCount == 0}>
+                    <Group bdrs={4} bg={isActive ? "#343536" : "transparent"} gap={0}>
+                        <Text p={8} size="md">{text}</Text>
+                    </Group>
+                </Indicator>
+            )}
+        </NavLink>
+    );
+}
+
+export const PageHeader = () => {
+    const isAuthenticated = useIsAuthenticated();
+    const {colorScheme, toggleColorScheme} = useMantineColorScheme();
+    const user = useUser();
+
+    const userCanView = user && (user?.permissions & UserPermissions.ViewReconstructions) != 0;
+
+    const userCanEdit = user && (user?.permissions & UserPermissions.Edit) != 0;
+
+    const userCanReview = user && ((user?.permissions & UserPermissions.FullReview) != 0) || ((user?.permissions & UserPermissions.PeerReview) != 0);
+
+    const userCanAdmin = user && (user?.permissions & UserPermissions.Admin) != 0;
+
+    const candidates = isAuthenticated ? "Find Candidate Neurons" : "Explore Candidate Neurons";
+
+    const viewItem = isAuthenticated && userCanView ? <TextNavLink text="Reconstruct Neurons" to="/reconstructions"/> : null;
+
+    const neuronsItem = isAuthenticated && userCanEdit ? <TextNavLink text="Add Specimens" to="/specimens"/> : null;
+
+    const reviewItem = isAuthenticated && userCanReview ? <TextNavLink text="Review Neurons" to="/review"/> : null;
+
+    const adminItem = isAuthenticated && userCanAdmin ? <IssueNavLink text="Admin" to="/admin"/> : null;
+
+    return (
+        <Group p={12} justify="space-between" bg="dark.8">
+            <Group>
+                <HomeNavLink/>
+                <TextNavLink text={candidates} to="/candidates"/>
+                {viewItem}
+                {reviewItem}
+                {neuronsItem}
+                {adminItem}
+            </Group>
+            <Group>
+                <ActionIcon variant="subtle" color="white" onClick={() => toggleColorScheme()}>
+                    {colorScheme == "light" ? <IconMoon/> : <IconSun/>}
+                </ActionIcon>
+                <SignInSignOutButton/>
+            </Group>
+        </Group>
+    );
+}

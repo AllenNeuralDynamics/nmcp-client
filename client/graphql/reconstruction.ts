@@ -1,417 +1,351 @@
 import gql from "graphql-tag";
-import {IReconstruction} from "../models/reconstruction";
-import {INeuron} from "../models/neuron";
-import {QualityCheckStatus} from "../models/qualityCheckStatus";
-import {QualityCheck} from "../models/qualityCheck";
+import {Reconstruction} from "../models/reconstruction";
+import {ReconstructionSpace} from "../models/reconstructionSpace";
+import {NEURON_BASE_FIELDS_FRAGMENT, NEURON_RELATIONSHIP_FIELDS_FRAGMENT} from "./neuron";
+import {ReconstructionStatus} from "../models/reconstructionStatus";
+import {AtlasReconstructionFieldsFragment} from "./atlasReconstruction";
 
-export const ReconstructionFieldsFragment = gql`fragment ReconstructionFields on Reconstruction {
+export const NodeCountFieldsFragment = gql`fragment NodeCountFieldsFragment on NodeCount {
+    total
+    soma
+    path
+    branch
+    end
+}`;
+
+export const NodeCountsFieldsFragment = gql`fragment NodeCountsFields on NodeCounts {
+    axon {
+        ...NodeCountFieldsFragment
+    }
+    dendrite {
+        ...NodeCountFieldsFragment
+    }
+}
+${NodeCountFieldsFragment}
+`;
+
+export const ReconstructionRelationshipsFragment = gql`fragment ReconstructionRelationshipsFragment on Reconstruction {
+    neuron {
+        ...NeuronBaseFields
+        ...NeuronRelationshipFields
+    }
+    atlasReconstruction {
+        id
+        status
+        sourceUrl
+        nodeCounts {
+            ...NodeCountsFields
+        }
+        qualityControl {
+            id
+            status
+        }
+    }
+}
+${NodeCountsFieldsFragment}
+${NEURON_BASE_FIELDS_FRAGMENT}
+${NEURON_RELATIONSHIP_FIELDS_FRAGMENT}
+`;
+
+export const ReconstructionFieldsFragment = gql`fragment ReconstructionFieldsFragment on Reconstruction {
     id
     status
+    sourceUrl
+    status
     notes
-    checks
     durationHours
-    lengthMillimeters
-    startedAt
-    completedAt
-    qualityCheckAt
-    qualityCheckStatus
-    qualityCheckVersion
-    qualityCheck {
-        warnings {
-            testName
-            testDescription
-            affectedNodes
-        }
-        errors {
-            testName
-            testDescription
-            affectedNodes
-        }
+    specimenLengthMillimeters
+    specimenNodeCounts {
+        ...NodeCountsFields
     }
     annotatorId
     annotator {
         id
         firstName
         lastName
-        emailAddress
     }
-    proofreaderId
-    proofreader {
+    reviewer {
         id
         firstName
         lastName
-        emailAddress
     }
-    peerReviewerId
-    peerReviewer {
-        id
-        firstName
-        lastName
-        emailAddress
+    atlasReconstruction {
+        ...AtlasReconstructionFields
     }
-    neuronId
-    neuron {
-        id
-        idNumber
-        idString
-        tag
-        keywords
-        x
-        y
-        z
-        brainArea {
-            id
-            name
-        }
-        sample {
-            id
-            animalId
-        }
-    }
-    axon {
-        id
-        nodeCount
-        filename
-    }
-    dendrite {
-        id
-        nodeCount
-        filename
-    }
-    precomputed {
-        id
-        skeletonSegmentId
-    }
-}`;
-
-//
-// All Reconstructions
-//
-export const RECONSTRUCTIONS_QUERY = gql`query ReconstructionsQuery ($pageInput: ReconstructionPageInput) {
-    reconstructions(pageInput: $pageInput) {
-        offset
-        limit
-        totalCount
-        reconstructions {
-            ...ReconstructionFields
-        }
-    }
+    startedAt
+    completedAt
+    createdAt
+    updatedAt
 }
-${ReconstructionFieldsFragment}`;
+${NodeCountsFieldsFragment}
+${AtlasReconstructionFieldsFragment}
+`;
 
-export type ReconstructionVariables = {
-    pageInput: {
-        offset: number;
-        limit: number;
-        userOnly: boolean;
-        sampleIds?: string[];
-        filters: number[];
+export const RECONSTRUCTIONS_QUERY = gql`
+    query Reconstructions($queryArgs: ReconstructionQueryArgs!) {
+        reconstructions(queryArgs: $queryArgs) {
+            total
+            offset
+            reconstructions {
+                ...ReconstructionFieldsFragment
+                ...ReconstructionRelationshipsFragment
+            }
+        }
     }
-}
+    ${ReconstructionFieldsFragment}
+    ${ReconstructionRelationshipsFragment}
+`;
 
 export type ReconstructionsResponse = {
     reconstructions: {
+        total: number;
         offset: number;
-        limit: number;
-        totalCount: number;
-        reconstructions: IReconstruction[];
-    };
-}
-
-//
-// Reviewable Annotations
-//
-
-export type ReviewableVariables = {
-    input: {
-        offset: number;
-        limit: number;
-        sampleIds: string[];
-        status: number[];
+        reconstructions: Reconstruction[];
     }
 }
 
-export type ReviewableResponse = {
-    reviewableReconstructions: {
-        offset: number;
-        limit: number;
-        totalCount: number;
-        reconstructions: IReconstruction[];
-    };
-}
-
-export const REVIEWABLE_ANNOTATIONS_QUERY = gql`query ReviewableReconstructions($input: ReviewPageInput) {
-    reviewableReconstructions(input: $input) {
-        offset
-        limit
-        totalCount
-        reconstructions {
-            ...ReconstructionFields
-        }
-    }
-}
-${ReconstructionFieldsFragment}`;
-
-//
-// Peer Reviewable Annotations
-//
-
-export type PeerReviewableVariables = {
-    input: {
-        offset: number;
-        limit: number;
-        sampleIds: string[];
-        tag: string;
+export type ReconstructionQueryArgs = {
+    queryArgs: {
+        offset?: number;
+        limit?: number;
+        userOnly?: boolean;
+        status?: number[];
+        specimenIds?: string[];
+        keywords?: string[];
     }
 }
 
-export type PeerReviewableResponse = {
-    peerReviewableReconstructions: {
-        offset: number;
-        limit: number;
-        totalCount: number;
-        reconstructions: IReconstruction[];
-    };
-}
+//
+// Modify Status
+//
 
-export const PEER_REVIEWABLE_ANNOTATIONS_QUERY = gql`query PeerReviewableReconstructions($input: PeerReviewPageInput) {
-    peerReviewableReconstructions(input: $input) {
-        offset
-        limit
-        totalCount
-        reconstructions {
-            ...ReconstructionFields
-        }
+// Open Reconstruction Mutation
+//
+export const OPEN_RECONSTRUCTION_MUTATION = gql`mutation OpenReconstruction($neuronId: String!) {
+    openReconstruction(neuronId: $neuronId) {
+        id
     }
+}`;
+export type StartReconstructionArgs = {
+    neuronId: string;
 }
-${ReconstructionFieldsFragment}`;
+export type StartReconstructionResponse = {
+    openReconstruction: Reconstruction;
+}
 
-//
-// Request Annotation Mutation
-//
-export const REQUEST_ANNOTATION_MUTATION = gql`mutation RequestAnnotation($id: String!) {
-    requestReconstruction(id: $id) {
+export type ReconstructionStatusModifierArgs = {
+    reconstructionId: string;
+}
+
+export const PAUSE_RECONSTRUCTION_MUTATION = gql`mutation PauseReconstruction($reconstructionId: String!) {
+    pauseReconstruction(reconstructionId: $reconstructionId) {
+        id
+        status
+    }
+}`;
+
+export type PauseReconstructionResponse = {
+    pauseReconstruction: Reconstruction;
+}
+
+export const RESUME_RECONSTRUCTION_MUTATION = gql`mutation ResumeReconstruction($reconstructionId: String!) {
+    resumeReconstruction(reconstructionId: $reconstructionId) {
+        id
+        status
+    }
+}`;
+
+export type ResumeReconstructionResponse = {
+    resumeReconstruction: Reconstruction;
+}
+
+export const REQUEST_REVIEW_MUTATION = gql`mutation RequestReview($reconstructionId: String!, $targetStatus: Int!, $duration: Float!, $notes: String!) {
+    requestReview(reconstructionId: $reconstructionId, targetStatus: $targetStatus, duration: $duration, notes: $notes) {
+        id
+        status
+    }
+}`;
+
+export type RequestReviewResponse = {
+    resumeReconstruction: Reconstruction;
+}
+
+export type RequestReviewArgs = {
+    reconstructionId: string;
+    targetStatus: ReconstructionStatus;
+    duration: number;
+    notes: string;
+}
+
+export const APPROVE_RECONSTRUCTION_MUTATION = gql`mutation ApproveReconstruction($reconstructionId: String!, $targetStatus: Int!) {
+    approveReconstruction(reconstructionId: $reconstructionId, targetStatus: $targetStatus) {
+        id
+        status
+    }
+}`;
+
+export type ApproveReconstructionResponse = {
+    resumeReconstruction: Error;
+}
+
+export type ApproveReconstructionArgs = {
+    reconstructionId: string;
+    targetStatus: ReconstructionStatus;
+}
+
+export const REJECT_RECONSTRUCTION_MUTATION = gql`mutation RejectReconstruction($reconstructionId: String!) {
+    rejectReconstruction(reconstructionId: $reconstructionId) {
+        id
+        status
+    }
+}`;
+
+export type RejectReconstructionResponse = {
+    rejectReconstruction: Reconstruction;
+}
+
+export const DISCARD_RECONSTRUCTION_MUTATION = gql`mutation DiscardReconstruction($reconstructionId: String!) {
+    discardReconstruction(reconstructionId: $reconstructionId) {
         id
     }
 }`;
 
-export type RequestAnnotationVariables = {
-    id: string;
-}
-
-export type RequestAnnotationResponse = {
-    requestReconstruction: INeuron;
-}
-
-//
-// Request Peer Review Mutation
-//
-export const REQUEST_PEER_REVIEW_MUTATION = gql`mutation RequestPeerReview($id: String!, $duration: Float!, $length: Float!, $notes: String!, $checks: String!) {
-    requestReconstructionPeerReview(id: $id, duration: $duration, length: $length, notes: $notes, checks: $checks) {
-        message
-        name
-    }
-}`;
-
-export type RequestPeerReviewVariables = {
-    id: string;
-    duration: number;
-    length: number;
-    notes: string;
-    checks: string;
-}
-
-export type RequestPeerReviewResponse = {
-    requestReconstructionPeerReview: ErrorOutput;
-}
-
-
-//
-// Request Review Mutation
-//
-export const REQUEST_ANNOTATION_REVIEW_MUTATION = gql`mutation RequestAnnotationReview($id: String!, $duration: Float!, $length: Float!, $notes: String!, $checks: String!) {
-    requestReconstructionReview(id: $id, duration: $duration, length: $length, notes: $notes, checks: $checks) {
-        message
-        name
-    }
-}`;
-
-export type RequestAnnotationReviewVariables = {
-    id: string;
-    duration: number;
-    length: number;
-    notes: string;
-    checks: string;
-}
-
-export type RequestAnnotationReviewResponse = {
-    requestReconstructionReview: ErrorOutput;
-}
-
-//
-//
-//
-export const UPDATE_RECONSTRUCTION_MUTATION = gql`mutation UpdateReconstruction($id: String!, $duration: Float!, $length: Float!, $notes: String!, $checks: String!) {
-    updateReconstruction(id: $id, duration: $duration, length: $length, notes: $notes, checks: $checks) {
-        message
-        name
-    }
-}`;
-
-export type UpdateReconstructionVariables = RequestAnnotationReviewVariables;
-
-export type UpdateReconstructionResponse = RequestAnnotationReviewResponse;
-
-//
-//
-//
-export const REQUEST_ANNOTATION_HOLD_MUTATION = gql`mutation RequestAnnotationHold($id: String!) {
-    requestReconstructionHold(id: $id) {
-        message
-        name
-    }
-}`;
-
-export type RequestAnnotationHoldVariables = {
-    id: string;
-}
-
-export type RequestAnnotationHoldResponse = {
-    requestReconstructionHold: ErrorOutput;
-}
-
-//
-// Approve Reconstruction Peer Review Mutation
-//
-export const APPROVE_RECONSTRUCTION_PEER_REVIEW_MUTATION = gql`mutation ApproveReconstructionPeerReview($id: String!) {
-    approveReconstructionPeerReview(id: $id) {
-        message
-        name
-    }
-}`;
-
-export type ApproveReconstructionPeerReviewVariables = {
-    id: string;
-}
-
-export type ApproveReconstructionPeerReviewResponse = {
-    approveReconstructionPeerReview: ErrorOutput;
-}
-
-//
-// Approve Annotation Mutation
-//
-export const APPROVE_ANNOTATION_MUTATION = gql`mutation ApproveAnnotation($id: String!) {
-    approveReconstruction(id: $id) {
-        message
-        name
-    }
-}`;
-
-export type ApproveAnnotationVariables = {
-    id: string;
-}
-
-export type ApproveAnnotationResponse = {
-    approveReconstruction: ErrorOutput;
-}
-
-//
-// Decline Annotation Mutation
-//
-export const DECLINE_ANNOTATION_MUTATION = gql`mutation DeclineAnnotation($id: String!) {
-    declineReconstruction(id: $id) {
-        message
-        name
-    }
-}`;
-
-export type DeclineAnnotationVariables = {
-    id: string;
-}
-
-export type DeclineAnnotationResponse = {
-    declineReconstruction: ErrorOutput;
-}
-
-//
-// Cancel Annotation Mutation
-//
-export const CANCEL_ANNOTATION_MUTATION = gql`mutation CancelAnnotation($id: String!) {
-    cancelReconstruction(id: $id) {
-        message
-        name
-    }
-}`;
-
-type ErrorOutput = {
-    kind?: number;
-    message: string;
-    name: string;
-}
-
-export type CancelAnnotationVariables = {
-    id: string;
-}
-
-export type CancelAnnotationMutationResponse = {
-    cancelReconstruction: ErrorOutput;
+export type DiscardReconstructionResponse = {
+    discardReconstruction: Reconstruction;
 }
 
 //
 // Publish Reconstruction Mutation
 //
-export const PUBLISH_RECONSTRUCTION_MUTATION = gql`mutation PublishReconstruction($id: String!) {
-    publishReconstruction(id: $id) {
-        message
-        name
+export const PUBLISH_RECONSTRUCTION_MUTATION = gql`mutation Publish($reconstructionId: String!) {
+    publish(reconstructionId: $reconstructionId) {
+        id
+        status
+        atlasReconstruction {
+            id
+            status
+        }
     }
 }`;
 
 export type PublishReconstructionVariables = {
-    id: string;
+    reconstructionId: string;
 }
 
 export type PublishReconstructionResponse = {
-    publishReconstruction: ErrorOutput;
+    publish: Reconstruction;
 }
 
-// Request Quality Check Mutation
-export const QUALITY_CHECK_MUTATION = gql`mutation QualityCheck($id: String!) {
-    requestQualityCheck(id: $id) {
+export const PUBLISH_ALL_RECONSTRUCTION_MUTATION = gql`mutation PublishAll($reconstructionIds: [String!]!) {
+    publishAll(reconstructionIds: $reconstructionIds) {
         id
-        qualityCheckStatus
-        qualityCheck {
-            warnings {
-                testName
-                testDescription
-                affectedNodes
-            }
-            errors {
-                testName
-                testDescription
-                affectedNodes
-            }
-        }
-        qualityCheckAt
-        error {
-            kind
-            message
+        status
+        atlasReconstruction {
+            id
+            status
         }
     }
 }`;
 
-export type QualityCheckVariables = {
-    id: string;
+export type PublishAllReconstructionVariables = {
+    reconstructionIds: string[];
 }
 
-export type QualityCheckResponse = {
-    requestQualityCheck: {
-        id: string,
-        qualityCheckStatus: QualityCheckStatus,
-        qualityCheck: QualityCheck;
-        qualityCheckAt: Date;
-        error: ErrorOutput
-    };
+export type PublishAllReconstructionResponse = {
+    publishAll: Reconstruction[];
 }
 
+//
+// Modify Metadata
+//
+
+export const UPDATE_RECONSTRUCTION_MUTATION = gql`mutation UpdateReconstruction($reconstructionId: String!, $duration: Float, $notes: String, $started: Date, $completed: Date) {
+    updateReconstruction(reconstructionId: $reconstructionId, duration:$duration, notes:$notes, started:$started, completed:$completed) {
+        id
+        durationHours
+        notes
+        startedAt
+        completedAt
+    }
+}`;
+
+export type UpdateReconstructionVariables = {
+    reconstructionId: string;
+    duration?: number;
+    notes?: string;
+    started?: Date;
+    completed?: Date;
+}
+
+
+export type UpdateReconstructionResponse = {
+    updateReconstruction: Reconstruction;
+}
+
+//
+// Upload/Create Unregistered Json/Swc Data
+//
+
+export const UPLOAD_JSON_MUTATION = gql`
+    mutation UploadJsonData($uploadArgs: JsonUploadArgs!) {
+        uploadJsonData(uploadArgs: $uploadArgs) {
+            id
+            status
+            specimenNodeCounts {
+                ...NodeCountsFields
+            }
+            atlasReconstruction {
+                ...AtlasReconstructionFields
+            }
+        }
+    }
+${NodeCountsFieldsFragment}
+${AtlasReconstructionFieldsFragment}
+`;
+
+export const UPLOAD_SWC_MUTATION = gql`
+    mutation UploadSwcData($uploadArgs: SwcUploadArgs!) {
+        uploadSwcData(uploadArgs: $uploadArgs) {
+            id
+            status
+            specimenNodeCounts {
+                ...NodeCountsFields
+            }
+            atlasReconstruction {
+                ...AtlasReconstructionFields
+            }
+        }
+    }
+    ${NodeCountsFieldsFragment}
+    ${AtlasReconstructionFieldsFragment}
+`;
+
+type UploadArgs = {
+    reconstructionId: string;
+    reconstructionSpace: ReconstructionSpace;
+}
+
+type JsonUploadArgs = UploadArgs & {
+    file: File
+}
+
+type SwcUploadArgs = UploadArgs & {
+    axonFile: File;
+    dendriteFile: File;
+}
+
+export type UploadUnregisteredJsonVariables = {
+    uploadArgs: JsonUploadArgs
+}
+
+export type UploadUnregisteredSwcVariables = {
+    uploadArgs: SwcUploadArgs
+}
+
+export type UploadJsonResponse = {
+    uploadJsonData: Reconstruction;
+}
+
+export type UploadSwcResponse = {
+    uploadJsonData: Reconstruction;
+}

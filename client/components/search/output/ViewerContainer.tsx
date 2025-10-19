@@ -1,127 +1,123 @@
 import * as React from "react";
-import {observer} from "mobx-react";
-import {Icon} from "semantic-ui-react";
+import {useState} from "react";
+import {observer} from "mobx-react-lite";
+import {ActionIcon, Divider, Flex, Grid, Group, SimpleGrid, Stack, Text, Tooltip} from "@mantine/core";
+import {IconAdjustmentsAlt, IconChartScatter3d, IconChevronLeft, IconChevronRight, IconRestore} from "@tabler/icons-react";
 
-import {primaryBackground} from "../../../util/styles";
 import {NeuroglancerProxy} from "../../../viewer/neuroglancerProxy";
 import {useAppLayout} from "../../../hooks/useAppLayout";
 import {DrawerState} from "../../../viewmodel/appLayout";
-import {TracingViewer} from "./TracingViewer";
+import {ReconstructionViewer} from "./ReconstructionViewer";
+import {useThrottledCallback} from "@mantine/hooks";
 
-
-export const ViewerContainer = observer(() => {
+export const ViewerContainer = observer(({maxHeight}: { maxHeight: number }) => {
     const appLayout = useAppLayout();
 
-    const renderFloatNeuronListGlyph = () => {
-        if (!appLayout.isNeuronListDocked && !appLayout.isNeuronListOpen) {
+    const [showNeuroglancerControls, setShowNeuroglancerControls] = useState<boolean>(false);
+    const [showNeuroglancerDimensions, setShowNeuroglancerDimensions] = useState<boolean>(false);
+
+    const [x, setX] = useState<number[]>([]);
+
+    const renderNeuronOpen = () => {
+        if (appLayout.neuronDrawerState == DrawerState.Hidden) {
             return (
-                <div style={{display: "flex", alignItems: "center", height: "100%"}}
-                     onClick={() => appLayout.setNeuronDrawerState(DrawerState.Float)}>
-                    <h5 style={{color: "white", fontWeight: "lighter", margin: "0 6px 0 10px"}}>
-                        Neurons</h5>
-                    <Icon name="chevron right" style={{top: -1, order: 2}}
-                    />
-                </div>);
+                <Group p={8} gap={0} align="center">
+                    <Text>Neurons</Text>
+                    <ActionIcon variant="subtle" onClick={() => appLayout.setNeuronDrawerState(DrawerState.Dock)}>
+                        <IconChevronRight size={22}/>
+                    </ActionIcon>
+                    <Divider orientation="vertical"/>
+                </Group>
+            );
         } else {
-            return null;
+            return <Divider orientation="vertical"/>;
         }
     };
 
-    const renderFloatCompartmentListGlyph = () => {
-        if (!appLayout.isCompartmentListDocked && !appLayout.isCompartmentListOpen) {
+    const renderAtlasStructureOpen = () => {
+        if (appLayout.atlasStructureDrawerState == DrawerState.Hidden) {
             return (
-                <div style={{display: "flex", alignItems: "center", height: "100%"}}
-                     onClick={() => appLayout.setAtlasStructureDrawerState(DrawerState.Float)}>
-                    <Icon name="chevron left" style={{order: 1, top: -1}}/>
-                    <h5 style={{
-                        color: "white",
-                        fontWeight: "lighter",
-                        margin: "0 6px 0 10px",
-                        order: 2
-                    }}>
-                        Compartments</h5>
-                </div>);
+                <Group p={8} gap={0} justify="end" align="center">
+                    <Divider orientation="vertical"/>
+                    <ActionIcon variant="subtle" onClick={() => appLayout.setAtlasStructureDrawerState(DrawerState.Dock)}>
+                        <IconChevronLeft size={22}/>
+                    </ActionIcon>
+                    <Text>Atlas Structures</Text>
+                </Group>
+            );
         } else {
-            return null;
+            return <Group p={0} gap={0}><Divider orientation="vertical"/></Group>;
         }
     };
 
-    const renderCollapseQueryGlyph = () => {
-        return (<Icon name={appLayout.isQueryExpanded ? "chevron up" : "chevron down"}
-                      style={{margin: "auto", order: 3}}
-                      onClick={() => appLayout.isQueryExpanded = !appLayout.isQueryExpanded}/>)
+    const resetNeuroglancerView = () => {
+        NeuroglancerProxy.SearchNeuroglancer?.resetView()
     };
 
-    const renderResetView = () => {
+    const toggleNeuroglancerControls = () => {
+        const b = !showNeuroglancerControls;
+        document.documentElement.style.setProperty("--neuroglancer-topview-height", b ? "30px" : "0px");
+        document.documentElement.style.setProperty("--neuroglancer-topview-visibility", b ? "visible" : "collapse");
+        setShowNeuroglancerControls(b);
+    }
+
+    const toggleNeuroglancerDimensions = () => {
+        const b = !showNeuroglancerDimensions;
+        document.documentElement.style.setProperty("--neuroglancer-display-dimensions", b ? "visible" : "collapse");
+        setShowNeuroglancerDimensions(b);
+    }
+
+    const renderControls = () => {
+        const text = x.length > 0 ? `X ${x[0].toFixed(0)}   Y ${x[1].toFixed(0)}   Z ${x[2].toFixed(0)}` : "";
+
         return (
-            <span style={{marginRight: "6px", textDecoration: "underline"}} onClick={() => {
-                if (NeuroglancerProxy.SearchNeuroglancer) {
-                    NeuroglancerProxy.SearchNeuroglancer.resetView();
-                }
-            }}>Reset View</span>
+            <Group p={8} justify="space-between" style={{flexGrow: 1}}>
+                <Group>
+                    <Tooltip label="Show or hide Neuroglancer controls">
+                        <ActionIcon variant="subtle" onClick={toggleNeuroglancerControls}>
+                            <IconAdjustmentsAlt size={18}/>
+                        </ActionIcon>
+                    </Tooltip>
+                    <Tooltip label="Show or hide Neuroglancer dimensions overlay">
+                        <ActionIcon variant="subtle" onClick={toggleNeuroglancerDimensions}>
+                            <IconChartScatter3d size={18}/>
+                        </ActionIcon>
+                    </Tooltip>
+                    <Divider orientation="vertical"/>
+                    <Tooltip label="Reset the view scale and orientation">
+                        <ActionIcon variant="subtle" onClick={resetNeuroglancerView}>
+                            <IconRestore size={18}/>
+                        </ActionIcon>
+                    </Tooltip>
+                </Group>
+                <Text size="xs" c="dimmed">{text}</Text>
+            </Group>
         );
     }
 
-    const renderHeader = () => {
-        return (
-            <div style={{
-                backgroundColor: primaryBackground,
-                color: "white",
-                height: "40px",
-                minHeight: "40px",
-                width: "100%",
-                margin: "auto",
-                padding: "0px",
-                display: "flex",
-                order: 1,
-                flexDirection: "row"
-            }}>
-                <div style={{display: "flex", flexDirection: "row", width: "100%"}}>
-                    <div style={{flex: "0 0 auto", order: 1, width: "auto"}}>
-                        {renderFloatNeuronListGlyph()}
-                    </div>
-                    <div style={{display: "flex", flexDirection: "column", flex: "1 1 auto", order: 2, width: "100%"}}>
-                        <div style={{flex: "0 0 auto", order: 1, textAlign: "center", height: "15px"}}>
-                            {renderCollapseQueryGlyph()}
-                        </div>
-                        <div style={{flex: "1 1 auto", order: 2, textAlign: "center", width: "100%"}}>
-                            {!appLayout.isQueryExpanded ?
-                                <span onClick={() => appLayout.isQueryExpanded = !appLayout.isQueryExpanded}>
-                                    Show Search
-                                </span> : null}
-                        </div>
-                        <div style={{flex: "1 1 auto", order: 2, textAlign: "right", width: "100%"}}>
-                            {renderResetView()}
-                        </div>
-                    </div>
-                    <div style={{flex: "0 0 auto", order: 3, width: "auto"}}>
-                        {renderFloatCompartmentListGlyph()}
-                    </div>
-                </div>
-            </div>
-        );
-    };
+    const renderedHeader = (
+        <Flex p={0} bg="section" style={{height: "40px"}}>
+            {renderNeuronOpen()}
+            {renderControls()}
+            {renderAtlasStructureOpen()}
+        </Flex>
+    );
+
+
+    const positionChanged = useThrottledCallback((p: number[]) => {
+        if (p.length == 0) {
+            setX([]);
+        } else {
+            setX(p);
+        }
+
+    }, 50);
 
     return (
-        <div style={{
-            flexDirection: "column",
-            flexWrap: "nowrap",
-            alignItems: "flex-start",
-            alignContent: "flex-start",
-            order: 2,
-            flexGrow: 1,
-            flexShrink: 1,
-            flexBasis: 0,
-            display: "flex",
-            height: "100%",
-            minWidth: "200px",
-            borderTop: "1px solid",
-            borderBottom: "1px solid"
-        }}>
-            {renderHeader()}
-            <div style={{order: 2, flexGrow: 1, width: "100%", height: "100%"}}>
-                <TracingViewer/>
-            </div>
-        </div>
+        <Stack gap={0} style={{flexGrow: 1, height: maxHeight, maxHeight: maxHeight, position: "relative"}}>
+            {renderedHeader}
+            <Divider orientation="horizontal"/>
+            <ReconstructionViewer height={maxHeight - 40} positionChanged={positionChanged}/>
+        </Stack>
     );
 });

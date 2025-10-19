@@ -1,18 +1,11 @@
 import * as React from "react";
 import {useEffect, useState} from "react";
-import {Button, Checkbox, Flex, Divider, Stack, TextInput} from "@mantine/core";
-import {IconUpload} from '@tabler/icons-react';
+import {Button, Checkbox, Flex, Divider, Stack, Text, TextInput, Group, Code} from "@mantine/core";
+import {Dropzone} from "@mantine/dropzone";
+import {IconFileTypeCsv, IconUpload, IconX} from '@tabler/icons-react';
 
-import Dropzone from "react-dropzone";
-import {NoFileStyle} from "../../review/upload/SwcDropZone";
 import {SomaImportOptions} from "./ImportSomasModal";
-
-const zoneStyle = (disabled: boolean, file: any) => {
-    return {
-        order: 0,
-        backgroundColor: disabled ? "rgb(255, 246, 246)" : (file ? "rgb(243, 244, 245)" : "rgb(255, 230, 230)")
-    };
-}
+import {parseKeywords} from "../../../models/neuron";
 
 type ImportSomasPanelProps = {
     onImport(options: SomaImportOptions): void;
@@ -38,22 +31,39 @@ export const ImportSomasPanel = (props: ImportSomasPanelProps) => {
     }
 
     return (
-        <Stack>
-            <Dropzone onDrop={onFileReceived}>
-                {({getRootProps, getInputProps}) => (
-                    <div {...getRootProps()} className="dropzone-no-border" style={zoneStyle(false, file)}>
-                        <input {...getInputProps()} />
-                        <span style={NoFileStyle(!file, false)}>
-                                {file ? file.name : "Drop a soma properties CSV file - or click to browse for one"}
-                            </span>
-                    </div>
-                )}
+        <Stack gap="lg">
+            <Dropzone onDrop={onFileReceived} accept={["text/csv"]}>
+                <Group justify="center" gap="xl" mih={220} style={{pointerEvents: 'none'}}>
+                    <Dropzone.Accept>
+                        <IconUpload size={52} color="var(--mantine-color-blue-6)" stroke={1.5}/>
+                    </Dropzone.Accept>
+                    <Dropzone.Reject>
+                        <IconX size={52} color="var(--mantine-color-red-6)" stroke={1.5}/>
+                    </Dropzone.Reject>
+                    <Dropzone.Idle>
+                        {file ?
+                            <IconUpload size={52} color="var(--mantine-color-green-6)" stroke={1.5}/> :
+                            <IconFileTypeCsv size={52} color="var(--mantine-color-dimmed)" stroke={1.5}/>
+                        }
+                    </Dropzone.Idle>
+
+                    {file ? <Text size="xl" inline>{file.name}</Text> :
+                        <div>
+                            <Text size="xl" inline>
+                                Drop a soma properties CSV file here or click to select a file
+                            </Text>
+                            <Text size="sm" c="dimmed" inline mt={7}>
+                                Files should contain columns for <Code>xyz_raw, Brightness, Volume (µm³), Radii (μm), xyz_ccf_auto</Code>
+                            </Text>
+                        </div>
+                    }
+                </Group>
             </Dropzone>
 
             <div>
-                <Checkbox checked={shouldApplyTag} label="Apply a tag value to all untagged rows"
+                <Checkbox checked={shouldApplyTag} label="Apply keyword(s) to candidates"
                           onChange={(event) => setShouldApplyTag(event.currentTarget.checked)}/>
-                <TextInput label="Tag" placeholder="AIND" disabled={!shouldApplyTag} value={tag}
+                <TextInput label="Keyword(s)" description="Separate multiple keywords with a semicolon (;)" placeholder="AIND" disabled={!shouldApplyTag} value={tag}
                            onChange={(event) => setTag(event.currentTarget.value)}/>
             </div>
 
@@ -64,8 +74,8 @@ export const ImportSomasPanel = (props: ImportSomasPanelProps) => {
 
             <Flex justify="flex-end">
                 <Button disabled={!canImport} rightSection={<IconUpload size={14}/>}
-                        onClick={() => props.onImport({tag: shouldApplyTag ? tag : null, shouldLookupSoma: shouldLookupSoma, file: file})}>
-                        Import
+                        onClick={() => props.onImport({keywords: shouldApplyTag ? parseKeywords(tag) : null, shouldLookupSoma: shouldLookupSoma, file: file})}>
+                    Import
                 </Button>
             </Flex>
         </Stack>

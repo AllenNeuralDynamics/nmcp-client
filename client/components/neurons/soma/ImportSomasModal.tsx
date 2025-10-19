@@ -1,21 +1,22 @@
 import * as React from "react";
 import {useState} from "react";
-
-import {Modal, Alert, Stack} from '@mantine/core';
-import {ImportSomasPanel} from "./ImportSomasPanel";
 import {useMutation} from "@apollo/client";
-import {IMPORT_SOMAS_MUTATION, ImportSomasMutationResponse, ImportSomasVariables} from "../../../graphql/neuron";
-import {toast} from "react-toastify";
+import {Modal, Alert, Stack, Select, Textarea, Group, Button} from '@mantine/core';
 import {IconInfoCircle} from "@tabler/icons-react";
 
+import {ImportSomasPanel} from "./ImportSomasPanel";
+import {IMPORT_SOMAS_MUTATION, ImportSomasMutationResponse, ImportSomasVariables, NEURONS_QUERY} from "../../../graphql/neuron";
+import {errorNotification, successNotification} from "../../common/NotificationHelper";
+import {SpecimenShape} from "../../../models/specimen";
+
 type ImportSomasModalProps = {
-    sampleId: string;
+    sample: SpecimenShape;
     onClose: () => void;
 }
 
 export type SomaImportOptions = {
     file: File | null;
-    tag: string;
+    keywords: string[];
     shouldLookupSoma: boolean;
 }
 
@@ -24,15 +25,10 @@ export const ImportSomasModal = (props: ImportSomasModalProps) => {
 
     const [importSomas] = useMutation<ImportSomasMutationResponse, ImportSomasVariables>(IMPORT_SOMAS_MUTATION,
         {
-            refetchQueries: ["NeuronsQuery"],
-            onError: (error) => toast.error((
-                <div><h3>Import Failed</h3>{error ? error.message : "(no additional details available)"}</div>), {autoClose: false}),
+            refetchQueries: [NEURONS_QUERY],
+            onError: (error) => errorNotification("Import Failed", error),
             onCompleted: (data) => setImportError(data.importSomas.error?.message),
         });
-
-    const onCancel = () => {
-        props.onClose();
-    }
 
     const onImport = async (options: SomaImportOptions) => {
         setImportError(null);
@@ -41,8 +37,8 @@ export const ImportSomasModal = (props: ImportSomasModalProps) => {
             variables: {
                 file: options.file,
                 options: {
-                    sampleId: props.sampleId,
-                    tag: options.tag,
+                    specimenId: props.sample.id,
+                    keywords: options.keywords,
                     shouldLookupSoma: options.shouldLookupSoma,
                     noEmit: false
                 }
@@ -51,20 +47,30 @@ export const ImportSomasModal = (props: ImportSomasModalProps) => {
 
         if (result.data.importSomas.error?.message) {
             setImportError(result.data.importSomas.error.message);
-        } else{
-            toast.success(<div><h3>Import Successful</h3>{result.data.importSomas.count} somas imported.</div>, {autoClose: 2500});
+        } else {
+            successNotification("Import Successful", `${result.data.importSomas.count} somas imported`);
             props.onClose();
         }
     }
 
+
     return (
-        <Modal opened={true} onClose={props.onClose} title="Import Somas for Sample" centered>
-            <Stack>
-                <ImportSomasPanel onImport={onImport}/>
-                {importError ? <Alert variant="filled" color="red" title="Import Failed" icon={<IconInfoCircle/>}>
-                    {importError}
-                </Alert> : null}
-            </Stack>
-        </Modal>
+        <Modal.Root size="lg" centered opened={true} onClose={props.onClose}>
+            <Modal.Overlay/>
+            <Modal.Content>
+                <Modal.Header bg="segment">
+                    <Modal.Title>{`Import Somas for Specimen ${props.sample.label}`}</Modal.Title>
+                    <Modal.CloseButton/>
+                </Modal.Header>
+                <Modal.Body p={0}>
+                    <Stack m={0} p={12}>
+                        <ImportSomasPanel onImport={onImport}/>
+                        {importError ? <Alert variant="filled" color="red" title="Import Failed" icon={<IconInfoCircle/>}>
+                            {importError}
+                        </Alert> : null}
+                    </Stack>
+                </Modal.Body>
+            </Modal.Content>
+        </Modal.Root>
     );
 }

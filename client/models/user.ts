@@ -1,4 +1,4 @@
-export interface IUser {
+export interface User {
     id: string;
     authDirectoryId: string;
     firstName: string;
@@ -6,4 +6,8 @@ export interface IUser {
     emailAddress: string;
     affiliation: string;
     permissions: number;
+}
+
+export function formatUser(user: User, placeholder: string = "") {
+    return user ? `${user.firstName} ${user.lastName}` : placeholder;
 }

@@ -1,10 +1,10 @@
-import {action, autorun, computed, makeObservable, observable} from "mobx";
+import {action, computed, makeAutoObservable, makeObservable, observable} from "mobx";
 
-import {INeuron} from "../models/neuron";
-import {NeuronViewModel} from "./neuronViewModel";
 import {jet} from "../util/colors";
-import {TracingStructure} from "../models/tracingStructure";
+import {NeuronShape} from "../models/neuron";
+import {NeuronViewModel} from "./neuronViewModel";
 import {NEURON_VIEW_MODE_ALL, NeuronViewMode} from "./neuronViewMode";
+import {isNullOrUndefined} from "../util/nodeUtil";
 
 export enum QueryStatus {
     NeverQueried,
@@ -19,7 +19,7 @@ export class QueryResponseViewModel {
 
     public queryTime: number = -1;
 
-    public neurons: INeuron[] = [];
+    public neurons: NeuronShape[] = [];
 
     public matchCount: number = 0;
 
@@ -29,14 +29,14 @@ export class QueryResponseViewModel {
 
     public neuronViewModels: NeuronViewModel[] = [];
 
-    private _neuronViewModelMap = new Map<string, NeuronViewModel>();
+    public defaultNeuronViewMode: NeuronViewMode = NEURON_VIEW_MODE_ALL;
 
-    private _defaultNeuronViewMode = NEURON_VIEW_MODE_ALL;
+    private _neuronViewModelMap = new Map<string, NeuronViewModel>();
 
     private _nextColorIndex = 0;
 
     public constructor() {
-        makeObservable(this, {
+        makeAutoObservable(this, {
             queryNonce: observable,
             isPending: observable,
             queryTime: observable,
@@ -45,13 +45,16 @@ export class QueryResponseViewModel {
             totalCount: observable,
             queryError: observable,
             neuronViewModels: observable,
+            defaultNeuronViewMode: observable,
+            setDefaultNeuronViewMode: action,
             reset: action,
             initiate: action,
             update: action,
             errored: action,
             status: computed,
-            defaultNeuronViewMode: computed,
-            areAllNeuronsSelected: computed
+            resetColors: action,
+            areAllNeuronsSelected: computed,
+            neuronsSameColor: computed
         });
 
         this.reset();
@@ -80,7 +83,7 @@ export class QueryResponseViewModel {
         this._nextColorIndex = 0;
     }
 
-    update(time: number, neurons: INeuron[], totalCount: number) {
+    update(time: number, neurons: NeuronShape[], totalCount: number) {
         this.isPending = false;
         this.queryTime = time;
         this.neurons = neurons;
@@ -103,13 +106,35 @@ export class QueryResponseViewModel {
         this.neuronViewModels.forEach(v => v.isSelected = b);
     }
 
-    public get defaultNeuronViewMode(): NeuronViewMode {
-        return this._defaultNeuronViewMode;
+    public get neuronsSameColor(): string {
+        const selected = this.neuronViewModels.filter(v => v.isSelected);
+
+        if (selected.length < 2) {
+            return null;
+        }
+
+        const sameColor = selected[0].baseColor;
+
+        return selected.filter(v => v.isSelected).every(v => v.baseColor == sameColor) ? sameColor : null;
     }
 
-    public set defaultNeuronViewMode(mode: NeuronViewMode) {
-        this._defaultNeuronViewMode = mode;
-        this.neuronViewModels.forEach(v => v.viewMode = mode);
+    public set neuronsSameColor(color: string) {
+        this.neuronViewModels.filter(v => v.isSelected).forEach(v => v.baseColor = color);
+    }
+
+    public resetColors(): void {
+        this._nextColorIndex = 0;
+
+        for (const v of this.neuronViewModels) {
+            v.baseColor = jet[this._nextColorIndex++ % jet.length];
+        }
+    }
+
+    public setDefaultNeuronViewMode(mode: NeuronViewMode) {
+        if (!isNullOrUndefined(mode)) {
+            this.defaultNeuronViewMode = mode;
+            this.neuronViewModels.forEach(v => v.viewMode = mode);
+        }
     }
 
     private updateViewModels() {

@@ -1,8 +1,8 @@
 import gql from "graphql-tag";
 
-import {IInjection} from "../models/injection";
-import {IFluorophore} from "../models/fluorophore";
-import {IInjectionVirus} from "../models/injectionVirus";
+import {InjectionShape} from "../models/injection";
+import {FluorophoreShape} from "../models/fluorophore";
+import {InjectionVirusShape} from "../models/injectionVirus";
 
 ///
 /// Fragments
@@ -18,7 +18,7 @@ export const INJECTION_FIELDS_FRAGMENT = gql`fragment InjectionFields on Injecti
         id
         name
     }
-    brainArea {
+    atlasStructure {
         id
         name
     }
@@ -29,7 +29,7 @@ export const INJECTION_FIELDS_FRAGMENT = gql`fragment InjectionFields on Injecti
 /// Sample-Related Queries
 ///
 
-export const INJECTIONS_FOR_SAMPLE_QUERY = gql`query InjectionsForSample($input: InjectionQueryInput) {
+export const INJECTIONS_FOR_SPECIMEN_QUERY = gql`query InjectionsForSpecimen($input: InjectionQueryInput) {
     injections(input: $input) {
         ...InjectionFields
     }
@@ -45,16 +45,16 @@ export const INJECTIONS_FOR_SAMPLE_QUERY = gql`query InjectionsForSample($input:
 ${INJECTION_FIELDS_FRAGMENT}
 `;
 
-export type InjectionsForSampleVariables = {
+export type InjectionsForSpecimenVariables = {
     input: {
-        sampleIds: string[]
+        specimenIds: string[]
     }
 }
 
-export type InjectionsForSampleQueryResponse = {
-    injections: IInjection[];
-    injectionViruses: IInjectionVirus[];
-    fluorophores: IFluorophore[];
+export type InjectionsForSpecimenQueryResponse = {
+    injections: InjectionShape[];
+    injectionViruses: InjectionVirusShape[];
+    fluorophores: FluorophoreShape[];
 }
 
 ///
@@ -62,13 +62,11 @@ export type InjectionsForSampleQueryResponse = {
 ///
 
 export type InjectionVariables = {
-    id: string;
-    brainAreaId?: string;
-    injectionVirusId?: string;
+    id?: string;
+    specimenId?: string;
+    atlasStructureId?: string;
     injectionVirusName?: string;
-    fluorophoreId?: string;
     fluorophoreName?: string;
-    sampleId?: string;
 }
 
 ///
@@ -77,10 +75,7 @@ export type InjectionVariables = {
 
 export const CREATE_INJECTION_MUTATION = gql`mutation CreateInjection($injectionInput: InjectionInput) {
     createInjection(injectionInput: $injectionInput) {
-        source {
-            ...InjectionFields
-        }
-        error
+        ...InjectionFields
     }
 }
 ${INJECTION_FIELDS_FRAGMENT}
@@ -90,13 +85,8 @@ export type CreateInjectionVariables = {
     injectionInput: InjectionVariables;
 }
 
-export type CreateInjectionMutationData = {
-    source: IInjection;
-    error: string;
-}
-
 export type CreateInjectionMutationResponse = {
-    createInjection: CreateInjectionMutationData;
+    createInjection: InjectionShape;
 }
 
 ///
@@ -105,10 +95,7 @@ export type CreateInjectionMutationResponse = {
 
 export const UPDATE_INJECTION_MUTATION = gql`mutation UpdateInjection($injectionInput: InjectionInput) {
     updateInjection(injectionInput: $injectionInput) {
-        source {
-            ...InjectionFields
-        }
-        error
+        ...InjectionFields
     }
 }
 ${INJECTION_FIELDS_FRAGMENT}
@@ -118,13 +105,8 @@ export type UpdateInjectionVariables = {
     injectionInput: InjectionVariables;
 }
 
-export type UpdateInjectionMutationData = {
-    source: IInjection;
-    error: string;
-}
-
 export type UpdateInjectionMutationResponse = {
-    updateInjection: UpdateInjectionMutationData;
+    updateInjection: InjectionShape;
 }
 
 ///
@@ -142,11 +124,6 @@ export type DeleteInjectionVariables = {
     id: string;
 }
 
-export type DeleteInjectionMutationData = {
-    id: string,
-    error: string;
-}
-
 export type DeleteInjectionMutationResponse = {
-    deleteInjection: DeleteInjectionMutationData;
+    deleteInjection: string;
 }

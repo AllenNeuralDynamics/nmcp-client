@@ -1,24 +1,77 @@
-import {IUser} from "./user";
-import {INeuron} from "./neuron";
+import {User} from "./user";
+import {NeuronShape} from "./neuron";
 
 export enum IssueKind {
     Uncategorized = 0,
-    Candidate = 10
+    Candidate = 100
 }
 
 export enum IssueStatus {
     Unreviewed = 0,
-    Closed = 99
+    UnderInvestigation = 100,
+    Closed = 1000
 }
 
-export interface IIssue {
+export enum IssueReferenceKind {
+    Specimen = 1000,
+    Neuron = 2000
+}
+
+export enum IssueResolutionKind {
+    NotEnoughInformation = 100,
+    NoLongerApplicable = 200,
+    NotAnIssue = 300,
+    NotFixing = 2000,
+    Fixed = 1000,
+    Other = 9000
+}
+
+export function issueStatusName(value: IssueStatus) {
+    switch (value) {
+        case IssueStatus.Unreviewed:
+            return "Unreviewed";
+        case IssueStatus.UnderInvestigation:
+            return "Under Investigation";
+        case IssueStatus.Closed:
+            return "Closed";
+    }
+}
+
+export function issueResolutionKindName(value: IssueResolutionKind) {
+    switch (value) {
+        case IssueResolutionKind.NotEnoughInformation:
+            return "Not Enough Information";
+        case IssueResolutionKind.NoLongerApplicable:
+            return "No Longer Applicable";
+        case IssueResolutionKind.NotAnIssue:
+            return "Not An Issue";
+        case IssueResolutionKind.NotFixing:
+            return "Not Changing";
+        case IssueResolutionKind.Fixed:
+            return "Fixed";
+        case IssueResolutionKind.Other:
+            return "Other...";
+    }
+}
+
+export type IssueReference = {
+    id?: string;
+    kind: IssueReferenceKind;
+    details?: any;
+}
+
+export type IssueShape = {
     id: string;
-    kind: number;
+    issueId: number;
+    kind: IssueKind;
     status: IssueStatus;
     description: string;
-    response: string;
-    creator?: IUser;
-    neuron?: INeuron;
+    neuron?: NeuronShape;
+    resolutionKind: IssueResolutionKind;
+    resolution: string;
+    references: IssueReference[];
+    author: User;
+    responder: User;
     createdAt: number;
 }
 

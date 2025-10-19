@@ -1,70 +1,43 @@
 import * as React from "react";
-import {List} from "semantic-ui-react";
+import {observer} from "mobx-react-lite";
+import {Accordion, Stack} from "@mantine/core";
 
 import {useConstants} from "../../../hooks/useConstants";
-import {QueryFilter} from "./QueryFilter";
-import {IQueryHeaderBaseProps, QueryHeader} from "./QueryHeader";
-import {columnStyle} from "../../../util/styles";
 import {useUIQuery} from "../../../hooks/useUIQuery";
-import {observer} from "mobx-react";
 import {useAppLayout} from "../../../hooks/useAppLayout";
+import {QueryFilter} from "./QueryFilter";
+import {QueryHeader} from "./QueryHeader";
 
-export interface IQueryFilterContainerProps extends IQueryHeaderBaseProps {
 
-}
-
-const styles = {
-    searchRow: {
-        margin: "0px",
-        padding: "8px"
-    }
-};
-
-export const QueryFilterContainer = observer((props: IQueryFilterContainerProps) => {
+export const QueryFilterContainer = observer(() => {
     const constants = useConstants();
     const appLayout = useAppLayout();
     const uiPredicates = useUIQuery();
 
     const predicates = uiPredicates.predicates;
 
-    const renderPredicates = (style: any) => {
-        const listItems = predicates.map((q, index) => (
-            <List.Item key={`qf_${q.id}`} style={{padding: "0", margin: 0, border: "none"}}>
-                <QueryFilter queryFilter={q}
-                             isComposite={index > 0}
-                             isRemovable={predicates.length > 1}
-                             queryOperators={constants.QueryOperators}
-                             onChangeFilter={(f) => uiPredicates.replacePredicate(f)}
-                             onRemoveFilter={(id: string) => uiPredicates.removePredicate(id)}
-                />
-            </List.Item>
-        ));
-
-        return (
-            <div style={style}>
-                <List style={styles.searchRow}>
-                    {listItems}
-                </List>
-            </div>
-        );
-    };
-
-    const flexStyle = {
-        height: "300px",
-        backgroundColor: "#efefef",
-        width: "100%",
-        flexGrow: 1,
-        flexShrink: 1,
-        order: 2,
-        overflow: "auto"
-    };
+    const renderPredicates = () => predicates.map((q, index) => (
+            <QueryFilter queryFilter={q}
+                         isSolo={predicates.length == 1}
+                         isComposite={index > 0}
+                         isRemovable={predicates.length > 1}
+                         queryOperators={constants.QueryOperators}
+                         onChangeFilter={(f) => uiPredicates.replacePredicate(f)}
+                         onRemoveFilter={(id: string) => uiPredicates.removePredicate(id)}/>));
 
     return (
-        <div style={columnStyle}>
-            <div style={{width: "100%", order: 1, flexBasis: "auto"}}>
-                <QueryHeader {...props}/>
-            </div>
-            {appLayout.isQueryExpanded ? renderPredicates(flexStyle): null}
-        </div>
+        <Accordion multiple={false} transitionDuration={0} chevronPosition="left" chevronIconSize={22} value={appLayout.isQueryExpanded ? "query" : null}
+                   onChange={v => appLayout.isQueryExpanded = v != null}>
+            <Accordion.Item value="query">
+                <Accordion.Control bg="section">
+                    <QueryHeader/>
+                </Accordion.Control>
+                <Accordion.Panel styles={{content: {padding: 0}}}>
+                    <Stack p={12} mah={240} style={{overflow: "auto"}}>
+                        {appLayout.isQueryExpanded ? renderPredicates() : null}
+                    </Stack>
+                </Accordion.Panel>
+            </Accordion.Item>
+        </Accordion>
     );
 });

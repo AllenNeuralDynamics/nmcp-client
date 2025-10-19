@@ -1,131 +1,132 @@
 import * as React from "react";
-import {Button, Icon} from "semantic-ui-react";
+import {useApolloClient} from "@apollo/client";
+import {Button, Group, Text} from "@mantine/core";
+import {IconPlus, IconRestore, IconSearch, IconShare3} from "@tabler/icons-react";
 
-import {primaryBackground, spinnerStyle} from "../../../util/styles";
 import {QueryStatus} from "../../../viewmodel/queryResponseViewModel";
 import {useQueryResponseViewModel} from "../../../hooks/useQueryResponseViewModel";
-import {observer} from "mobx-react";
+import {observer} from "mobx-react-lite";
 import {useUIQuery} from "../../../hooks/useUIQuery";
 import {useAppLayout} from "../../../hooks/useAppLayout";
+import {useAtlas} from "../../../hooks/useAtlas";
+import {usePreferences} from "../../../hooks/usePreferences";
+import {NeuroglancerProxy} from "../../../viewer/neuroglancerProxy";
 
-
-const styles = {
-    toggle: {
-        order: 1,
-        padding: "4px"
-    },
-    message: {
-        padding: "4px"
-    }
-};
-
-export interface IQueryHeaderBaseProps {
-    onPerformQuery(): void;
-    onResetPage(): void;
-    onShare(): void;
-}
-
-export const QueryHeader = observer((props: IQueryHeaderBaseProps) => {
+export const QueryHeader = observer(() => {
+    const client = useApolloClient();
+    const preferences = usePreferences();
     const appLayout = useAppLayout();
     const queryResponse = useQueryResponseViewModel();
-    const uiPredicates = useUIQuery();
+    const uiQuery = useUIQuery();
+    const atlas = useAtlas();
 
-    const renderToggleButton = () => {
-        if (queryResponse.status === QueryStatus.Loading) {
-            return null;
+    const onResetPage = (evt: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+        evt.stopPropagation();
+
+        uiQuery.reset();
+        queryResponse.reset();
+
+        atlas.clear();
+
+        appLayout.isQueryExpanded = true;
+    };
+
+    const onPerformQuery = async (evt: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+        evt.stopPropagation();
+
+        if (!appLayout.isQueryExpanded && !preferences.ShouldAutoCollapseOnQuery) {
+            appLayout.isQueryExpanded = true;
+        }
+        await uiQuery.execute(queryResponse, client);
+    };
+
+    const onAddFilter = (evt: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+        evt.stopPropagation();
+        uiQuery.addPredicate();
+    }
+
+    const onShare = async (evt: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+        evt.stopPropagation();
+        const queryData = {
+            timestamp: Date.now(),
+            filters: uiQuery.predicates.map(p => p.serialize())
+        };
+
+        const encodedQuery = btoa(JSON.stringify(queryData));
+        const baseUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname}`;
+        let shareUrl = `${baseUrl}?q=${encodedQuery}`;
+
+        const ngState = NeuroglancerProxy.SearchNeuroglancer?.State;
+
+        if (ngState) {
+            shareUrl += `#!${btoa(JSON.stringify(ngState))}`;
         }
 
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            try {
+                await navigator.clipboard.writeText(shareUrl);
+            } catch (err) {
+                console.error("Failed to copy URL to clipboard:", err);
+            }
+        } else {
+            console.warn("Clipboard not supported in this browser.");
+        }
+    };
+
+    const renderToggleButton = () => {
         return (
-            <Button size="mini" inverted icon="remove circle" content="Reset" onClick={() => props.onResetPage()}/>
+            <Button variant="light" leftSection={<IconRestore size={18}/>} disabled={queryResponse.status === QueryStatus.Loading} onClick={onResetPage}>Reset</Button>
         )
     }
 
     const renderMessage = () => {
+        let message: string = null;
+
         if (queryResponse.status === QueryStatus.NeverQueried) {
             if (!appLayout.isQueryExpanded) {
-                return (
-                    <div>
-                        <Icon name="expand arrows alternate" style={styles.toggle}
-                              onClick={() => appLayout.isQueryExpanded = true}/>
-                        <span style={{paddingLeft: "6px"}}>Expand to perform a query</span>
-                    </div>
-
-                )
-            } else {
-                return null;
+                message = "Expand to perform a query";
             }
-        }
-
-        if (queryResponse.status === QueryStatus.Loading) {
-            return (
-                <div>
-                    <span style={{paddingRight: "8px"}}>
-                            <div style={spinnerStyle}/>
-                    </span>
-                    Query in progress...
-                </div>
-            );
+        } else if (queryResponse.status === QueryStatus.Loading) {
+            message = "Query in progress...";
         } else {
-            if (queryResponse.matchCount === 0) {
-                return null;
-            }
-
-            if (queryResponse.queryTime >= 0) {
+            if (queryResponse.matchCount > 0) {
                 const duration = (queryResponse.queryTime / 1000);
 
                 let matched = `Matched ${queryResponse.matchCount} of ${queryResponse.totalCount} reconstructions`;
 
                 matched += ` in ${duration.toFixed(3)} ${duration === 1 ? "second" : "seconds"}`;
-                return (<span>{matched}</span>);
-            } else {
-                return null;
+                message = matched;
             }
         }
+
+        return message ? <Text size="xs" c="dimmed">{message}</Text> : null;
     }
 
     const renderButtons = () => {
         return (
-            <div>
-                <Button size="mini" inverted icon="share" content="Share"
-                        disabled={queryResponse.status === QueryStatus.Loading}
-                        onClick={() => props.onShare()}/>
-                <Button size="mini" inverted icon="plus" content="Add Filter"
-                        disabled={queryResponse.status === QueryStatus.Loading}
-                        onClick={() => uiPredicates.addPredicate()}
-                        style={{marginLeft: "4px"}}/>
-                <Button size="mini" inverted icon="search" content="Search"
-                        disabled={queryResponse.status === QueryStatus.Loading}
-                        onClick={() => props.onPerformQuery()}
-                        style={{marginLeft: "4px"}}/>
-            </div>
+            <Group>
+                {/*
+                <Button variant="light" leftSection={<IconShare3 size={18}/>} disabled={queryResponse.status === QueryStatus.Loading} onClick={onShare}>
+                    Share
+                </Button>*/}
+                <Button variant="light" leftSection={<IconPlus size={18}/>} disabled={queryResponse.status === QueryStatus.Loading} onClick={onAddFilter}>
+                    Add Filter
+                </Button>
+                <Button variant="light" color="green" leftSection={<IconSearch size={18}/>} loading={queryResponse.status === QueryStatus.Loading}
+                        onClick={onPerformQuery}>
+                    Search
+                </Button>
+            </Group>
         );
     }
 
     return (
-        <div style={{
-            backgroundColor: primaryBackground,
-            color: "white",
-            height: "30px",
-            minHeight: "40px",
-            width: "100%",
-            margin: 0,
-            padding: "6px",
-            display: "flex",
-            order: 1,
-            flexDirection: "row",
-            verticalAlign: "middle"
-        }}>
-            <div style={{order: 1, flexGrow: 0, flexShrink: 0}}>
+        <Group justify="space-between">
+            <Group>
                 {renderToggleButton()}
-            </div>
-            <div style={{order: 2, flexGrow: 1, flexShrink: 1, marginLeft: "10px"}}>
-                <div style={styles.message}>
-                    {renderMessage()}
-                </div>
-            </div>
-            <div style={{order: 3, flexGrow: 0, flexShrink: 0}}>
-                {renderButtons()}
-            </div>
-        </div>
+                {renderMessage()}
+            </Group>
+            {renderButtons()}
+        </Group>
     );
 });

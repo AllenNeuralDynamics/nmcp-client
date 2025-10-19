@@ -1,4 +1,4 @@
-export interface IInjectionVirus {
+export type InjectionVirusShape = {
     id: string;
     name: string;
 }

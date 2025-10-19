@@ -1,121 +1,3 @@
-.toastify {
-    z-index: 10000;
-}
-
-.toastify--bottom-center {
-    min-width: 600px;
-    margin-left: -300px;
-    margin-bottom: 40px;
-}
-
-.dropzone {
-    display: flex;
-    align-items: center;
-    width: 100%;
-    min-height: 80px;
-    border: 1px solid lightgray;
-    border-radius: 4px;
-    background-color: rgb(243, 244, 245);
-}
-
-.dropzone-no-border {
-    display: flex;
-    align-items: center;
-    width: 100%;
-    min-height: 80px;
-    border: none;
-    background-color: rgb(243, 244, 245);
-}
-
-.react-datepicker__view-calendar-icon input {
-    border: 0;
-}
-
-.react-autosuggest__container {
-    position: relative;
-}
-
-.react-autosuggest__input {
-    width: 100%;
-    border: 1px solid #aaa;
-    border-radius: 4px;
-}
-
-.react-autosuggest__input--focused {
-    outline: none;
-}
-
-.react-autosuggest__input--open {
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
-}
-
-.react-autosuggest__suggestions-container {
-    display: none;
-}
-
-.react-autosuggest__suggestions-container--open {
-    display: block;
-    position: absolute;
-    top: 29px;
-    width: 100%;
-    border: 1px solid #ddd;
-    background-color: #fff;
-    font-weight: normal;
-    border-bottom-left-radius: 4px;
-    border-bottom-right-radius: 4px;
-    text-align: left;
-    z-index: 2;
-}
-
-.react-autosuggest__suggestions-list {
-    margin: 0;
-    padding: 0;
-    list-style-type: none;
-}
-
-.react-autosuggest__suggestion {
-    cursor: pointer;
-    padding: 10px 20px;
-}
-
-.react-autosuggest__suggestion--highlighted {
-    background-color: #ddd;
-}
-
-.react-autosuggest__input_inputgroup {
-    width: 100%;
-    height: 30px;
-    padding: 0 10px;
-    border: none;
-    font-weight: normal;
-    border-radius: 0;
-}
-
-.ReactTable {
-    border: none;
-}
-
-.ReactTable .rt-thead.-header {
-    background-color: rgb(249, 250, 251);
-    border-bottom: 1px solid rgba(34, 36, 38, 0.0980392);
-    box-shadow: none;
-}
-
-.ReactTable .rt-td.-menu {
-    overflow: visible;
-}
-
-.ui.edit-input > input {
-    border: none;
-    padding: 2px 4px;
-}
-
-.ui.pagejump > input {
-    width: 60px;
-    text-align: right;
-}
-
 .ui.compartment-search > input {
     border: none;
     border-radius: 0;
@@ -126,12 +8,33 @@
     border-radius: 0;
 }
 
+.header-menu-item {
+    color: white;
+}
+
+.header-menu-item:hover {
+    background-color: #232425;
+    color: #ddd;
+}
+
+.active:hover {
+    color: white;
+}
+
+:root {
+    --neuroglancer-topview-height: 0;
+    --neuroglancer-topview-visibility: collapse;
+    --neuroglancer-display-dimensions: collapse;
+}
+
 .neuroglancer-side-panel-titlebar.neuroglancer-layer-side-panel-title {
     background-color: rgb(39, 128, 220) !important;
 }
 
 .neuroglancer-viewer-top-row {
-    background-color: rgb(39, 128, 220) !important;
+    background-color: var(--mantine-color-ngtop-6) !important;
+    border-color: red !important;
+    color: var(--mantine-color-text) !important;                /* Forces the right text color for most items for a given background */
 }
 
 .neuroglancer-layer-panel {
@@ -139,7 +42,90 @@
     height: 0 !important;
 }
 
+.neuroglancer-layer-item-value {
+    visibility: collapse !important;
+    height: 0 !important;
+}
+
+.neuroglancer-layer-panel[data-show-hover-values="true"] {
+    visibility: collapse !important;
+    color: black !important;
+}
+
+/* Prevents switching out of 3D view */
+.neuroglancer-data-panel-layout-controls {
+    visibility: collapse !important;
+}
+
+canvas {
+    color: blue !important;
+    background-color: blue !important;
+    border-color: blue !important;
+}
+
+/*
+Search Viewer
+ */
+
 #neuroglancer-container {
+    overflow: hidden;
+    border: 0 solid blue !important;
+    border-radius: 0;
+    box-shadow: none !important;
+    box-sizing: content-box;
+    webkit-box-sizing: content-box;
+}
+
+#neuroglancer-container .neuroglancer-display-dimensions-widget {
+    visibility: var(--neuroglancer-display-dimensions) !important;
+}
+
+#neuroglancer-container .neuroglancer-viewer-top-row {
+    margin: 0 !important;   /* Removes the black shadow under the controls top row */
+    padding: 0 !important;  /* Removes the black shadow under the controls top row */
+    height: var(--neuroglancer-topview-height) !important;
+    visibility: var(--neuroglancer-topview-visibility) !important;
+}
+
+/* Fixes differences in the font in sizing due to page font*/
+#neuroglancer-container input {
+    margin: 3px;
+    font-family: monospace;
+    font-size: 13px;
+    min-width: 14px;
+}
+
+/* Fixes differences in the font in sizing due to page font*/
+#neuroglancer-container input.neuroglancer-position-dimension-scale {
+    min-width: 30px;
+}
+
+/* Fixes differences in the font in sizing due to page font*/
+#neuroglancer-container input.neuroglancer-position-dimension-coordinate {
+    min-width: 30px;
+}
+
+#neuroglancer-container .neuroglancer-data-panel {
+    border-color: green !important;
+}
+
+#neuroglancer-container .neuroglancer-panel {
+    border-color: var(--mantine-color-section-6) !important;
+    border-width: 1px !important;
+    border-style: solid !important;
+    border-collapse: collapse;
+}
+
+/*
+Candidate Viewer
+ */
+
+#candidate-ng-container .neuroglancer-rendered-data-panel {
+    border-color: var(--mantine-color-section-6) !important;
+    border-collapse: collapse;
+}
+
+#candidate-ng-container {
     overflow: hidden;
     flex: 1;
     color: white;
@@ -150,6 +136,25 @@
     webkit-box-sizing: content-box;
 }
 
-#neuroglancer-container input {
-    margin: 3px
+#candidate-ng-container .neuroglancer-viewer-top-row {
+    visibility: collapse !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+#candidate-ng-container .neuroglancer-rendered-data-panel {
+    border-width: 0 !important;
+}
+
+#candidate-ng-container .neuroglancer-display-dimensions-widget {
+    visibility: collapse !important;
+}
+
+#candidate-ng-container input.neuroglancer-position-dimension-scale {
+    min-width: 30px;
+}
+
+#candidate-ng-container input.neuroglancer-position-dimension-coordinate {
+    min-width: 30px;
 }

@@ -8,19 +8,23 @@ import {registerEventListener} from "neuroglancer/unstable/util/disposable.js";
 import {NEURON_VIEW_MODE_ALL, NEURON_VIEW_MODE_AXON, NEURON_VIEW_MODE_DENDRITE} from "../viewmodel/neuronViewMode";
 import {UserPreferences} from "../util/userPreferences";
 import {NeuronViewModel} from "../viewmodel/neuronViewModel";
-import {ITracingNode} from "../models/tracingNode";
 import {SearchLayer, SearchLayers} from "./layerDefinitions";
+import {AtlasNode} from "../models/atlasNode";
 
 export type NeuronSelectionDelegate = {
     (neuron: NeuronViewModel, position: number[]): void;
 }
 
 export type SomaSelectionDelegate = {
-    (soma: ITracingNode, neuron: NeuronViewModel): void;
+    (soma: AtlasNode, neuron: NeuronViewModel): void;
 }
 
 export type CandidateSelectionDelegate = {
     (annotationId: string): void;
+}
+
+export type PositionCallback = {
+    (position: number[]): void;
 }
 
 export class NeuroglancerProxy {
@@ -30,17 +34,21 @@ export class NeuroglancerProxy {
 
     private _modelMap = new Map<number, NeuronViewModel>();
     private _somaModelMap = new Map<string, NeuronViewModel>();
-    private _somaNodeMap = new Map<string, ITracingNode>();
+    private _somaNodeMap = new Map<string, AtlasNode>();
 
     private _segmentColors = new Map<string, string>();
 
     private _searchLayers: SearchLayers;
 
+    private _positionCallback: PositionCallback = null;
+
+    private _colorScheme = "light";
+
     public static SearchNeuroglancer?: NeuroglancerProxy = null;
 
     private static _cachedQueryParamsState: any = null;
 
-    public static configureCandidateNeuroglancer(id: string, state: any, annotations: any, selectionDelegate: CandidateSelectionDelegate, precomputedLocation: string, segmentColors: Map<string, string>): NeuroglancerProxy {
+    public static configureCandidateNeuroglancer(id: string, state: any, annotations: any, selectionDelegate: CandidateSelectionDelegate, precomputedLocation: string, segmentColors: Map<string, string>, colorScheme: string): NeuroglancerProxy {
         const [proxy, target] = NeuroglancerProxy.createCommon(id, segmentColors);
 
         registerEventListener(target, "click", (_: Event) => {
@@ -57,9 +65,15 @@ export class NeuroglancerProxy {
 
         disableWheel();
 
-        proxy._viewer = makeMinimalViewer();
+        proxy._viewer = makeMinimalViewer({target: document.getElementById(id)});
 
         setDefaultInputEventBindings(proxy._viewer.inputEventBindings);
+
+        if (state) {
+            state["position"] = immutableDefaultCandidateState.position;
+            state["projectionOrientation"] = immutableDefaultCandidateState.projectionOrientation;
+            state["projectionScale"] = immutableDefaultCandidateState.projectionScale;
+        }
 
         let s = state || defaultCandidateState(proxy._searchLayers, proxy._segmentColors);
 
@@ -72,6 +86,11 @@ export class NeuroglancerProxy {
             s.layers[0].annotations = annotations;
         }
 
+
+        proxy._colorScheme = colorScheme;
+        s.projectionBackgroundColor = colorScheme == "light" ? "#ffffff": "#242424";
+
+        proxy._viewer.state.reset();
         proxy._viewer.state.restoreState(s);
 
         const throttledSetUrlHash = debounce(
@@ -86,7 +105,7 @@ export class NeuroglancerProxy {
         return proxy;
     }
 
-    public static configureSearchNeuroglancer(id: string, state: any, neuronSelectionDelegate: NeuronSelectionDelegate, somaSelectionDelegate: SomaSelectionDelegate, precomputedLocation: string, segmentColors: Map<string, string>): NeuroglancerProxy {
+    public static configureSearchNeuroglancer(id: string, state: any, neuronSelectionDelegate: NeuronSelectionDelegate, somaSelectionDelegate: SomaSelectionDelegate, precomputedLocation: string, segmentColors: Map<string, string>, colorScheme: string): NeuroglancerProxy {
         const map = getDefaultRenderedDataPanelBindings();
 
         map.set("at:wheel", {action: "zoom-via-wheel", originalEventIdentifier: "wheel", preventDefault: true});
@@ -127,7 +146,7 @@ export class NeuroglancerProxy {
 
         disableWheel();
 
-        proxy._viewer = makeMinimalViewer();
+        proxy._viewer = makeMinimalViewer({target: document.getElementById(id)});
 
         setDefaultInputEventBindings(proxy._viewer.inputEventBindings);
 
@@ -143,18 +162,14 @@ export class NeuroglancerProxy {
 
         NeuroglancerProxy._cachedQueryParamsState = null;
 
-        let reset = false;
-
         // Default compartment visibility.
         if (s.layers?.length >= proxy._searchLayers.SearchCcfLayer.index) {
             s.layers[proxy._searchLayers.SearchCcfLayer.index].segments = [997];
-            reset = true;
         }
 
         // Clear any stored soma annotations from last session.
         if (s.layers?.length >= proxy._searchLayers.SearchSomaAnnotationLayer.index) {
             s.layers[proxy._searchLayers.SearchSomaAnnotationLayer.index].annotations = [];
-            reset = true;
         }
 
         // Clear any stored segments from last session.
@@ -162,24 +177,17 @@ export class NeuroglancerProxy {
             if (s.layers?.length >= idx) {
                 s.layers[idx].segments = [];
                 s.layers[idx].segmentColors = {};
-                reset = true;
             } else {
                 break;
             }
         }
 
-        if (reset) {
-            proxy._viewer.state.reset();
-        }
+        proxy._colorScheme = colorScheme;
+        s.projectionBackgroundColor = colorScheme == "light" ? "#ffffff": "#242424";
+
+        proxy._viewer.state.reset();
 
         proxy._viewer.state.restoreState(s);
-
-        const throttledSetUrlHash = debounce(
-            () => UserPreferences.Instance.searchViewerState = proxy._viewer.state.toJSON(),
-            500
-        );
-
-        proxy._changeHandler = proxy._viewer.state.changed.add(throttledSetUrlHash);
 
         proxy._defaultState = defaultSearchState(proxy._searchLayers, proxy._segmentColors);
 
@@ -189,6 +197,13 @@ export class NeuroglancerProxy {
         proxy._viewer.inputEventBindings.perspectiveView.bindings["wheel"] = {action: "zoom-via-wheel", preventDefault: true};
         proxy._viewer.inputEventBindings.global.bindings["at:wheel"] = {action: "zoom-via-wheel", preventDefault: true};
         proxy._viewer.inputEventBindings.global.bindings["wheel"] = {action: "zoom-via-wheel", preventDefault: true};
+
+        const throttledSetUrlHash = debounce(
+            () => UserPreferences.Instance.searchViewerState = proxy._viewer.state.toJSON(),
+            500
+        );
+
+        proxy._changeHandler = proxy._viewer.state.changed.add(throttledSetUrlHash);
 
         return proxy;
     }
@@ -214,6 +229,7 @@ export class NeuroglancerProxy {
         const target = document.getElementById(id)
 
         if (target == null) {
+            console.log("failed to find target element");
             return [null, null];
         }
 
@@ -226,6 +242,32 @@ export class NeuroglancerProxy {
 
     public get State() {
         return this._viewer ? this._viewer.state : null;
+    }
+
+    public updateColorScheme(scheme: string) {
+        const state = this._viewer.state.toJSON();
+
+        this._colorScheme = scheme;
+        state.projectionBackgroundColor = scheme == "light" ? "#ffffff": "#242424";
+
+        this._viewer.state.reset();
+        this._viewer.state.restoreState(state);
+    }
+
+    public set PositionListener(callback: PositionCallback) {
+        const replacing = this._positionCallback != null;
+        this._positionCallback = callback;
+
+        const throttledPositionCallback = () => {
+            const s: Float32Array<ArrayBufferLike> = this._viewer.state.viewer.mouseState.position;
+            this._positionCallback(this._viewer.state.viewer.mouseState.active ? Array.from(s.map(n => Math.floor(n))) : []);
+        };
+
+        if (!replacing && this._positionCallback) {
+            this._viewer.state.viewer.mouseState.changed.add(throttledPositionCallback);
+        } else if (replacing && this._positionCallback == null) {
+            this._viewer.state.viewer.mouseState.changed.remove(throttledPositionCallback);
+        }
     }
 
     public updateCandidateAnnotations(annotations: any, selectedSkeletonSegmentId: number = null) {
@@ -316,7 +358,6 @@ export class NeuroglancerProxy {
 
         if (state.layers?.length > 0) {
             state.layers[this._searchLayers.SearchCcfLayer.index].segments = compartmentIds;
-            state.layers[this._searchLayers.SearchCcfLayer.index].segments = compartmentIds;
             stateChanged = true;
         }
 
@@ -327,8 +368,11 @@ export class NeuroglancerProxy {
     }
 
     public resetNeuroglancerState() {
+        const state = {...this._defaultState};
+        state.projectionBackgroundColor = this._colorScheme == "light" ? "#ffffff": "#242424";
+
         this._viewer.state.reset();
-        this._viewer.state.restoreState(this._defaultState);
+        this._viewer.state.restoreState(state);
     }
 
     public resetView() {
@@ -339,6 +383,31 @@ export class NeuroglancerProxy {
         state.projectionScale = this._defaultState.projectionScale;
         state.crossSectionScale = this._defaultState.crossSectionScale;
         state.showAxisLines = this._defaultState.showAxisLines;
+        state.projectionBackgroundColor = this._colorScheme == "light" ? "#ffffff": "#242424";
+
+        this._viewer.state.reset();
+        this._viewer.state.restoreState(state);
+    }
+
+    public setPosition(x: number, y: number, z: number) {
+        const state = this._viewer.state.toJSON();
+
+        state.position = [x, y, z, 0];
+
+        this._viewer.state.reset();
+        this._viewer.state.restoreState(state);
+    }
+
+    public setCandidateAtlasStructures(ids: number[], includeWholeBrain: boolean = true) {
+        if (includeWholeBrain && ids.findIndex(s => s == 997) == -1) {
+            ids.push(997);
+        }
+
+        const segments = ids.map(s => s.toString());
+
+        const state = this._viewer.state.toJSON();
+
+        state.layers[this._searchLayers.CandidateCcfLayer.index].segments = segments;
 
         this._viewer.state.reset();
         this._viewer.state.restoreState(state);
@@ -428,9 +497,15 @@ const immutableDefaultCandidateState = {
     "position": [
         659.5,
         399.5,
-        569.5
+        569.5,
+        0
     ],
-    "projectionOrientation": [],
+    "projectionOrientation": [
+        -0.2892743945121765,
+        0.45396557450294495,
+        0.1698378622531891,
+        0.8254639506340027
+    ],
     "crossSectionScale": 2.7182818284590446,
     "projectionScale": 2048,
     "showAxisLines": false,
@@ -442,8 +517,8 @@ const immutableDefaultCandidateState = {
         "visible": false
     },
     "showDefaultAnnotations": false,
-    "crossSectionBackgroundColor": "#ffffff",
-    "projectionBackgroundColor": "#ffffff"
+    "crossSectionBackgroundColor": "#f3f4f5",
+    "projectionBackgroundColor": "#f3f4f5"
 }
 
 function defaultCandidateState(layers: SearchLayers, segmentColors: Map<string, string> = null) {
@@ -487,7 +562,7 @@ function defaultCandidateState(layers: SearchLayers, segmentColors: Map<string, 
                         "default": 10
                     }
                 ],
-                "shader": "\nvoid main() {\n  setColor(prop_color());\n  setPointMarkerSize(prop_size());\n}\n",
+                "shader": "\nvoid main() {\n  setColor(prop_color());\n  setPointMarkerBorderColor(prop_color());\n  setPointMarkerSize(prop_size());\n}\n",
                 "name": layers.CandidateAnnotationLayer.name
             },
             {
@@ -542,7 +617,8 @@ const immutableDefaultSearchState = {
     }, "position": [
         659.5,
         399.5,
-        569.5
+        569.5,
+        0
     ],
     "crossSectionScale": 2.7182818284590446,
     "projectionOrientation": [
@@ -622,7 +698,7 @@ function defaultSearchState(layers: SearchLayers, segmentColors: Map<string, str
                         "default": 10
                     }
                 ],
-                "shader": "\nvoid main() {\n  setColor(prop_color());\n  setPointMarkerSize(prop_size());\n}\n",
+                "shader": "\nvoid main() {\n  setColor(prop_color());\n  setPointMarkerBorderColor(prop_color());\n  setPointMarkerSize(prop_size());\n}\n",
                 "name": layers.SearchSomaAnnotationLayer.name
             },
             reconstructionLayer(layers.SearchReconstructionLayer),
