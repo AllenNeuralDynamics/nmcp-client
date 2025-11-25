@@ -29,7 +29,7 @@ export const QueryFilterContainer = observer(() => {
         <Accordion multiple={false} transitionDuration={0} chevronPosition="left" chevronIconSize={22} value={appLayout.isQueryExpanded ? "query" : null}
                    onChange={v => appLayout.isQueryExpanded = v != null}>
             <Accordion.Item value="query">
-                <Accordion.Control bg="section">
+                <Accordion.Control bg="section" styles={{label: {padding: 0}}}>
                     <QueryHeader/>
                 </Accordion.Control>
                 <Accordion.Panel styles={{content: {padding: 0}}}>

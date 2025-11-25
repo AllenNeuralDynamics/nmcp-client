@@ -2,22 +2,9 @@ import * as React from "react";
 import {observer} from "mobx-react-lite";
 import {Flex, HoverCard, Text} from "@mantine/core";
 
-import {useConstants} from "../../hooks/useConstants";
 import {infoNotification} from "../common/NotificationHelper";
 
 export const Footer = observer(() => {
-    const constants = useConstants();
-
-    let totalMessage = "There are no reconstructions available";
-
-    if (constants.neuronCount > 0) {
-        if (constants.neuronCount > 1) {
-            totalMessage = `There are ${constants.neuronCount} neurons available`
-        } else {
-            totalMessage = `There is 1 neurons available`
-        }
-    }
-
     const citationText = `Allen Institute for Neural Dynamics. (${(new Date().getFullYear())}). Whole brain single neuron reconstructions. Available from: https://morphology.allenneuraldynamics.org.`
 
     const citation = (<span style={{textDecoration: "underline"}} onClick={async () => {
@@ -52,13 +39,12 @@ export const Footer = observer(() => {
     </HoverCard>
 
     return (
-        <Flex p={8} bg="section">
-            <Text size="sm">Data available under <a target="_blank" rel="noopener noreferrer" href="https://creativecommons.org/licenses/by/4.0/">CC BY
+        <Flex p={12} bg="section">
+            <Text size="sm" style={{flexGrow: 1}}>Neuron Morphology Community Portal Copyright © 2023 - {(new Date().getFullYear())} Allen Institute</Text>
+            <Text size="sm" ta="end">Data available under <a target="_blank" rel="noopener noreferrer" href="https://creativecommons.org/licenses/by/4.0/">CC BY
                 4.0</a>. Free to use
                 with {citationPopup}.
             </Text>
-            <Text size="sm" ta="center" style={{flexGrow: 1}}>Neuron Morphology Community Portal Copyright © 2023 - {(new Date().getFullYear())} Allen Institute</Text>
-            <Text size="sm" ta="end">{totalMessage}</Text>
         </Flex>
     )
 });

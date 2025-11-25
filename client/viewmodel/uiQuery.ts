@@ -35,7 +35,7 @@ export class UIQuery {
     public reset() {
         this.resetCount++;
 
-        this.predicates = [Object.assign(new UIQueryPredicate(), DEFAULT_QUERY_FILTER, {id: cuid()})];
+        this.predicates = [Object.assign(new UIQueryPredicate(), DEFAULT_QUERY_FILTER(), {id: cuid()})];
     }
 
     public set Constants(constants: DataConstants) {
@@ -51,7 +51,7 @@ export class UIQuery {
     }
 
     public addPredicate(uiModifiers: any = {}, predicateModifiers: any = {}) {
-        const predicate = Object.assign(new UIQueryPredicate(), DEFAULT_QUERY_FILTER, {
+        const predicate = Object.assign(new UIQueryPredicate(), DEFAULT_QUERY_FILTER(), {
             id: cuid(),
             index: this.predicates.length,
             filter: Object.assign(new FilterContents(this.predicates.length === 0), predicateModifiers)
@@ -129,7 +129,7 @@ export class UIQuery {
     }
 }
 
-export const DEFAULT_QUERY_FILTER: UIQueryPredicate = Object.assign(new UIQueryPredicate(), {
+export const DEFAULT_QUERY_FILTER = (): UIQueryPredicate => Object.assign(new UIQueryPredicate(), {
     id: "",
     index: 0,
     brainAreaFilterType: QUERY_PREDICATE_KIND_COMPARTMENT,

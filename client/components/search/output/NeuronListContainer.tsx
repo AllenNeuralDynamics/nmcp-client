@@ -60,7 +60,8 @@ export const NeuronListContainer = observer(({maxHeight}: { maxHeight: number })
                 </Menu.Target>
                 <Menu.Dropdown>
                     <Menu.Item>
-                        <Group gap={2}><IconExclamationCircle size={12} color="red"/>{`Export is limited to ${exportLimit} selected neurons at one time`}</Group>
+                        <Group gap={2}><IconExclamationCircle size={12} color="red"/>{`Export is limited to ${exportLimit} selected neurons at one time`}
+                        </Group>
                     </Menu.Item>
                 </Menu.Dropdown>
             </Menu>
@@ -79,15 +80,19 @@ export const NeuronListContainer = observer(({maxHeight}: { maxHeight: number })
         </SimpleGrid>
     );
 
-    const table = queryResponse.queryTime < 0 ? <Center p={8}><Text size="sm" c="dimmed">Perform a query to view matching neurons</Text></Center> :
-        <NeuronTable/>;
+    let content = <Center p={12}><Text size="sm" c="dimmed">Perform a search to view matching neurons</Text></Center>;
+
+    if (queryResponse.queryTime >= 0) {
+        content = queryResponse.matchCount == 0 ?
+            <Center p={12}><Text size="sm" c="dimmed">There were no neurons that met the specified criteria.</Text></Center> : <NeuronTable/>;
+    }
 
     return (
         // h and mah are not in units of pixels, however the maxHeight prop is.
         <Stack gap={0} w={NeuronListContainerWidth} style={{height: maxHeight, maxHeight: maxHeight}}>
             {renderedHeader}
             <div style={{order: 1, flexGrow: 1, overflow: "auto"}}>
-                {table}
+                {content}
             </div>
         </Stack>
     );
