@@ -128,7 +128,7 @@ export const QueryHeader = observer(() => {
     }
 
     return (
-        <Group p={12} justify="space-between" onClick={(evt) => evt.stopPropagation()}>
+        <Group p="12 0" justify="space-between" onClick={(evt) => evt.stopPropagation()}>
             <Group align="baseline">
                 <Text size="lg" fw={500}>Search Published Neurons</Text>
                 {renderMessage()}
