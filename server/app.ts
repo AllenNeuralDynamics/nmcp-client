@@ -53,10 +53,7 @@ if (process.env.NODE_ENV !== "production") {
     debug(`proxying ${ServerConfiguration.graphQLService.endpoint} to ${apiUri}`);
     app.use(`${ServerConfiguration.graphQLService.endpoint}`, proxy(`${apiUri}`, {
         limit: "100mb",
-        proxyReqPathResolver: maintainBaseUrl,
-        proxyReqOptDecorator: (proxyReqOpts: any) => {
-            return proxyReqOpts;
-        }
+        proxyReqPathResolver: maintainBaseUrl
     }));
 
     debug(`proxying ${ServerConfiguration.exportService.endpoint} to ${exportUri}`);
@@ -84,14 +81,16 @@ function devServer() {
     const compiler = webpack(webpackConfig);
 
     const server = new webpackDevServer({
-        proxy: {
-            [ServerConfiguration.graphQLService.endpoint]: {
+        proxy: [
+            {
+                context: ServerConfiguration.graphQLService.endpoint,
                 target: apiUri
             },
-            [ServerConfiguration.exportService.endpoint]: {
+            {
+                context: ServerConfiguration.exportService.endpoint,
                 target: exportUri
             }
-        },
+        ],
         allowedHosts: "all",
         setupMiddlewares: (middlewares, devServer) => {
             if (!devServer) {

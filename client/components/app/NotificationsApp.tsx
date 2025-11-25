@@ -14,7 +14,7 @@ export interface Notifications {
 }
 
 type NotificationsAppProps = {
-    children: any;
+    children?: any;
 }
 
 export const NotificationContext = React.createContext<Notifications>({issueCount: 0});

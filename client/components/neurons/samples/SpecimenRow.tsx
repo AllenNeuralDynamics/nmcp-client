@@ -1,11 +1,11 @@
 import * as React from "react";
 import {useMutation} from "@apollo/client";
-import {Badge, Button, List, Table} from "@mantine/core";
+import {Badge, Button, Group, List, Stack, Table, Text} from "@mantine/core";
 import {DatePickerInput} from "@mantine/dates";
 import {IconCalendar, IconTrash} from "@tabler/icons-react";
 import dayjs from "dayjs";
 
-import {SpecimenShape} from "../../../models/specimen";
+import {SomaFeaturesShape, SpecimenShape} from "../../../models/specimen";
 import {InputPopup} from "../../common/InputPopup";
 import {displayInjection, InjectionShape} from "../../../models/injection";
 import {CollectionSelect} from "../../common/CollectionSelect";
@@ -57,8 +57,10 @@ export const SpecimenRow = ({specimen, manageInjections, requestDelete}: Specime
         }
     }
 
+    const features = specimen.somaProperties ? SomaPropertiesDisplay(specimen.somaProperties) : null;
+
     return (
-        <Table.Tr>
+        <Table.Tr key={specimen.id}>
             <Table.Td>
                 <InputPopup value={specimen.label} label="Specimen Id" placeholder="Enter specimen id..." onAccept={updateLabel}/>
             </Table.Td>
@@ -79,6 +81,9 @@ export const SpecimenRow = ({specimen, manageInjections, requestDelete}: Specime
             </Table.Td>
             <Table.Td>
                 <CollectionSelect value={specimen.collectionId} onChange={updateCollection}/>
+            </Table.Td>
+            <Table.Td>
+                {features}
             </Table.Td>
             <Table.Td>
                 {specimen.neuronCount === 0 ?
@@ -111,4 +116,20 @@ const InjectionList = ({injections, isExpanded}: { injections: InjectionShape[],
     );
 
     return <List size="sm">{rows}</List>;
+}
+
+function PropertyRow(label: string, value: number): React.ReactNode {
+    return <Group gap="sm"><Text size="sm" miw={70} c="dimmed">{label}</Text><Text size="sm">{value}</Text></Group>
+}
+
+function SomaPropertiesDisplay(somaProperties: SomaFeaturesShape) {
+    const brightness = somaProperties.defaultBrightness ? PropertyRow("Brightness", somaProperties.defaultBrightness) : null;
+    const volume = somaProperties.defaultVolume ? PropertyRow("Volume", somaProperties.defaultVolume) : null;
+
+    return (
+        <Stack gap={0}>
+            {brightness}
+            {volume}
+        </Stack>
+    )
 }

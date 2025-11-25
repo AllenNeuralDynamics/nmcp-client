@@ -1,6 +1,6 @@
 import * as React from "react";
 import {useApolloClient} from "@apollo/client";
-import {Button, Group, Text} from "@mantine/core";
+import {Button, Divider, Group, Text} from "@mantine/core";
 import {IconPlus, IconRestore, IconSearch, IconShare3} from "@tabler/icons-react";
 
 import {QueryStatus} from "../../../viewmodel/queryResponseViewModel";
@@ -73,9 +73,10 @@ export const QueryHeader = observer(() => {
         }
     };
 
-    const renderToggleButton = () => {
+    const renderResetButton = () => {
         return (
-            <Button variant="light" leftSection={<IconRestore size={18}/>} disabled={queryResponse.status === QueryStatus.Loading} onClick={onResetPage}>Reset</Button>
+            <Button variant="light" color="orange" leftSection={<IconRestore size={18}/>} disabled={queryResponse.status === QueryStatus.Loading}
+                    onClick={onResetPage}>Reset</Button>
         )
     }
 
@@ -84,18 +85,22 @@ export const QueryHeader = observer(() => {
 
         if (queryResponse.status === QueryStatus.NeverQueried) {
             if (!appLayout.isQueryExpanded) {
-                message = "Expand to perform a query";
+                message = "Expand to filter your neuron search";
+            } else {
+                message = "Optionally filter neurons by the criteria below"
             }
         } else if (queryResponse.status === QueryStatus.Loading) {
-            message = "Query in progress...";
+            message = "Search in progress...";
         } else {
             if (queryResponse.matchCount > 0) {
                 const duration = (queryResponse.queryTime / 1000);
 
-                let matched = `Matched ${queryResponse.matchCount} of ${queryResponse.totalCount} reconstructions`;
+                let matched = `Matched ${queryResponse.matchCount} of ${queryResponse.totalCount} neurons`;
 
                 matched += ` in ${duration.toFixed(3)} ${duration === 1 ? "second" : "seconds"}`;
                 message = matched;
+            } else {
+                message = "There were no neurons that met the specified criteria."
             }
         }
 
@@ -105,10 +110,12 @@ export const QueryHeader = observer(() => {
     const renderButtons = () => {
         return (
             <Group>
+                {renderResetButton()}
                 {/*
                 <Button variant="light" leftSection={<IconShare3 size={18}/>} disabled={queryResponse.status === QueryStatus.Loading} onClick={onShare}>
                     Share
                 </Button>*/}
+                <Divider orientation="vertical"/>
                 <Button variant="light" leftSection={<IconPlus size={18}/>} disabled={queryResponse.status === QueryStatus.Loading} onClick={onAddFilter}>
                     Add Filter
                 </Button>
@@ -121,9 +128,9 @@ export const QueryHeader = observer(() => {
     }
 
     return (
-        <Group justify="space-between">
-            <Group>
-                {renderToggleButton()}
+        <Group p="12 0" justify="space-between" onClick={(evt) => evt.stopPropagation()}>
+            <Group align="baseline">
+                <Text size="lg" fw={500}>Search Published Neurons</Text>
                 {renderMessage()}
             </Group>
             {renderButtons()}

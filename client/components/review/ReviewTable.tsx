@@ -22,7 +22,7 @@ export type ReviewTableProps = {
 
 export const ReviewTable = (props: ReviewTableProps) => {
     const rows = props.reconstructions.map((r: Reconstruction) => {
-        return <ReviewRow key={`tt_${r.id}`} reconstruction={r} isSelected={r == props.selected} onRowClick={props.onRowClick}/>
+        return <ReviewRow reconstruction={r} isSelected={r == props.selected} onRowClick={props.onRowClick}/>
     });
     return (
         <Table withColumnBorders>
@@ -79,7 +79,7 @@ const ReviewRow = (props: ReviewRowProps) => {
     const rowProps = props.isSelected ? {bg: "table-selection"} : {};
 
     return (
-        <Table.Tr {...rowProps} onClick={() => props.onRowClick(props.reconstruction)}>
+        <Table.Tr key={props.reconstruction.id} {...rowProps} onClick={() => props.onRowClick(props.reconstruction)}>
             <Table.Td><NeuronVersionLink neuron={props.reconstruction.neuron}/></Table.Td>
             <Table.Td>{props.reconstruction.neuron.specimen.label}</Table.Td>
             {...cellsForNodeCounts(props.reconstruction.specimenNodeCounts, scheme)}

@@ -59,7 +59,7 @@ export const EditCollection = ({collection}: { collection: CollectionShape }) =>
             impacts.</Alert> : null;
 
     return (
-        <Card withBorder>
+        <Card key={collection.id} withBorder>
             <Card.Section bg="segment">
                 <Group p={12} mih={72} justify="space-between">
                     <Group gap="sm">

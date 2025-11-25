@@ -19,6 +19,7 @@ import {PaginationHeader} from "../../common/PaginationHeader";
 import {MessageBox} from "../../common/MessageBox";
 import {GraphQLErrorAlert} from "../../common/GraphQLErrorAlert";
 import {CollectionSelect} from "../../common/CollectionSelect";
+import {COLLECTIONS_QUERY, CollectionsResponse} from "../../../graphql/collection";
 
 type SpecimensTableState = {
     offset?: number;
@@ -41,6 +42,8 @@ export const SpecimensTable = () => {
         manageInjectionsSample: null
     });
 
+
+    const {data: collectionsData} = useQuery<CollectionsResponse>(COLLECTIONS_QUERY, {fetchPolicy: "cache-first"});
 
     const {loading, error, data, previousData} = useQuery<SamplesQueryResponse>(SPECIMENS_QUERY, {fetchPolicy: "cache-first"});
 
@@ -76,6 +79,12 @@ export const SpecimensTable = () => {
         totalCount = previousData.specimens.totalCount;
     }
 
+    let selectedCollectionId = collectionId;
+
+    if (collectionId == null && collectionsData?.collections?.length > 0) {
+        selectedCollectionId = collectionsData.collections[0].id;
+    }
+
     const onUpdateOffsetForPage = (page: number) => {
         const offset = state.limit * (page - 1);
 
@@ -99,6 +108,10 @@ export const SpecimensTable = () => {
             preferences.samplePageOffset = offset;
             preferences.samplePageLimit = limit;
         }
+    }
+
+    const onCreateSpecimen = async () => {
+        await createSample({variables: {specimen: {collectionId: selectedCollectionId}}})
     }
 
     const onRequestManageInjections = (forSample: SpecimenShape) => {
@@ -165,6 +178,7 @@ export const SpecimensTable = () => {
                     <Table.Th>Genotype</Table.Th>
                     <Table.Th>Labeling</Table.Th>
                     <Table.Th>Collection</Table.Th>
+                    <Table.Th>Soma Features</Table.Th>
                     <Table.Th/>
                 </Table.Tr>
             </Table.Thead>
@@ -183,9 +197,9 @@ export const SpecimensTable = () => {
                     <Group justify="space-between" p={12}>
                         <Text size="lg" fw={500}>Specimens</Text>
                         <Group>
-                            <CollectionSelect value={collectionId} defaultSelection={true} onChange={setCollectionId}/>
-                            <Button loading={createLoading} leftSection={<IconPlus size={18}/>} disabled={!collectionId}
-                                    onClick={() => createSample({variables: {specimen: {collectionId: collectionId}}})}>Add</Button>
+                            <CollectionSelect value={selectedCollectionId} onChange={setCollectionId}/>
+                            <Button loading={createLoading} leftSection={<IconPlus size={18}/>} disabled={!selectedCollectionId}
+                                    onClick={() => onCreateSpecimen()}>Add</Button>
                         </Group>
                     </Group>
                     <Divider orientation="horizontal"/>

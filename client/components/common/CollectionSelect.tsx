@@ -20,12 +20,11 @@ export function sortedCollectionOptions(specimens: CollectionShape[]): ComboboxD
 
 type CollectionSelectProps = {
     value: string;
-    defaultSelection?: boolean;
 
     onChange?(value: string): void;
 }
 
-export const CollectionSelect = ({value, defaultSelection, onChange}: CollectionSelectProps) => {
+export const CollectionSelect = ({value, onChange}: CollectionSelectProps) => {
     const {loading, error, data} = useQuery<CollectionsResponse>(COLLECTIONS_QUERY, {fetchPolicy: "cache-first"});
 
     if (loading) {
@@ -37,10 +36,6 @@ export const CollectionSelect = ({value, defaultSelection, onChange}: Collection
     const isError = error != null || options.length == 0;
 
     const placeholder = error ? "Collections not found" : (options.length == 0 ? "No collections defined" : null);
-
-    if (defaultSelection && !value && data?.collections.length > 0) {
-        onChange(data.collections[0].id);
-    }
 
     return <Select disabled={isError} allowDeselect={false} placeholder={placeholder} data={options} value={value} error={isError} onChange={onChange}
                    rightSectionPointerEvents="auto"/>;

@@ -23,6 +23,10 @@ export const Home = observer(() => {
     const queryResponseViewModel = useQueryResponseViewModel();
 
     useEffect(() => {
+        initializeQueryFilters();
+    }, []);
+
+    useEffect(() => {
         resetContent();
     }, [uiPredicates.resetCount]);
 

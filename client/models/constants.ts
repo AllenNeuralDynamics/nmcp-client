@@ -184,7 +184,6 @@ export class DataConstants {
     private loadNeuronalStructures(ts: NeuronStructureShape[], si: NodeStructureShape[]) {
         // These are a fixed set of pairings supported in search predicates.
         // Ids are used to serialize search predicates locally and for sharing so must remain constant.
-        console.log(ts);
         this._NeuronStructures.push(this.makeNeuronalStructurePairing("fc6ba542-1a5d-417a-b33e-8eb23b96e473", SomaStructureName, ts, NodeStructureKind.soma, si));
         this._NeuronStructures.push(this.makeNeuronalStructurePairing("bd3a8d75-12dd-4152-8f1c-2cd0119679dd", AxonStructureName, ts, NodeStructureKind.any, si));
         this._NeuronStructures.push(this.makeNeuronalStructurePairing("f42cee66-4ec6-420e-a22f-e54ff82f031e", AxonStructureName, ts, NodeStructureKind.forkPoint, si));

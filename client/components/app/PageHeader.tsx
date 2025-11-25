@@ -2,7 +2,7 @@ import * as React from "react";
 import {useContext} from "react";
 import {NavLink, useLocation} from "react-router-dom";
 import {useIsAuthenticated} from "@azure/msal-react";
-import {ActionIcon, Group, Image, Indicator, Text, useMantineColorScheme} from "@mantine/core";
+import {ActionIcon, Divider, Group, Image, Indicator, Text, useMantineColorScheme} from "@mantine/core";
 import {IconMoon, IconSun} from "@tabler/icons-react";
 
 import {SignInSignOutButton} from "./SignInSignOutButton";
@@ -11,6 +11,7 @@ import {UserPermissions} from "../../graphql/user";
 import logo from "../../../assets/nmcp_logo.png";
 import {NotificationContext} from "./NotificationsApp";
 import {useUser} from "../../hooks/useUser";
+import {useConstants} from "../../hooks/useConstants";
 
 const TextNavLink = ({text, to}: { text: string, to: string }) => {
     return (
@@ -53,6 +54,17 @@ export const PageHeader = () => {
     const isAuthenticated = useIsAuthenticated();
     const {colorScheme, toggleColorScheme} = useMantineColorScheme();
     const user = useUser();
+    const constants = useConstants();
+
+    let totalMessage = "There are no published neurons";
+
+    if (constants.neuronCount > 0) {
+        if (constants.neuronCount > 1) {
+            totalMessage = `${constants.neuronCount} published neurons`
+        } else {
+            totalMessage = `1 published neuron`
+        }
+    }
 
     const userCanView = user && (user?.permissions & UserPermissions.ViewReconstructions) != 0;
 
@@ -83,6 +95,8 @@ export const PageHeader = () => {
                 {adminItem}
             </Group>
             <Group>
+                <Text size="sm" c="white">{totalMessage}</Text>
+                <Divider orientation="vertical" />
                 <ActionIcon variant="subtle" color="white" onClick={() => toggleColorScheme()}>
                     {colorScheme == "light" ? <IconMoon/> : <IconSun/>}
                 </ActionIcon>

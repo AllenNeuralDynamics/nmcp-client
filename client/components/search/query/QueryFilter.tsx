@@ -197,7 +197,7 @@ export const QueryFilter = observer((props: IQueryFilterProps) => {
                     }
                 }}/>
                 <div style={{flex: 1}}>
-                    <AtlasStructureMultiSelect label="Target Atlas Structures (multiple treated as an or condition)" selection={filter.brainAreas}
+                    <AtlasStructureMultiSelect label="Target Atlas Structures (multiple treated as an OR condition)" selection={filter.brainAreas}
                                                onSelectionChange={(brainAreas: AtlasStructureShape[]) => onBrainAreaChange(brainAreas)}/>
                 </div>
                 <Select label="Neuron Structure" clearable placeholder="any" data={nodeStructureOptions}

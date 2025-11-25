@@ -17,7 +17,7 @@ type ReconstructionTableProps = {
 }
 export const ReconstructionTable = ({reconstructions, selectedId, onSelected}: ReconstructionTableProps) => {
     const rows = reconstructions.map(r => {
-        return <ReconstructionRow key={`rr_${r.id}`} reconstruction={r} isSelected={r.id == selectedId} onSelected={onSelected}/>
+        return <ReconstructionRow reconstruction={r} isSelected={r.id == selectedId} onSelected={onSelected}/>
     });
 
     return (
@@ -60,7 +60,7 @@ export const ReconstructionRow = (props: ReconstructionRowProps) => {
     const nodeCounts = props.reconstruction.atlasReconstruction.nodeCounts ?? props.reconstruction.specimenNodeCounts;
 
     return (
-        <Table.Tr {...subProps} onClick={() => props.onSelected(props.reconstruction)}>
+        <Table.Tr key={props.reconstruction.id} {...subProps} onClick={() => props.onSelected(props.reconstruction)}>
             <Table.Td><NeuronVersionLink neuron={props.reconstruction.neuron}/></Table.Td>
             <Table.Td>{props.reconstruction.neuron.specimen.label}</Table.Td>
             <Table.Td>{formatAtlasStructure(props.reconstruction.neuron.atlasStructure, "(unspecified)")}</Table.Td>

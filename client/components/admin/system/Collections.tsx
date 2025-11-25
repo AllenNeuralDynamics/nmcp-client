@@ -79,7 +79,7 @@ export const Collections = () => {
                 </Card.Section>
             </Card>
             <Space h={24}/>
-            {selected ? <EditCollection key={selectedId} collection={selected}/> : null}
+            {selected ? <EditCollection collection={selected}/> : null}
         </div>
     );
 }

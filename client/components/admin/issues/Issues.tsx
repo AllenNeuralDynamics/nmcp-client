@@ -48,7 +48,7 @@ export const Issues = () => {
 
     const selected = selectionId ? issues.find(i => i.id === selectionId) : null;
 
-    const rows = issues.map(r => <IssueRow issue={r} key={r.id} selected={r.id == selectionId} onSelect={setSelectionId}/>);
+    const rows = issues.map(r => <IssueRow issue={r}  selected={r.id == selectionId} onSelect={setSelectionId}/>);
 
     return (
         <Card withBorder>
@@ -88,7 +88,7 @@ const IssueRow = ({issue, selected, onSelect}: { issue: IssueShape, selected: bo
     const subProps = selected ? {bg: "table-selection"} : {};
 
     return (
-        <Table.Tr {...subProps} onClick={() => onSelect(issue.id)}>
+        <Table.Tr key={issue.id} {...subProps} onClick={() => onSelect(issue.id)}>
             <Table.Td><Text size="sm" fw={500}>{issue.issueId}</Text></Table.Td>
             <Table.Td>{issue.neuron?.specimen?.label ?? "(none)"}</Table.Td>
             <Table.Td>{issue.neuron?.label ?? "(none)"}</Table.Td>
