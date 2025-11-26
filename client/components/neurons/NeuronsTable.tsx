@@ -17,7 +17,7 @@ type NeuronTableProps = {
 
 export const NeuronsTable = (props: NeuronTableProps) => {
     const rows = props.neurons.map(n => {
-        return <NeuronRow key={n.id} neuron={n} onDelete={props.onDeleteNeuron}/>
+        return <NeuronRow neuron={n} onDelete={props.onDeleteNeuron}/>
     });
 
     return (

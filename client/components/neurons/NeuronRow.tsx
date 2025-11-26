@@ -135,7 +135,7 @@ export const NeuronRow = (props: NeuronRowProps) => {
     }
 
     return (
-        <Table.Tr>
+        <Table.Tr key={props.neuron.id}>
             <Table.Td style={{minWidth: "60px", maxWidth: "60px"}}>
                 <Group align="center" gap="sm">
                     <InputPopup value={props.neuron.label} placeholder="(none)" onAccept={updateLabel}/>

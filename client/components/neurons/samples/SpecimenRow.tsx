@@ -58,7 +58,7 @@ export const SpecimenRow = ({specimen, manageInjections, requestDelete}: Specime
     }
 
     return (
-        <Table.Tr>
+        <Table.Tr key={specimen.id}>
             <Table.Td>
                 <InputPopup value={specimen.label} label="Specimen Id" placeholder="Enter specimen id..." onAccept={updateLabel}/>
             </Table.Td>

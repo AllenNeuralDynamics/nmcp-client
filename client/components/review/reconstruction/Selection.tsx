@@ -44,14 +44,14 @@ export const Selection = ({reconstruction}: {reconstruction: Reconstruction}) =>
                 */}
             </Tabs.List>
 
-            <Tabs.Panel value="status">
-                <Status key={`status_${reconstruction.id}`} reconstruction={reconstruction}/>
+            <Tabs.Panel value="status" key={`status_${reconstruction.id}`}>
+                <Status reconstruction={reconstruction}/>
             </Tabs.Panel>
-            <Tabs.Panel value="specimen">
-                <SpecimenSpace key={`specimen_${reconstruction.id}`} reconstruction={reconstruction}/>
+            <Tabs.Panel value="specimen" key={`specimen_${reconstruction.id}`}>
+                <SpecimenSpace reconstruction={reconstruction}/>
             </Tabs.Panel>
-            <Tabs.Panel value="atlas">
-                <AtlasSpace key={`atlas_${reconstruction.id}`} reconstruction={reconstruction}/>
+            <Tabs.Panel value="atlas" key={`atlas_${reconstruction.id}`}>
+                <AtlasSpace reconstruction={reconstruction}/>
             </Tabs.Panel>
         </Tabs>
     );

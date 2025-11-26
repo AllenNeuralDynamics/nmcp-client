@@ -113,7 +113,7 @@ export const Users = () => {
 }
 const UserTable = ({adminUserId, users, includesImported}: { adminUserId: User, users: User[], includesImported: boolean }) => {
     const rows = users.map((t: User) => {
-        return <UserRow key={`tt_${t.id}`} user={t} adminUserId={adminUserId.id} includesImported={includesImported}/>
+        return <UserRow user={t} adminUserId={adminUserId.id} includesImported={includesImported}/>
     });
 
     return (
@@ -149,7 +149,7 @@ const UserRow = ({user, adminUserId, includesImported}: { user: User, adminUserI
         return <Badge variant="light" color={b ? "green" : "grape"}>{b ? "Registered" : "Imported"}</Badge>
     }, [user.authDirectoryId]);
 
-    return (<Table.Tr>
+    return (<Table.Tr key={user.id}>
             <Table.Td>{user.firstName} {user.lastName}</Table.Td>
             <Table.Td>{user.affiliation}</Table.Td>
             <Table.Td>{user.emailAddress}</Table.Td>

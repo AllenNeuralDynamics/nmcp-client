@@ -93,7 +93,7 @@ export const FilePreview = (props: FilePreviewProps) => {
     const onDrop = (evt: React.DragEvent<HTMLDivElement>) => {
         evt.preventDefault();
 
-        const files = Array.from(evt.dataTransfer.items).filter(item => item.kind == "file");
+        const files = Array.from<DataTransferItem>(evt.dataTransfer.items).filter(item => item.kind == "file");
 
         if (files.length > 0) {
             if (props.onDrop) {
@@ -108,7 +108,7 @@ export const FilePreview = (props: FilePreviewProps) => {
     const onDragOver = (evt: React.DragEvent<HTMLDivElement>) => {
         evt.preventDefault();
 
-        const files = Array.from(evt.dataTransfer.items).filter(item => item.kind == "file");
+        const files = Array.from<DataTransferItem>(evt.dataTransfer.items).filter(item => item.kind == "file");
 
         if (files.length > 2) {
             evt.dataTransfer.dropEffect = "none";

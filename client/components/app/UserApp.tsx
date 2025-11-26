@@ -10,7 +10,7 @@ import {AppLoading} from "./AppLoading";
 export const UserContext = createContext<User>(null);
 
 interface IUserAppProps {
-    children: any;
+    children?: any;
 }
 
 export const UserApp = (props: IUserAppProps) => {

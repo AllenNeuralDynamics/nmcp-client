@@ -152,7 +152,7 @@ export const SpecimensTable = () => {
     const end = Math.min(state.offset + state.limit, totalCount);
 
     const rows = samples.map(s => {
-        return <SpecimenRow key={s.id} specimen={s} requestDelete={setSampleForDelete} manageInjections={onRequestManageInjections}/>
+        return <SpecimenRow specimen={s} requestDelete={setSampleForDelete} manageInjections={onRequestManageInjections}/>
     });
 
     const table = (
