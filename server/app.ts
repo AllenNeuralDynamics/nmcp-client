@@ -81,14 +81,16 @@ function devServer() {
     const compiler = webpack(webpackConfig);
 
     const server = new webpackDevServer({
-        proxy: {
-            [ServerConfiguration.graphQLService.endpoint]: {
+        proxy: [
+            {
+                context: ServerConfiguration.graphQLService.endpoint,
                 target: apiUri
             },
-            [ServerConfiguration.exportService.endpoint]: {
+            {
+                context: ServerConfiguration.exportService.endpoint,
                 target: exportUri
             }
-        },
+        ],
         allowedHosts: "all",
         setupMiddlewares: (middlewares, devServer) => {
             if (!devServer) {

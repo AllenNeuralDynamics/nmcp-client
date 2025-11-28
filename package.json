@@ -16,7 +16,7 @@
     "express-http-proxy": "^2.1.2",
     "path-browserify": "^1.0.1",
     "webpack": "^5.89.0",
-    "webpack-dev-server": "^4.15.1"
+    "webpack-dev-server": "^5.2.2"
   },
   "devDependencies": {
     "@apollo/client": "^3.13.8",
