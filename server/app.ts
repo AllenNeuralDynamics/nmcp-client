@@ -53,10 +53,7 @@ if (process.env.NODE_ENV !== "production") {
     debug(`proxying ${ServerConfiguration.graphQLService.endpoint} to ${apiUri}`);
     app.use(`${ServerConfiguration.graphQLService.endpoint}`, proxy(`${apiUri}`, {
         limit: "100mb",
-        proxyReqPathResolver: maintainBaseUrl,
-        proxyReqOptDecorator: (proxyReqOpts: any) => {
-            return proxyReqOpts;
-        }
+        proxyReqPathResolver: maintainBaseUrl
     }));
 
     debug(`proxying ${ServerConfiguration.exportService.endpoint} to ${exportUri}`);
