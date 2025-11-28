@@ -34,7 +34,6 @@ export const CandidateActions = ({neuron, showAnnotators}: { neuron: NeuronShape
         });
 
     const onRequestAccessResponse = (response: RequestAccessResponse) => {
-        console.log(response);
         let message = "The request for access has been received.  A member of the Neuron Morphology Community Portal be in contact."
 
         switch (response) {
