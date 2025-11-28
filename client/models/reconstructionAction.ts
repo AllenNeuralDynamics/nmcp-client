@@ -47,7 +47,7 @@ export const actionColor = (status: ReconstructionAction): string => {
 export const actionName = (status: ReconstructionAction): string => {
     switch (status) {
         case ReconstructionAction.Open:
-            return "Open";
+            return "Add to My Annotations";
         case ReconstructionAction.Reopen:
             return "Reopen";
         case ReconstructionAction.Hold:

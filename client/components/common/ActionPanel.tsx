@@ -25,7 +25,7 @@ export const ActionPanel = ({title, message, status, id, renderIcon, actions, mo
             <Group>
                 {renderIcon(32)}
                 <Stack justify="flex-start" align="flex-start" gap={0}>
-                    <Group>
+                    <Group gap="sm">
                         <Text fw={500}>{title}</Text>
                         {status}
                         {info}
