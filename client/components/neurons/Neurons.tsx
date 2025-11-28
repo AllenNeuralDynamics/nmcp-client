@@ -2,7 +2,7 @@ import * as React from "react";
 import {useEffect, useState} from "react";
 import {observer} from "mobx-react-lite";
 import {useMutation, useQuery} from "@apollo/client";
-import {Button, Card, Center, Divider, Group, Loader, SimpleGrid, Text, Tooltip} from "@mantine/core";
+import {Button, Card, Center, Divider, Group, Loader, SimpleGrid, Text} from "@mantine/core";
 import {IconPlus, IconUpload} from "@tabler/icons-react";
 
 import {toastCreateError, toastDeleteError} from "../common/NotificationHelper";
@@ -172,10 +172,8 @@ export const Neurons = observer(() => {
                     <SpecimenSelect value={sampleId} lockable locked={isSampleLocked} onChange={onSampleChange}
                                     onLock={onLockSample}/>
                 </Group>
-                <Tooltip label="Temporarily disabled pending update">
-                    <Button color="green" leftSection={<IconUpload size={18}/>} disabled={sampleId == null || isCreating || true}
+                    <Button color="green" leftSection={<IconUpload size={18}/>} disabled={sampleId == null || isCreating}
                             onClick={() => uploadSomaProperties()}>Import...</Button>
-                </Tooltip>
                 <Button leftSection={<IconPlus size={18}/>} disabled={sampleId == null || isCreating} loading={isCreating}
                         onClick={() => createNeuron({variables: {neuron: {specimenId: sampleId}}})}>Add</Button>
             </Group>

@@ -33,6 +33,7 @@
     "@types/debug": "^4.1.12",
     "@types/lodash-es": "^4.17.12",
     "@types/node": "^20.12.8",
+    "@types/react": "^18.3.27",
     "@types/three": "^0.93.10",
     "@types/webpack": "^5.28.5",
     "apollo-upload-client": "^18.0.1",

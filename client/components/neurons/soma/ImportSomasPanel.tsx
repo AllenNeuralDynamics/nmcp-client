@@ -1,55 +1,44 @@
 import * as React from "react";
-import {useEffect, useState} from "react";
-import {Button, Checkbox, Flex, Divider, Stack, Text, TextInput, Group, Code} from "@mantine/core";
+import {observer} from "mobx-react-lite";
+import {Checkbox, Stack, Text, TextInput, Group, Code, NumberInput, SimpleGrid} from "@mantine/core";
 import {Dropzone} from "@mantine/dropzone";
-import {IconFileTypeCsv, IconUpload, IconX} from '@tabler/icons-react';
+import {IconFileTypeCsv, IconJson, IconUpload, IconX} from '@tabler/icons-react';
 
-import {SomaImportOptions} from "./ImportSomasModal";
-import {parseKeywords} from "../../../models/neuron";
+import {ImportSomaData} from "../../../viewmodel/importSomaData";
 
-type ImportSomasPanelProps = {
-    onImport(options: SomaImportOptions): void;
-}
+const iconSize = 40;
 
-export const ImportSomasPanel = (props: ImportSomasPanelProps) => {
-    const [file, setFile] = useState<File | null>(null);
-    const [shouldApplyTag, setShouldApplyTag] = useState(false);
-    const [tag, setTag] = useState("");
-    const [shouldLookupSoma, setShouldLookupSoma] = useState(true);
-    const [canImport, setCanImport] = useState(false);
+export const ImportSomasPanel = observer(({importData}: { importData: ImportSomaData }) => {
 
-    useEffect(() => {
-        setCanImport(file != null);
-    }, [file]);
-
-    const onFileReceived = (acceptedFiles: File[]) => {
+    const onSomaFileDropped = (acceptedFiles: File[]) => {
         if (acceptedFiles && acceptedFiles.length > 0) {
-            setFile(acceptedFiles[0]);
+            importData.somaFile = acceptedFiles[0];
         } else {
-            setFile(null);
+            importData.somaFile = null;
         }
     }
 
     return (
         <Stack gap="lg">
-            <Dropzone onDrop={onFileReceived} accept={["text/csv"]}>
-                <Group justify="center" gap="xl" mih={220} style={{pointerEvents: 'none'}}>
+            <Text>Soma Candidates</Text>
+            <Dropzone onDrop={onSomaFileDropped} accept={["text/csv"]}>
+                <Group justify="start" gap="sm" mih={120} style={{pointerEvents: 'none'}}>
                     <Dropzone.Accept>
-                        <IconUpload size={52} color="var(--mantine-color-blue-6)" stroke={1.5}/>
+                        <IconUpload size={iconSize} color="var(--mantine-color-blue-6)" stroke={1.5}/>
                     </Dropzone.Accept>
                     <Dropzone.Reject>
-                        <IconX size={52} color="var(--mantine-color-red-6)" stroke={1.5}/>
+                        <IconX size={iconSize} color="var(--mantine-color-red-6)" stroke={1.5}/>
                     </Dropzone.Reject>
                     <Dropzone.Idle>
-                        {file ?
-                            <IconUpload size={52} color="var(--mantine-color-green-6)" stroke={1.5}/> :
-                            <IconFileTypeCsv size={52} color="var(--mantine-color-dimmed)" stroke={1.5}/>
+                        {importData.somaFile ?
+                            <IconUpload size={iconSize} color="var(--mantine-color-green-6)" stroke={1.5}/> :
+                            <IconFileTypeCsv size={iconSize} color="var(--mantine-color-dimmed)" stroke={1.5}/>
                         }
                     </Dropzone.Idle>
 
-                    {file ? <Text size="xl" inline>{file.name}</Text> :
+                    {importData.somaFile ? <Text size="md" inline>{importData.somaFile.name}</Text> :
                         <div>
-                            <Text size="xl" inline>
+                            <Text size="md" inline>
                                 Drop a soma properties CSV file here or click to select a file
                             </Text>
                             <Text size="sm" c="dimmed" inline mt={7}>
@@ -61,23 +50,15 @@ export const ImportSomasPanel = (props: ImportSomasPanelProps) => {
             </Dropzone>
 
             <div>
-                <Checkbox checked={shouldApplyTag} label="Apply keyword(s) to candidates"
-                          onChange={(event) => setShouldApplyTag(event.currentTarget.checked)}/>
-                <TextInput label="Keyword(s)" description="Separate multiple keywords with a semicolon (;)" placeholder="AIND" disabled={!shouldApplyTag} value={tag}
-                           onChange={(event) => setTag(event.currentTarget.value)}/>
+                <Checkbox checked={importData.applyKeywords} label="Apply keyword(s) to candidates"
+                          onChange={(event) => importData.applyKeywords = event.currentTarget.checked}/>
+                <TextInput label="Keyword(s)" description="Separate multiple keywords with a semicolon (;)" placeholder="AIND"
+                           disabled={!importData.applyKeywords}
+                           value={importData.keywords} onChange={(event) => importData.keywords = event.currentTarget.value}/>
             </div>
 
-            <Checkbox checked={shouldLookupSoma} label="Use Atlas lookup for unspecified soma structures"
-                      onChange={(event) => setShouldLookupSoma(event.currentTarget.checked)}/>
-
-            <Divider my="md"/>
-
-            <Flex justify="flex-end">
-                <Button disabled={!canImport} rightSection={<IconUpload size={14}/>}
-                        onClick={() => props.onImport({keywords: shouldApplyTag ? parseKeywords(tag) : null, shouldLookupSoma: shouldLookupSoma, file: file})}>
-                    Import
-                </Button>
-            </Flex>
+            <Checkbox checked={importData.shouldLookupAtlasStructures} label="Use Atlas lookup for unspecified soma structures"
+                      onChange={(event) => importData.shouldLookupAtlasStructures = event.currentTarget.checked}/>
         </Stack>
     );
-}
+});
