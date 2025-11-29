@@ -38,15 +38,19 @@ export const ImportSomasModal = observer((props: ImportSomasModalProps) => {
                     specimenId: props.sample.id,
                     keywords: importData.applyKeywords ? parseKeywords(importData.keywords) : null,
                     shouldLookupSoma: importData.shouldLookupAtlasStructures,
-                    noEmit: false
+                    defaultBrightness: importData.brightness,
+                    defaultVolume: importData.volume
                 }
             }
         });
 
-        if (result.data.importSomas.error?.message) {
+        if (result.data?.importSomas.error?.message) {
             importData.importError = result.data.importSomas.error.message;
+        } else if (result.errors) {
+            console.log(result);
+            errorNotification("Import Failed", result.errors[0]?.message);
         } else {
-            successNotification("Import Successful", `${result.data.importSomas.count} somas imported`);
+            successNotification("Import Successful", `${result.data.importSomas} somas imported`);
             props.onClose();
         }
     }
