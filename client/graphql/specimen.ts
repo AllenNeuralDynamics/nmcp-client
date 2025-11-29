@@ -10,6 +10,10 @@ export const SPECIMEN_FIELDS_FRAGMENT = gql`fragment SpecimenFields on Specimen 
     tomographyUrl
     collectionId
     neuronCount
+    somaProperties {
+        defaultBrightness
+        defaultVolume
+    }
     genotype {
         id
         name
@@ -20,10 +24,6 @@ export const SPECIMEN_FIELDS_FRAGMENT = gql`fragment SpecimenFields on Specimen 
             id
             name
         }
-    }
-    neurons {
-        id
-        label
     }
     createdAt
     updatedAt

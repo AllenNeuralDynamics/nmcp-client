@@ -178,6 +178,7 @@ export const SpecimensTable = () => {
                     <Table.Th>Genotype</Table.Th>
                     <Table.Th>Labeling</Table.Th>
                     <Table.Th>Collection</Table.Th>
+                    <Table.Th>Soma Features</Table.Th>
                     <Table.Th/>
                 </Table.Tr>
             </Table.Thead>

@@ -60,9 +60,9 @@ export const PageHeader = () => {
 
     if (constants.neuronCount > 0) {
         if (constants.neuronCount > 1) {
-            totalMessage = `There are ${constants.neuronCount} published neurons`
+            totalMessage = `${constants.neuronCount} published neurons`
         } else {
-            totalMessage = `There is 1 published neuron`
+            totalMessage = `1 published neuron`
         }
     }
 

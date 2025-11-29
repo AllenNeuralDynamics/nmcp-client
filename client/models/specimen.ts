@@ -2,6 +2,11 @@ import {GenotypeShape} from "./genotype";
 import {NeuronShape} from "./neuron";
 import {InjectionShape} from "./injection";
 
+export type SomaFeaturesShape = {
+    defaultBrightness: number;
+    defaultVolume: number;
+}
+
 export type SpecimenShape = {
     id: string,
     label: string;
@@ -9,6 +14,7 @@ export type SpecimenShape = {
     referenceDate: Date;
     tomographyUrl: string;
     neuronCount: number;
+    somaProperties?: SomaFeaturesShape;
     genotype: GenotypeShape;
     injections: InjectionShape[];
     neurons: NeuronShape[];
