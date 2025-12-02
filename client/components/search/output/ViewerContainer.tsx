@@ -1,7 +1,7 @@
 import * as React from "react";
 import {useState} from "react";
 import {observer} from "mobx-react-lite";
-import {ActionIcon, Divider, Flex, Grid, Group, SimpleGrid, Stack, Text, Tooltip} from "@mantine/core";
+import {ActionIcon, Divider, Flex, Group, Stack, Text, Tooltip} from "@mantine/core";
 import {IconAdjustmentsAlt, IconChartScatter3d, IconChevronLeft, IconChevronRight, IconRestore} from "@tabler/icons-react";
 
 import {NeuroglancerProxy} from "../../../viewer/neuroglancerProxy";
@@ -12,9 +12,6 @@ import {useThrottledCallback} from "@mantine/hooks";
 
 export const ViewerContainer = observer(({maxHeight}: { maxHeight: number }) => {
     const appLayout = useAppLayout();
-
-    const [showNeuroglancerControls, setShowNeuroglancerControls] = useState<boolean>(false);
-    const [showNeuroglancerDimensions, setShowNeuroglancerDimensions] = useState<boolean>(false);
 
     const [x, setX] = useState<number[]>([]);
 
@@ -54,19 +51,6 @@ export const ViewerContainer = observer(({maxHeight}: { maxHeight: number }) => 
         NeuroglancerProxy.SearchNeuroglancer?.resetView()
     };
 
-    const toggleNeuroglancerControls = () => {
-        const b = !showNeuroglancerControls;
-        document.documentElement.style.setProperty("--neuroglancer-topview-height", b ? "30px" : "0px");
-        document.documentElement.style.setProperty("--neuroglancer-topview-visibility", b ? "visible" : "collapse");
-        setShowNeuroglancerControls(b);
-    }
-
-    const toggleNeuroglancerDimensions = () => {
-        const b = !showNeuroglancerDimensions;
-        document.documentElement.style.setProperty("--neuroglancer-display-dimensions", b ? "visible" : "collapse");
-        setShowNeuroglancerDimensions(b);
-    }
-
     const renderControls = () => {
         const text = x.length > 0 ? `X ${x[0].toFixed(0)}   Y ${x[1].toFixed(0)}   Z ${x[2].toFixed(0)}` : "";
 
@@ -74,12 +58,12 @@ export const ViewerContainer = observer(({maxHeight}: { maxHeight: number }) => 
             <Group p={8} justify="space-between" style={{flexGrow: 1}}>
                 <Group>
                     <Tooltip label="Show or hide Neuroglancer controls">
-                        <ActionIcon variant="subtle" onClick={toggleNeuroglancerControls}>
+                        <ActionIcon variant="subtle" onClick={() => appLayout.toggleNeuroglancerControlsVisible()}>
                             <IconAdjustmentsAlt size={18}/>
                         </ActionIcon>
                     </Tooltip>
                     <Tooltip label="Show or hide Neuroglancer dimensions overlay">
-                        <ActionIcon variant="subtle" onClick={toggleNeuroglancerDimensions}>
+                        <ActionIcon variant="subtle" onClick={() => appLayout.toggleNeuroglancerDimensionsVisible()}>
                             <IconChartScatter3d size={18}/>
                         </ActionIcon>
                     </Tooltip>

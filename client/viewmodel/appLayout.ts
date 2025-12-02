@@ -14,6 +14,9 @@ export class AppLayout {
     public isAtlasStructureHistoryExpanded: boolean = true;
     public isPreferencesWindowOpen: boolean = false;
 
+    public neuroglancerControlsVisible: boolean = false;
+    public neuroglancerDimensionsVisible: boolean = false;
+
     public showReferenceIds: boolean = false;
 
     public constructor() {
@@ -25,8 +28,15 @@ export class AppLayout {
             this.isQueryExpanded = layout.isQueryExpanded ?? true;
             this.isAtlasStructureHistoryExpanded = layout.isAtlasStructureHistoryExpanded ?? false;
             this.isPreferencesWindowOpen = layout.isPreferencesWindowOpen ?? false;
+
+            this.neuroglancerControlsVisible = layout.neuroglancerControlsVisible ?? false;
+            this.neuroglancerDimensionsVisible = layout.neuroglancerDimensionsVisible ?? false;
+
             this.showReferenceIds = layout.showReferenceIds ?? false;
         }
+
+        this.updateNeuroglancerControlsVisible(this.neuroglancerControlsVisible);
+        this.updateNeuroglancerDimensionsVisible(this.neuroglancerDimensionsVisible);
 
         makeAutoObservable(this);
 
@@ -49,5 +59,26 @@ export class AppLayout {
 
     public setAtlasStructureDrawerState(drawerState: DrawerState) {
         this.atlasStructureDrawerState = drawerState;
+    }
+
+    public toggleNeuroglancerControlsVisible() {
+        const visible = !this.neuroglancerControlsVisible;
+        this.updateNeuroglancerControlsVisible(visible);
+        this.neuroglancerControlsVisible = visible;
+    }
+
+    public toggleNeuroglancerDimensionsVisible() {
+        const visible = !this.neuroglancerDimensionsVisible;
+        this.updateNeuroglancerDimensionsVisible(visible);
+        this.neuroglancerDimensionsVisible = visible;
+    }
+
+    private updateNeuroglancerControlsVisible(visible: boolean) {
+        document.documentElement.style.setProperty("--neuroglancer-topview-height", visible ? "30px" : "0px");
+        document.documentElement.style.setProperty("--neuroglancer-topview-visibility", visible ? "visible" : "collapse");
+    }
+
+    private updateNeuroglancerDimensionsVisible(visible: boolean) {
+        document.documentElement.style.setProperty("--neuroglancer-display-dimensions", visible ? "visible" : "collapse");
     }
 }

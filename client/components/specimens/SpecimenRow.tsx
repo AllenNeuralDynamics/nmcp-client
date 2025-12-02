@@ -2,16 +2,17 @@ import * as React from "react";
 import {useMutation} from "@apollo/client";
 import {Badge, Button, Group, List, Stack, Table, Text} from "@mantine/core";
 import {DatePickerInput} from "@mantine/dates";
-import {IconCalendar, IconTrash} from "@tabler/icons-react";
+import {IconCalendar, IconShare3, IconTrash} from "@tabler/icons-react";
 import dayjs from "dayjs";
 
-import {SomaFeaturesShape, SpecimenShape} from "../../../models/specimen";
-import {InputPopup} from "../../common/InputPopup";
-import {displayInjection, InjectionShape} from "../../../models/injection";
-import {CollectionSelect} from "../../common/CollectionSelect";
-import {GenotypeAutosuggest} from "../../common/GenotypeAutosuggset";
-import {UPDATE_SPECIMEN_MUTATION, UpdateSpecimenMutationResponse, UpdateSpecimenVariables} from "../../../graphql/specimen";
-import {toastUpdateError} from "../../common/NotificationHelper";
+import {SomaFeaturesShape, SpecimenShape} from "../../models/specimen";
+import {InputPopup} from "../common/InputPopup";
+import {displayInjection, InjectionShape} from "../../models/injection";
+import {CollectionSelect} from "../common/CollectionSelect";
+import {GenotypeAutosuggest} from "../common/GenotypeAutosuggset";
+import {UPDATE_SPECIMEN_MUTATION, UpdateSpecimenMutationResponse, UpdateSpecimenVariables} from "../../graphql/specimen";
+import {toastUpdateError} from "../common/NotificationHelper";
+import {Link} from "react-router-dom";
 
 export type SpecimenRowProps = {
     specimen: SpecimenShape;
@@ -52,7 +53,7 @@ export const SpecimenRow = ({specimen, manageInjections, requestDelete}: Specime
     }
 
     const updateCollection = async (collectionId: string) => {
-        if (collectionId !== specimen.collectionId) {
+        if (collectionId !== specimen.collection?.id) {
             await updateSpecimen({variables: {specimen: {id: specimen.id, collectionId: collectionId}}});
         }
     }
@@ -62,7 +63,10 @@ export const SpecimenRow = ({specimen, manageInjections, requestDelete}: Specime
     return (
         <Table.Tr key={specimen.id}>
             <Table.Td>
-                <InputPopup value={specimen.label} label="Specimen Id" placeholder="Enter specimen id..." onAccept={updateLabel}/>
+                <Group align="center" gap="sm">
+                    <InputPopup value={specimen.label} label="Specimen Id" placeholder="Enter specimen id..." onAccept={updateLabel}/>
+                    <Link to={`/specimen/${specimen.id}`}><IconShare3 style={{marginTop: "4px"}} size={18}/></Link>
+                </Group>
             </Table.Td>
             <Table.Td>
                 <DatePickerInput size="sm" leftSection={<IconCalendar size={18} stroke={1.5}/>} clearable placeholder="Select date" valueFormat="YYYY-MM-DD"
@@ -80,7 +84,7 @@ export const SpecimenRow = ({specimen, manageInjections, requestDelete}: Specime
                 </a>
             </Table.Td>
             <Table.Td>
-                <CollectionSelect value={specimen.collectionId} onChange={updateCollection}/>
+                <CollectionSelect value={specimen.collection?.id} onChange={updateCollection}/>
             </Table.Td>
             <Table.Td>
                 {features}

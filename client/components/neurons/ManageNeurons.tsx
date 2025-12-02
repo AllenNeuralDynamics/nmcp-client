@@ -2,7 +2,7 @@ import * as React from "react";
 import {Space, Stack} from "@mantine/core";
 
 import {Neurons} from "./Neurons";
-import {SpecimensTable} from "./samples/Specimens";
+import {SpecimensTable} from "../specimens/Specimens";
 
 export const ManageNeurons = () => {
     return (

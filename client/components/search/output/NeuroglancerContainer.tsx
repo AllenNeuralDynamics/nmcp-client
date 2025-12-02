@@ -13,7 +13,7 @@ import {useQueryResponseViewModel} from "../../../hooks/useQueryResponseViewMode
 import {useConstants} from "../../../hooks/useConstants";
 import {useAtlas} from "../../../hooks/useAtlas";
 import {AtlasNode} from "../../../models/atlasNode";
-import {getThemeColor, useComputedColorScheme, useMantineTheme} from "@mantine/core";
+import {useComputedColorScheme} from "@mantine/core";
 
 export type NeuroglancerContainerProps = {
     elementName: string
@@ -92,5 +92,5 @@ export const NeuroglancerContainer = observer<NeuroglancerContainerProps>((props
         }
     }
 
-    return <div id="neuroglancer-container" style={{minHeight: 0, height: props.height, backgroundColor: "blue"}}/>
+    return <div id="neuroglancer-container" className="ng-default-container" style={{minHeight: 0, height: props.height}}/>
 });

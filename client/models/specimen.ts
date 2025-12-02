@@ -1,6 +1,17 @@
 import {GenotypeShape} from "./genotype";
 import {NeuronShape} from "./neuron";
 import {InjectionShape} from "./injection";
+import {CollectionShape} from "./collection";
+
+export type TomographyRange = [number, number];
+
+export type Tomography = {
+    url: string;
+    options: {
+        range: TomographyRange;
+        window: TomographyRange;
+    }
+}
 
 export type SomaFeaturesShape = {
     defaultBrightness: number;
@@ -12,13 +23,13 @@ export type SpecimenShape = {
     label: string;
     notes: string;
     referenceDate: Date;
-    tomographyUrl: string;
-    neuronCount: number;
+    tomography?: Tomography;
     somaProperties?: SomaFeaturesShape;
+    collection: CollectionShape;
     genotype: GenotypeShape;
     injections: InjectionShape[];
     neurons: NeuronShape[];
-    collectionId: string;
+    neuronCount: number;
     createdAt: number;
     updatedAt: number;
 }

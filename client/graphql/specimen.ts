@@ -7,7 +7,13 @@ export const SPECIMEN_FIELDS_FRAGMENT = gql`fragment SpecimenFields on Specimen 
     label
     notes
     referenceDate
-    tomographyUrl
+    tomography {
+        url
+        options {
+            range
+            window
+        }
+    }
     collectionId
     neuronCount
     somaProperties {
@@ -25,10 +31,34 @@ export const SPECIMEN_FIELDS_FRAGMENT = gql`fragment SpecimenFields on Specimen 
             name
         }
     }
+    collection {
+        id
+        name
+    }
     createdAt
     updatedAt
 }
 `;
+
+///
+/// Specimen Query
+///
+
+export const SPECIMEN_QUERY = gql`query SpecimenQuery($id: String!) {
+    specimen(id: $id) {
+        ...SpecimenFields
+    }
+}
+${SPECIMEN_FIELDS_FRAGMENT}
+`;
+
+export type SpecimenQueryResponse = {
+    specimen: SpecimenShape;
+}
+
+export type SpecimenQueryVariables = {
+    id: string;
+}
 
 ///
 /// Specimens Query
@@ -50,7 +80,7 @@ export type SpecimensResponse = {
     items: SpecimenShape[];
 }
 
-export type SamplesQueryResponse = {
+export type SpecimensQueryResponse = {
     specimens: SpecimensResponse;
 }
 

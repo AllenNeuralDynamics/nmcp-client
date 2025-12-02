@@ -3,12 +3,12 @@ import {useQuery} from "@apollo/client";
 import {observer} from "mobx-react-lite";
 import {Group, Loader, MultiSelect, Switch, Text} from "@mantine/core";
 
-import {SPECIMENS_QUERY, SamplesQueryResponse} from "../../../graphql/specimen";
+import {SPECIMENS_QUERY, SpecimensQueryResponse} from "../../../graphql/specimen";
 import {OptionalFilter} from "../../../viewmodel/candidateFilter";
 import {LoadingSpecimens, sortedSpecimenOptions} from "../SpecimenSelect";
 
 export const SpecimenFilter = observer(({filter, w = null}: { filter: OptionalFilter<string[]>, w?: number }) => {
-    const {loading, error, data} = useQuery<SamplesQueryResponse>(SPECIMENS_QUERY, {fetchPolicy: "cache-first"});
+    const {loading, error, data} = useQuery<SpecimensQueryResponse>(SPECIMENS_QUERY, {fetchPolicy: "cache-first"});
 
     if (loading) {
         return <LoadingSpecimens/>;

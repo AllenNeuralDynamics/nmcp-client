@@ -46,6 +46,8 @@ const colorPalette = {
     "warning-bg-dark": colorsTuple("#ffd43b"),
     "warning-c-light": colorsTuple("#ffd43b"),
     "warning-c-dark": colorsTuple("#ffd43b"),
+    "warning-light": colorsTuple("#f08c00"),
+    "warning-dark": colorsTuple("#ffe066"),
     "ngtop-light": colorsTuple("#828282"),
     "ngtop-dark": colorsTuple("#343536"),
     // "table-cell-warning-dark": colorsTuple("#ffd43b")
@@ -89,6 +91,11 @@ const portalTheme = createTheme({
             name: "warning-c",
             light: "warning-c-light",
             dark: "warning-c-dark"
+        }),
+        "warning": virtualColor({
+            name: "warning",
+            light: "warning-light",
+            dark: "warning-dark"
         }),
         "ngtop": virtualColor({
             name: "ngtop",

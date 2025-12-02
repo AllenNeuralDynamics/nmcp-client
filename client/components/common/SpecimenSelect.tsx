@@ -2,7 +2,7 @@ import * as React from "react";
 import {useQuery} from "@apollo/client";
 import {ComboboxData, Group, Loader, Select, Text} from "@mantine/core";
 
-import {SPECIMENS_QUERY, SamplesQueryResponse} from "../../graphql/specimen";
+import {SPECIMENS_QUERY, SpecimensQueryResponse} from "../../graphql/specimen";
 import {SpecimenShape} from "../../models/specimen";
 import {IconLock, IconLockOpen} from "@tabler/icons-react";
 
@@ -30,7 +30,7 @@ type SpecimenSelectProps = {
 }
 
 export const SpecimenSelect = ({value, clearable, lockable, locked, onChange, onLock}: SpecimenSelectProps) => {
-    const {loading, error, data} = useQuery<SamplesQueryResponse>(SPECIMENS_QUERY, {fetchPolicy: "cache-first"});
+    const {loading, error, data} = useQuery<SpecimensQueryResponse>(SPECIMENS_QUERY, {fetchPolicy: "cache-first"});
 
     if (loading) {
         return <LoadingSpecimens/>;

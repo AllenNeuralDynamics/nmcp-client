@@ -27,14 +27,33 @@
     --neuroglancer-display-dimensions: collapse;
 }
 
-.neuroglancer-side-panel-titlebar.neuroglancer-layer-side-panel-title {
-    background-color: rgb(39, 128, 220) !important;
+.neuroglancer-panel {
+    border-color: var(--mantine-color-section-6) !important;
+    border-width: 1px !important;
+    border-style: solid !important;
+    border-collapse: collapse;
+}
+
+/* Fixes differences in the font in sizing due to page font*/
+.ng-default-container input {
+    margin: 3px;
+    font-family: monospace;
+    font-size: 13px;
+    min-width: 14px;
 }
 
 .neuroglancer-viewer-top-row {
     background-color: var(--mantine-color-ngtop-6) !important;
     border-color: red !important;
-    color: var(--mantine-color-text) !important;                /* Forces the right text color for most items for a given background */
+    color: var(--mantine-color-text) !important; /* Forces the right text color for most items for a given background */
+    margin: 0 !important; /* Removes the black shadow under the controls top row */
+    padding: 0 !important; /* Removes the black shadow under the controls top row */
+    height: var(--neuroglancer-topview-height) !important;
+    visibility: var(--neuroglancer-topview-visibility) !important;
+}
+
+.neuroglancer-side-panel-titlebar.neuroglancer-layer-side-panel-title {
+    background-color: rgb(39, 128, 220) !important;
 }
 
 .neuroglancer-layer-panel {
@@ -57,104 +76,38 @@
     visibility: collapse !important;
 }
 
-canvas {
-    color: blue !important;
-    background-color: blue !important;
-    border-color: blue !important;
+.neuroglancer-rendered-data-panel {
+    border-color: var(--mantine-color-section-6) !important;
+    border-width: 0 !important;
+    border-collapse: collapse;
+}
+
+/* Fixes differences in the font in sizing due to page font*/
+input.neuroglancer-position-dimension-scale {
+    min-width: 30px;
+}
+
+.neuroglancer-display-dimensions-widget {
+    visibility: var(--neuroglancer-display-dimensions) !important;
+}
+
+/* Fixes differences in the font in sizing due to page font*/
+input.neuroglancer-position-dimension-coordinate {
+    min-width: 34px;
+}
+
+.perspective-panel-show-slice-views {
+    visibility: collapse !important;
+    display: none !important;
 }
 
 /*
 Search Viewer
  */
 
-#neuroglancer-container {
-    overflow: hidden;
-    border: 0 solid blue !important;
-    border-radius: 0;
-    box-shadow: none !important;
-    box-sizing: content-box;
-    webkit-box-sizing: content-box;
-}
-
-#neuroglancer-container .neuroglancer-display-dimensions-widget {
-    visibility: var(--neuroglancer-display-dimensions) !important;
-}
-
-#neuroglancer-container .neuroglancer-viewer-top-row {
-    margin: 0 !important;   /* Removes the black shadow under the controls top row */
-    padding: 0 !important;  /* Removes the black shadow under the controls top row */
-    height: var(--neuroglancer-topview-height) !important;
-    visibility: var(--neuroglancer-topview-visibility) !important;
-}
-
-/* Fixes differences in the font in sizing due to page font*/
-#neuroglancer-container input {
-    margin: 3px;
-    font-family: monospace;
-    font-size: 13px;
-    min-width: 14px;
-}
-
-/* Fixes differences in the font in sizing due to page font*/
-#neuroglancer-container input.neuroglancer-position-dimension-scale {
-    min-width: 30px;
-}
-
-/* Fixes differences in the font in sizing due to page font*/
-#neuroglancer-container input.neuroglancer-position-dimension-coordinate {
-    min-width: 30px;
-}
-
-#neuroglancer-container .neuroglancer-data-panel {
-    border-color: green !important;
-}
-
 #neuroglancer-container .neuroglancer-panel {
     border-color: var(--mantine-color-section-6) !important;
     border-width: 1px !important;
     border-style: solid !important;
     border-collapse: collapse;
-}
-
-/*
-Candidate Viewer
- */
-
-#candidate-ng-container .neuroglancer-rendered-data-panel {
-    border-color: var(--mantine-color-section-6) !important;
-    border-collapse: collapse;
-}
-
-#candidate-ng-container {
-    overflow: hidden;
-    flex: 1;
-    color: white;
-    border: 0 solid black;
-    border-radius: 0px;
-    box-shadow: 0 1px 2px 0 rgba(34, 36, 38, .1);
-    box-sizing: content-box;
-    webkit-box-sizing: content-box;
-}
-
-#candidate-ng-container .neuroglancer-viewer-top-row {
-    visibility: collapse !important;
-    height: 0 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-}
-
-#candidate-ng-container .neuroglancer-rendered-data-panel {
-    border-width: 0 !important;
-}
-
-#candidate-ng-container .neuroglancer-display-dimensions-widget {
-    visibility: collapse !important;
-}
-
-#candidate-ng-container input.neuroglancer-position-dimension-scale {
-    min-width: 30px;
-}
-
-#candidate-ng-container input.neuroglancer-position-dimension-coordinate {
-    min-width: 30px;
 }

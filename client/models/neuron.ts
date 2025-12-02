@@ -136,21 +136,3 @@ export function parseSomaLocation(location: string): IParseSomaResult {
 
     return somaParse;
 }
-
-export function createCandidateAnnotationLayer(neurons: NeuronShape[], selectedId: string) {
-    const defaultColor = selectedId ? "#2184d033" : "#2184d0ff";
-    const defaultSize = selectedId ? 3 : 5;
-
-    return neurons.map(n => {
-        return {
-            type: "point",
-            id: n.id,
-            point: [
-                (n.atlasSoma?.x || 0) / 10,
-                (n.atlasSoma?.y || 0) / 10,
-                (n.atlasSoma?.z || 0) / 10
-            ],
-            props: [n.id == selectedId ? "#00ff00ff" : defaultColor, n.id == selectedId ? 8 : defaultSize]
-        }
-    });
-}

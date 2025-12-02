@@ -9,7 +9,7 @@ import {NeuronShape} from "../../models/neuron";
 import {CandidateFilter} from "../../viewmodel/candidateFilter";
 import {PaginationHeader} from "../common/PaginationHeader";
 import {CandidatesTable} from "./CandidatesTable";
-import {CandidatesViewer} from "./CandidateViewer";
+import {CandidatesView} from "./CandidatesView";
 import {CandidateActions} from "./CandidateActions";
 import {CandidateFilters} from "./CandidateFilters";
 import {CandidateMetrics} from "./CandidateMetrics";
@@ -47,7 +47,7 @@ export const Candidates = observer(() => {
 
     let candidateCache: NeuronShape[];
     let totalCount: number;
-    let selection = null;
+    let selection: NeuronShape = null;
 
     if (data?.candidateNeurons) {
         candidateCache = data.candidateNeurons.items;
@@ -127,9 +127,12 @@ export const Candidates = observer(() => {
                             </Text>
                             <Text size="sm" ta="end">{`Page ${activePage} of ${pageCount}`}</Text>
                         </SimpleGrid>
+                        <Divider orientation="horizontal"/>
                     </Card.Section> : null}
+                <Card.Section>
+                    <CandidatesView neurons={candidateCache} selected={selection} onViewerSelected={onNeuronSelectedFromViewer}/>
+                </Card.Section>
             </Card>
-            <CandidatesViewer neurons={candidateCache} selectedId={selectedCandidateId} onViewerSelected={onNeuronSelectedFromViewer}/>
             <Space h={16}/>
         </Stack>
     );

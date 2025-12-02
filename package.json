@@ -1,13 +1,13 @@
 {
   "name": "nmcp-client",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "main": "server/app.js",
   "private": true,
   "repository": "https://github.com/AllenNeuralDynamics/nmcp-search-client",
   "author": "Patrick Edson <pedson@leapscientific.com>",
   "license": "SEE LICENSE IN LICENSE",
   "scripts": {
-    "debug": "node --trace-warnings server/app.js",
+    "dev": "node --trace-warnings server/app.js",
     "production": "node --trace-warnings dist/app.js"
   },
   "dependencies": {

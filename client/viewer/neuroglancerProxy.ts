@@ -19,10 +19,6 @@ export type SomaSelectionDelegate = {
     (soma: AtlasNode, neuron: NeuronViewModel): void;
 }
 
-export type CandidateSelectionDelegate = {
-    (annotationId: string): void;
-}
-
 export type PositionCallback = {
     (position: number[]): void;
 }
@@ -47,63 +43,6 @@ export class NeuroglancerProxy {
     public static SearchNeuroglancer?: NeuroglancerProxy = null;
 
     private static _cachedQueryParamsState: any = null;
-
-    public static configureCandidateNeuroglancer(id: string, state: any, annotations: any, selectionDelegate: CandidateSelectionDelegate, precomputedLocation: string, segmentColors: Map<string, string>, colorScheme: string): NeuroglancerProxy {
-        const [proxy, target] = NeuroglancerProxy.createCommon(id, segmentColors);
-
-        registerEventListener(target, "click", (_: Event) => {
-            if (proxy._viewer && selectionDelegate) {
-                const selected = proxy._viewer.layerSelectedValues.toJSON();
-
-                if (selected && selected["Candidates"] && selected["Candidates"]["annotationId"]) {
-                    selectionDelegate(selected["Candidates"]["annotationId"]);
-                }
-            }
-        });
-
-        proxy._searchLayers = new SearchLayers(`precomputed://${precomputedLocation}`);
-
-        disableWheel();
-
-        proxy._viewer = makeMinimalViewer({target: document.getElementById(id)});
-
-        setDefaultInputEventBindings(proxy._viewer.inputEventBindings);
-
-        if (state) {
-            state["position"] = immutableDefaultCandidateState.position;
-            state["projectionOrientation"] = immutableDefaultCandidateState.projectionOrientation;
-            state["projectionScale"] = immutableDefaultCandidateState.projectionScale;
-        }
-
-        let s = state || defaultCandidateState(proxy._searchLayers, proxy._segmentColors);
-
-        // proxy.applyCcfSegmentColors(s, proxy._searchLayers.CandidateCcfLayer, proxy._segmentColors);
-
-        if (s?.layers?.length > 0) {
-            s.layers[0].annotations = annotations;
-        } else {
-            s = defaultCandidateState(proxy._searchLayers);
-            s.layers[0].annotations = annotations;
-        }
-
-
-        proxy._colorScheme = colorScheme;
-        s.projectionBackgroundColor = colorScheme == "light" ? "#ffffff": "#242424";
-
-        proxy._viewer.state.reset();
-        proxy._viewer.state.restoreState(s);
-
-        const throttledSetUrlHash = debounce(
-            () => UserPreferences.Instance.candidateViewerState = proxy._viewer.state.toJSON(),
-            500
-        );
-
-        proxy._changeHandler = proxy._viewer.state.changed.add(throttledSetUrlHash);
-
-        proxy._defaultState = defaultCandidateState(proxy._searchLayers, proxy._segmentColors);
-
-        return proxy;
-    }
 
     public static configureSearchNeuroglancer(id: string, state: any, neuronSelectionDelegate: NeuronSelectionDelegate, somaSelectionDelegate: SomaSelectionDelegate, precomputedLocation: string, segmentColors: Map<string, string>, colorScheme: string): NeuroglancerProxy {
         const map = getDefaultRenderedDataPanelBindings();
@@ -270,31 +209,6 @@ export class NeuroglancerProxy {
         }
     }
 
-    public updateCandidateAnnotations(annotations: any, selectedSkeletonSegmentId: number = null) {
-        const state = this._viewer.state.toJSON();
-
-        let stateChanged = false;
-
-        if (state.layers?.length > 0) {
-            state.layers[0].annotations = annotations;
-            stateChanged = true;
-        }
-
-        if (state.layers?.length > 2) {
-            if (selectedSkeletonSegmentId) {
-                state.layers[2].segments = [selectedSkeletonSegmentId];
-            } else {
-                state.layers[2].segments = [];
-            }
-            stateChanged = true;
-        }
-
-        if (stateChanged) {
-            this._viewer.state.reset();
-            this._viewer.state.restoreState(state);
-        }
-    }
-
     public updateSearchReconstructions(somas: NeuronViewModel[], neurons: NeuronViewModel[] = []) {
         const state = this._viewer.state.toJSON();
 
@@ -367,14 +281,6 @@ export class NeuroglancerProxy {
         }
     }
 
-    public resetNeuroglancerState() {
-        const state = {...this._defaultState};
-        state.projectionBackgroundColor = this._colorScheme == "light" ? "#ffffff": "#242424";
-
-        this._viewer.state.reset();
-        this._viewer.state.restoreState(state);
-    }
-
     public resetView() {
         const state = this._viewer.state.toJSON();
 
@@ -384,30 +290,6 @@ export class NeuroglancerProxy {
         state.crossSectionScale = this._defaultState.crossSectionScale;
         state.showAxisLines = this._defaultState.showAxisLines;
         state.projectionBackgroundColor = this._colorScheme == "light" ? "#ffffff": "#242424";
-
-        this._viewer.state.reset();
-        this._viewer.state.restoreState(state);
-    }
-
-    public setPosition(x: number, y: number, z: number) {
-        const state = this._viewer.state.toJSON();
-
-        state.position = [x, y, z, 0];
-
-        this._viewer.state.reset();
-        this._viewer.state.restoreState(state);
-    }
-
-    public setCandidateAtlasStructures(ids: number[], includeWholeBrain: boolean = true) {
-        if (includeWholeBrain && ids.findIndex(s => s == 997) == -1) {
-            ids.push(997);
-        }
-
-        const segments = ids.map(s => s.toString());
-
-        const state = this._viewer.state.toJSON();
-
-        state.layers[this._searchLayers.CandidateCcfLayer.index].segments = segments;
 
         this._viewer.state.reset();
         this._viewer.state.restoreState(state);
@@ -473,127 +355,6 @@ function reconstructionLayer(layerDefinition: SearchLayer) {
     }
 
     return layer;
-}
-
-const immutableDefaultCandidateState = {
-    dimensions: {
-        "x": [
-            0.00001,
-            "m"
-        ],
-        "y": [
-            0.00001,
-            "m"
-        ],
-        "z": [
-            0.00001,
-            "m"
-        ],
-        "t": [
-            0.001,
-            "s"
-        ]
-    },
-    "position": [
-        659.5,
-        399.5,
-        569.5,
-        0
-    ],
-    "projectionOrientation": [
-        -0.2892743945121765,
-        0.45396557450294495,
-        0.1698378622531891,
-        0.8254639506340027
-    ],
-    "crossSectionScale": 2.7182818284590446,
-    "projectionScale": 2048,
-    "showAxisLines": false,
-    "layout": "3d",
-    "layerListPanel": {
-        "visible": false
-    },
-    "selection": {
-        "visible": false
-    },
-    "showDefaultAnnotations": false,
-    "crossSectionBackgroundColor": "#f3f4f5",
-    "projectionBackgroundColor": "#f3f4f5"
-}
-
-function defaultCandidateState(layers: SearchLayers, segmentColors: Map<string, string> = null) {
-    const state = {
-        ...immutableDefaultCandidateState,
-        "layers": [
-            {
-                "type": "annotation",
-                "source": {
-                    "url": layers.CandidateAnnotationLayer.source,
-                    "transform": {
-                        "outputDimensions": {
-                            "x": [
-                                0.00001,
-                                "m"
-                            ],
-                            "y": [
-                                0.00001,
-                                "m"
-                            ],
-                            "z": [
-                                0.00001,
-                                "m"
-                            ]
-                        }
-                    }
-                },
-                "tool": "annotatePoint",
-                "tab": "annotations",
-                "annotationColor": "#2184d0",
-                "annotations": [],
-                "annotationProperties": [
-                    {
-                        "id": "color",
-                        "type": "rgba",
-                        "default": "#ff0000ff"
-                    },
-                    {
-                        "id": "size",
-                        "type": "float32",
-                        "default": 10
-                    }
-                ],
-                "shader": "\nvoid main() {\n  setColor(prop_color());\n  setPointMarkerBorderColor(prop_color());\n  setPointMarkerSize(prop_size());\n}\n",
-                "name": layers.CandidateAnnotationLayer.name
-            },
-            {
-                "type": "segmentation",
-                "source": {
-                    "url": layers.CandidateCcfLayer.source,
-                    "subsources": {
-                        "default": true,
-                        "properties": true,
-                        "mesh": true
-                    },
-                    "enableDefaultSubsources": false
-                },
-                "tab": "source",
-                "segments": [997],
-                "objectAlpha": 0.20,
-                "name": layers.CandidateCcfLayer.name,
-                "visible": true
-            },
-            reconstructionLayer(layers.CandidateReconstructionLayer),
-        ],
-        "selectedLayer": {
-            "layer": layers.CandidateCcfLayer.name,
-        }
-    };
-
-    if (segmentColors) {
-        state.layers[1]["segmentColors"] = segmentColors;
-    }
-
-    return state;
 }
 
 const immutableDefaultSearchState = {

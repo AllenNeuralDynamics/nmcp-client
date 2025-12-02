@@ -3,23 +3,23 @@ import {useState} from "react";
 import {useMutation} from "@apollo/client";
 import {Button, Group, Stack, Text} from "@mantine/core";
 
-import {useConstants} from "../../../../hooks/useConstants";
-import {SpecimenShape} from "../../../../models/specimen";
-import {InjectionVirusShape} from "../../../../models/injectionVirus";
-import {FluorophoreShape} from "../../../../models/fluorophore";
-import {AtlasStructureShape} from "../../../../models/atlasStructure";
-import {toastCreateError, toastCreateSuccess} from "../../../common/NotificationHelper";
+import {useConstants} from "../../../hooks/useConstants";
+import {SpecimenShape} from "../../../models/specimen";
+import {InjectionVirusShape} from "../../../models/injectionVirus";
+import {FluorophoreShape} from "../../../models/fluorophore";
+import {AtlasStructureShape} from "../../../models/atlasStructure";
+import {toastCreateError, toastCreateSuccess} from "../../common/NotificationHelper";
 import {
     CREATE_INJECTION_MUTATION,
     CreateInjectionMutationResponse,
     CreateInjectionVariables, INJECTIONS_FOR_SPECIMEN_QUERY,
     InjectionVariables
-} from "../../../../graphql/injection";
-import {isNullOrUndefined} from "../../../../util/nodeUtil";
-import {AtlasStructureSelect} from "../../../common/AtlasStructureSelect";
-import {Autosuggest} from "../../../common/Autosuggest";
-import {SPECIMENS_QUERY} from "../../../../graphql/specimen";
-import {InjectionShape} from "../../../../models/injection";
+} from "../../../graphql/injection";
+import {isNullOrUndefined} from "../../../util/nodeUtil";
+import {AtlasStructureSelect} from "../../common/AtlasStructureSelect";
+import {Autosuggest} from "../../common/Autosuggest";
+import {SPECIMENS_QUERY} from "../../../graphql/specimen";
+import {InjectionShape} from "../../../models/injection";
 
 type AddInjectionProps = {
     sample: SpecimenShape;

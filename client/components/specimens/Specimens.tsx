@@ -4,22 +4,22 @@ import {useMutation, useQuery} from "@apollo/client";
 import {Button, Card, Center, Divider, Group, Loader, SimpleGrid, Table, Text} from "@mantine/core";
 import {IconPlus} from "@tabler/icons-react";
 
-import {usePreferences} from "../../../hooks/usePreferences";
-import {SpecimenShape} from "../../../models/specimen";
+import {usePreferences} from "../../hooks/usePreferences";
+import {SpecimenShape} from "../../models/specimen";
 import {SpecimenRow} from "./SpecimenRow";
 import {
     SPECIMEN_SAMPLE_MUTATION,
     CreateSampleMutationResponse,
     CreateSpecimenVariables,
-    DELETE_SPECIMEN_MUTATION, DeleteSpecimenMutationResponse, DeleteSpecimenVariables, SamplesQueryResponse, SPECIMENS_QUERY
-} from "../../../graphql/specimen";
-import {toastCreateError, toastDeleteError} from "../../common/NotificationHelper";
+    DELETE_SPECIMEN_MUTATION, DeleteSpecimenMutationResponse, DeleteSpecimenVariables, SpecimensQueryResponse, SPECIMENS_QUERY
+} from "../../graphql/specimen";
+import {toastCreateError, toastDeleteError} from "../common/NotificationHelper";
 import {InjectionsModal} from "./injections/InjectionsModal";
-import {PaginationHeader} from "../../common/PaginationHeader";
-import {MessageBox} from "../../common/MessageBox";
-import {GraphQLErrorAlert} from "../../common/GraphQLErrorAlert";
-import {CollectionSelect} from "../../common/CollectionSelect";
-import {COLLECTIONS_QUERY, CollectionsResponse} from "../../../graphql/collection";
+import {PaginationHeader} from "../common/PaginationHeader";
+import {MessageBox} from "../common/MessageBox";
+import {GraphQLErrorAlert} from "../common/GraphQLErrorAlert";
+import {CollectionSelect} from "../common/CollectionSelect";
+import {COLLECTIONS_QUERY, CollectionsResponse} from "../../graphql/collection";
 
 type SpecimensTableState = {
     offset?: number;
@@ -45,7 +45,7 @@ export const SpecimensTable = () => {
 
     const {data: collectionsData} = useQuery<CollectionsResponse>(COLLECTIONS_QUERY, {fetchPolicy: "cache-first"});
 
-    const {loading, error, data, previousData} = useQuery<SamplesQueryResponse>(SPECIMENS_QUERY, {fetchPolicy: "cache-first"});
+    const {loading, error, data, previousData} = useQuery<SpecimensQueryResponse>(SPECIMENS_QUERY, {fetchPolicy: "cache-first"});
 
     const [createSample, {loading: createLoading}] = useMutation<CreateSampleMutationResponse, CreateSpecimenVariables>(SPECIMEN_SAMPLE_MUTATION,
         {

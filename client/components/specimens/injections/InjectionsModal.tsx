@@ -4,14 +4,14 @@ import {useQuery} from "@apollo/client";
 import {Modal, Tabs, Box, LoadingOverlay} from "@mantine/core";
 import {IconPencil, IconPlus} from "@tabler/icons-react";
 
-import {INJECTIONS_FOR_SPECIMEN_QUERY, InjectionsForSpecimenQueryResponse, InjectionsForSpecimenVariables} from "../../../../graphql/injection";
-import {SpecimenShape} from "../../../../models/specimen";
-import {InjectionShape} from "../../../../models/injection";
-import {InjectionVirusShape} from "../../../../models/injectionVirus";
-import {FluorophoreShape} from "../../../../models/fluorophore";
+import {INJECTIONS_FOR_SPECIMEN_QUERY, InjectionsForSpecimenQueryResponse, InjectionsForSpecimenVariables} from "../../../graphql/injection";
+import {SpecimenShape} from "../../../models/specimen";
+import {InjectionShape} from "../../../models/injection";
+import {InjectionVirusShape} from "../../../models/injectionVirus";
+import {FluorophoreShape} from "../../../models/fluorophore";
 import {AddInjection} from "./AddInjection";
 import {EditInjectionsPanel} from "./ManageInjections";
-import {GraphQLErrorAlert} from "../../../common/GraphQLErrorAlert";
+import {GraphQLErrorAlert} from "../../common/GraphQLErrorAlert";
 
 type ManageInjectionsContentProps = {
     sample: SpecimenShape;

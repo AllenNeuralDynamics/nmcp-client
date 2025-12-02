@@ -21,7 +21,7 @@ import {ImportSomasModal} from "./soma/ImportSomasModal";
 import {SpecimenFilter} from "../common/filters/SpecimenFilter";
 import {OptionalFilter} from "../../viewmodel/candidateFilter";
 import {SpecimenSelect} from "../common/SpecimenSelect";
-import {SamplesQueryResponse, SPECIMENS_QUERY} from "../../graphql/specimen";
+import {SpecimensQueryResponse, SPECIMENS_QUERY} from "../../graphql/specimen";
 import {GraphQLErrorAlert} from "../common/GraphQLErrorAlert";
 import {usePreferences} from "../../hooks/usePreferences";
 import {MessageBox} from "../common/MessageBox";
@@ -61,7 +61,7 @@ export const Neurons = observer(() => {
             onError: (error) => toastCreateError(error)
         });
 
-    const specimenData = useQuery<SamplesQueryResponse>(SPECIMENS_QUERY, {fetchPolicy: "cache-first"});
+    const specimenData = useQuery<SpecimensQueryResponse>(SPECIMENS_QUERY, {fetchPolicy: "cache-first"});
 
     const sampleIds = specimenFilter.isEnabled ? specimenFilter.contents : [];
 

@@ -4,28 +4,28 @@ import {useMutation} from "@apollo/client";
 import {Button, Stack, Text, Table} from "@mantine/core";
 import {IconTrash} from "@tabler/icons-react";
 
-import {useConstants} from "../../../../hooks/useConstants";
+import {useConstants} from "../../../hooks/useConstants";
 import {
     toastCreateError,
     toastDeleteError,
     toastDeleteSuccess,
     toastUpdateError, toastUpdateSuccess
-} from "../../../common/NotificationHelper";
-import {SpecimenShape} from "../../../../models/specimen";
-import {InjectionShape} from "../../../../models/injection";
-import {AtlasStructureShape} from "../../../../models/atlasStructure";
-import {FluorophoreShape} from "../../../../models/fluorophore";
-import {InjectionVirusShape} from "../../../../models/injectionVirus";
+} from "../../common/NotificationHelper";
+import {SpecimenShape} from "../../../models/specimen";
+import {InjectionShape} from "../../../models/injection";
+import {AtlasStructureShape} from "../../../models/atlasStructure";
+import {FluorophoreShape} from "../../../models/fluorophore";
+import {InjectionVirusShape} from "../../../models/injectionVirus";
 import {
     DELETE_INJECTION_MUTATION,
     DeleteInjectionMutationResponse, DeleteInjectionVariables, INJECTIONS_FOR_SPECIMEN_QUERY,
     UPDATE_INJECTION_MUTATION,
     UpdateInjectionMutationResponse, UpdateInjectionVariables
-} from "../../../../graphql/injection";
-import {AtlasStructureSelect} from "../../../common/AtlasStructureSelect";
-import {Autosuggest} from "../../../common/Autosuggest";
-import {MessageBox} from "../../../common/MessageBox";
-import {SPECIMENS_QUERY} from "../../../../graphql/specimen";
+} from "../../../graphql/injection";
+import {AtlasStructureSelect} from "../../common/AtlasStructureSelect";
+import {Autosuggest} from "../../common/Autosuggest";
+import {MessageBox} from "../../common/MessageBox";
+import {SPECIMENS_QUERY} from "../../../graphql/specimen";
 
 interface IEditInjectionsPanelProps {
     sample: SpecimenShape;

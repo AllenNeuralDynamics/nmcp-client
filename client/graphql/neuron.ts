@@ -10,6 +10,7 @@ export const NEURON_RELATIONSHIP_FIELDS_FRAGMENT = gql`fragment NeuronRelationsh
     atlasStructure {
         id
         name
+        structureId
     }
     specimen {
         id
