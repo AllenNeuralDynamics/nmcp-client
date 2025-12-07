@@ -1,7 +1,7 @@
 import * as React from "react";
 import {Link} from "react-router-dom";
 import {useMutation} from "@apollo/client";
-import {Badge, Button, Group, Table} from "@mantine/core";
+import {Badge, Button, Group, Table, Text} from "@mantine/core";
 import {IconShare3, IconTrash} from "@tabler/icons-react";
 
 import {useConstants} from "../../hooks/useConstants";
@@ -134,42 +134,79 @@ export const NeuronRow = (props: NeuronRowProps) => {
         return null;
     }
 
-    return (
-        <Table.Tr key={props.neuron.id}>
-            <Table.Td style={{minWidth: "60px", maxWidth: "60px"}}>
-                <Group align="center" gap="sm">
-                    <InputPopup value={props.neuron.label} placeholder="(none)" onAccept={updateLabel}/>
-                    <Link to={`/neuron/${props.neuron.id}`}><IconShare3 style={{marginTop: "4px"}} size={18}/></Link>
-                </Group>
-            </Table.Td>
-            <Table.Td style={{maxWidth: "100px"}}>
-                {props.neuron.specimen.label}
-            </Table.Td>
-            <Table.Td style={{minWidth: "60px", maxWidth: "60px"}}>
-                <InputPopup value={formatKeywords(props.neuron.keywords)} placeholder="(none)" onAccept={updateKeywords}/>
-            </Table.Td>
-            <Table.Td style={{maxWidth: "140px"}}>
-                <InputPopup value={formatHortaLocation(props.neuron)} placeholder="(undefined)" onAccept={updateSampleSoma}
-                            isValidValueFcn={v => !parseSomaLocation(v).error}/>
-            </Table.Td>
-            <Table.Td style={{maxWidth: "140px"}}>
-                <InputPopup value={formatSomaLocation(props.neuron)} placeholder="(undefined)" onAccept={updateAtlasSoma}
-                            isValidValueFcn={v => !parseSomaLocation(v).error}/>
-            </Table.Td>
-            <Table.Td>
-                <AtlasStructureSelect value={props.neuron.atlasStructure ? constants.findStructure(props.neuron.atlasStructure.id) : null} clearable={true}
-                                      onChange={(s) => setTimeout(() => updateAtlasStructure(s), 200)}/>
-            </Table.Td>
-            <Table.Td style={{width: "180px"}}>
-                {props.neuron.reconstructionCount == 0 ?
-                    <Button leftSection={<IconTrash size={18}/>} variant="light" color="red" children="remove" onClick={() => props.onDelete(props.neuron)}/> :
-                    <Badge p={8} variant="light">
-                        {`${props.neuron.reconstructionCount} reconstruction${props.neuron.reconstructionCount != 1 ? "s" : ""}`}
+    const isPublished = props.neuron.published != null;
+
+    if (isPublished) {
+        return (
+            <Table.Tr key={props.neuron.id}>
+                <Table.Td style={{minWidth: "60px", maxWidth: "60px"}}>
+                    <Group align="center" gap="sm">
+                        <Text size="sm" c="dimmed">{props.neuron.label}</Text>
+                        <Link to={`/neuron/${props.neuron.id}`}><IconShare3 style={{marginTop: "4px"}} size={18}/></Link>
+                    </Group>
+                </Table.Td>
+                <Table.Td style={{maxWidth: "100px"}}>
+                    <Text size="sm" c="dimmed">{props.neuron.specimen.label}</Text>
+                </Table.Td>
+                <Table.Td style={{minWidth: "60px", maxWidth: "60px"}}>
+                    <Text size="sm" c="dimmed">{formatKeywords(props.neuron.keywords)}</Text>
+                </Table.Td>
+                <Table.Td style={{maxWidth: "140px"}}>
+                    <Text size="sm" c="dimmed">{formatHortaLocation(props.neuron)}</Text>
+                </Table.Td>
+                <Table.Td style={{maxWidth: "140px"}}>
+                    <Text size="sm" c="dimmed">{formatSomaLocation(props.neuron)}</Text>
+                </Table.Td>
+                <Table.Td>
+                    <Text size="sm" c="dimmed">{props.neuron.atlasStructure ? constants.findStructure(props.neuron.atlasStructure.id).name : "(none)"}</Text>
+                </Table.Td>
+                <Table.Td style={{width: "180px"}}>
+                    <Badge p={8} color="green" variant="light">
+                        Published
                     </Badge>
-                }
-            </Table.Td>
-        </Table.Tr>
-    );
+                </Table.Td>
+            </Table.Tr>
+        );
+
+    } else {
+        return (
+            <Table.Tr key={props.neuron.id}>
+                <Table.Td style={{minWidth: "60px", maxWidth: "60px"}}>
+                    <Group align="center" gap="sm">
+                        <InputPopup value={props.neuron.label} placeholder="(none)" onAccept={updateLabel}/>
+                        <Link to={`/neuron/${props.neuron.id}`}><IconShare3 style={{marginTop: "4px"}} size={18}/></Link>
+                    </Group>
+                </Table.Td>
+                <Table.Td style={{maxWidth: "100px"}}>
+                    {props.neuron.specimen.label}
+                </Table.Td>
+                <Table.Td style={{minWidth: "60px", maxWidth: "60px"}}>
+                    <InputPopup value={formatKeywords(props.neuron.keywords)} placeholder="(none)" onAccept={updateKeywords}/>
+                </Table.Td>
+                <Table.Td style={{maxWidth: "140px"}}>
+                    <InputPopup value={formatHortaLocation(props.neuron)} placeholder="(undefined)" onAccept={updateSampleSoma}
+                                isValidValueFcn={v => !parseSomaLocation(v).error}/>
+                </Table.Td>
+                <Table.Td style={{maxWidth: "140px"}}>
+                    <InputPopup value={formatSomaLocation(props.neuron)} placeholder="(undefined)" onAccept={updateAtlasSoma}
+                                isValidValueFcn={v => !parseSomaLocation(v).error}/>
+                </Table.Td>
+                <Table.Td>
+                    <AtlasStructureSelect value={props.neuron.atlasStructure ? constants.findStructure(props.neuron.atlasStructure.id) : null} clearable={true}
+                                          onChange={(s) => setTimeout(() => updateAtlasStructure(s), 200)}/>
+                </Table.Td>
+                <Table.Td style={{width: "180px"}}>
+                    {props.neuron.reconstructionCount == 0 ?
+                        <Button leftSection={<IconTrash size={18}/>} variant="light" color="red" children="remove"
+                                onClick={() => props.onDelete(props.neuron)}/> :
+                        <Badge p={8} variant="light">
+                            {`${props.neuron.reconstructionCount} reconstruction${props.neuron.reconstructionCount != 1 ? "s" : ""}`}
+                        </Badge>
+                    }
+                </Table.Td>
+            </Table.Tr>
+        );
+    }
 }
 
 function onNeuronUpdated(data: NeuronShape) {

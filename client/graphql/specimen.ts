@@ -1,6 +1,6 @@
 import gql from "graphql-tag";
 
-import {SpecimenShape} from "../models/specimen";
+import {SpecimenShape, Tomography} from "../models/specimen";
 
 export const SPECIMEN_FIELDS_FRAGMENT = gql`fragment SpecimenFields on Specimen {
     id
@@ -93,6 +93,7 @@ type SpecimenMutateArgs = {
     label?: string;
     notes?: string;
     referenceDate?: number;
+    tomography?: Tomography;
     genotypeId?: string;
     genotypeName?: string;
     collectionId?: string;

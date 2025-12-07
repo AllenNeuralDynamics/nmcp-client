@@ -10,7 +10,6 @@ import {useUIQuery} from "../../../hooks/useUIQuery";
 import {useAppLayout} from "../../../hooks/useAppLayout";
 import {useAtlas} from "../../../hooks/useAtlas";
 import {usePreferences} from "../../../hooks/usePreferences";
-import {NeuroglancerProxy} from "../../../viewer/neuroglancerProxy";
 
 export const QueryHeader = observer(() => {
     const client = useApolloClient();
@@ -56,11 +55,13 @@ export const QueryHeader = observer(() => {
         const baseUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname}`;
         let shareUrl = `${baseUrl}?q=${encodedQuery}`;
 
+        /* TODO
         const ngState = NeuroglancerProxy.SearchNeuroglancer?.State;
 
         if (ngState) {
             shareUrl += `#!${btoa(JSON.stringify(ngState))}`;
         }
+        */
 
         if (navigator.clipboard && navigator.clipboard.writeText) {
             try {

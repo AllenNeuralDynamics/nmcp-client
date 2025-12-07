@@ -4,14 +4,12 @@ import {useComputedColorScheme} from "@mantine/core";
 import {useResizeObserver} from "@mantine/hooks";
 
 import {SceneViewer} from "../../../viewer/preview/sceneViewer";
-import {NeuronStructureKind} from "../../../models/neuronStructure";
 import {viewerBackgroundDark, viewerBackgroundDarkString, viewerBackgroundLight, viewerBackgroundLightString} from "../../../index";
 
 type FilePreviewProps = {
     style?: CSSProperties
     elementName: string;
-    files: File[];
-    forceStructure?: NeuronStructureKind;
+    file: File;
 
     onDrop?(file: File): void;
     onDrops?(files: File[]): void;
@@ -47,27 +45,18 @@ export const FilePreview = (props: FilePreviewProps) => {
 
         let interrupted = false;
 
-        if (props.files.length == 0) {
+        if (props.file == null) {
             sceneViewer.removeNeurons();
             return;
         }
 
         const loadData = async () => {
             try {
-                if (props.files.length == 1) {
-                    const count = await sceneViewer.loadFile(props.files[0]);
+                if (props.file) {
+                    const count = await sceneViewer.loadFiles(props.file);
 
                     if (!interrupted) {
                         props.onLoaded(count);
-                    }
-                } else if (props.files.length == 2) {
-                    sceneViewer.removeNeurons();
-
-                    const axonCount = props.files[0] ? await sceneViewer.loadFile(props.files[0], NeuronStructureKind.axon, true) : [0, 0];
-                    const dendriteCount = props.files[1] ? await sceneViewer.loadFile(props.files[1], NeuronStructureKind.dendrite, true) : [0, 0];
-
-                    if (!interrupted) {
-                        props.onLoaded([axonCount[0], dendriteCount[1]]);
                     }
                 } else {
                     if (!interrupted) {
@@ -86,7 +75,7 @@ export const FilePreview = (props: FilePreviewProps) => {
         return () => {
             interrupted = true;
         };
-    }, [props.files, props.forceStructure]);
+    }, [props.file]);
 
     sceneViewer?.SceneManager?.setSize(rect.width, rect.height);
 

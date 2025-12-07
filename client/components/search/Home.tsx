@@ -2,11 +2,10 @@ import * as React from "react";
 import {useEffect} from "react";
 import {observer} from "mobx-react-lite";
 import {useApolloClient} from "@apollo/client";
-import {Stack, useMantineColorScheme} from "@mantine/core";
+import {Stack} from "@mantine/core";
 
 import {QueryPage} from "./QueryPage";
 import {UserPreferences} from "../../util/userPreferences";
-import {NeuroglancerProxy} from "../../viewer/neuroglancerProxy";
 import {useConstants} from "../../hooks/useConstants";
 import {useUIQuery} from "../../hooks/useUIQuery";
 import {useQueryResponseViewModel} from "../../hooks/useQueryResponseViewModel";
@@ -40,7 +39,7 @@ export const Home = observer(() => {
         if (ngParam) {
             try {
                 const decodedState = JSON.parse(atob(ngParam.slice(2)));
-                NeuroglancerProxy.applyQueryParameterState(decodedState);
+                // NeuroglancerProxy.applyQueryParameterState(decodedState);
             } catch (e) {
                 console.warn("Invalid Neuroglancer query parameter:", e);
             }

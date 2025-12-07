@@ -287,7 +287,7 @@ export type UpdateReconstructionResponse = {
 //
 
 export const UPLOAD_JSON_MUTATION = gql`
-    mutation UploadJsonData($uploadArgs: JsonUploadArgs!) {
+    mutation UploadJsonData($uploadArgs: ReconstructionUploadArgs!) {
         uploadJsonData(uploadArgs: $uploadArgs) {
             id
             status
@@ -304,7 +304,7 @@ ${AtlasReconstructionFieldsFragment}
 `;
 
 export const UPLOAD_SWC_MUTATION = gql`
-    mutation UploadSwcData($uploadArgs: SwcUploadArgs!) {
+    mutation UploadSwcData($uploadArgs: ReconstructionUploadArgs!) {
         uploadSwcData(uploadArgs: $uploadArgs) {
             id
             status
@@ -325,21 +325,16 @@ type UploadArgs = {
     reconstructionSpace: ReconstructionSpace;
 }
 
-type JsonUploadArgs = UploadArgs & {
+type ReconstructionUploadArgs = UploadArgs & {
     file: File
 }
 
-type SwcUploadArgs = UploadArgs & {
-    axonFile: File;
-    dendriteFile: File;
-}
-
 export type UploadUnregisteredJsonVariables = {
-    uploadArgs: JsonUploadArgs
+    uploadArgs: ReconstructionUploadArgs
 }
 
 export type UploadUnregisteredSwcVariables = {
-    uploadArgs: SwcUploadArgs
+    uploadArgs: ReconstructionUploadArgs
 }
 
 export type UploadJsonResponse = {

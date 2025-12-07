@@ -18,4 +18,6 @@ export interface AtlasReconstruction {
     qualityCheckStatus: number;
     qualityCheckAt: Date;
     searchIndexedAt: Date;
+    createdAt: Date;
+    updatedAt: Date;
 }

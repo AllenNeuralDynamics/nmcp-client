@@ -5,30 +5,18 @@ export function viewerBackgroundColor(isDark: boolean) {
     return isDark ? darkBackgroundColor : lightBackgroundColor;
 }
 
+const defaultDimensions = {
+    x: [0.00001, "m"],
+    y: [0.00001, "m"],
+    z: [0.00001, "m"]
+};
+
 export const immutableDefaultState = {
-    dimensions: {
-        x: [
-            0.00001,
-            "m"
-        ],
-        y: [
-            0.00001,
-            "m"
-        ],
-        z: [
-            0.00001,
-            "m"
-        ],
-        t: [
-            0.001,
-            "s"
-        ]
-    },
+    dimensions: defaultDimensions,
     position: [
         659.5,
         399.5,
-        569.5,
-        0
+        569.5
     ],
     projectionOrientation: [
         -0.2892743945121765,
@@ -47,4 +35,13 @@ export const immutableDefaultState = {
         visible: false
     },
     showDefaultAnnotations: false
+}
+
+export const mirrorCCFv3Transform = {
+    matrix: [
+        [1, 0, 0, 0],
+        [0, 1, 0, 0],
+        [0, 0, -1, 1140]
+    ],
+    outputDimensions: defaultDimensions
 }

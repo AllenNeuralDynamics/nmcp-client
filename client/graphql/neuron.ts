@@ -15,11 +15,20 @@ export const NEURON_RELATIONSHIP_FIELDS_FRAGMENT = gql`fragment NeuronRelationsh
     specimen {
         id
         label
+        tomography {
+            url
+            options {
+                range
+                window
+            }
+        }
+        createdAt
     }
     published {
         id
         status
         searchIndexedAt
+        updatedAt
     }
 }`;
 
@@ -42,14 +51,35 @@ export const NEURON_BASE_FIELDS_FRAGMENT = gql`fragment NeuronBaseFields on Neur
     updatedAt
 }`;
 
+export const NEURON_VERSIONS_RELATIONSHIPS_FRAGMENT = gql`fragment NeuronVersionsRelationshipFields on Neuron {
+    reconstructions {
+        id
+        createdAt
+        precomputed {
+            id
+            skeletonId
+        }
+        atlasReconstruction {
+            id
+            precomputed {
+                id
+                skeletonId
+            }
+            createdAt
+        }
+    }
+}`;
+
 export const NEURON_VERSIONS_QUERY = gql`query NeuronQuery($id: String!) {
     neuron(id: $id) {
         ...NeuronBaseFields
         ...NeuronRelationshipFields
+        ...NeuronVersionsRelationshipFields
     }
 }
 ${NEURON_BASE_FIELDS_FRAGMENT}
 ${NEURON_RELATIONSHIP_FIELDS_FRAGMENT}
+${NEURON_VERSIONS_RELATIONSHIPS_FRAGMENT}
 `;
 
 export type NeuronVersionsQueryVariables = {

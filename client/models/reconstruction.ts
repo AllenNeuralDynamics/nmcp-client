@@ -4,6 +4,7 @@ import {ReconstructionStatus} from "./reconstructionStatus";
 import {NeuronShape} from "./neuron";
 import {AtlasReconstructionStatus} from "./atlasReconstructionStatus";
 import {QualityControl} from "./qualityControl";
+import {Precomputed} from "./precomputed";
 
 export type NodeCount = {
     total: number;
@@ -32,6 +33,7 @@ export type Reconstruction = {
     annotator: User;
     reviewer: User;
     neuron: NeuronShape;
+    precomputed: Precomputed;
     atlasReconstruction: AtlasReconstruction;
     publishedAt: Date;
     createdAt: Date;

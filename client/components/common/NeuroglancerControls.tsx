@@ -1,7 +1,7 @@
 import * as React from "react";
 import {useEffect, useState} from "react";
 import {observer} from "mobx-react-lite";
-import {ActionIcon, Badge, Divider, Group, Text, Tooltip} from "@mantine/core";
+import {ActionIcon, Divider, Group, Text, Tooltip} from "@mantine/core";
 import {useThrottledCallback} from "@mantine/hooks";
 import {IconAdjustmentsAlt, IconAlertTriangle, IconChartScatter3d, IconInfoCircle, IconRestore} from "@tabler/icons-react";
 

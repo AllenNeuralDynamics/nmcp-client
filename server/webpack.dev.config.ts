@@ -2,16 +2,16 @@ import * as path from "path";
 import webpack from "webpack";
 
 // @ts-ignore
-import { dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const dist = path.join(__dirname, "public");
 
-import { createRequire } from 'node:module';
+import { createRequire } from "node:module";
 
 const require = createRequire(import.meta.url);
-const pathName = require.resolve('path-browserify');
+const pathName = require.resolve("path-browserify");
 
 export const webpackConfig = {
     entry: [
@@ -19,9 +19,9 @@ export const webpackConfig = {
     ],
 
     output: {
-        filename: 'bundle.js',
+        filename: "bundle.js",
         path: dist,
-        publicPath: '/'
+        publicPath: "/"
     },
 
     mode: "development",
@@ -30,18 +30,18 @@ export const webpackConfig = {
         rules: [
             {
                 test: /\.tsx?$/,
-                loader: 'ts-loader',
+                loader: "ts-loader",
                 exclude: /node_modules/
             },
-            {test: /\.css$/, use: 'style-loader'},
-            {test: /\.css$/, use: 'css-loader'},
+            {test: /\.css$/, use: "style-loader"},
+            {test: /\.css$/, use: "css-loader"},
             {
                 test: /\.png/,
-                type: 'asset/resource'
+                type: "asset/resource"
             },
             {
                 test: /\.svg/,
-                type: 'asset/resource'
+                type: "asset/resource"
             },
             // Needed for .svg?raw imports used for embedding icons.
             {
@@ -64,15 +64,15 @@ export const webpackConfig = {
     },
 
     resolve: {
-        fallback: { 'path': pathName },
+        fallback: { "path": pathName },
         extensions: [".tsx", ".ts", ".js"]
     },
 
     plugins: [
         new webpack.DefinePlugin({
-            'process.env.AUTH_ENV': JSON.stringify("development")
+            "process.env.AUTH_ENV": JSON.stringify("development")
         })
     ],
 
-    devtool: 'inline-source-map'
+    devtool: "eval-source-map"
 };

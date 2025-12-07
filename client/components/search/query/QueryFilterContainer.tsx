@@ -17,7 +17,7 @@ export const QueryFilterContainer = observer(() => {
     const predicates = uiPredicates.predicates;
 
     const renderPredicates = () => predicates.map((q, index) => (
-            <QueryFilter queryFilter={q}
+            <QueryFilter queryFilter={q} key={index}
                          isSolo={predicates.length == 1}
                          isComposite={index > 0}
                          isRemovable={predicates.length > 1}

@@ -47,6 +47,7 @@ export const SpecimensTable = () => {
 
     const {loading, error, data, previousData} = useQuery<SpecimensQueryResponse>(SPECIMENS_QUERY, {fetchPolicy: "cache-first"});
 
+
     const [createSample, {loading: createLoading}] = useMutation<CreateSampleMutationResponse, CreateSpecimenVariables>(SPECIMEN_SAMPLE_MUTATION,
         {
             refetchQueries: [SPECIMENS_QUERY],
@@ -154,19 +155,23 @@ export const SpecimensTable = () => {
         setState({...state, requestedSampleForDelete: sample})
     };
 
-    const samples = specimens.slice(state.offset, state.offset + state.limit);
+    const actualOffset = Math.min(Math.max(specimens.length - state.offset, 0));
+
+    const specimenSubset = specimens.slice(actualOffset, actualOffset + state.limit);
 
     const pageCount = Math.ceil(totalCount / state.limit);
 
-    const activePage = (state.offset ? (Math.floor(state.offset / state.limit) + 1) : 1);
+    const activePage = Math.min(pageCount, (Math.floor(actualOffset / state.limit) + 1));
 
-    const start = state.offset + 1;
+    const start = actualOffset + 1;
 
-    const end = Math.min(state.offset + state.limit, totalCount);
+    const end = Math.min(actualOffset + state.limit, totalCount);
 
-    const rows = samples.map(s => {
+    const rows = specimenSubset.map(s => {
         return <SpecimenRow key={s.id} specimen={s} requestDelete={setSampleForDelete} manageInjections={onRequestManageInjections}/>
     });
+
+    const totalMessage = totalCount >= 0 ? (totalCount > 0 ? (totalCount > 1 ? `Showing ${start} to ${end} of ${totalCount} specimens` : "Showing 1 of 1 specimen") : "There are no specimens") : ""
 
     const table = (
         <Table>
@@ -211,14 +216,14 @@ export const SpecimensTable = () => {
                 </Card.Section>
                 <Card.Section>
                     <Divider orientation="horizontal"/>
-                    {samples.length == 0 ? <Center><Text c="dimmed" p={24}>There are no specimens.</Text></Center> : table}
+                    {specimenSubset.length == 0 ? <Center><Text c="dimmed" p={24}>There are no specimens.</Text></Center> : table}
                 </Card.Section>
-                {samples.length > 0 ?
+                {specimenSubset.length > 0 ?
                     <Card.Section bg="segment">
                         <Divider orientation="horizontal"/>
                         <SimpleGrid cols={3} p={8}>
                             <Text
-                                size="sm">{totalCount >= 0 ? (totalCount > 0 ? `Showing ${start} to ${end} of ${totalCount} specimens` : "There are no specimens") : ""}</Text>
+                                size="sm">{totalMessage}</Text>
                             <Text size="sm" ta="center" c="dimmed">Click a cell value to modify a value</Text>
                             <Text size="sm" ta="end">{`Page ${activePage} of ${pageCount}`}</Text>
                         </SimpleGrid>

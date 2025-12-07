@@ -17,6 +17,7 @@ const UNSPECIFIED = "(unspecified)";
 
 export const Specimen = observer(() => {
     const {specimenId} = useParams();
+
     const clipboard = useClipboard();
 
     const appLayout = useAppLayout();

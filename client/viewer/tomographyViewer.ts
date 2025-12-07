@@ -2,9 +2,6 @@ import {NeuroglancerViewer} from "./neuroglancerViewer";
 import {LayerType, NeuroglancerLayerSource} from "./neuroglancerLayer";
 import {Tomography, TomographyRange} from "../models/specimen";
 
-// s3://aind-open-data/exaSPIM_685221_2024-04-12_11-46-38_fusion_2024-07-22_21-00-15/fused.zarr
-// s3://aind-open-data/exaSPIM_685222_2024-05-07_13-51-39_fusion_2024-07-29_17-28-26/fused.zarr
-
 const defaultTomographyViewerState = {
     "dimensions": {
         "x": [
@@ -61,7 +58,6 @@ const createTomographySource = (name: string, source: string, range: TomographyR
     return {
         name: name,
         type: LayerType.image,
-        isMirror: false,
         source: source,
         options: {
             localDimensions: {
@@ -85,9 +81,11 @@ export class TomographyViewer extends NeuroglancerViewer {
     }
 
     public setTomography(name: string, tomography: Tomography) {
-        const state = this.ensureLayer(createTomographySource(name, `zarr://${tomography.url}`, tomography.options?.range, tomography.options?.window), this.currentState);
+        if (tomography?.url) {
+            const state = this.ensureLayer(createTomographySource(name, `zarr://${tomography.url}`, tomography.options?.range, tomography.options?.window), this.currentState);
 
-        this.restoreState(state);
+            this.restoreState(state);
+        }
     }
 
     public resetView() {

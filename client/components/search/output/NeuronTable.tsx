@@ -9,6 +9,7 @@ import {getViewMode, NEURON_VIEW_MODES} from "../../../viewmodel/neuronViewMode"
 import {NeuronViewModel} from "../../../viewmodel/neuronViewModel";
 import {NeuronViewModelModal} from "./NeuronViewModelModal";
 import {Dropdown} from "../../common/Dropdown";
+import {Link} from "react-router-dom";
 
 const swatches = ['#2e2e2e', '#868e96', '#fa5252', '#e64980', '#be4bdb', '#7950f2', '#4c6ef5', '#228be6', '#15aabf', '#12b886', '#40c057', '#82c91e', '#fab005', '#fd7e14'];
 
@@ -49,7 +50,6 @@ export const NeuronRow = observer((props: NeuronRowProps) => {
                 <Dropdown data={viewModeNames} value={props.neuronViewModel.viewMode.id}
                           onChange={(value) => {
                               v.viewMode = getViewMode(value);
-                              console.log(value);
                           }}/>
             </Table.Td>
 
@@ -60,7 +60,7 @@ export const NeuronRow = observer((props: NeuronRowProps) => {
             </Table.Td>
             <Table.Td style={{verticalAlign: "middle"}}>
                 <Stack gap={0}>
-                    {v.Label}
+                    <Link to={`/neuron/${v.neuron.id}`}>{v.Label}</Link>
                     <Text size="xs" c="dimmed">{v.neuron.specimen.label}</Text>
                 </Stack>
             </Table.Td>

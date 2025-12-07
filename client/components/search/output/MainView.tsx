@@ -8,7 +8,7 @@ import {useAppLayout} from "../../../hooks/useAppLayout";
 import {NeuronListContainer} from "./NeuronListContainer";
 import {AtlasContainer} from "./atlas/AtlasContainer";
 import {DrawerState} from "../../../viewmodel/appLayout";
-import {ViewerContainer} from "./ViewerContainer";
+import {SearchView} from "./SearchView";
 
 export const MainView = observer(() => {
     const appLayout = useAppLayout();
@@ -25,7 +25,7 @@ export const MainView = observer(() => {
         <Group ref={ref} gap={0} align="stretch" style={{flexGrow: 1, flexShrink: 0, flexBasis: 0, minHeight: 0}} preventGrowOverflow={false}>
             {neuronListDock}
             <div style={{order: 1, flexGrow: 1, display: "flex", justifyContent: "stretch"}}>
-                <ViewerContainer maxHeight={height}/>
+                <SearchView height={height - 40}/>
             </div>
             {compartmentListDock}
         </Group>
