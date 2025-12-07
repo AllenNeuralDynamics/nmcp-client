@@ -101,6 +101,36 @@ export class NeuroglancerViewer {
     protected onSelectionChanged(layerSelection: any) {
     }
 
+    protected selectFromAnnotationLayer(layerSelection: any, name: string, state: any): string {
+        const index = this.findLayer(name, state);
+
+        if (index == null || index == -1) {
+            return null;
+        }
+
+        if (layerSelection[name] && layerSelection[name]["annotationId"]) {
+            return layerSelection[name]["annotationId"];
+        }
+
+        return null;
+    }
+
+
+    protected selectFromSegmentationLayer(layerSelection: any, name: string, state: any): number {
+        const index = this.findLayer(name, state);
+
+        if (index == null || index == -1) {
+            return null;
+        }
+
+        if (layerSelection[name] && layerSelection[name]["value"] && layerSelection[name]["value"]["key"]) {
+            const value = parseInt(layerSelection[name]["value"]["key"]);
+            return isNaN(value) ? null : value;
+        }
+
+        return null;
+    }
+
     protected restoreState(state: object) {
         if (state) {
             this.viewer.state.reset();
@@ -130,21 +160,29 @@ export class NeuroglancerViewer {
         }
     }
 
-    protected ensureLayer(source: NeuroglancerLayerSource, state: any, exclusive: boolean = false): any {
-        const current = this.findLayer(source.name, state);
+    protected ensureLayer(layerSource: NeuroglancerLayerSource, state: any, exclusive: boolean = false): any {
+        const current = this.findLayer(layerSource.name, state);
 
         if (current && current >= 0) {
             return;
         }
 
+        const source = {
+            url: layerSource.source,
+        }
+
+        if (layerSource.transform) {
+            source["transform"] = layerSource.transform;
+        }
+
+        console.log(source);
+
         const layer: any = {
-            name: source.name,
-            type: LayerType[source.type],
-            source: {
-                url: source.source
-            },
+            name: layerSource.name,
+            type: LayerType[layerSource.type],
+            source: source,
             visible: true,
-            ...source.options
+            ...layerSource.options
         };
 
         if (state.layers && !exclusive) {

@@ -8,7 +8,6 @@ export type SelectionListener = (id: string) => void;
 const candidateLayerSource: NeuroglancerLayerSource = {
     name: "Candidates",
     type: LayerType.annotation,
-    isMirror: false,
     source: "local://annotations",
     options: {
         tool: "annotatePoint",
@@ -90,10 +89,10 @@ export class CandidateViewer extends AtlasViewer {
             }
 
             if (neuron.atlasStructure?.structureId) {
-                this.includeAtlasStructures(state, [neuron.atlasStructure.structureId], true);
+                this.includeAtlasStructures([neuron.atlasStructure.structureId], state, true);
             }
         } else {
-            this.includeAtlasStructures(state, [], true);
+            this.includeAtlasStructures([], state, true);
         }
     }
 

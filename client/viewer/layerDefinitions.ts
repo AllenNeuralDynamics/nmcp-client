@@ -6,10 +6,6 @@ export type SearchLayer = {
 }
 
 export class SearchLayers {
-    public CandidateCcfLayer: SearchLayer;
-    public CandidateAnnotationLayer: SearchLayer;
-    public CandidateReconstructionLayer: SearchLayer;
-
     public SearchCcfLayer: SearchLayer;
     public SearchSomaAnnotationLayer: SearchLayer;
     public SearchReconstructionLayer: SearchLayer;
@@ -22,10 +18,6 @@ export class SearchLayers {
     public SearchSelectionLayers: SearchLayer[];
 
     public constructor(precomputedUrl: string) {
-        this.CandidateAnnotationLayer = {name: "Candidates", index: 0, isMirror: false, source: "local://annotations"};
-        this.CandidateCcfLayer = {name: "CCF", index: 1, isMirror: false, source: "precomputed://gs://allen_neuroglancer_ccf/ccf_test1"};
-        this.CandidateReconstructionLayer = {name: "Pending Reconstructions", index: 2, isMirror: false, source: `${precomputedUrl}/candidates`};
-
         this.SearchCcfLayer = {name: "CCF", index: 0, isMirror: false, source: "precomputed://gs://allen_neuroglancer_ccf/ccf_test1"};
         this.SearchSomaAnnotationLayer = {name: "Soma", index: 1, isMirror: false, source: "local://annotations"};
         this.SearchReconstructionLayer = {name: "Reconstruction", index: 2, isMirror: false, source: `${precomputedUrl}/full`};

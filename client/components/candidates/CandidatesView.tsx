@@ -49,7 +49,7 @@ export const CandidatesView = (props: CandidatesViewProps) => {
         if (viewer) {
             viewer.updateNeurons(props.neurons, props.selected);
         }
-    }, [props.neurons, [props.selected]]);
+    }, [props.neurons, props.selected]);
 
     const selectNeuron = (id: string) => {
         if (id != props.selected?.id) {

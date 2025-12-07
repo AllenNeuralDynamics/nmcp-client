@@ -2,12 +2,12 @@ import * as React from "react";
 import {useState} from "react";
 import {observer} from "mobx-react-lite";
 import {Stack} from "@mantine/core";
-import {useResizeObserver} from "@mantine/hooks";
 
 import {ViewerSelection} from "./ViewerSelection";
 import {NeuroglancerContainer} from "./NeuroglancerContainer";
 import {AtlasNode} from "../../../models/atlasNode";
 import {NeuronViewModel} from "../../../viewmodel/neuronViewModel";
+import {NeuroglancerContainer2} from "./NeuroglancerContainer2";
 
 export const ReconstructionViewer = observer(({height, positionChanged}: { height: number, positionChanged: (p: number[]) => void } = null) => {
     const [selectedState, setSelectedState] = useState<{ selectedNeuron: NeuronViewModel, selectedNode: AtlasNode }>({
@@ -25,8 +25,8 @@ export const ReconstructionViewer = observer(({height, positionChanged}: { heigh
         }
     }
 
-    const viewerContainer = <NeuroglancerContainer elementName="neuroglancer-viewer-container" height={height}
-                                                   onPositionChanged={positionChanged}
+    const viewerContainer = <NeuroglancerContainer2 elementName="neuroglancer-viewer-container" height={height}
+                                                   // onPositionChanged={positionChanged}
                                                    onSelectNode={(n, t, a, b, c) => onSelectNodeFromTracingNode(n, t, a, b, c)}/>
 
     return (

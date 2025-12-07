@@ -1,5 +1,11 @@
 import {NeuroglancerViewer} from "./neuroglancerViewer";
-import {defaultAtlasLayerSource} from "./neuroglancerLayer";
+import {LayerType, NeuroglancerLayerSource} from "./neuroglancerLayer";
+
+export const defaultAtlasLayerSource: NeuroglancerLayerSource = {
+    name: "Atlas",
+    type: LayerType.segmentation,
+    source: "precomputed://gs://allen_neuroglancer_ccf/ccf_test1"
+};
 
 export class AtlasViewer extends NeuroglancerViewer {
     private readonly _atlasSegmentColors: Map<string, string>
@@ -22,7 +28,7 @@ export class AtlasViewer extends NeuroglancerViewer {
         }), state);
     }
 
-    protected includeAtlasStructures(state: any, ids: number[], includeRoot: boolean = false) {
+    protected includeAtlasStructures(ids: number[], state: any, includeRoot: boolean = false): any {
         if (includeRoot && ids.findIndex(s => s == 997) == -1) {
             ids.push(997);
         }
@@ -32,5 +38,7 @@ export class AtlasViewer extends NeuroglancerViewer {
         const layerIndex = this.findLayer(defaultAtlasLayerSource.name, state);
 
         state.layers[layerIndex].segments = segments;
+
+        return state;
     }
 }

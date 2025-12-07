@@ -48,3 +48,40 @@ export const immutableDefaultState = {
     },
     showDefaultAnnotations: false
 }
+
+export const mirrorCCFv3Transform = {
+    matrix: [
+        [
+            1,
+            0,
+            0,
+            0
+        ],
+        [
+            0,
+            1,
+            0,
+            0
+        ],
+        [
+            0,
+            0,
+            -1,
+            1140
+        ]
+    ],
+    outputDimensions: {
+        x: [
+            0.00001,
+            "m"
+        ],
+        y: [
+            0.00001,
+            "m"
+        ],
+        z: [
+            0.00001,
+            "m"
+        ]
+    }
+}
