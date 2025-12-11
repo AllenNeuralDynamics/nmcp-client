@@ -149,8 +149,7 @@ export class SearchViewer extends AtlasViewer {
                 point: [
                     soma.x / 10,
                     soma.y / 10,
-                    soma.z / 10,
-                    0
+                    soma.z / 10
                 ],
                 props: [n.baseColor, 3]
             };

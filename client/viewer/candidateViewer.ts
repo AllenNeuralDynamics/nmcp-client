@@ -107,8 +107,7 @@ export class CandidateViewer extends AtlasViewer {
                 point: [
                     (n.atlasSoma.x) / 10,
                     (n.atlasSoma.y) / 10,
-                    (n.atlasSoma.z) / 10,
-                    0
+                    (n.atlasSoma.z) / 10
                 ],
                 props: [n == selected ? "#00ff00ff" : defaultColor, n == selected ? "#ffffffff" : "#000000ff", n == selected ? 5 : defaultSize]
             }

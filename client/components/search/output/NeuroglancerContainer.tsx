@@ -1,21 +1,19 @@
 import * as React from "react";
 import {useEffect, useState} from "react";
+import {observer} from "mobx-react-lite";
 import {useLazyQuery} from "@apollo/client";
+import {useComputedColorScheme} from "@mantine/core";
 
-import {NeuroglancerProxy} from "../../../viewer/neuroglancerProxy";
-import {UserPreferences} from "../../../util/userPreferences";
 import {NeuronViewModel} from "../../../viewmodel/neuronViewModel";
-import {NEURON_VIEW_MODE_SOMA} from "../../../viewmodel/neuronViewMode";
 import {NEAREST_NODE_QUERY, NearestNodeQueryResponse, NearestNodeQueryVariables} from "../../../graphql/search";
 import {useSystemConfiguration} from "../../../hooks/useSystemConfiguration";
-import {observer} from "mobx-react-lite";
 import {useQueryResponseViewModel} from "../../../hooks/useQueryResponseViewModel";
 import {useConstants} from "../../../hooks/useConstants";
 import {useAtlas} from "../../../hooks/useAtlas";
 import {AtlasNode} from "../../../models/atlasNode";
-import {useComputedColorScheme} from "@mantine/core";
+import {SearchViewer} from "../../../viewer/searchViewer";
 
-export type NeuroglancerContainerProps = {
+type NeuroglancerContainerProps = {
     elementName: string
     height: number;
 
@@ -24,7 +22,7 @@ export type NeuroglancerContainerProps = {
 }
 
 export const NeuroglancerContainer = observer<NeuroglancerContainerProps>((props) => {
-    const [ngProxy, setNgProxy] = useState<NeuroglancerProxy>(null);
+    const [viewer, setViewer] = useState<SearchViewer>(null);
 
     const constants = useConstants().AtlasConstants;
     const systemConfiguration = useSystemConfiguration();
@@ -36,42 +34,43 @@ export const NeuroglancerContainer = observer<NeuroglancerContainerProps>((props
     const [getNearest] = useLazyQuery<NearestNodeQueryResponse, NearestNodeQueryVariables>(NEAREST_NODE_QUERY);
 
     useEffect(() => {
-        const proxy = NeuroglancerProxy.configureSearchNeuroglancer("neuroglancer-container", UserPreferences.Instance.searchViewerState, selectNeuron, selectSoma, systemConfiguration.precomputedLocation, constants.StructureColors, scheme);
+        const v = new SearchViewer("neuroglancer-container", constants.StructureColors, systemConfiguration.precomputedLocation, scheme == "dark");
 
-        proxy.PositionListener = (position) => {
-            if (props.onPositionChanged) {
-                props.onPositionChanged(position);
-            }
-        };
+        v.updateState();
 
-        setNgProxy(proxy);
+        v.neuronSelectionListener = selectNeuron;
+
+        v.somaSelectionDelegate = selectSoma;
+
+        v.PositionListener = props.onPositionChanged;
+
+        setViewer(v);
 
         setTimeout(() => {
-            proxy?.resetView();
+            v?.resetView();
         }, 1000);
 
         return () => {
-            proxy.unlinkNeuroglancerHandler();
+            v.unlink();
         }
     }, []);
 
     useEffect(() => {
-        ngProxy?.updateColorScheme(scheme);
+        if (viewer) {
+            viewer.colorScheme = scheme == "dark";
+        }
     }, [scheme]);
 
-    if (ngProxy) {
-        const ids = atlas.displayedStructures.map(c => c.structure.structureId);
+    useEffect(() => {
+        if (viewer) {
+            viewer.updateAtlasStructures(atlas.displayedStructures.map(c => c.structure.structureId));
+        }
+    }, [atlas.displayedStructures]);
 
-        ngProxy.updateSearchCompartments(ids);
-    }
-
-    if (ngProxy) {
+    if (viewer) {
         const known = queryViewModel.neuronViewModels.filter(n => n.isSelected);
 
-        const somas = known.filter(n => n.viewMode == NEURON_VIEW_MODE_SOMA)
-            .filter(n => n.soma);
-
-        ngProxy.updateSearchReconstructions(somas, known);
+        viewer.updateReconstructions(known);
     }
 
     const selectNeuron = async (neuron: NeuronViewModel, location: number[]) => {
@@ -86,9 +85,9 @@ export const NeuroglancerContainer = observer<NeuroglancerContainerProps>((props
         }
     }
 
-    const selectSoma = (node: AtlasNode, neuron: NeuronViewModel) => {
-        if (node && neuron) {
-            props.onSelectNode(node, neuron, false, false, false);
+    const selectSoma = (neuron: NeuronViewModel) => {
+        if (neuron && neuron.soma) {
+            props.onSelectNode(neuron.soma, neuron, false, false, false);
         }
     }
 

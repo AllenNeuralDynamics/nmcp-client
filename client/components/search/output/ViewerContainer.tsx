@@ -4,7 +4,6 @@ import {observer} from "mobx-react-lite";
 import {ActionIcon, Divider, Flex, Group, Stack, Text, Tooltip} from "@mantine/core";
 import {IconAdjustmentsAlt, IconChartScatter3d, IconChevronLeft, IconChevronRight, IconRestore} from "@tabler/icons-react";
 
-import {NeuroglancerProxy} from "../../../viewer/neuroglancerProxy";
 import {useAppLayout} from "../../../hooks/useAppLayout";
 import {DrawerState} from "../../../viewmodel/appLayout";
 import {ReconstructionViewer} from "./ReconstructionViewer";

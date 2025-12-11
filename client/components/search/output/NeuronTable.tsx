@@ -49,7 +49,6 @@ export const NeuronRow = observer((props: NeuronRowProps) => {
                 <Dropdown data={viewModeNames} value={props.neuronViewModel.viewMode.id}
                           onChange={(value) => {
                               v.viewMode = getViewMode(value);
-                              console.log(value);
                           }}/>
             </Table.Td>
 

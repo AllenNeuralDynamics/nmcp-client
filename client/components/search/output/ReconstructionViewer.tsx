@@ -4,18 +4,17 @@ import {observer} from "mobx-react-lite";
 import {Stack} from "@mantine/core";
 
 import {ViewerSelection} from "./ViewerSelection";
-import {NeuroglancerContainer} from "./NeuroglancerContainer";
 import {AtlasNode} from "../../../models/atlasNode";
 import {NeuronViewModel} from "../../../viewmodel/neuronViewModel";
-import {NeuroglancerContainer2} from "./NeuroglancerContainer2";
+import {NeuroglancerContainer} from "./NeuroglancerContainer";
 
-export const ReconstructionViewer = observer(({height, positionChanged}: { height: number, positionChanged: (p: number[]) => void } = null) => {
+export const ReconstructionViewer = observer(({height, positionChanged}: { height: number, positionChanged: (p: number[]) => void }) => {
     const [selectedState, setSelectedState] = useState<{ selectedNeuron: NeuronViewModel, selectedNode: AtlasNode }>({
         selectedNeuron: null,
         selectedNode: null
     });
 
-    function onSelectNodeFromTracingNode(node: AtlasNode, neuron: NeuronViewModel = null, isShiftKey: boolean = false, isCtrlKey: boolean = false, isAltKey: boolean = false) {
+    function onNodeSelected(node: AtlasNode, neuron: NeuronViewModel = null, isShiftKey: boolean = false, isCtrlKey: boolean = false, isAltKey: boolean = false) {
         if (!isCtrlKey && !isAltKey) {
             if (!isShiftKey) {
                 if (node) {
@@ -25,9 +24,8 @@ export const ReconstructionViewer = observer(({height, positionChanged}: { heigh
         }
     }
 
-    const viewerContainer = <NeuroglancerContainer2 elementName="neuroglancer-viewer-container" height={height}
-                                                   // onPositionChanged={positionChanged}
-                                                   onSelectNode={(n, t, a, b, c) => onSelectNodeFromTracingNode(n, t, a, b, c)}/>
+    const viewerContainer = <NeuroglancerContainer elementName="neuroglancer-viewer-container" height={height} onPositionChanged={positionChanged}
+                                                   onSelectNode={(n, t, a, b, c) => onNodeSelected(n, t, a, b, c)}/>
 
     return (
         <Stack style={{flexGrow: 1}}>

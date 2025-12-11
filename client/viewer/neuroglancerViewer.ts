@@ -7,9 +7,12 @@ import {registerEventListener} from "neuroglancer/unstable/util/disposable.js";
 import {Viewer} from "neuroglancer/unstable/viewer.js";
 import {immutableDefaultState, viewerBackgroundColor} from "./neuroglancerViewerState";
 import {LayerType, NeuroglancerLayerSource} from "./neuroglancerLayer";
-import {PositionCallback} from "./neuroglancerProxy";
 
 export type StateListener = (obj: object) => void;
+
+export type PositionCallback = {
+    (position: number[]): void;
+}
 
 export class NeuroglancerViewer {
     protected readonly _viewer: Viewer;
@@ -174,8 +177,6 @@ export class NeuroglancerViewer {
         if (layerSource.transform) {
             source["transform"] = layerSource.transform;
         }
-
-        console.log(source);
 
         const layer: any = {
             name: layerSource.name,
