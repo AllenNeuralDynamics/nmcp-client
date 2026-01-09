@@ -87,7 +87,7 @@ export const NeuronAtlasSpaceView = observer(({neuron}: { neuron: NeuronShape })
 
     return (
         <Stack gap={0} style={{flexGrow: 1}}>
-            <NeuroglancerControls viewer={viewer}/>
+            <NeuroglancerControls viewer={viewer} allowResetView={true}/>
             <Divider orientation="horizontal"/><AtlasViewerSelection node={data?.nearestNode?.node ?? null} onClick={(id) => {
             displayedStructures.push(id);
             setDisplayedStructures(displayedStructures.slice());

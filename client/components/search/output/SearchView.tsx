@@ -132,7 +132,7 @@ export const SearchView = observer(({height}: { height: number }) => {
         <Stack gap={0} style={{flexGrow: 1}}>
             <Group gap={0} align="space-between" bg="section" style={{height: "40px"}}>
                 {renderNeuronOpen()}
-                <NeuroglancerControls viewer={viewer}/>
+                <NeuroglancerControls viewer={viewer} allowResetView={true}/>
                 {renderAtlasStructureOpen()}
             </Group>
             <Stack style={{height: height, position: "relative"}}>

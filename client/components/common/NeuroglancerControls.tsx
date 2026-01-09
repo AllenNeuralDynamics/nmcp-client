@@ -8,7 +8,7 @@ import {IconAdjustmentsAlt, IconAlertTriangle, IconChartScatter3d, IconInfoCircl
 import {NeuroglancerViewer} from "../../viewer/neuroglancerViewer";
 import {useAppLayout} from "../../hooks/useAppLayout";
 
-export const NeuroglancerControls = observer(({viewer}: { viewer: NeuroglancerViewer }) => {
+export const NeuroglancerControls = observer(({viewer, allowResetView}: { viewer: NeuroglancerViewer, allowResetView: boolean }) => {
     const appLayout = useAppLayout();
 
     const [position, setPosition] = useState<number[]>([]);
@@ -45,15 +45,19 @@ export const NeuroglancerControls = observer(({viewer}: { viewer: NeuroglancerVi
                     </ActionIcon>
                 </Tooltip>
                 {needWarning ?
-                    <Tooltip label={<Group gap={4} align="center"><IconAlertTriangle size={14}/><Text size="sm">Modifying Neuroglancer layers and properties directly may affect portal functionality.</Text></Group>}>
+                    <Tooltip
+                        label={<Group gap={4} align="center"><IconAlertTriangle size={14}/><Text size="sm">Modifying Neuroglancer layers and properties directly
+                            may affect portal functionality.</Text></Group>}>
                         <IconInfoCircle size={18} color="var(--mantine-color-warning-5)"/>
                     </Tooltip> : null}
-                <Divider orientation="vertical"/>
-                <Tooltip label="Reset the view scale and orientation">
-                    <ActionIcon variant="subtle" onClick={resetNeuroglancerView}>
-                        <IconRestore size={18}/>
-                    </ActionIcon>
-                </Tooltip>
+                {allowResetView ?
+                    <Divider orientation="vertical"/> : null}
+                {allowResetView ?
+                    <Tooltip label="Reset the view scale and orientation">
+                        <ActionIcon variant="subtle" onClick={resetNeuroglancerView}>
+                            <IconRestore size={18}/>
+                        </ActionIcon>
+                    </Tooltip> : null}
             </Group>
             <Text size="xs" c="dimmed">{text}</Text>
         </Group>

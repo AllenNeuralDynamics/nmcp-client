@@ -59,7 +59,7 @@ export const CandidatesView = (props: CandidatesViewProps) => {
 
     return (
         <Stack gap={0}>
-            <NeuroglancerControls viewer={viewer}/>
+            <NeuroglancerControls viewer={viewer} allowResetView={true}/>
             <Divider orientation="horizontal"/>
             <div id="candidate-ng-container" className="ng-default-container" style={{minHeight: "400px"}}/>
         </Stack>
