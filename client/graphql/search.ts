@@ -54,6 +54,7 @@ ${NodeCountsFieldsFragment}
 
 export type SearchContext = {
     nonce: string,
+    collectionId: string,
     predicates: SearchPredicate[];
 }
 

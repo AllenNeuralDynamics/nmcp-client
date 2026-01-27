@@ -20,18 +20,23 @@ export function sortedCollectionOptions(specimens: CollectionShape[]): ComboboxD
 
 type CollectionSelectProps = {
     value: string;
+    allowAll?: boolean;
 
     onChange?(value: string): void;
 }
 
-export const CollectionSelect = ({value, onChange}: CollectionSelectProps) => {
+export const CollectionSelect = ({value, onChange, allowAll}: CollectionSelectProps) => {
     const {loading, error, data} = useQuery<CollectionsResponse>(COLLECTIONS_QUERY, {fetchPolicy: "cache-first"});
 
     if (loading) {
         return <LoadingCollections/>;
     }
 
-    const options = sortedCollectionOptions(data?.collections);
+    let options = sortedCollectionOptions(data?.collections);
+
+    if (allowAll) {
+        options = [{label: "All Collections", value: "all"}, ...options];
+    }
 
     const isError = error != null || options.length == 0;
 
