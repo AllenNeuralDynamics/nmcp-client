@@ -22,41 +22,12 @@ export class CandidateFilter {
     public atlasStructureFilter: OptionalFilter<AtlasStructureShape[]> = new OptionalFilter([]);
     public tagFilter: OptionalFilter<string> = new OptionalFilter("");
     public limitBrightness: boolean = false;
-    public brightnessOperator: string = "3";
-    public brightness: number = 0;
+    public brightnessRange: [number, number] = [0, 1000];
     public limitVolume: boolean = false;
-    public volumeOperator: string = "3";
-    public volume: number = 0;
+    public volumeRange: [number, number] = [0, 1000];
 
     public constructor() {
         makeAutoObservable(this);
-    }
-
-    public setBrightness(value: any) {
-        const v = this.parseValue(value);
-
-        if (!isNaN(v)) {
-            this.brightness = v;
-        }
-    }
-
-    public setVolume(value: any) {
-        const v = this.parseValue(value);
-
-        if (!isNaN(v)) {
-            this.volume = v;
-        }
-    }
-
-    private parseValue(value: any) {
-        let v: number;
-        if (typeof value === "string") {
-            v = parseFloat(value);
-        } else {
-            v = value;
-        }
-
-        return v;
     }
 
     public get anyEnabled(): boolean {
@@ -78,15 +49,11 @@ export class CandidateFilter {
     public get somaFilter(): SomaFilterProperties {
         const input: any = {};
 
-        if (this.limitBrightness) {
-            input.brightnessOperator = parseInt(this.brightnessOperator);
-            input.brightness = this.brightness;
-        }
+        input.limitBrightness = this.limitBrightness;
+        input.brightnessRange = this.brightnessRange;
 
-        if (this.limitVolume) {
-            input.volumeOperator = parseInt(this.volumeOperator);
-            input.volume = this.volume;
-        }
+        input.limitVolume = this.limitVolume;
+        input.volumeRange = this.volumeRange;
 
         return input;
     }

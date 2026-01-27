@@ -1,10 +1,19 @@
 import * as React from "react";
 import {observer} from "mobx-react-lite";
-import {Divider, Group, NumberInput, Select, Stack, Switch, Text} from "@mantine/core";
+import {Divider, Group, RangeSlider, Stack, Switch, Text} from "@mantine/core";
 
 import {CandidateFilter} from "../../viewmodel/candidateFilter";
 
+function createMarks(range: [number, number]) {
+    return [
+        {value: range[0], label: `${range[0].toFixed(0)}`},
+        {value: range[1], label: `${range[1].toFixed(0)}`}
+    ];
+}
+
 export const CandidateMetrics = observer(({candidateFilter}: { candidateFilter: CandidateFilter }) => {
+    const [range, setRange] = React.useState<[number, number]>(candidateFilter.brightnessRange);
+
     return (
         <Stack p={12} justify="left">
             <Text fw={500}>Use Metrics</Text>
@@ -14,36 +23,17 @@ export const CandidateMetrics = observer(({candidateFilter}: { candidateFilter: 
                         onChange={(event) => {
                             candidateFilter.limitBrightness = event.currentTarget.checked;
                         }}/>
-                <Select style={{maxWidth: "80px"}} disabled={!candidateFilter.limitBrightness} withCheckIcon={false}
-                        data={[{value: "2", label: "≤"}, {value: "3", label: "≥"}]}
-                        value={candidateFilter.brightnessOperator}
-                        onChange={(value) => {
-                            if (value) {
-                                candidateFilter.brightnessOperator = value;
-                            }
-                        }}/>
-                <NumberInput style={{maxWidth: "80px"}} disabled={!candidateFilter.limitBrightness} min={0} hideControls
-                             value={candidateFilter.brightness} onChange={(value) => {
-                    candidateFilter.setBrightness(value);
-                }}/>
+                <RangeSlider mb={16} miw={200} min={0} max={1000} disabled={!candidateFilter.limitBrightness} marks={createMarks([0, 1000])}
+                             value={range} onChange={setRange} onChangeEnd={(r) => candidateFilter.brightnessRange = r}/>
                 <Divider orientation="vertical"/>
                 <Switch label="Volume"
                         checked={candidateFilter.limitVolume}
                         onChange={(event) => {
                             candidateFilter.limitVolume = event.currentTarget.checked;
                         }}/>
-                <Select style={{maxWidth: "80px"}} disabled={!candidateFilter.limitVolume} withCheckIcon={false}
-                        data={[{value: "2", label: "≤"}, {value: "3", label: "≥"}]}
-                        value={candidateFilter.volumeOperator}
-                        onChange={(value) => {
-                            if (value) {
-                                candidateFilter.volumeOperator = value;
-                            }
-                        }}/>
-                <NumberInput style={{maxWidth: "80px"}} disabled={!candidateFilter.limitVolume} min={0} hideControls
-                             value={candidateFilter.volume} onChange={(value) => {
-                    candidateFilter.setVolume(value);
-                }}/>
+                <RangeSlider mb={16} miw={200} min={0} max={1000} disabled={!candidateFilter.limitVolume}
+                             marks={createMarks([0, 1000])}
+                             value={candidateFilter.volumeRange} onChange={(r) => candidateFilter.volumeRange = r}/>
             </Group>
         </Stack>
     )
