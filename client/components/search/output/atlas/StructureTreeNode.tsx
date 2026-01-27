@@ -1,9 +1,8 @@
 import * as React from "react";
 import {ActionIcon, getTreeExpandedState, Group, Text, Tree, TreeNodeData, useTree} from '@mantine/core';
-import {IconChevronDown, IconChevronRight} from "@tabler/icons-react";
+import {IconChevronRight} from "@tabler/icons-react";
 
 import {AtlasStructureViewModel} from "../../../../viewmodel/atlasStructureViewModel";
-import {useAtlas} from "../../../../hooks/useAtlas";
 import {AtlasViewModel} from "../../../../viewmodel/atlasViewModel";
 import {isSelectedIcon} from "../NeuronTable";
 import {observer} from "mobx-react-lite";
@@ -33,9 +32,7 @@ function getTree(atlas: AtlasViewModel): StructureTreeNodeData[] {
     return staticTree;
 }
 
-export const StructureTree = observer(() => {
-    const atlas = useAtlas();
-
+export const StructureTree = observer(({atlas}: {atlas: AtlasViewModel}) => {
     const data = getTree(atlas);
 
     const onClick =(evt: any, n: StructureTreeNodeData) => {

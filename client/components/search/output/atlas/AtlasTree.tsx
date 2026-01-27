@@ -2,29 +2,27 @@ import * as React from "react";
 import {observer} from "mobx-react-lite";
 
 import {StructureListItem} from "./StructureListItem";
-import {useAtlas} from "../../../../hooks/useAtlas";
 import {List, Stack, TextInput} from "@mantine/core";
 import {useState} from "react";
 import {IconSearch, IconX} from "@tabler/icons-react";
 import {StructureTree} from "./StructureTreeNode";
+import {AtlasViewModel} from "../../../../viewmodel/atlasViewModel";
 
-export const AtlasTree = observer(() => {
-    const atlas = useAtlas();
-
+export const AtlasTree = observer(({atlas}: {atlas: AtlasViewModel}) => {
     const [filterText, setFilterText] = useState<string>("");
 
     const listItems = () => {
         if (filterText) {
             const items = atlas.structures.filter(c => c.matches(filterText));
 
-            const listItems = items.map(c => (<StructureListItem key={c.structure.id} structure={c}/>));
+            const listItems = items.map(c => (<StructureListItem key={c.structure.id} atlas={atlas} structure={c}/>));
             return (
                 <List>
                     {listItems}
                 </List>
             );
         } else {
-            return <StructureTree/>;
+            return <StructureTree atlas={atlas}/>;
         }
     };
 

@@ -5,15 +5,12 @@ import {Accordion, Anchor, Stack, Table, Tooltip} from "@mantine/core";
 import {useMouse} from "@mantine/hooks";
 
 import {useConstants} from "../../hooks/useConstants";
-import {useAppLayout} from "../../hooks/useAppLayout";
-import {useUIQuery} from "../../hooks/useUIQuery";
-import {useAtlas} from "../../hooks/useAtlas";
 import {AtlasNode} from "../../models/atlasNode";
 
 // Small table-padding (compact tables)
 const stp: number = 8;
 
-export const AtlasViewerSelection = observer(({node, onClick}: { node: AtlasNode, onClick: (id: number) => void }) => {
+export const AtlasViewerSelection = observer(({node, onClick}: { node: AtlasNode, onClick: (id: string) => void }) => {
     const [top, setTop] = useState<number>(200);
     const [left, setLeft] = useState<number>(10);
     const {x, y} = useMouse();
@@ -24,7 +21,6 @@ export const AtlasViewerSelection = observer(({node, onClick}: { node: AtlasNode
     const startMouseRef = useRef<{ x: number, y: number }>({x: 0, y: 0});
 
     const constants = useConstants();
-    const atlas = useAtlas();
 
     if (!node) {
         return;
@@ -50,7 +46,7 @@ export const AtlasViewerSelection = observer(({node, onClick}: { node: AtlasNode
         }
         const structureLabel = displayStructure ? (
             <Tooltip zIndex={2000} label={atlasStructure.name}>
-                <Anchor size="sm" onClick={() => {onClick(displayStructure.structureId)}}>
+                <Anchor size="sm" onClick={() => {onClick(displayStructure.id)}}>
                     {`${atlasStructure.acronym}`}
                 </Anchor>
             </Tooltip>

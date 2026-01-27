@@ -2,7 +2,8 @@ import * as React from "react";
 import {useParams} from "react-router-dom";
 import {useQuery} from "@apollo/client";
 import {useIsAuthenticated} from "@azure/msal-react";
-import {Badge, Card, Center, Divider, Group, Stack, Tabs, Text} from "@mantine/core";
+import {Badge, Card, Divider, Group, Stack, Tabs, Text} from "@mantine/core";
+import {IconBinaryTree, IconBinaryTreeFilled, IconVersions} from "@tabler/icons-react";
 import dayjs from "dayjs";
 
 import {NEURON_VERSIONS_QUERY, NeuronVersionsQueryResponse, NeuronVersionsQueryVariables} from "../../graphql/neuron";
@@ -13,9 +14,6 @@ import {useAppLayout} from "../../hooks/useAppLayout";
 import {NeuronSpecimenSpaceView} from "./NeuronSpecimenSpaceView";
 import {NeuronAtlasSpaceView} from "./NeuronAtlasSpaceView";
 import {useState} from "react";
-import {IconBinaryTree, IconBinaryTreeFilled, IconVersions} from "@tabler/icons-react";
-import {SpecimenSpace} from "../review/reconstruction/SpecimenSpace";
-import {AtlasSpace} from "../review/reconstruction/AtlasSpace";
 import {NeuronHistory} from "./NeuronHistory";
 
 export const Neuron = () => {
@@ -74,7 +72,7 @@ export const Neuron = () => {
                     </Group>
                     <Divider orientation="horizontal"/>
                 </Card.Section>
-                <Card.Section bg="segment">
+                <Card.Section>
                     <Tabs orientation="horizontal" value={activeTab} onChange={onChangeTab}>
                         <Tabs.List>
                             <Tabs.Tab value="atlas" leftSection={<IconBinaryTreeFilled size={18} style={{transform: "rotate(-90deg)"}}/>}>

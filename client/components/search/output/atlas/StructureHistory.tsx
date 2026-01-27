@@ -1,11 +1,11 @@
 import * as React from "react";
-import {ActionIcon, Group, List, Stack, Text} from "@mantine/core"
+import {ActionIcon, Group, Stack, Text} from "@mantine/core"
 
 import {AtlasStructureViewModel} from "../../../../viewmodel/atlasStructureViewModel";
 import {observer} from "mobx-react-lite";
-import {useAtlas} from "../../../../hooks/useAtlas";
 import {isSelectedIcon} from "../NeuronTable";
 import {IconX} from "@tabler/icons-react";
+import {AtlasViewModel} from "../../../../viewmodel/atlasViewModel";
 
 type StructureHistoryRowProps = {
     structure: AtlasStructureViewModel;
@@ -30,9 +30,7 @@ const StructureHistoryRow = observer((props: StructureHistoryRowProps) => {
     )
 });
 
-export const StructureHistory = observer(() => {
-    const atlas = useAtlas();
-
+export const StructureHistory = observer(({atlas}: {atlas: AtlasViewModel}) => {
     const rows: any = atlas.structureHistory.map(v => {
         return (<StructureHistoryRow key={`bv_${v.structure.id}`} structure={v}/>)
     });

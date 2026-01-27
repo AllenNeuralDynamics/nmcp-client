@@ -27,6 +27,10 @@ export class AtlasViewModel {
         });
     }
 
+    public get initialized(): boolean {
+        return this.rootStructure != null;
+    }
+
     public get displayedStructures(): AtlasStructureViewModel[] {
         return this.structures.filter(s => s.isDisplayed);
     }
