@@ -10,6 +10,8 @@ import {useUIQuery} from "../../../hooks/useUIQuery";
 import {useAppLayout} from "../../../hooks/useAppLayout";
 import {useAtlas} from "../../../hooks/useAtlas";
 import {usePreferences} from "../../../hooks/usePreferences";
+import {CollectionSelect} from "../../common/CollectionSelect";
+import {useState} from "react";
 
 export const QueryHeader = observer(() => {
     const client = useApolloClient();
@@ -111,6 +113,8 @@ export const QueryHeader = observer(() => {
     const renderButtons = () => {
         return (
             <Group>
+                <CollectionSelect allowAll={true} value={uiQuery.collectionId} onChange={(id) => uiQuery.collectionId = id}/>
+                <Divider orientation="vertical"/>
                 {renderResetButton()}
                 {/*
                 <Button variant="light" leftSection={<IconShare3 size={18}/>} disabled={queryResponse.status === QueryStatus.Loading} onClick={onShare}>

@@ -15,12 +15,15 @@ export class UIQuery {
 
     public predicates: UIQueryPredicate[] = [];
 
+    public collectionId: string = "all";
+
     private _constants: DataConstants = null;
 
     public constructor() {
         makeObservable(this, {
-            resetCount: observable,
             predicates: observable,
+            collectionId: observable,
+            resetCount: observable,
             reset: action,
             addPredicate: action,
             removePredicate: action,
@@ -105,6 +108,7 @@ export class UIQuery {
 
             const context: SearchContext = {
                 nonce: queryResponseViewModel.queryNonce,
+                collectionId: this.collectionId == "all" ? null : this.collectionId,
                 predicates: this.predicates.map(f => f.asSearchPredicate())
             };
 
