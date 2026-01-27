@@ -38,6 +38,7 @@ export const Candidates = observer(() => {
             },
             includeInProgress: candidateFilter.includeInProgress
         },
+        fetchPolicy: "network-only",
         pollInterval: 60000
     });
 

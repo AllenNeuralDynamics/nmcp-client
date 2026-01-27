@@ -50,6 +50,10 @@ export const ReconstructionActions = (props: ReconstructionPanelProps) => {
             onError: (e) => console.log(e)
         });
 
+    const createRevision = (variables: any) => {
+
+    }
+
     if (props.reconstruction == null) {
         return (<NoReconstruction/>);
     }
@@ -59,6 +63,7 @@ export const ReconstructionActions = (props: ReconstructionPanelProps) => {
     let peerReviewButton = null;
     let reviewButton = null;
     let cancelButton = null;
+    let reviseButton = null;
 
     let moreThanCancel = false;
 
@@ -85,6 +90,11 @@ export const ReconstructionActions = (props: ReconstructionPanelProps) => {
         }
     }
 
+    if (props.reconstruction.status == ReconstructionStatus.Published) {
+        reviseButton = <ReconstructionActionButton action={ReconstructionAction.CreateRevision}
+                                                   onClick={() => createRevision({variables: {reconstructionId: props.reconstruction.id}})}/>
+    }
+
     const actions = <Group justify="flex-end">
         {cancelButton}
         {cancelButton && moreThanCancel ? <Divider orientation="vertical"/> : null}
@@ -92,6 +102,7 @@ export const ReconstructionActions = (props: ReconstructionPanelProps) => {
         {holdButton}
         {peerReviewButton}
         {reviewButton}
+        {reviseButton}
     </Group>
 
     const info = appLayout.showReferenceIds ? (

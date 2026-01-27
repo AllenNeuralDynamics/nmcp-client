@@ -10,7 +10,8 @@ export enum ReconstructionAction {
     Reject = 8,
     Archive = 9,
     Discard = 10,
-    ReportIssue = 11
+    ReportIssue = 11,
+    CreateRevision = 12
 }
 
 export const actionColor = (status: ReconstructionAction): string => {
@@ -39,6 +40,8 @@ export const actionColor = (status: ReconstructionAction): string => {
             return "red";
         case ReconstructionAction.ReportIssue:
             return "red";
+        case ReconstructionAction.CreateRevision:
+            return "orange";
         default:
             return "black";
     }
@@ -70,6 +73,8 @@ export const actionName = (status: ReconstructionAction): string => {
             return "Discard";
         case ReconstructionAction.ReportIssue:
             return "Report an Issue";
+        case ReconstructionAction.CreateRevision:
+            return "Start Revision";
         default:
             return "UNKNOWN";
     }

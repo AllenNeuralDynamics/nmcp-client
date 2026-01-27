@@ -108,7 +108,7 @@ export class UIQuery {
 
             const context: SearchContext = {
                 nonce: queryResponseViewModel.queryNonce,
-                collectionId: this.collectionId == "all" ? null : this.collectionId,
+                collectionIds: this.collectionId == "all" ? [] : [this.collectionId],
                 predicates: this.predicates.map(f => f.asSearchPredicate())
             };
 
