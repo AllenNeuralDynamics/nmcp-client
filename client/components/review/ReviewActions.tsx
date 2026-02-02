@@ -40,7 +40,16 @@ export const ReviewActions = ({reconstruction}: { reconstruction: Reconstruction
     const [publishReconstruction] = useMutation<PublishReconstructionResponse, PublishReconstructionVariables>(PUBLISH_RECONSTRUCTION_MUTATION,
         {
             refetchQueries: [RECONSTRUCTIONS_QUERY],
-            onError: (e) => errorNotification("Error Publishing Reconstruction", e.message)
+            onError: (e) => {
+                if (e.graphQLErrors?.length > 0) {
+                    if (e.graphQLErrors[0].extensions?.code == 1001) {
+                        errorNotification("Publish Reconstruction Failed", "This neuron already has a published reconstruction.  A new reconstruction can not be published.");
+                        return;
+                    }
+                }
+
+                errorNotification("Error Publishing Reconstruction", e.message)
+            }
         });
 
     if (!reconstruction) {

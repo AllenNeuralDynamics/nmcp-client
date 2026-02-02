@@ -1,5 +1,5 @@
 import gql from "graphql-tag";
-import {Reconstruction} from "../models/reconstruction";
+import {Reconstruction, ReconstructionRevisionKind} from "../models/reconstruction";
 import {ReconstructionSpace} from "../models/reconstructionSpace";
 import {NEURON_BASE_FIELDS_FRAGMENT, NEURON_RELATIONSHIP_FIELDS_FRAGMENT} from "./neuron";
 import {ReconstructionStatus} from "../models/reconstructionStatus";
@@ -119,6 +119,7 @@ export type ReconstructionQueryArgs = {
 // Modify Status
 //
 
+//
 // Open Reconstruction Mutation
 //
 export const OPEN_RECONSTRUCTION_MUTATION = gql`mutation OpenReconstruction($neuronId: String!) {
@@ -137,6 +138,9 @@ export type ReconstructionStatusModifierArgs = {
     reconstructionId: string;
 }
 
+//
+// Pause/Hold Reconstruction Mutation
+//
 export const PAUSE_RECONSTRUCTION_MUTATION = gql`mutation PauseReconstruction($reconstructionId: String!) {
     pauseReconstruction(reconstructionId: $reconstructionId) {
         id
@@ -144,6 +148,9 @@ export const PAUSE_RECONSTRUCTION_MUTATION = gql`mutation PauseReconstruction($r
     }
 }`;
 
+//
+// Resume Reconstruction Mutation
+//
 export type PauseReconstructionResponse = {
     pauseReconstruction: Reconstruction;
 }
@@ -159,6 +166,9 @@ export type ResumeReconstructionResponse = {
     resumeReconstruction: Reconstruction;
 }
 
+//
+// Request Review Mutation
+//
 export const REQUEST_REVIEW_MUTATION = gql`mutation RequestReview($reconstructionId: String!, $targetStatus: Int!, $duration: Float!, $notes: String!) {
     requestReview(reconstructionId: $reconstructionId, targetStatus: $targetStatus, duration: $duration, notes: $notes) {
         id
@@ -177,6 +187,9 @@ export type RequestReviewArgs = {
     notes: string;
 }
 
+//
+// Approve Reconstruction Mutation
+//
 export const APPROVE_RECONSTRUCTION_MUTATION = gql`mutation ApproveReconstruction($reconstructionId: String!, $targetStatus: Int!) {
     approveReconstruction(reconstructionId: $reconstructionId, targetStatus: $targetStatus) {
         id
@@ -193,6 +206,9 @@ export type ApproveReconstructionArgs = {
     targetStatus: ReconstructionStatus;
 }
 
+//
+// Reject Reconstruction Mutation
+//
 export const REJECT_RECONSTRUCTION_MUTATION = gql`mutation RejectReconstruction($reconstructionId: String!) {
     rejectReconstruction(reconstructionId: $reconstructionId) {
         id
@@ -204,6 +220,9 @@ export type RejectReconstructionResponse = {
     rejectReconstruction: Reconstruction;
 }
 
+//
+// Discard Reconstruction Mutation
+//
 export const DISCARD_RECONSTRUCTION_MUTATION = gql`mutation DiscardReconstruction($reconstructionId: String!) {
     discardReconstruction(reconstructionId: $reconstructionId) {
         id
@@ -236,6 +255,9 @@ export type PublishReconstructionResponse = {
     publish: Reconstruction;
 }
 
+//
+// Publish All Reconstruction Mutation
+//
 export const PUBLISH_ALL_RECONSTRUCTION_MUTATION = gql`mutation PublishAll($reconstructionIds: [String!]!) {
     publishAll(reconstructionIds: $reconstructionIds) {
         id
@@ -253,6 +275,25 @@ export type PublishAllReconstructionVariables = {
 
 export type PublishAllReconstructionResponse = {
     publishAll: Reconstruction[];
+}
+
+//
+// Open Reconstruction Revision Mutation
+//
+export const OPEN_RECONSTRUCTION_REVISION_MUTATION = gql`mutation OpenReconstructionRevision($reconstructionId: String!, $revisionKind: Int!) {
+    openReconstructionRevision(reconstructionId: $reconstructionId, revisionKind: $revisionKind) {
+        id
+        status
+    }
+}`;
+
+export type OpenReconstructionRevisionVariables = {
+    reconstructionId: string;
+    revisionKind: ReconstructionRevisionKind;
+}
+
+export type OpenReconstructionRevisionResponse = {
+    openReconstructionRevision: Reconstruction;
 }
 
 //
@@ -299,8 +340,8 @@ export const UPLOAD_JSON_MUTATION = gql`
             }
         }
     }
-${NodeCountsFieldsFragment}
-${AtlasReconstructionFieldsFragment}
+    ${NodeCountsFieldsFragment}
+    ${AtlasReconstructionFieldsFragment}
 `;
 
 export const UPLOAD_SWC_MUTATION = gql`

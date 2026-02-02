@@ -20,6 +20,7 @@ import {ReconstructionAction} from "../../models/reconstructionAction";
 import {ReconstructionActionButton} from "../common/ReconstructionAction";
 import {ReconstructionStatusLabel} from "../common/ReconstructionStatus";
 import {useAppLayout} from "../../hooks/useAppLayout";
+import {CreateRevisionPopover} from "./CreateRevisionPopover";
 
 export type ReconstructionPanelProps = {
     reconstruction: Reconstruction;
@@ -50,10 +51,6 @@ export const ReconstructionActions = (props: ReconstructionPanelProps) => {
             onError: (e) => console.log(e)
         });
 
-    const createRevision = (variables: any) => {
-
-    }
-
     if (props.reconstruction == null) {
         return (<NoReconstruction/>);
     }
@@ -63,7 +60,7 @@ export const ReconstructionActions = (props: ReconstructionPanelProps) => {
     let peerReviewButton = null;
     let reviewButton = null;
     let cancelButton = null;
-    let reviseButton = null;
+    let revisePopover = null;
 
     let moreThanCancel = false;
 
@@ -91,8 +88,7 @@ export const ReconstructionActions = (props: ReconstructionPanelProps) => {
     }
 
     if (props.reconstruction.status == ReconstructionStatus.Published) {
-        reviseButton = <ReconstructionActionButton action={ReconstructionAction.CreateRevision}
-                                                   onClick={() => createRevision({variables: {reconstructionId: props.reconstruction.id}})}/>
+        revisePopover = <CreateRevisionPopover id={props.reconstruction.id}/>
     }
 
     const actions = <Group justify="flex-end">
@@ -102,7 +98,7 @@ export const ReconstructionActions = (props: ReconstructionPanelProps) => {
         {holdButton}
         {peerReviewButton}
         {reviewButton}
-        {reviseButton}
+        {revisePopover}
     </Group>
 
     const info = appLayout.showReferenceIds ? (

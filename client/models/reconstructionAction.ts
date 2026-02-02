@@ -74,7 +74,7 @@ export const actionName = (status: ReconstructionAction): string => {
         case ReconstructionAction.ReportIssue:
             return "Report an Issue";
         case ReconstructionAction.CreateRevision:
-            return "Start Revision";
+            return "Create Revision";
         default:
             return "UNKNOWN";
     }
@@ -106,6 +106,8 @@ export const actionTooltip = (status: ReconstructionAction): string => {
             return `Permanently stop work on the reconstruction.  If you wish to pause annotation with the option to resume later, choose the ${actionName(ReconstructionAction.Hold)} action.`;
         case ReconstructionAction.ReportIssue:
             return "Report an issue with this candidate neuron";
+        case ReconstructionAction.CreateRevision:
+            return "Create a new revision of the specimen-space or atlas-space reconstruction for the associated neuron.";
         default:
             return "UNKNOWN";
     }

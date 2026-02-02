@@ -2,8 +2,6 @@ import {User} from "./user";
 import {AtlasReconstruction} from "./atlasReconstruction";
 import {ReconstructionStatus} from "./reconstructionStatus";
 import {NeuronShape} from "./neuron";
-import {AtlasReconstructionStatus} from "./atlasReconstructionStatus";
-import {QualityControl} from "./qualityControl";
 import {Precomputed} from "./precomputed";
 
 export type NodeCount = {
@@ -17,6 +15,11 @@ export type NodeCount = {
 export type NodeCounts = {
     axon: NodeCount;
     dendrite: NodeCount;
+}
+
+export enum ReconstructionRevisionKind {
+    SpecimenSpace = 0,
+    AtlasSpace = 1
 }
 
 export type Reconstruction = {

@@ -31,15 +31,15 @@ export function atlasStatusName(status: AtlasReconstructionStatus): string {
         case AtlasReconstructionStatus.ReadyToProcess:
             return "Ready to Process";
         case AtlasReconstructionStatus.PendingQualityControl:
-            return "Pending QC";
+            return "Pending Automated QC";
         case AtlasReconstructionStatus.FailedQualityControl:
             return "Failed QC";
         case AtlasReconstructionStatus.PendingStructureAssignment:
-            return "Pending Structure Assignment";
+            return "Pending Automated Structure Assignment";
         case AtlasReconstructionStatus.FailedStructureAssignment:
             return "Failed Structure Assignment";
         case AtlasReconstructionStatus.PendingPrecomputed:
-            return "Pending Precomputed Generation";
+            return "Pending Automated Precomputed Generation";
         case AtlasReconstructionStatus.FailedPrecomputed:
             return "Failed Precomputed Generation";
         case AtlasReconstructionStatus.ReadyToPublish:
