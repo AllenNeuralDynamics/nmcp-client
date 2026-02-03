@@ -15,17 +15,12 @@ const defaultTomographyViewerState = {
         "z": [
             0.00001,
             "m"
-        ],
-        "t": [
-            0.001,
-            "s"
         ]
     },
     "position": [
         2456.76953125,
         1115.9412841796875,
-        1384.6180419921875,
-        0
+        1384.6180419921875
     ],
     "crossSectionScale": 6,
     "projectionOrientation": [
