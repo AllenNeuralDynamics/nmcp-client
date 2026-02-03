@@ -10,8 +10,7 @@ import {useUIQuery} from "../../../hooks/useUIQuery";
 import {useAppLayout} from "../../../hooks/useAppLayout";
 import {useAtlas} from "../../../hooks/useAtlas";
 import {usePreferences} from "../../../hooks/usePreferences";
-import {CollectionSelect} from "../../common/CollectionSelect";
-import {useState} from "react";
+import {CollectionsSelect} from "../../common/CollectionsSelect";
 
 export const QueryHeader = observer(() => {
     const client = useApolloClient();
@@ -90,7 +89,7 @@ export const QueryHeader = observer(() => {
             if (!appLayout.isQueryExpanded) {
                 message = "Expand to filter your neuron search";
             } else {
-                message = "Optionally filter neurons by the criteria below"
+                message = "Optionally filter neurons by the criteria below and click Search to view results"
             }
         } else if (queryResponse.status === QueryStatus.Loading) {
             message = "Search in progress...";
@@ -113,7 +112,8 @@ export const QueryHeader = observer(() => {
     const renderButtons = () => {
         return (
             <Group>
-                <CollectionSelect allowAll={true} value={uiQuery.collectionId} onChange={(id) => uiQuery.collectionId = id}/>
+                <CollectionsSelect limitCollections={uiQuery.limitCollections} onChangeSelectAll={(b) => uiQuery.limitCollections = b} values={uiQuery.collectionIds}
+                                   onChange={(id) => uiQuery.collectionIds = id}/>
                 <Divider orientation="vertical"/>
                 {renderResetButton()}
                 {/*

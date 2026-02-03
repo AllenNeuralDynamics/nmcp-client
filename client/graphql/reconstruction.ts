@@ -236,8 +236,8 @@ export type DiscardReconstructionResponse = {
 //
 // Publish Reconstruction Mutation
 //
-export const PUBLISH_RECONSTRUCTION_MUTATION = gql`mutation Publish($reconstructionId: String!) {
-    publish(reconstructionId: $reconstructionId) {
+export const PUBLISH_RECONSTRUCTION_MUTATION = gql`mutation Publish($reconstructionId: String! $replaceExisting: Boolean) {
+    publish(reconstructionId: $reconstructionId, replaceExisting: $replaceExisting) {
         id
         status
         atlasReconstruction {
@@ -249,6 +249,7 @@ export const PUBLISH_RECONSTRUCTION_MUTATION = gql`mutation Publish($reconstruct
 
 export type PublishReconstructionVariables = {
     reconstructionId: string;
+    replaceExisting: boolean;
 }
 
 export type PublishReconstructionResponse = {

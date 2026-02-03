@@ -1,4 +1,5 @@
 import * as React from "react";
+import {useState} from "react";
 import {Badge, Divider, Group, Stack, Text} from "@mantine/core";
 import {IconGitMerge} from "@tabler/icons-react";
 
@@ -20,10 +21,13 @@ import {ReconstructionActionButton} from "../common/ReconstructionAction";
 import {ReconstructionStatus} from "../../models/reconstructionStatus";
 import {AtlasReconstructionStatus} from "../../models/atlasReconstructionStatus";
 import {useAppLayout} from "../../hooks/useAppLayout";
+import {ArchiveConfirmationModal} from "./ArchiveConfirmationModal";
 
 export const ReviewActions = ({reconstruction}: { reconstruction: Reconstruction }) => {
     const clipboard = useClipboard();
     const appLayout = useAppLayout();
+
+    const [isArchiveModelOpen, setIsArchiveModelOpen] = useState<boolean>(false);
 
     const [rejectAnnotation] = useMutation<RejectReconstructionResponse, ReconstructionStatusModifierArgs>(REJECT_RECONSTRUCTION_MUTATION,
         {
@@ -43,7 +47,7 @@ export const ReviewActions = ({reconstruction}: { reconstruction: Reconstruction
             onError: (e) => {
                 if (e.graphQLErrors?.length > 0) {
                     if (e.graphQLErrors[0].extensions?.code == 1001) {
-                        errorNotification("Publish Reconstruction Failed", "This neuron already has a published reconstruction.  A new reconstruction can not be published.");
+                        setIsArchiveModelOpen(true);
                         return;
                     }
                 }
@@ -91,8 +95,26 @@ export const ReviewActions = ({reconstruction}: { reconstruction: Reconstruction
 
     if (reconstruction.status == ReconstructionStatus.ReadyToPublish) {
         publishButton = <ReconstructionActionButton action={ReconstructionAction.Publish}
-                                                    onClick={() => publishReconstruction({variables: {reconstructionId: reconstruction.id}})}/>;
+                                                    onClick={() => publishReconstruction({
+                                                        variables: {
+                                                            reconstructionId: reconstruction.id,
+                                                            replaceExisting: false
+                                                        }
+                                                    })}/>;
         moreThanReject = true;
+    }
+
+    async function tryArchiveReconstruction(replaceExisting: boolean) {
+        if (replaceExisting) {
+            await publishReconstruction({
+                variables: {
+                    reconstructionId: reconstruction.id,
+                    replaceExisting: true
+                }
+            });
+        }
+
+        setIsArchiveModelOpen(false);
     }
 
     const actions = <Group justify="flex-end">
@@ -101,6 +123,7 @@ export const ReviewActions = ({reconstruction}: { reconstruction: Reconstruction
         {approveButton}
         {peerReviewButton}
         {publishButton}
+        <ArchiveConfirmationModal show={isArchiveModelOpen} onClose={(b) => tryArchiveReconstruction(b)}/>
     </Group>
 
     const info = appLayout.showReferenceIds ? (
