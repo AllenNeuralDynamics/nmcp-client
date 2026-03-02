@@ -3,6 +3,7 @@ import {useState} from "react";
 import {useQuery} from "@apollo/client";
 import {observer} from "mobx-react-lite";
 import {Card, Center, Divider, Group, SimpleGrid, Stack, Switch, Text} from "@mantine/core";
+import {useLocalStorage} from "@mantine/hooks";
 
 import {ReviewTable} from "./ReviewTable";
 import {Selection} from "./reconstruction/Selection";
@@ -56,7 +57,7 @@ export const ReviewReconstructions = observer(() => {
     const [statusFilter] = useState(new OptionalFilter<number[]>([]));
     const [tagFilter] = useState(new OptionalFilter<string>(""));
 
-    const [selectedId, setSelectedId] = useState<string>(null);
+    const [selectedId, setSelectedId] = useLocalStorage<string>({key: "review-reconstruction-id", defaultValue: null});
 
     const allowedStatus = myAllowedStatus(approvalOnly, haveFull, havePeer);
 
@@ -82,16 +83,10 @@ export const ReviewReconstructions = observer(() => {
     const reconstructionCache = (loading && previousData ? previousData.reconstructions.reconstructions : data?.reconstructions.reconstructions) || [];
     const totalCount = (loading && previousData ? previousData.reconstructions.total : data?.reconstructions.total) || 0;
 
-    let selection: Reconstruction = null;
-
-    if (selectedId) {
-        selection = reconstructionCache.find(r => r.id === selectedId) ?? null;
-    }
+    const selection: Reconstruction = selectedId ? (reconstructionCache.find(r => r.id === selectedId) ?? null) : null;
 
     const onRowClick = (reconstruction: Reconstruction) => {
-        if ((reconstruction?.id ?? null) != selectedId) {
-            setSelectedId(reconstruction?.id ?? null);
-        }
+        setSelectedId(reconstruction?.id ?? null);
     }
 
     const pageCount = Math.max(Math.ceil(totalCount / limit), 1);

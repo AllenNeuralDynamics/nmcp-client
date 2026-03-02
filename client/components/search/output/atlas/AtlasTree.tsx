@@ -1,12 +1,12 @@
 import * as React from "react";
-import {observer} from "mobx-react-lite";
-
-import {StructureListItem} from "./StructureListItem";
-import {List, Stack, TextInput} from "@mantine/core";
 import {useState} from "react";
+import {observer} from "mobx-react-lite";
+import {List, Stack, TextInput} from "@mantine/core";
 import {IconSearch, IconX} from "@tabler/icons-react";
-import {StructureTree} from "./StructureTreeNode";
+
 import {AtlasViewModel} from "../../../../viewmodel/atlasViewModel";
+import {StructureListItem} from "./StructureListItem";
+import {StructureTree} from "./StructureTreeNode";
 
 export const AtlasTree = observer(({atlas}: {atlas: AtlasViewModel}) => {
     const [filterText, setFilterText] = useState<string>("");

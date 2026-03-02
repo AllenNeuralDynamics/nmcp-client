@@ -1,7 +1,7 @@
 import React, {useContext, useState} from "react"
 import {Navigate} from "react-router-dom";
 import {Indicator, Tabs} from "@mantine/core";
-import {IconBook, IconExclamationCircle, IconFlagExclamation, IconPackage, IconUsers} from "@tabler/icons-react";
+import {IconBook, IconFlagExclamation, IconKey, IconPackage, IconUsers} from "@tabler/icons-react";
 
 import {usePreferences} from "../../hooks/usePreferences";
 import {NotificationContext} from "../app/NotificationsApp";
@@ -9,10 +9,11 @@ import {Users} from "./users/Users";
 import {Collections} from "./system/Collections";
 import {Published} from "./published/Published";
 import {Issues} from "./issues/Issues";
+import {ApiKeys} from "./apiKeys/ApiKeys";
 import {useUser} from "../../hooks/useUser";
 import {UserPermissions} from "../../graphql/user";
 
-const allowedTabs = ["users", "collections", "published", "issues"];
+const allowedTabs = ["users", "collections", "published", "issues", "apikeys"];
 
 const iconSize = 24;
 
@@ -52,6 +53,9 @@ export const Admin = () => {
                                                    ml={-2} mt={-12}/>}>
                     Issues
                 </Tabs.Tab>
+                <Tabs.Tab value="apikeys" leftSection={<IconKey size={iconSize}/>}>
+                    API Keys
+                </Tabs.Tab>
             </Tabs.List>
 
             <Tabs.Panel value="users" mt={16}>
@@ -68,6 +72,10 @@ export const Admin = () => {
 
             <Tabs.Panel value="issues" mt={16}>
                 <Issues/>
+            </Tabs.Panel>
+
+            <Tabs.Panel value="apikeys" mt={16}>
+                <ApiKeys/>
             </Tabs.Panel>
         </Tabs>
     );

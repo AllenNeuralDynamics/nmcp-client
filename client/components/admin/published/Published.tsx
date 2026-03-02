@@ -1,19 +1,27 @@
 import React, {useState} from "react";
 import {Navigate} from "react-router-dom";
+import {useMutation, useQuery} from "@apollo/client";
 import {observer} from "mobx-react-lite";
-import {useQuery} from "@apollo/client";
-import {Select, Group, Text, Card, Divider, SimpleGrid, Tooltip, ComboboxLikeRenderOptionInput, ComboboxItem, Badge} from "@mantine/core";
+import {Button, Select, Group, Text, Card, Divider, SimpleGrid, Tooltip, ComboboxLikeRenderOptionInput, ComboboxItem, Badge} from "@mantine/core";
 
 import {PaginationHeader} from "../../common/PaginationHeader";
 import {PublishedTable} from "./PublishedTable";
 import {GraphQLErrorAlert} from "../../common/GraphQLErrorAlert";
 import {ReconstructionStatus} from "../../../models/reconstructionStatus";
-import {RECONSTRUCTIONS_QUERY, ReconstructionQueryArgs, ReconstructionsResponse} from "../../../graphql/reconstruction";
+import {
+    RECONSTRUCTIONS_QUERY,
+    ReconstructionQueryArgs,
+    ReconstructionsResponse,
+    VALIDATE_DOIS_MUTATION,
+    ValidateDoIsResponse
+} from "../../../graphql/reconstruction";
 import {Reconstruction} from "../../../models/reconstruction";
 import {useUser} from "../../../hooks/useUser";
 import {UserPermissions} from "../../../graphql/user";
 import {AppLoading} from "../../app/AppLoading";
 import {PublishedActions} from "./PublishedActions";
+import {MessageBox} from "../../common/MessageBox";
+import {errorNotification, successNotification} from "../../common/NotificationHelper";
 
 type StatusFilterType = "published" | "in-progress" | "publishable" | "finalizing";
 
@@ -72,8 +80,15 @@ export const Published = observer(() => {
 
     const [offset, setOffset] = useState(0);
     const [limit, setLimit] = useState(10);
+    const [showValidateDois, setShowValidateDois] = useState(false);
 
     const [statusFilter, setStatusFilter] = useState<StatusFilterType>("published");
+
+    const [validateDois, {loading: validating}] = useMutation<ValidateDoIsResponse>(VALIDATE_DOIS_MUTATION, {
+        refetchQueries: [RECONSTRUCTIONS_QUERY],
+        onCompleted: (data) => successNotification("Validate DOIs", `${data.validateDois} DOIs assigned`),
+        onError: (e) => errorNotification("Validate DOIs", e.message)
+    });
 
     const filters = getStatusFilters(statusFilter);
 
@@ -116,10 +131,23 @@ export const Published = observer(() => {
 
     return (
         <Card withBorder>
+            <MessageBox opened={showValidateDois} centered title="Validate DOIs"
+                        message="DOIs will be created and assigned for published reconstructions that do not have one."
+                        confirmText="Assign"
+                        onCancel={() => setShowValidateDois(false)}
+                        onConfirm={async () => {
+                            setShowValidateDois(false);
+                            await validateDois();
+                        }}/>
             <Card.Section bg="segment">
-                <Group p={12} align="center">
-                    <Text size="lg" fw={500}>Reconstructions</Text>
-                    <Badge variant="light">{statusOptions.find(s => s.value == statusFilter)?.label}</Badge>
+                <Group p={12} align="center" justify="space-between">
+                    <Group align="center">
+                        <Text size="lg" fw={500}>Reconstructions</Text>
+                        <Badge variant="light">{statusOptions.find(s => s.value == statusFilter)?.label}</Badge>
+                    </Group>
+                    {/*
+                    <Button variant="light" loading={validating} onClick={() => setShowValidateDois(true)}>Validate DOIs...</Button>
+                    */}
                 </Group>
                 <Divider orientation="horizontal"/>
             </Card.Section>

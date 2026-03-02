@@ -1,10 +1,11 @@
+import {makeObservable, observable} from "mobx";
+
 import {ConstantsQueryResponse} from "../graphql/constants";
 import {formatAtlasStructure, AtlasStructureShape} from "./atlasStructure";
 import {NodeStructureShape, NodeStructureKind} from "./structureIdentifier";
 import {NeuronalStructure} from "./neuronalStructure";
 import {NeuronStructureShape, AxonStructureName, NeuronStructureKey, DendriteStructureName, SomaStructureName} from "./neuronStructure";
 import {IQueryOperator} from "./queryOperator";
-import {makeObservable, observable} from "mobx";
 
 export class AtlasConstants {
     private _structures: AtlasStructureShape[] = [];

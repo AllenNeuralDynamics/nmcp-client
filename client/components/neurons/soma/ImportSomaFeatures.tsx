@@ -3,7 +3,7 @@ import {useState} from "react";
 import {observer} from "mobx-react-lite";
 import {Stack, Text, Group, Code, NumberInput, SimpleGrid} from "@mantine/core";
 import {Dropzone} from "@mantine/dropzone";
-import {IconJson, IconUpload, IconX} from '@tabler/icons-react';
+import {IconJson, IconUpload, IconX} from "@tabler/icons-react";
 
 import {ImportSomaData} from "../../../viewmodel/importSomaData";
 

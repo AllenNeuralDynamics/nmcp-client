@@ -1,7 +1,7 @@
 import * as React from "react";
 import {useEffect} from "react";
-import {observer} from "mobx-react-lite";
 import {useApolloClient} from "@apollo/client";
+import {observer} from "mobx-react-lite";
 import {Stack} from "@mantine/core";
 
 import {QueryPage} from "./QueryPage";

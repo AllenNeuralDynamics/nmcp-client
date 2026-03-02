@@ -1,11 +1,11 @@
 import * as React from "react";
 import {useApolloClient} from "@apollo/client";
+import {observer} from "mobx-react-lite";
 import {Button, Divider, Group, Text} from "@mantine/core";
-import {IconPlus, IconRestore, IconSearch, IconShare3} from "@tabler/icons-react";
+import {IconPlus, IconRestore, IconSearch} from "@tabler/icons-react";
 
 import {QueryStatus} from "../../../viewmodel/queryResponseViewModel";
 import {useQueryResponseViewModel} from "../../../hooks/useQueryResponseViewModel";
-import {observer} from "mobx-react-lite";
 import {useUIQuery} from "../../../hooks/useUIQuery";
 import {useAppLayout} from "../../../hooks/useAppLayout";
 import {useAtlas} from "../../../hooks/useAtlas";

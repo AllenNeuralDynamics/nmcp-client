@@ -1,11 +1,10 @@
 import * as React from "react";
 import {useState} from "react";
+import {useMutation} from "@apollo/client";
 import {Badge, Divider, Group, Stack, Text} from "@mantine/core";
+import {useClipboard} from "@mantine/hooks";
 import {IconGitMerge} from "@tabler/icons-react";
 
-import {Reconstruction} from "../../models/reconstruction";
-import {useClipboard} from "@mantine/hooks";
-import {useMutation} from "@apollo/client";
 import {
     APPROVE_RECONSTRUCTION_MUTATION,
     ApproveReconstructionArgs,
@@ -15,6 +14,7 @@ import {
     RejectReconstructionResponse,
     RECONSTRUCTIONS_QUERY, PublishReconstructionResponse, PublishReconstructionVariables, PUBLISH_RECONSTRUCTION_MUTATION
 } from "../../graphql/reconstruction";
+import {Reconstruction} from "../../models/reconstruction";
 import {errorNotification} from "../common/NotificationHelper";
 import {ReconstructionAction} from "../../models/reconstructionAction";
 import {ReconstructionActionButton} from "../common/ReconstructionAction";

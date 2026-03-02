@@ -1,12 +1,11 @@
 import * as React from "react";
-import {Link} from "react-router-dom";
 import {Group, Table} from "@mantine/core";
+import {IconBrowserShare} from "@tabler/icons-react";
 
-import {formatNeuron, formatHortaLocation, NeuronShape} from "../../models/neuron";
+import {formatHortaLocation, NeuronShape} from "../../models/neuron";
 import {formatAtlasStructure} from "../../models/atlasStructure";
 import {AnnotatorWithStatus} from "../common/AnnotatorWithStatus";
 import {successNotification} from "../common/NotificationHelper";
-import {IconBrowserShare, IconCopy} from "@tabler/icons-react";
 import {NeuronVersionLink} from "../common/NeuronVersionLink";
 
 export interface ICandidateRowProps {

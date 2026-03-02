@@ -1,6 +1,6 @@
 import * as React from "react";
 import {useState} from "react";
-import {Anchor, Popover, Text, TextInput} from "@mantine/core";
+import {Popover, Text, TextInput} from "@mantine/core";
 
 type IsValidValueFcn = (value: string) => boolean;
 

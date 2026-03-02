@@ -1,7 +1,8 @@
 import * as React from "react";
 import {Badge, Group, Stack, Text} from "@mantine/core";
-import {useAppLayout} from "../../hooks/useAppLayout";
 import {useClipboard} from "@mantine/hooks";
+
+import {useAppLayout} from "../../hooks/useAppLayout";
 
 export type ActionPanelProps = {
     title: React.ReactNode;

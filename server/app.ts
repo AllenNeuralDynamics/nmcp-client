@@ -16,8 +16,8 @@ const debug = Debug("nmcp:client:app");
 
 import {ServerConfiguration} from "./serverConfig.js";
 
-import {dirname} from 'node:path';
-import {fileURLToPath} from 'node:url';
+import {dirname} from "node:path";
+import {fileURLToPath} from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -43,6 +43,7 @@ if (process.env.NODE_ENV !== "production") {
         res.json({
             systemVersion: version,
             precomputedLocation: ServerConfiguration.precomputedLocation,
+            doiHandler: ServerConfiguration.doiHandler,
             exportLimit: ServerConfiguration.exportLimit
         });
     });
@@ -101,7 +102,8 @@ function devServer() {
                 res.json({
                     systemVersion: version,
                     precomputedLocation: ServerConfiguration.precomputedLocation,
-                    exportLimit: ServerConfiguration.exportLimit
+                    exportLimit: ServerConfiguration.exportLimit,
+                    doiHandler: ServerConfiguration.doiHandler
                 });
             });
 

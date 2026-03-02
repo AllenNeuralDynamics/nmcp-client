@@ -1,8 +1,8 @@
 import * as React from "react";
 import {Button, Tooltip} from "@mantine/core";
+import {IconBook, IconEdit, IconFlagExclamation, IconFolderOpen, IconPencilPause, IconUserEdit, IconX} from "@tabler/icons-react";
 
 import {actionColor, actionName, actionTooltip, ReconstructionAction} from "../../models/reconstructionAction";
-import {IconBook, IconEdit, IconFlagExclamation, IconFolderOpen, IconPencilPause, IconUserEdit, IconX} from "@tabler/icons-react";
 
 function icon(action: ReconstructionAction, size: number = 18): React.JSX.Element {
     switch (action) {

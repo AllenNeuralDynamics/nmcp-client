@@ -1,11 +1,11 @@
 import * as React from "react";
-import {ActionIcon, getTreeExpandedState, Group, Text, Tree, TreeNodeData, useTree} from '@mantine/core';
+import {observer} from "mobx-react-lite";
+import {ActionIcon, getTreeExpandedState, Group, Text, Tree, TreeNodeData, useTree} from "@mantine/core";
 import {IconChevronRight} from "@tabler/icons-react";
 
 import {AtlasStructureViewModel} from "../../../../viewmodel/atlasStructureViewModel";
 import {AtlasViewModel} from "../../../../viewmodel/atlasViewModel";
 import {isSelectedIcon} from "../NeuronTable";
-import {observer} from "mobx-react-lite";
 
 interface StructureTreeNodeData extends TreeNodeData {
     structure: AtlasStructureViewModel;

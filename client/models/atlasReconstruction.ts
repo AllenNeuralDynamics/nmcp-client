@@ -8,15 +8,13 @@ export interface AtlasReconstruction {
     id: string;
     sourceUrl: string;
     status: number;
+    doi?: string;
     nodeCounts: NodeCounts;
     soma: AtlasNode;
     qualityControl: QualityControl;
     reviewerId: string;
     reviewer: User;
     precomputed?: Precomputed;
-    qualityCheck: any;
-    qualityCheckStatus: number;
-    qualityCheckAt: Date;
     searchIndexedAt: Date;
     createdAt: Date;
     updatedAt: Date;

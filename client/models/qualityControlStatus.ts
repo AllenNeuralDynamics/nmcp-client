@@ -12,6 +12,8 @@ export function qualityControlStatus(status: QualityControlStatus): string {
             return "Not Ready";
         case QualityControlStatus.Pending:
             return "Pending"
+        case QualityControlStatus.Error:
+            return "Tool or Service Error";
         case QualityControlStatus.Failed:
             return "Failed";
         case QualityControlStatus.Passed:
@@ -27,6 +29,8 @@ export function qualityControlColor(status: QualityControlStatus): string {
             return "cyan";
         case QualityControlStatus.Pending:
             return "indigo";
+        case QualityControlStatus.Error:
+            return "red";
         case QualityControlStatus.Failed:
             return "red";
         case QualityControlStatus.Passed:

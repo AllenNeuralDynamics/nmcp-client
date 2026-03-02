@@ -1,4 +1,5 @@
 import * as React from "react";
+import {useState} from "react";
 import {useMutation} from "@apollo/client";
 import {Badge, Button, Group, List, Stack, Table, Text} from "@mantine/core";
 import {DatePickerInput} from "@mantine/dates";
@@ -13,6 +14,8 @@ import {GenotypeAutosuggest} from "../common/GenotypeAutosuggset";
 import {UPDATE_SPECIMEN_MUTATION, UpdateSpecimenMutationResponse, UpdateSpecimenVariables} from "../../graphql/specimen";
 import {toastUpdateError} from "../common/NotificationHelper";
 import {Link} from "react-router-dom";
+import {SomaFeaturesModal} from "./SomaFeaturesModal";
+import {TomographyModal} from "./TomographyModal";
 
 export type SpecimenRowProps = {
     specimen: SpecimenShape;
@@ -22,6 +25,9 @@ export type SpecimenRowProps = {
 }
 
 export const SpecimenRow = ({specimen, manageInjections, requestDelete}: SpecimenRowProps) => {
+    const [isSomaModalOpen, setIsSomaModalOpen] = useState(false);
+    const [isTomographyModalOpen, setIsTomographyModalOpen] = useState(false);
+
     const [updateSpecimen] = useMutation<UpdateSpecimenMutationResponse, UpdateSpecimenVariables>(UPDATE_SPECIMEN_MUTATION,
         {
             onError: (error) => toastUpdateError(error)
@@ -58,7 +64,15 @@ export const SpecimenRow = ({specimen, manageInjections, requestDelete}: Specime
         }
     }
 
-    const features = specimen.somaProperties ? SomaPropertiesDisplay(specimen.somaProperties) : null;
+    const tomographyLabel = specimen.tomography?.url
+        ? <Text size="sm" style={{cursor: "pointer"}} onClick={() => setIsTomographyModalOpen(true)}>
+            {specimen.tomography.url.length > 20 ? specimen.tomography.url.substring(0, 20) + "..." : specimen.tomography.url}
+          </Text>
+        : <Text size="sm" c="dimmed" style={{cursor: "pointer"}} onClick={() => setIsTomographyModalOpen(true)}>click to edit</Text>;
+
+    const features = specimen.somaProperties
+        ? <a style={{cursor: "pointer"}} onClick={() => setIsSomaModalOpen(true)}>{SomaPropertiesDisplay(specimen.somaProperties)}</a>
+        : <Text size="sm" c="dimmed" style={{cursor: "pointer"}} onClick={() => setIsSomaModalOpen(true)}>click to edit</Text>;
 
     return (
         <Table.Tr key={specimen.id}>
@@ -87,7 +101,12 @@ export const SpecimenRow = ({specimen, manageInjections, requestDelete}: Specime
                 <CollectionSelect value={specimen.collection?.id} onChange={updateCollection}/>
             </Table.Td>
             <Table.Td>
+                {tomographyLabel}
+                <TomographyModal specimen={specimen} opened={isTomographyModalOpen} onClose={() => setIsTomographyModalOpen(false)}/>
+            </Table.Td>
+            <Table.Td>
                 {features}
+                <SomaFeaturesModal specimen={specimen} opened={isSomaModalOpen} onClose={() => setIsSomaModalOpen(false)}/>
             </Table.Td>
             <Table.Td>
                 {specimen.neuronCount === 0 ?

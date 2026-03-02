@@ -1,6 +1,6 @@
 import * as React from "react";
 import {useQuery} from "@apollo/client";
-import {ComboboxData, Group, Loader, Text} from "@mantine/core";
+import {Group, Loader, Text} from "@mantine/core";
 
 import {GenotypeShape} from "../../models/genotype";
 import {GENOTYPES_QUERY, GenotypesQueryResponse} from "../../graphql/genotype";

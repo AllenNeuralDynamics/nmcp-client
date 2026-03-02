@@ -1,9 +1,9 @@
 import * as React from "react";
 import {useEffect, useState} from "react";
-import {observer} from "mobx-react-lite";
 import {useMutation, useQuery} from "@apollo/client";
+import {observer} from "mobx-react-lite";
 import {Button, Card, Center, Divider, Group, Loader, SimpleGrid, Text} from "@mantine/core";
-import {IconPlus, IconUpload} from "@tabler/icons-react";
+import {IconPencil, IconPlus, IconUpload} from "@tabler/icons-react";
 
 import {toastCreateError, toastDeleteError} from "../common/NotificationHelper";
 import {PaginationHeader} from "../common/PaginationHeader";
@@ -19,12 +19,16 @@ import {formatNeuron, NeuronShape} from "../../models/neuron";
 import {UserPreferences} from "../../util/userPreferences";
 import {ImportSomasModal} from "./soma/ImportSomasModal";
 import {SpecimenFilter} from "../common/filters/SpecimenFilter";
-import {OptionalFilter} from "../../viewmodel/candidateFilter";
+import {AtlasStructureMultiSelectFilter} from "../common/filters/AtlasStructureMultiSelectFilter";
+import {NeuronTagFilter} from "../common/filters/NeuronTagFilter";
+import {CandidateFilter} from "../../viewmodel/candidateFilter";
+import {CandidateMetrics} from "../candidates/CandidateMetrics";
 import {SpecimenSelect} from "../common/SpecimenSelect";
 import {SpecimensQueryResponse, SPECIMENS_QUERY} from "../../graphql/specimen";
 import {GraphQLErrorAlert} from "../common/GraphQLErrorAlert";
 import {usePreferences} from "../../hooks/usePreferences";
 import {MessageBox} from "../common/MessageBox";
+import {BulkUpdateModal} from "./BulkUpdateModal";
 
 interface INeuronsState {
     offset: number;
@@ -39,7 +43,8 @@ export const Neurons = observer(() => {
     const [sampleId, setSampleId] = useState<string>(null);
     const [isSampleLocked, setIsSampleLocked] = useState<boolean>(false);
 
-    const [specimenFilter] = useState(new OptionalFilter<string[]>([]));
+    const [candidateFilter] = useState(new CandidateFilter());
+    const [showBulkUpdate, setShowBulkUpdate] = useState(false);
 
     const [state, setState] = useState<INeuronsState>({
         offset: UserPreferences.Instance.neuronPageOffset,
@@ -63,12 +68,19 @@ export const Neurons = observer(() => {
 
     const specimenData = useQuery<SpecimensQueryResponse>(SPECIMENS_QUERY, {fetchPolicy: "cache-first"});
 
-    const sampleIds = specimenFilter.isEnabled ? specimenFilter.contents : [];
-
     const {loading, error, data, previousData} = useQuery<NeuronsQueryResponse, NeuronsQueryVariables>(NEURONS_QUERY,
         {
             pollInterval: 10000,
-            variables: {input: {offset: state.offset, limit: state.limit, specimenIds: sampleIds}}
+            variables: {
+                input: {
+                    offset: state.offset,
+                    limit: state.limit,
+                    specimenIds: candidateFilter.specimenIds,
+                    atlasStructureIds: candidateFilter.atlasStructureIds,
+                    keywords: candidateFilter.keywords,
+                    somaProperties: candidateFilter.somaFilter
+                }
+            }
         });
 
     useEffect(() => {
@@ -165,6 +177,8 @@ export const Neurons = observer(() => {
         setState({...state, isUploadSomaPropertiesOpen: true});
     }
 
+    const hasNeurons = neurons?.length > 0;
+
     const renderCreateNeuron = () => {
         return (
             <Group preventGrowOverflow={false}>
@@ -172,8 +186,10 @@ export const Neurons = observer(() => {
                     <SpecimenSelect value={sampleId} lockable locked={isSampleLocked} onChange={onSampleChange}
                                     onLock={onLockSample}/>
                 </Group>
-                    <Button color="green" leftSection={<IconUpload size={18}/>} disabled={sampleId == null || isCreating}
+                    <Button color="green" variant="light" leftSection={<IconUpload size={18}/>} disabled={sampleId == null || isCreating}
                             onClick={() => uploadSomaProperties()}>Import...</Button>
+                <Button color="green" variant="light" leftSection={<IconPencil size={18}/>} disabled={!hasNeurons}
+                        onClick={() => setShowBulkUpdate(true)}>Update...</Button>
                 <Button leftSection={<IconPlus size={18}/>} disabled={sampleId == null || isCreating} loading={isCreating}
                         onClick={() => createNeuron({variables: {neuron: {specimenId: sampleId}}})}>Add</Button>
             </Group>
@@ -220,6 +236,14 @@ export const Neurons = observer(() => {
         <div>
             {renderDeleteConfirmationModal()}
             {renderUploadSomaProperties()}
+            <BulkUpdateModal open={showBulkUpdate} neuronIds={neurons?.map(n => n.id) ?? []} totalCount={totalCount ?? 0}
+                             queryInput={{
+                                 specimenIds: candidateFilter.specimenIds,
+                                 atlasStructureIds: candidateFilter.atlasStructureIds,
+                                 keywords: candidateFilter.keywords,
+                                 somaProperties: candidateFilter.somaFilter
+                             }}
+                             onClose={() => setShowBulkUpdate(false)}/>
             <Card withBorder>
                 <Card.Section bg="segment">
                     <Group justify="space-between" p={12}>
@@ -229,9 +253,17 @@ export const Neurons = observer(() => {
                     <Divider orientation="horizontal"/>
                 </Card.Section>
                 <Card.Section bg="segment">
-                    <Group p={12}>
-                        <SpecimenFilter w={400} filter={specimenFilter}/>
+                    <Group p={12} align="center">
+                        <SpecimenFilter w={160} filter={candidateFilter.samplesFilter}/>
+                        <Divider orientation="vertical"/>
+                        <AtlasStructureMultiSelectFilter w={300} filter={candidateFilter.atlasStructureFilter}/>
+                        <Divider orientation="vertical"/>
+                        <NeuronTagFilter filter={candidateFilter.tagFilter}/>
                     </Group>
+                    <Divider orientation="horizontal"/>
+                </Card.Section>
+                <Card.Section bg="segment">
+                    <CandidateMetrics candidateFilter={candidateFilter}/>
                     <Divider orientation="horizontal"/>
                 </Card.Section>
                 <Card.Section>
@@ -243,7 +275,7 @@ export const Neurons = observer(() => {
                     {neurons.length > 0 ?
                         <NeuronsTable neurons={neurons} pageCount={pageCount} activePage={activePage} start={start} end={end}
                                       totalCount={totalCount} onDeleteNeuron={(n) => setState({...state, requestedNeuronForDelete: n})}/> :
-                        <Center><Text c="dimmed" p={24}>{zeroNeuronsMessage(specimenFilter.isEnabled)}</Text></Center>}
+                        <Center><Text c="dimmed" p={24}>{zeroNeuronsMessage(candidateFilter.anyEnabled)}</Text></Center>}
                 </Card.Section>
                 {neurons.length > 0 ?
                     <Card.Section bg="segment">
@@ -267,5 +299,5 @@ function onNeuronCreated(data: NeuronShape) {
 }
 
 function zeroNeuronsMessage(isFiltered: boolean): string {
-    return `There are no neurons${isFiltered ? " for the selected specimen" : "."}`;
+    return `There are no neurons${isFiltered ? " that match the current filters" : "."}`;
 }

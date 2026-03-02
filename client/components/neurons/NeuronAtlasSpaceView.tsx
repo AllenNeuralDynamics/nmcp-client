@@ -1,19 +1,19 @@
 import * as React from "react";
 import {useEffect, useState} from "react";
+import {useLazyQuery} from "@apollo/client";
 import {observer} from "mobx-react-lite";
 import {Divider, Group, Stack, useComputedColorScheme} from "@mantine/core";
-
-import {NeuronShape} from "../../models/neuron";
-import {NeuroglancerControls} from "../common/NeuroglancerControls";
-import {useSystemConfiguration} from "../../hooks/useSystemConfiguration";
-import {AtlasSpaceViewer} from "../../viewer/atlasSpaceViewer";
-import {useConstants} from "../../hooks/useConstants";
-import {useLazyQuery} from "@apollo/client";
-import {NEAREST_NODE_QUERY, NearestNodeQueryResponse, NearestNodeQueryVariables} from "../../graphql/search";
-import {AtlasViewerSelection} from "./AtlasViewerSelection";
 import {useResizeObserver} from "@mantine/hooks";
-import {AtlasContainer} from "../search/output/atlas/AtlasContainer";
+
+import {NEAREST_NODE_QUERY, NearestNodeQueryResponse, NearestNodeQueryVariables} from "../../graphql/search";
+import {useConstants} from "../../hooks/useConstants";
+import {useSystemConfiguration} from "../../hooks/useSystemConfiguration";
+import {NeuronShape} from "../../models/neuron";
+import {AtlasSpaceViewer} from "../../viewer/atlasSpaceViewer";
 import {AtlasViewModel} from "../../viewmodel/atlasViewModel";
+import {NeuroglancerControls} from "../common/NeuroglancerControls";
+import {AtlasContainer} from "../search/output/atlas/AtlasContainer";
+import {AtlasViewerSelection} from "./AtlasViewerSelection";
 
 export const NeuronAtlasSpaceView = observer(({neuron}: { neuron: NeuronShape }) => {
     const scheme = useComputedColorScheme();

@@ -1,0 +1,109 @@
+import gql from "graphql-tag";
+
+import {QualityControl} from "../models/qualityControl";
+
+export const QualityControlFieldsFragment = gql`fragment QualityControlFields on QualityControl {
+    id
+    status
+}`;
+
+const QualityControlTestFieldsFragment = gql`fragment QualityControlTestFields on QualityControlTest {
+    name
+    description
+    nodes
+}`;
+
+const QualityOutputFieldsFragment = gql`fragment QualityOutputFields on QualityOutput {
+    serviceVersion
+    toolVersion
+    score
+    warnings {
+        ...QualityControlTestFields
+    }
+    errors {
+        ...QualityControlTestFields
+    }
+    toolError {
+        kind
+        description
+        info
+    }
+    when
+}
+${QualityControlTestFieldsFragment}
+`;
+
+export const QUALITY_CONTROL_DETAIL_QUERY = gql`
+    query QualityControlDetail($id: String!) {
+        qualityControl(id: $id) {
+            id
+            status
+            current {
+                ...QualityOutputFields
+            }
+            history {
+                ...QualityOutputFields
+            }
+        }
+    }
+    ${QualityOutputFieldsFragment}
+`;
+
+export type QualityControlDetailVariables = {
+    id: string;
+}
+
+export type QualityControlDetailResponse = {
+    qualityControl: QualityControl;
+}
+
+export const NEURON_QUALITY_CONTROL_QUERY = gql`
+    query NeuronQualityControl($neuronId: String!) {
+        neuron(id: $neuronId) {
+            published {
+                id
+                status
+                qualityControl {
+                    id
+                    status
+                    current {
+                        ...QualityOutputFields
+                    }
+                    history {
+                        ...QualityOutputFields
+                    }
+                }
+            }
+        }
+    }
+    ${QualityOutputFieldsFragment}
+`;
+
+export type NeuronQualityControlVariables = {
+    neuronId: string;
+}
+
+export type NeuronQualityControlResponse = {
+    neuron: {
+        published: {
+            id: string;
+            status: number;
+            qualityControl: QualityControl;
+        };
+    };
+}
+
+export const REASSESS_QUALITY_CONTROL_MUTATION = gql`mutation ReassessQualityControl($reconstructionId: String!) {
+    requestQualityControlReassessment(reconstructionId: $reconstructionId) {
+        id
+        status
+    }
+}`;
+
+export type ReassessQualityControlVariables = {
+    reconstructionId: string;
+}
+
+export type ReassessQualityControlResponse = {
+    requestQualityControlReassessment: QualityControl;
+}

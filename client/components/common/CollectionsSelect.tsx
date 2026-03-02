@@ -1,6 +1,6 @@
 import * as React from "react";
 import {useQuery} from "@apollo/client";
-import {ComboboxData, Group, Loader, MultiSelect, Select, Switch, Text} from "@mantine/core";
+import {ComboboxData, Group, Loader, MultiSelect, Switch, Text} from "@mantine/core";
 
 import {CollectionShape} from "../../models/collection";
 import {COLLECTIONS_QUERY, CollectionsResponse} from "../../graphql/collection";

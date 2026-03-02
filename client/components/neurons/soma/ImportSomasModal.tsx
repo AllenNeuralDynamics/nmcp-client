@@ -1,8 +1,8 @@
 import * as React from "react";
 import {useState} from "react";
-import {observer} from "mobx-react-lite";
 import {useMutation} from "@apollo/client";
-import {Modal, Alert, Stack, Button, Divider, Flex, Group} from '@mantine/core';
+import {observer} from "mobx-react-lite";
+import {Modal, Alert, Stack, Button, Divider, Flex, Group} from "@mantine/core";
 import {IconInfoCircle, IconUpload} from "@tabler/icons-react";
 
 import {ImportSomasPanel} from "./ImportSomasPanel";

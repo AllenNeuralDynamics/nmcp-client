@@ -1,15 +1,15 @@
 import * as React from "react";
 import {useState} from "react";
+import {useMutation} from "@apollo/client";
 import {Badge, Button, Group, Stack, Text} from "@mantine/core";
+import {useClipboard} from "@mantine/hooks";
 import {IconArchive, IconFlagExclamation, IconZoomCode, IconZoomQuestion} from "@tabler/icons-react";
 
-import {IssueShape, IssueStatus} from "../../../models/issue";
-import {useClipboard} from "@mantine/hooks";
-import {CloseIssueModal} from "./CloseIssueModal";
-import {useMutation} from "@apollo/client";
 import {MODIFY_ISSUE_MUTATION, ModifyIssueResponse, ModifyIssueVariables, OPEN_ISSUES_QUERY} from "../../../graphql/issue";
-import {errorNotification} from "../../common/NotificationHelper";
 import {useAppLayout} from "../../../hooks/useAppLayout";
+import {IssueShape, IssueStatus} from "../../../models/issue";
+import {errorNotification} from "../../common/NotificationHelper";
+import {CloseIssueModal} from "./CloseIssueModal";
 
 export const IssueActions = ({issue}: { issue: IssueShape }) => {
     const clipboard = useClipboard();

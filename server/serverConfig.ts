@@ -10,6 +10,7 @@ export interface IServiceOptions {
     graphQLService: ServiceLocation;
     exportService: ServiceLocation;
     exportLimit: number;
+    doiHandler: string;
     precomputedLocation: string;
 }
 
@@ -27,6 +28,7 @@ const configuration: IServiceOptions = {
         endpoint: "/export"
     },
     exportLimit: 20,
+    doiHandler: "https://dois.org",
     precomputedLocation: ""
 };
 
@@ -40,8 +42,9 @@ function loadServerConfiguration() {
 
     options.exportService.hostname = process.env.EXPORT_API_HOST || options.exportService.hostname;
     options.exportService.port = parseInt(process.env.EXPORT_API_PORT) || options.exportService.port;
-
     options.exportLimit = parseInt(process.env.NMCP_CLIENT_EXPORT_LIMIT) || options.exportLimit;
+
+    options.doiHandler =  process.env.DOI_HANDLER || options.doiHandler;
 
     options.precomputedLocation = process.env.NMCP_PRECOMPUTED_OUTPUT || options.precomputedLocation;
 

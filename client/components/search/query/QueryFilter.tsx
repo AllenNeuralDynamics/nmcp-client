@@ -1,18 +1,18 @@
 import * as React from "react";
-import {ActionIcon, Checkbox, Flex, Select, TextInput} from "@mantine/core";
 import {observer} from "mobx-react-lite";
+import {ActionIcon, Checkbox, Flex, Select, TextInput} from "@mantine/core";
+import {IconX} from "@tabler/icons-react";
 
+import {useConstants} from "../../../hooks/useConstants";
 import {AtlasStructureShape} from "../../../models/atlasStructure";
+import {NeuronalStructure} from "../../../models/neuronalStructure";
 import {IQueryOperator} from "../../../models/queryOperator";
 import {FilterComposition, FilterCompositions} from "../../../viewmodel/filterContents";
-import {NeuronalStructure} from "../../../models/neuronalStructure";
-import {useConstants} from "../../../hooks/useConstants";
-import {AtlasStructureMultiSelect} from "../../common/AtlasStructureMultiSelect";
-import {UIQueryPredicate} from "../../../viewmodel/uiQueryPredicate";
 import {
     QUERY_PREDICATE_KINDS, QueryPredicateKind, PredicateType
 } from "../../../viewmodel/queryPredicateKind";
-import {IconCircleMinus, IconMinus, IconX} from "@tabler/icons-react";
+import {UIQueryPredicate} from "../../../viewmodel/uiQueryPredicate";
+import {AtlasStructureMultiSelect} from "../../common/AtlasStructureMultiSelect";
 
 const queryPredicateLookup = new Map<string, QueryPredicateKind>();
 

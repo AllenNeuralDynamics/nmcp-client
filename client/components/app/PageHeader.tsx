@@ -1,8 +1,8 @@
 import * as React from "react";
 import {useContext} from "react";
 import {NavLink, useLocation} from "react-router-dom";
-import {useIsAuthenticated} from "@azure/msal-react";
 import {ActionIcon, Divider, Group, Image, Indicator, Text, useMantineColorScheme} from "@mantine/core";
+import {useIsAuthenticated} from "@azure/msal-react";
 import {IconMoon, IconSun} from "@tabler/icons-react";
 
 import {SignInSignOutButton} from "./SignInSignOutButton";

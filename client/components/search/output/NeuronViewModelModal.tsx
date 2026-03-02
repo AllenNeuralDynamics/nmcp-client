@@ -1,10 +1,10 @@
 import * as React from "react";
+import {useState} from "react";
 import {observer} from "mobx-react-lite";
 import {Modal, Select} from "@mantine/core";
 
 import {useQueryResponseViewModel} from "../../../hooks/useQueryResponseViewModel";
 import {NEURON_VIEW_MODES, NeuronViewMode} from "../../../viewmodel/neuronViewMode";
-import {useState} from "react";
 
 type NeuronViewModelModalProps = {
     opened: boolean

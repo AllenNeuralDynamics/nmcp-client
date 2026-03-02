@@ -1,6 +1,6 @@
 import * as React from "react";
-import {useQuery} from "@apollo/client";
 import {createContext, useEffect} from "react";
+import {useQuery} from "@apollo/client";
 import {useAccount, useIsAuthenticated, useMsal} from "@azure/msal-react";
 
 import {USER_QUERY, UserQueryResponse} from "../../graphql/user";

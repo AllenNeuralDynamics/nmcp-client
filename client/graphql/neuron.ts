@@ -1,6 +1,6 @@
 import gql from "graphql-tag";
 
-import {NeuronShape, SomaLocation, SomaProperties} from "../models/neuron";
+import {NeuronShape, SomaFilterProperties, SomaLocation, SomaProperties} from "../models/neuron";
 
 
 // brainStructureId is used to determine whether the brain area is inherited or not.  brainAreas{} is the resolved brain are
@@ -27,6 +27,7 @@ export const NEURON_RELATIONSHIP_FIELDS_FRAGMENT = gql`fragment NeuronRelationsh
     published {
         id
         status
+        doi
         searchIndexedAt
         updatedAt
     }
@@ -112,8 +113,9 @@ export type NeuronsQueryVariables = {
     input: {
         ids?: string[];
         specimenIds?: string[];
+        atlasStructureIds?: string[];
         keywords?: string[];
-        somaProperties?: SomaProperties;
+        somaProperties?: SomaFilterProperties;
         offset?: number;
         limit?: number;
     }
@@ -200,6 +202,131 @@ export type DeleteNeuronVariables = {
 
 export type DeleteNeuronMutationResponse = {
     deleteNeuron: string;
+}
+
+///
+/// Bulk Update Neurons Mutations
+///
+
+export const UPDATE_NEURONS_MUTATION = gql`mutation UpdateNeurons($input: NeuronBulkUpdateInput!) {
+    updateNeurons(input: $input) {
+        ...NeuronBaseFields
+        ...NeuronRelationshipFields
+    }
+}
+${NEURON_BASE_FIELDS_FRAGMENT}
+${NEURON_RELATIONSHIP_FIELDS_FRAGMENT}
+`;
+
+export type UpdateNeuronsVariables = {
+    input: {
+        ids: string[];
+        keywords?: string[];
+        atlasStructureId?: string;
+    }
+}
+
+export type UpdateNeuronsResponse = {
+    updateNeurons: NeuronShape[];
+}
+
+export const UPDATE_NEURONS_BY_QUERY_MUTATION = gql`mutation UpdateNeuronsByQuery($input: NeuronBulkUpdateByQueryInput!) {
+    updateNeuronsByQuery(input: $input) {
+        ...NeuronBaseFields
+        ...NeuronRelationshipFields
+    }
+}
+${NEURON_BASE_FIELDS_FRAGMENT}
+${NEURON_RELATIONSHIP_FIELDS_FRAGMENT}
+`;
+
+export type UpdateNeuronsByQueryVariables = {
+    input: {
+        query: NeuronsQueryVariables["input"];
+        keywords?: string[];
+        atlasStructureId?: string;
+    }
+}
+
+export type UpdateNeuronsByQueryResponse = {
+    updateNeuronsByQuery: NeuronShape[];
+}
+
+///
+/// Neuron Version History Query
+///
+
+const VERSION_HISTORY_EVENT_FRAGMENT = gql`fragment VersionHistoryEventFields on VersionHistoryEvent {
+    id
+    kind
+    name
+    details
+    userId
+    user {
+        firstName
+        lastName
+        affiliation
+    }
+    createdAt
+}`;
+
+export const NEURON_VERSION_HISTORY_QUERY = gql`query NeuronVersionHistory($neuronId: String!) {
+    neuronVersionHistory(neuronId: $neuronId) {
+        neuronId
+        specimen {
+            ...VersionHistoryEventFields
+        }
+        trunk {
+            ...VersionHistoryEventFields
+        }
+        branches {
+            reconstructionId
+            status
+            startedAt
+            events {
+                ...VersionHistoryEventFields
+            }
+        }
+    }
+}
+${VERSION_HISTORY_EVENT_FRAGMENT}`;
+
+export type VersionHistoryEventUser = {
+    firstName: string;
+    lastName: string;
+    affiliation: string;
+}
+
+export type VersionHistoryEvent = {
+    id: string;
+    kind: number;
+    name: string;
+    details: string;
+    userId: string;
+    user: VersionHistoryEventUser;
+    createdAt: string;
+}
+
+export type VersionHistoryBranch = {
+    reconstructionId: string;
+    status: number;
+    startedAt: string;
+    events: VersionHistoryEvent[];
+}
+
+export type NeuronVersionHistory = {
+    neuronId: string;
+    specimen: VersionHistoryEvent[];
+    trunk: VersionHistoryEvent[];
+    branches: VersionHistoryBranch[];
+}
+
+export type NeuronVersionHistoryVariables = {
+    neuronId: string;
+}
+
+export type NeuronVersionHistoryResponse = {
+    neuronVersionHistory: NeuronVersionHistory;
 }
 
 ///

@@ -1,4 +1,5 @@
 import gql from "graphql-tag";
+
 import {User} from "../models/user";
 
 /*

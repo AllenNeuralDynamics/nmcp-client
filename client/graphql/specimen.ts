@@ -13,6 +13,10 @@ export const SPECIMEN_FIELDS_FRAGMENT = gql`fragment SpecimenFields on Specimen 
             range
             window
         }
+        linearTransform {
+            scale { x y z }
+            translate { x y z }
+        }
     }
     collectionId
     neuronCount
@@ -97,6 +101,10 @@ type SpecimenMutateArgs = {
     genotypeId?: string;
     genotypeName?: string;
     collectionId?: string;
+    somaProperties?: {
+        defaultBrightness?: number;
+        defaultVolume?: number;
+    };
 }
 
 ///

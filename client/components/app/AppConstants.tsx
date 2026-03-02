@@ -1,7 +1,7 @@
 import * as React from "react";
 import {createContext} from "react";
-import {observer} from "mobx-react-lite";
 import {useQuery} from "@apollo/client";
+import {observer} from "mobx-react-lite";
 
 import {DataConstants} from "../../models/constants";
 import {AppLoading} from "./AppLoading";

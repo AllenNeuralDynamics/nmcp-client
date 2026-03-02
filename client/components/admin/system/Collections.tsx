@@ -1,6 +1,6 @@
 import React, {useState} from "react";
-import {useQuery} from "@apollo/client";
 import {Navigate} from "react-router-dom";
+import {useQuery} from "@apollo/client";
 import {Badge, Button, Card, Divider, Group, Space, Table, Text} from "@mantine/core";
 import {IconPlus} from "@tabler/icons-react";
 

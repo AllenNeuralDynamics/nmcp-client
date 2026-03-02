@@ -1,13 +1,13 @@
 import * as React from "react";
 import {Center, Group, Table, Text, useComputedColorScheme} from "@mantine/core";
+import {UseColorSchemeValue} from "@mantine/hooks";
 import {IconAlertTriangle} from "@tabler/icons-react";
 
 import {formatAtlasStructure} from "../../models/atlasStructure";
-import {User} from "../../models/user";
-import {ReconstructionStatusLabel} from "../common/ReconstructionStatus";
 import {NodeCounts, Reconstruction} from "../../models/reconstruction";
+import {User} from "../../models/user";
 import {NeuronVersionLink} from "../common/NeuronVersionLink";
-import {UseColorSchemeValue} from "@mantine/hooks";
+import {ReconstructionStatusLabel} from "../common/ReconstructionStatus";
 
 export type ReviewTableProps = {
     reconstructions: Reconstruction[]

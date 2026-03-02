@@ -1,6 +1,6 @@
 import * as React from "react";
 import {useState} from "react";
-import {Box, Button, Combobox, Text, useCombobox} from "@mantine/core";
+import {Button, Combobox, useCombobox} from "@mantine/core";
 import {IconSelector} from "@tabler/icons-react";
 
 type DropdownProps = {

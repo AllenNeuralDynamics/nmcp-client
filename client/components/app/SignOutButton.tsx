@@ -1,7 +1,8 @@
 import * as React from "react";
-import {useMsal} from "@azure/msal-react";
 import {Avatar, Menu} from "@mantine/core";
+import {useMsal} from "@azure/msal-react";
 import {IconLogout2, IconSettings} from "@tabler/icons-react";
+
 import {useAppLayout} from "../../hooks/useAppLayout";
 
 export const SignOutButton = () => {

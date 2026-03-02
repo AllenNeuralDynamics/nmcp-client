@@ -1,9 +1,9 @@
 import React from "react";
-
-import {useUser} from "../../hooks/useUser";
-import {UserPermissions} from "../../graphql/user";
-import {ReviewReconstructions} from "./ReviewReconstructions";
 import {Navigate} from "react-router-dom";
+
+import {UserPermissions} from "../../graphql/user";
+import {useUser} from "../../hooks/useUser";
+import {ReviewReconstructions} from "./ReviewReconstructions";
 
 export const ReviewTab = () => {
     const user = useUser();

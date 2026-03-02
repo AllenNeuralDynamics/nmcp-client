@@ -1,5 +1,4 @@
 import {AtlasViewer} from "./atlasViewer";
-
 import {LayerType, NeuroglancerLayerSource} from "./neuroglancerLayer";
 import {NeuronShape} from "../models/neuron";
 

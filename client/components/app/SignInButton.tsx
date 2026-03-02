@@ -1,6 +1,6 @@
 import * as React from "react";
-import { useMsal } from "@azure/msal-react";
 import {Button} from "@mantine/core";
+import {useMsal} from "@azure/msal-react";
 
 import { loginRequest } from "../../authConfig";
 

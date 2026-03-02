@@ -1,7 +1,7 @@
 import * as React from "react";
 import {useParams} from "react-router-dom";
-import {observer} from "mobx-react-lite";
 import {useQuery} from "@apollo/client";
+import {observer} from "mobx-react-lite";
 import {Badge, Card, Center, Divider, Group, Stack, Table, Text, Tooltip} from "@mantine/core";
 import {useClipboard} from "@mantine/hooks";
 import dayjs from "dayjs";

@@ -1,6 +1,6 @@
 import React, {useState} from "react";
-import {useQuery} from "@apollo/client";
 import {Navigate} from "react-router-dom";
+import {useQuery} from "@apollo/client";
 import {Card, Center, Divider, Group, Stack, Table, Text} from "@mantine/core";
 import {IconCheck} from "@tabler/icons-react";
 import dayjs from "dayjs";

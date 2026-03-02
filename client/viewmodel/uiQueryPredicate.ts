@@ -1,6 +1,7 @@
+import {makeObservable, observable} from "mobx";
+
 import {findQueryPredicateKind, PredicateType, QUERY_PREDICATE_KIND_COMPARTMENT, QueryPredicateKind} from "./queryPredicateKind";
 import {FilterContents, IPosition, IPositionInput} from "./filterContents";
-import {makeObservable, observable} from "mobx";
 import {DataConstants} from "../models/constants";
 import {SearchPredicate} from "../models/searchPredicate";
 

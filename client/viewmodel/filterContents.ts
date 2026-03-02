@@ -1,8 +1,9 @@
+import {makeObservable, observable} from "mobx";
+
 import {IQueryOperator} from "../models/queryOperator";
 import {AtlasStructureShape} from "../models/atlasStructure";
 import {NeuronalStructure} from "../models/neuronalStructure";
 import {DataConstants} from "../models/constants";
-import {makeObservable, observable} from "mobx";
 
 export enum FilterComposition {
     and = 1,

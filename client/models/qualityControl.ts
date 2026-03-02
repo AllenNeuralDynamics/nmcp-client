@@ -1,18 +1,30 @@
 import {QualityControlStatus} from "./qualityControlStatus";
 
-export type QualityCheckError = {
-    testName: string;
-    testDescription: string;
-    affectedNodes: number[];
+export type QualityControlTest = {
+    name: string;
+    description: string;
+    nodes: number[];
 }
 
-export type OldQualityControl = {
-    standardMorphVersion?: string
-    errors: QualityCheckError[];
-    warnings: QualityCheckError[];
+export type QualityControlToolError = {
+    kind: string;
+    description: string;
+    info?: string;
+}
+
+export type QualityOutput = {
+    serviceVersion: number;
+    toolVersion: string;
+    score: number;
+    warnings: QualityControlTest[];
+    errors: QualityControlTest[];
+    toolError?: QualityControlToolError;
+    when: Date;
 }
 
 export type QualityControl = {
     id: string;
-    status: QualityControlStatus
+    status: QualityControlStatus;
+    current?: QualityOutput;
+    history?: QualityOutput[];
 }

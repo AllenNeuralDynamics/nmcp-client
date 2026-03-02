@@ -1,9 +1,11 @@
 import gql from "graphql-tag";
+
 import {Reconstruction, ReconstructionRevisionKind} from "../models/reconstruction";
 import {ReconstructionSpace} from "../models/reconstructionSpace";
 import {NEURON_BASE_FIELDS_FRAGMENT, NEURON_RELATIONSHIP_FIELDS_FRAGMENT} from "./neuron";
 import {ReconstructionStatus} from "../models/reconstructionStatus";
 import {AtlasReconstructionFieldsFragment} from "./atlasReconstruction";
+import {QualityControlFieldsFragment} from "./qualityControl";
 
 export const NodeCountFieldsFragment = gql`fragment NodeCountFieldsFragment on NodeCount {
     total
@@ -37,12 +39,12 @@ export const ReconstructionRelationshipsFragment = gql`fragment ReconstructionRe
             ...NodeCountsFields
         }
         qualityControl {
-            id
-            status
+            ...QualityControlFields
         }
     }
 }
 ${NodeCountsFieldsFragment}
+${QualityControlFieldsFragment}
 ${NEURON_BASE_FIELDS_FRAGMENT}
 ${NEURON_RELATIONSHIP_FIELDS_FRAGMENT}
 `;
@@ -385,4 +387,16 @@ export type UploadJsonResponse = {
 
 export type UploadSwcResponse = {
     uploadJsonData: Reconstruction;
+}
+
+//
+// Validate DOIs Mutation
+//
+
+export const VALIDATE_DOIS_MUTATION = gql`mutation ValidateDois {
+    validateDois
+}`;
+
+export type ValidateDoIsResponse = {
+    validateDois: number;
 }

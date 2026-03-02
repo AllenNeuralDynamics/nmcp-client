@@ -1,9 +1,9 @@
 import * as React from "react";
 import {useMutation} from "@apollo/client";
 import {Badge, Divider, Group, Stack, Text} from "@mantine/core";
+import {useClipboard} from "@mantine/hooks";
 import {IconGitMerge} from "@tabler/icons-react";
 
-import {useClipboard} from "@mantine/hooks";
 import {Reconstruction} from "../../models/reconstruction";
 import {
     DISCARD_RECONSTRUCTION_MUTATION,

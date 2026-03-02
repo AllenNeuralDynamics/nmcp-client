@@ -1,8 +1,8 @@
 import * as React from "react";
 import {useState} from "react";
-import {useIsAuthenticated} from "@azure/msal-react";
 import {useMutation} from "@apollo/client";
 import {Group} from "@mantine/core";
+import {useIsAuthenticated} from "@azure/msal-react";
 import {IconGitMerge} from "@tabler/icons-react";
 
 import {useUser} from "../../hooks/useUser";

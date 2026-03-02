@@ -1,11 +1,11 @@
 import * as React from "react";
-import {ActionIcon, Group, Stack, Text} from "@mantine/core"
+import {observer} from "mobx-react-lite";
+import {ActionIcon, Group, Stack, Text} from "@mantine/core";
+import {IconX} from "@tabler/icons-react";
 
 import {AtlasStructureViewModel} from "../../../../viewmodel/atlasStructureViewModel";
-import {observer} from "mobx-react-lite";
-import {isSelectedIcon} from "../NeuronTable";
-import {IconX} from "@tabler/icons-react";
 import {AtlasViewModel} from "../../../../viewmodel/atlasViewModel";
+import {isSelectedIcon} from "../NeuronTable";
 
 type StructureHistoryRowProps = {
     structure: AtlasStructureViewModel;

@@ -1,13 +1,11 @@
 import * as React from "react";
 import {useQuery} from "@apollo/client";
+import {Stack} from "@mantine/core";
 
 import {ISSUE_COUNT_QUERY, IssueCountResponse} from "../../graphql/issue";
 import {UserPermissions} from "../../graphql/user";
-import {GraphQLErrorAlert} from "../common/GraphQLErrorAlert";
 import {useUser} from "../../hooks/useUser";
-import {useContext} from "react";
-import {UserContext} from "./UserApp";
-import {Stack} from "@mantine/core";
+import {GraphQLErrorAlert} from "../common/GraphQLErrorAlert";
 
 export interface Notifications {
     issueCount: number;

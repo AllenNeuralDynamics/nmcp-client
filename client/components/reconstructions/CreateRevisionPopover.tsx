@@ -2,7 +2,6 @@ import * as React from "react";
 import {useState} from "react";
 import {useMutation} from "@apollo/client";
 import {Button, Group, Popover, Select, Stack, Text} from "@mantine/core";
-import {actionColor, actionName, ReconstructionAction} from "../../models/reconstructionAction";
 import {IconVersions} from "@tabler/icons-react";
 
 import {
@@ -12,6 +11,7 @@ import {
     RECONSTRUCTIONS_QUERY,
 } from "../../graphql/reconstruction";
 import {ReconstructionRevisionKind} from "../../models/reconstruction";
+import {actionColor, actionName, ReconstructionAction} from "../../models/reconstructionAction";
 import {errorNotification} from "../common/NotificationHelper";
 
 const action = ReconstructionAction.CreateRevision;

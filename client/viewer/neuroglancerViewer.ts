@@ -1,10 +1,10 @@
 import {debounce} from "lodash-es";
-
 import {makeMinimalViewer} from "neuroglancer/unstable/ui/minimal_viewer.js";
 import {getDefaultRenderedDataPanelBindings, setDefaultInputEventBindings} from "neuroglancer/unstable/ui/default_input_event_bindings.js";
 import {disableWheel} from "neuroglancer/unstable/ui/disable_default_actions.js";
 import {registerEventListener} from "neuroglancer/unstable/util/disposable.js";
 import {Viewer} from "neuroglancer/unstable/viewer.js";
+
 import {immutableDefaultState, viewerBackgroundColor} from "./neuroglancerViewerState";
 import {LayerType, NeuroglancerLayerSource} from "./neuroglancerLayer";
 

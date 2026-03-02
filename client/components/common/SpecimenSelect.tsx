@@ -1,10 +1,10 @@
 import * as React from "react";
 import {useQuery} from "@apollo/client";
 import {ComboboxData, Group, Loader, Select, Text} from "@mantine/core";
+import {IconLock, IconLockOpen} from "@tabler/icons-react";
 
 import {SPECIMENS_QUERY, SpecimensQueryResponse} from "../../graphql/specimen";
 import {SpecimenShape} from "../../models/specimen";
-import {IconLock, IconLockOpen} from "@tabler/icons-react";
 
 export const LoadingSpecimens = () => {
     return <Group gap="sm" align="center">

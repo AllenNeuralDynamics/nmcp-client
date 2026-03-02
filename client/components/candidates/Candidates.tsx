@@ -1,7 +1,7 @@
 import * as React from "react";
 import {useState} from "react";
-import {observer} from "mobx-react-lite";
 import {useQuery} from "@apollo/client";
+import {observer} from "mobx-react-lite";
 import {Card, Center, Divider, Group, Loader, SimpleGrid, Space, Stack, Text} from "@mantine/core";
 
 import {CANDIDATE_NEURONS_QUERY, CandidateNeuronsResponse, NeuronsQueryVariables} from "../../graphql/candidates";

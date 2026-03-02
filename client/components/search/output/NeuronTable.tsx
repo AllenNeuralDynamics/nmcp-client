@@ -1,7 +1,8 @@
 import * as React from "react";
+import {Link} from "react-router-dom";
 import {observer} from "mobx-react-lite";
-import {useDisclosure} from "@mantine/hooks";
 import {ActionIcon, Button, ColorPicker, ColorSwatch, Divider, Popover, Stack, Table, Text, Tooltip} from "@mantine/core";
+import {useDisclosure} from "@mantine/hooks";
 import {IconSquare, IconSquareCheck} from "@tabler/icons-react";
 
 import {useQueryResponseViewModel} from "../../../hooks/useQueryResponseViewModel";
@@ -9,7 +10,6 @@ import {getViewMode, NEURON_VIEW_MODES} from "../../../viewmodel/neuronViewMode"
 import {NeuronViewModel} from "../../../viewmodel/neuronViewModel";
 import {NeuronViewModelModal} from "./NeuronViewModelModal";
 import {Dropdown} from "../../common/Dropdown";
-import {Link} from "react-router-dom";
 
 const swatches = ['#2e2e2e', '#868e96', '#fa5252', '#e64980', '#be4bdb', '#7950f2', '#4c6ef5', '#228be6', '#15aabf', '#12b886', '#40c057', '#82c91e', '#fab005', '#fd7e14'];
 

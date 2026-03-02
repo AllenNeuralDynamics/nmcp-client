@@ -17,9 +17,9 @@ import "neuroglancer/unstable/layer/enabled_frontend_modules.js";
 import "neuroglancer/unstable/datasource/enabled_frontend_modules.js";
 
 import "@mantine/core/styles.css";
-import '@mantine/dates/styles.css';
-import '@mantine/notifications/styles.css';
-import '@mantine/dropzone/styles.css';
+import "@mantine/dates/styles.css";
+import "@mantine/notifications/styles.css";
+import "@mantine/dropzone/styles.css";
 
 const viewerBackgroundLightSource = [249, 250, 251];
 const viewerBackgroundDarkSource = [42, 42, 42];

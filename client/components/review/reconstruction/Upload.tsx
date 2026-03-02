@@ -1,20 +1,20 @@
 import React, {useState} from "react";
+import {ApolloError, useMutation} from "@apollo/client";
 import {observer} from "mobx-react-lite";
 import {Button, Divider, Flex, Group, Loader, Stack, Table, Text} from "@mantine/core";
 import {Dropzone} from "@mantine/dropzone";
 import {IconFileCode, IconUpload, IconX} from "@tabler/icons-react";
 
-import {FilePreview} from "./FilePreview";
-import {errorNotification, successNotification} from "../../common/NotificationHelper";
-import {ApolloError, useMutation} from "@apollo/client";
 import {
     UPLOAD_JSON_MUTATION,
     UPLOAD_SWC_MUTATION, UploadJsonResponse, UploadSwcResponse,
     UploadUnregisteredJsonVariables,
     UploadUnregisteredSwcVariables
 } from "../../../graphql/reconstruction";
-import {ReconstructionSpace} from "../../../models/reconstructionSpace";
 import {Reconstruction} from "../../../models/reconstruction";
+import {ReconstructionSpace} from "../../../models/reconstructionSpace";
+import {FilePreview} from "./FilePreview";
+import {errorNotification, successNotification} from "../../common/NotificationHelper";
 
 const previewHeight = 300;
 

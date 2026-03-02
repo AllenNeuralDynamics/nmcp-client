@@ -1,10 +1,10 @@
 import * as React from "react";
 import {useEffect} from "react";
-import {InteractionRequiredAuthError} from "@azure/msal-browser";
-import {useAccount, useIsAuthenticated, useMsal} from "@azure/msal-react";
 import {ApolloClient, InMemoryCache, ApolloProvider, concat} from "@apollo/client";
 import {setContext} from "@apollo/client/link/context";
 import createUploadLink from "apollo-upload-client/createUploadLink.mjs";
+import {InteractionRequiredAuthError} from "@azure/msal-browser";
+import {useAccount, useIsAuthenticated, useMsal} from "@azure/msal-react";
 
 import {AppConstants} from "./AppConstants";
 import {loginRequest} from "../../authConfig";

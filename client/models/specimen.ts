@@ -5,12 +5,24 @@ import {CollectionShape} from "./collection";
 
 export type TomographyRange = [number, number];
 
+export type LinearTransformVector = {
+    x: number;
+    y: number;
+    z: number;
+}
+
+export type LinearTransform = {
+    scale: LinearTransformVector;
+    translate: LinearTransformVector;
+}
+
 export type Tomography = {
     url: string;
     options: {
         range: TomographyRange;
         window: TomographyRange;
-    }
+    };
+    linearTransform?: LinearTransform;
 }
 
 export type SomaFeaturesShape = {

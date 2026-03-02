@@ -1,4 +1,5 @@
 import gql from "graphql-tag";
+
 import {IssueShape, IssueKind, IssueReference, IssueResolutionKind, IssueStatus} from "../models/issue";
 
 const ISSUE_FIELDS_FRAGMENT = gql`fragment IssueFields on Issue {

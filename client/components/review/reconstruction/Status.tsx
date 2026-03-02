@@ -8,11 +8,8 @@ import {qualityControlStatus} from "../../../models/qualityControlStatus";
 export const Status = ({reconstruction}: { reconstruction: Reconstruction }) => {
     return (
         <Flex>
-            <Stack miw={300}>
-                {/* <Text>{qualityControlStatus(reconstruction.atlasReconstruction.qualityControl?.status)}</Text>*/}
-            </Stack>
-            <Divider orientation="vertical" />
             <Metadata reconstruction={reconstruction}/>
+            <Divider orientation="vertical" />
         </Flex>
     )
 }

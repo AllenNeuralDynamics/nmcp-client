@@ -1,22 +1,22 @@
 import * as React from "react";
 import {useEffect, useState} from "react";
-import {observer} from "mobx-react-lite";
 import {useLazyQuery} from "@apollo/client";
+import {observer} from "mobx-react-lite";
 import {ActionIcon, Divider, Group, Stack, Text, useComputedColorScheme} from "@mantine/core";
-
-import {NeuronViewModel} from "../../../viewmodel/neuronViewModel";
-import {NEAREST_NODE_QUERY, NearestNodeQueryResponse, NearestNodeQueryVariables} from "../../../graphql/search";
-import {useSystemConfiguration} from "../../../hooks/useSystemConfiguration";
-import {useQueryResponseViewModel} from "../../../hooks/useQueryResponseViewModel";
-import {useConstants} from "../../../hooks/useConstants";
-import {useAtlas} from "../../../hooks/useAtlas";
-import {AtlasNode} from "../../../models/atlasNode";
-import {SearchViewer} from "../../../viewer/searchViewer";
-import {ViewerSelection} from "./ViewerSelection";
-import {NeuroglancerControls} from "../../common/NeuroglancerControls";
-import {DrawerState} from "../../../viewmodel/appLayout";
 import {IconChevronLeft, IconChevronRight} from "@tabler/icons-react";
+
+import {NEAREST_NODE_QUERY, NearestNodeQueryResponse, NearestNodeQueryVariables} from "../../../graphql/search";
 import {useAppLayout} from "../../../hooks/useAppLayout";
+import {useAtlas} from "../../../hooks/useAtlas";
+import {useConstants} from "../../../hooks/useConstants";
+import {useQueryResponseViewModel} from "../../../hooks/useQueryResponseViewModel";
+import {useSystemConfiguration} from "../../../hooks/useSystemConfiguration";
+import {AtlasNode} from "../../../models/atlasNode";
+import {DrawerState} from "../../../viewmodel/appLayout";
+import {NeuronViewModel} from "../../../viewmodel/neuronViewModel";
+import {SearchViewer} from "../../../viewer/searchViewer";
+import {NeuroglancerControls} from "../../common/NeuroglancerControls";
+import {ViewerSelection} from "./ViewerSelection";
 
 export const SearchView = observer(({height}: { height: number }) => {
     const [viewer, setViewer] = useState<SearchViewer>(null);
