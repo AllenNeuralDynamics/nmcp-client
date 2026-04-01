@@ -14,6 +14,7 @@ import {GenotypeAutosuggest} from "../common/GenotypeAutosuggset";
 import {UPDATE_SPECIMEN_MUTATION, UpdateSpecimenMutationResponse, UpdateSpecimenVariables} from "../../graphql/specimen";
 import {toastUpdateError} from "../common/NotificationHelper";
 import {Link} from "react-router-dom";
+import {ReferenceDatasetModal} from "./ReferenceDatasetModal";
 import {SomaFeaturesModal} from "./SomaFeaturesModal";
 import {TomographyModal} from "./TomographyModal";
 
@@ -25,6 +26,7 @@ export type SpecimenRowProps = {
 }
 
 export const SpecimenRow = ({specimen, manageInjections, requestDelete}: SpecimenRowProps) => {
+    const [isRefDataSetModalOpen, setIsRefDataSetModalOpen] = useState(false);
     const [isSomaModalOpen, setIsSomaModalOpen] = useState(false);
     const [isTomographyModalOpen, setIsTomographyModalOpen] = useState(false);
 
@@ -64,6 +66,12 @@ export const SpecimenRow = ({specimen, manageInjections, requestDelete}: Specime
         }
     }
 
+    const refDataSetLabel = specimen.referenceDataset?.url
+        ? <Text size="sm" style={{cursor: "pointer"}} onClick={() => setIsRefDataSetModalOpen(true)}>
+            {specimen.referenceDataset.url.length > 20 ? specimen.referenceDataset.url.substring(0, 20) + "..." : specimen.referenceDataset.url}
+          </Text>
+        : <Text size="sm" c="dimmed" style={{cursor: "pointer"}} onClick={() => setIsRefDataSetModalOpen(true)}>click to edit</Text>;
+
     const tomographyLabel = specimen.tomography?.url
         ? <Text size="sm" style={{cursor: "pointer"}} onClick={() => setIsTomographyModalOpen(true)}>
             {specimen.tomography.url.length > 20 ? specimen.tomography.url.substring(0, 20) + "..." : specimen.tomography.url}
@@ -99,6 +107,10 @@ export const SpecimenRow = ({specimen, manageInjections, requestDelete}: Specime
             </Table.Td>
             <Table.Td>
                 <CollectionSelect value={specimen.collection?.id} onChange={updateCollection}/>
+            </Table.Td>
+            <Table.Td>
+                {refDataSetLabel}
+                <ReferenceDatasetModal specimen={specimen} opened={isRefDataSetModalOpen} onClose={() => setIsRefDataSetModalOpen(false)}/>
             </Table.Td>
             <Table.Td>
                 {tomographyLabel}

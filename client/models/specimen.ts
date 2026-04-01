@@ -25,6 +25,11 @@ export type Tomography = {
     linearTransform?: LinearTransform;
 }
 
+export type ReferenceDataset = {
+    url: string;
+    segmentationUrl: string;
+}
+
 export type SomaFeaturesShape = {
     defaultBrightness: number;
     defaultVolume: number;
@@ -35,6 +40,7 @@ export type SpecimenShape = {
     label: string;
     notes: string;
     referenceDate: Date;
+    referenceDataset?: ReferenceDataset;
     tomography?: Tomography;
     somaProperties?: SomaFeaturesShape;
     collection: CollectionShape;

@@ -1,7 +1,7 @@
 import * as React from "react";
 import {useParams} from "react-router-dom";
 import {useQuery} from "@apollo/client";
-import {Badge, Card, Divider, Group, Stack, Tabs, Text} from "@mantine/core";
+import {Anchor, Badge, Card, Divider, Group, Space, Stack, Table, Tabs, Text} from "@mantine/core";
 import {useClipboard, useLocalStorage} from "@mantine/hooks";
 import {useIsAuthenticated} from "@azure/msal-react";
 import {IconBinaryTree, IconBinaryTreeFilled, IconVersions} from "@tabler/icons-react";
@@ -78,17 +78,49 @@ export const Neuron = () => {
                         <Stack gap={2} align="flex-end">
                             <Badge bg={isPublished ? "green" : "orange"}>{published}</Badge>
                             {isPublished && data.neuron.published.doi &&
-                            <Group gap={2}>
-                                <Text size="sm">DOI:</Text>
-                                <Text size="sm" c="dimmed" td="underline" style={{cursor: "pointer"}}
-                                      onClick={() => {
-                                          clipboard.copy(`${systemConfiguration.doiHandler}/${data.neuron.published.doi}`);
-                                          successNotification("DOI", "DOI copied to clipboard");
-                                      }}>{`${systemConfiguration.doiHandler}/${data.neuron.published.doi}`}</Text>
-                            </Group>}
+                                <Group gap={2}>
+                                    <Text size="sm">DOI:</Text>
+                                    <Text size="sm" c="dimmed" td="underline" style={{cursor: "pointer"}}
+                                          onClick={() => {
+                                              clipboard.copy(`${systemConfiguration.doiHandler}/${data.neuron.published.doi}`);
+                                              successNotification("DOI", "DOI copied to clipboard");
+                                          }}>{`${systemConfiguration.doiHandler}/${data.neuron.published.doi}`}</Text>
+                                </Group>}
                         </Stack>
                     </Group>
                     <Divider orientation="horizontal"/>
+                </Card.Section>
+                <Card.Section p={0}  bg="segment">
+                    <Group p={12} gap={8} align="baseline">
+                        <Text fw={500}>Open Dataset</Text>
+                        {!(isPublished && data.neuron.specimen.referenceDataset?.url) && <Text c="dimmed" size="sm">Not available.</Text>}
+                    </Group>
+                    {isPublished && data.neuron.specimen.referenceDataset?.url && (
+                        <Table variant="vertical" withColumnBorders>
+                            <Table.Tr>
+                                <Table.Th colSpan={2} ta="left">Atlas Space</Table.Th>
+                            </Table.Tr>
+                            <Table.Tr>
+                                <Table.Th bg="table-header">SWC</Table.Th>
+                                <Table.Td><Anchor size="sm" href={`${data.neuron.specimen.referenceDataset.url}/ccf_space_reconstructions/swc/${data.neuron.label}-${data.neuron.specimen.label}.swc`} target="_blank">{`${data.neuron.label}-${data.neuron.specimen.label}.swc`}</Anchor></Table.Td>
+                            </Table.Tr>
+                            <Table.Tr>
+                                <Table.Th bg="table-header">JSON</Table.Th>
+                                <Table.Td><Anchor size="sm" href={`${data.neuron.specimen.referenceDataset.url}/ccf_space_reconstructions/json/${data.neuron.label}-${data.neuron.specimen.label}.json`} target="_blank">{`${data.neuron.label}-${data.neuron.specimen.label}.json`}</Anchor></Table.Td>
+                            </Table.Tr>
+                            <Table.Tr>
+                                <Table.Th colSpan={2} ta="left">Specimen Space</Table.Th>
+                            </Table.Tr>
+                            <Table.Tr>
+                                <Table.Th bg="table-header">SWC</Table.Th>
+                                <Table.Td><Anchor size="sm" href={`${data.neuron.specimen.referenceDataset.url}/specimen_space_reconstructions/swc/${data.neuron.label}-${data.neuron.specimen.label}.swc`} target="_blank">{`${data.neuron.label}-${data.neuron.specimen.label}.swc`}</Anchor></Table.Td>
+                            </Table.Tr>
+                            <Table.Tr>
+                                <Table.Th bg="table-header">JSON</Table.Th>
+                                <Table.Td><Anchor size="sm" href={`${data.neuron.specimen.referenceDataset.url}/specimen_space_reconstructions/json/${data.neuron.label}-${data.neuron.specimen.label}.json`} target="_blank">{`${data.neuron.label}-${data.neuron.specimen.label}.json`}</Anchor></Table.Td>
+                            </Table.Tr>
+                        </Table>
+                    )}
                 </Card.Section>
                 <Card.Section>
                     <Tabs orientation="horizontal" value={activeTab} onChange={onChangeTab}>

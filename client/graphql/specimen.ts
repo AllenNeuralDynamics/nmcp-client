@@ -1,12 +1,16 @@
 import gql from "graphql-tag";
 
-import {SpecimenShape, Tomography} from "../models/specimen";
+import {ReferenceDataset, SpecimenShape, Tomography} from "../models/specimen";
 
 export const SPECIMEN_FIELDS_FRAGMENT = gql`fragment SpecimenFields on Specimen {
     id
     label
     notes
     referenceDate
+    referenceDataset {
+        url
+        segmentationUrl
+    }
     tomography {
         url
         options {
@@ -97,6 +101,7 @@ type SpecimenMutateArgs = {
     label?: string;
     notes?: string;
     referenceDate?: number;
+    referenceDataset?: ReferenceDataset;
     tomography?: Tomography;
     genotypeId?: string;
     genotypeName?: string;

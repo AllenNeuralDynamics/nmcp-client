@@ -15,6 +15,10 @@ export const NEURON_RELATIONSHIP_FIELDS_FRAGMENT = gql`fragment NeuronRelationsh
     specimen {
         id
         label
+        referenceDataset {
+            url
+            segmentationUrl
+        }
         tomography {
             url
             options {

@@ -109,6 +109,13 @@ export const Specimen = observer(() => {
                                 <Table.Td>{simpleSomaCell(specimen.somaProperties?.defaultVolume)}</Table.Td>
                             </Table.Tr>
                             <Table.Tr>
+                                <Table.Th colSpan={2} ta="center">Reference Data Set</Table.Th>
+                            </Table.Tr>
+                            <Table.Tr>
+                                <Table.Th bg="table-header">URL</Table.Th>
+                                <Table.Td maw={200}><Tooltip label={specimen.referenceDataset?.url ?? NONE}>{simpleCell(specimen.referenceDataset?.url ?? NONE)}</Tooltip></Table.Td>
+                            </Table.Tr>
+                            <Table.Tr>
                                 <Table.Th colSpan={2} ta="center">Tomography</Table.Th>
                             </Table.Tr>
                             <Table.Tr>
