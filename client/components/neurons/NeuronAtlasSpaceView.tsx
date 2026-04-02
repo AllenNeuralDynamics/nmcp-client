@@ -1,5 +1,5 @@
 import * as React from "react";
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import {useLazyQuery} from "@apollo/client";
 import {observer} from "mobx-react-lite";
 import {Divider, Group, Stack, useComputedColorScheme} from "@mantine/core";
@@ -9,13 +9,19 @@ import {NEAREST_NODE_QUERY, NearestNodeQueryResponse, NearestNodeQueryVariables}
 import {useConstants} from "../../hooks/useConstants";
 import {useSystemConfiguration} from "../../hooks/useSystemConfiguration";
 import {NeuronShape} from "../../models/neuron";
+import {Reconstruction} from "../../models/reconstruction";
 import {AtlasSpaceViewer} from "../../viewer/atlasSpaceViewer";
 import {AtlasViewModel} from "../../viewmodel/atlasViewModel";
 import {NeuroglancerControls} from "../common/NeuroglancerControls";
 import {AtlasContainer} from "../search/output/atlas/AtlasContainer";
 import {AtlasViewerSelection} from "./AtlasViewerSelection";
 
-export const NeuronAtlasSpaceView = observer(({neuron}: { neuron: NeuronShape }) => {
+type NeuronAtlasSpaceViewProps = {
+    neuron: NeuronShape;
+    reconstruction?: Reconstruction;
+};
+
+export const NeuronAtlasSpaceView = observer(({neuron, reconstruction}: NeuronAtlasSpaceViewProps) => {
     const scheme = useComputedColorScheme();
 
     const systemConfiguration = useSystemConfiguration();
@@ -34,6 +40,9 @@ export const NeuronAtlasSpaceView = observer(({neuron}: { neuron: NeuronShape })
 
     const height = Math.round(rect.height);
 
+    const reconstructionRef = useRef(reconstruction);
+    reconstructionRef.current = reconstruction;
+
     useEffect(() => {
         atlas.initialize(constants);
 
@@ -43,13 +52,8 @@ export const NeuronAtlasSpaceView = observer(({neuron}: { neuron: NeuronShape })
 
         v.neuronSelectionListener = selectNeuron;
 
-        if (neuron?.reconstructions) {
-            const skeletonIds = neuron.reconstructions.map(r => r.atlasReconstruction?.precomputed?.skeletonId).filter(s => s);
-
-            v.setNeuronSkeletonId(skeletonIds);
-        } else {
-            v.setNeuronSkeletonId(null);
-        }
+        const skeletonId = reconstruction?.atlasReconstruction?.precomputed?.skeletonId;
+        v.setNeuronSkeletonId(skeletonId ? [skeletonId] : null);
 
         v.updateAtlasStructures(displayedStructures);
 
@@ -62,15 +66,10 @@ export const NeuronAtlasSpaceView = observer(({neuron}: { neuron: NeuronShape })
 
     useEffect(() => {
         if (viewer) {
-            if (neuron?.reconstructions) {
-                const skeletonIds = neuron.reconstructions.map(r => r.atlasReconstruction?.precomputed?.skeletonId).filter(s => s);
-
-                viewer.setNeuronSkeletonId(skeletonIds);
-            } else {
-                viewer.setNeuronSkeletonId(null);
-            }
+            const skeletonId = reconstruction?.atlasReconstruction?.precomputed?.skeletonId;
+            viewer.setNeuronSkeletonId(skeletonId ? [skeletonId] : null);
         }
-    }, [neuron]);
+    }, [reconstruction]);
 
     useEffect(() => {
         if (viewer) {
@@ -91,10 +90,12 @@ export const NeuronAtlasSpaceView = observer(({neuron}: { neuron: NeuronShape })
     }, [atlas.displayedStructures]);
 
     const selectNeuron = async (location: number[]) => {
-        if (neuron?.reconstructions.length > 0) {
+        const atlasReconstructionId = reconstructionRef.current?.atlasReconstruction?.id;
+
+        if (atlasReconstructionId) {
             await getNearest({
                 variables: {
-                    id: neuron.reconstructions[0].atlasReconstruction.id,
+                    id: atlasReconstructionId,
                     location: [location[0] * 10, location[1] * 10, location[2] * 10]
                 }
             });

@@ -5,21 +5,22 @@ import {Badge, Card, Center, Flex, Loader, SimpleGrid, Stack, Table, Text} from 
 import {QualityOutput, QualityControlTest} from "../../models/qualityControl";
 import {QualityControlStatus, qualityControlColor, qualityControlStatus} from "../../models/qualityControlStatus";
 import {
-    NEURON_QUALITY_CONTROL_QUERY,
-    NeuronQualityControlResponse,
-    NeuronQualityControlVariables,
+    QUALITY_CONTROL_DETAIL_QUERY,
+    QualityControlDetailResponse,
+    QualityControlDetailVariables,
 } from "../../graphql/qualityControl";
 
 type QualityMetricsProps = {
-    neuronId: string;
+    qualityControlId?: string;
 }
 
-export const QualityMetrics = ({neuronId}: QualityMetricsProps) => {
-    const {data, loading} = useQuery<NeuronQualityControlResponse, NeuronQualityControlVariables>(NEURON_QUALITY_CONTROL_QUERY, {
-        variables: {neuronId}
+export const QualityMetrics = ({qualityControlId}: QualityMetricsProps) => {
+    const {data, loading} = useQuery<QualityControlDetailResponse, QualityControlDetailVariables>(QUALITY_CONTROL_DETAIL_QUERY, {
+        variables: {id: qualityControlId},
+        skip: !qualityControlId
     });
 
-    const qc = data?.neuron?.published?.qualityControl;
+    const qc = data?.qualityControl;
 
     if (loading) {
         return (

@@ -1,13 +1,16 @@
 import * as React from "react";
-import {useParams} from "react-router-dom";
+import {useMemo} from "react";
+import {Navigate, useLocation, useNavigate, useParams} from "react-router-dom";
 import {useQuery} from "@apollo/client";
-import {Anchor, Badge, Card, Divider, Group, Space, Stack, Table, Tabs, Text} from "@mantine/core";
+import {Alert, Anchor, Badge, Card, Divider, Group, Space, Stack, Table, Tabs, Text} from "@mantine/core";
 import {useClipboard, useLocalStorage} from "@mantine/hooks";
 import {useIsAuthenticated} from "@azure/msal-react";
 import {IconBinaryTree, IconBinaryTreeFilled, IconVersions} from "@tabler/icons-react";
 import dayjs from "dayjs";
 
 import {NEURON_VERSIONS_QUERY, NeuronVersionsQueryResponse, NeuronVersionsQueryVariables} from "../../graphql/neuron";
+import {Reconstruction} from "../../models/reconstruction";
+import {ReconstructionStatus} from "../../models/reconstructionStatus";
 import {GraphQLErrorAlert} from "../common/GraphQLErrorAlert";
 import {AppLoading} from "../app/AppLoading";
 import {useAppLayout} from "../../hooks/useAppLayout";
@@ -18,8 +21,39 @@ import {QualityMetrics} from "./QualityMetrics";
 import {useSystemConfiguration} from "../../hooks/useSystemConfiguration";
 import {successNotification} from "../common/NotificationHelper";
 
+const ExcludedStatuses = new Set([
+    ReconstructionStatus.Archived,
+    ReconstructionStatus.Discarded,
+    ReconstructionStatus.OnHold,
+]);
+
+function selectReconstruction(reconstructions: Reconstruction[], versionId: string): Reconstruction | null {
+    if (!reconstructions || reconstructions.length === 0) {
+        return null;
+    }
+
+    if (versionId && versionId !== "latest") {
+        return reconstructions.find(r => r.id === versionId) ?? null;
+    }
+
+    const published = reconstructions.find(r => r.status === ReconstructionStatus.Published);
+
+    if (published) {
+        return published;
+    }
+
+    const eligible = reconstructions
+        .filter(r => !ExcludedStatuses.has(r.status))
+        .sort((a, b) => (b.status as number) - (a.status as number));
+
+    return eligible.length > 0 ? eligible[0] : null;
+}
+
 export const Neuron = () => {
-    let {neuronId, versionId} = useParams();
+    const {neuronId, versionId} = useParams();
+
+    const location = useLocation();
+    const navigate = useNavigate();
 
     const clipboard = useClipboard();
 
@@ -34,15 +68,20 @@ export const Neuron = () => {
 
     const systemConfiguration = useSystemConfiguration();
 
-    if (!versionId) {
-        versionId = "latest";
-    }
-
     const {error, data} = useQuery<NeuronVersionsQueryResponse, NeuronVersionsQueryVariables>(NEURON_VERSIONS_QUERY,
         {
             pollInterval: 10000,
             variables: {id: neuronId}
         });
+
+    const selectedReconstruction = useMemo(() => {
+        if (!data?.neuron?.reconstructions) {
+            return null;
+        }
+        return selectReconstruction(data.neuron.reconstructions, versionId);
+    }, [data?.neuron?.reconstructions, versionId]);
+
+    const invalidVersion = (location.state as any)?.invalidVersion as string | undefined;
 
     const onChangeTab = (tab: string) => {
         setActiveTab(tab);
@@ -56,6 +95,10 @@ export const Neuron = () => {
         return <AppLoading message="Loading Neuron..."/>;
     }
 
+    if (versionId && versionId !== "latest" && !selectedReconstruction && data.neuron.reconstructions) {
+        return <Navigate to={`/neuron/${neuronId}`} replace state={{invalidVersion: versionId}}/>;
+    }
+
     const info = appLayout.showReferenceIds ? (
         <Badge variant="light" onClick={() => clipboard.copy(data.neuron.id)}>{data.neuron.id}</Badge>) : null;
 
@@ -63,8 +106,16 @@ export const Neuron = () => {
 
     const published = isPublished ? `Published ${dayjs(data.neuron.published.searchIndexedAt).format("YYYY-MM-DD")}` : "Unpublished";
 
+    const qualityControlId = selectedReconstruction?.atlasReconstruction?.qualityControl?.id;
+
     return (
         <Stack p={20} align="stretch">
+            {invalidVersion && (
+                <Alert color="orange" title="Version Not Found" withCloseButton
+                       onClose={() => navigate(location.pathname, {replace: true, state: {}})}>
+                    Reconstruction version &quot;{invalidVersion}&quot; was not found. Showing the default version.
+                </Alert>
+            )}
             <Card withBorder>
                 <Card.Section bg="segment">
                     <Group p={12} justify="space-between">
@@ -140,13 +191,13 @@ export const Neuron = () => {
                         </Tabs.List>
 
                         <Tabs.Panel value="atlas" key={`atlas_${data.neuron.id}`}>
-                            <NeuronAtlasSpaceView neuron={data.neuron}/>
+                            <NeuronAtlasSpaceView neuron={data.neuron} reconstruction={selectedReconstruction}/>
                         </Tabs.Panel>
                         <Tabs.Panel value="specimen" key={`specimen_${data.neuron.id}`}>
-                            <NeuronSpecimenSpaceView neuron={data.neuron}/>
+                            <NeuronSpecimenSpaceView neuron={data.neuron} reconstruction={selectedReconstruction}/>
                         </Tabs.Panel>
                         <Tabs.Panel value="quality" key={`quality_${data.neuron.id}`}>
-                            <QualityMetrics neuronId={data.neuron.id}/>
+                            <QualityMetrics qualityControlId={qualityControlId}/>
                         </Tabs.Panel>
                         <Tabs.Panel value="history" key={`history_${data.neuron.id}`}>
                             <NeuronHistory neuronId={data.neuron.id}/>

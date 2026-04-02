@@ -57,42 +57,6 @@ export type QualityControlDetailResponse = {
     qualityControl: QualityControl;
 }
 
-export const NEURON_QUALITY_CONTROL_QUERY = gql`
-    query NeuronQualityControl($neuronId: String!) {
-        neuron(id: $neuronId) {
-            published {
-                id
-                status
-                qualityControl {
-                    id
-                    status
-                    current {
-                        ...QualityOutputFields
-                    }
-                    history {
-                        ...QualityOutputFields
-                    }
-                }
-            }
-        }
-    }
-    ${QualityOutputFieldsFragment}
-`;
-
-export type NeuronQualityControlVariables = {
-    neuronId: string;
-}
-
-export type NeuronQualityControlResponse = {
-    neuron: {
-        published: {
-            id: string;
-            status: number;
-            qualityControl: QualityControl;
-        };
-    };
-}
-
 export const REASSESS_QUALITY_CONTROL_MUTATION = gql`mutation ReassessQualityControl($reconstructionId: String!) {
     requestQualityControlReassessment(reconstructionId: $reconstructionId) {
         id

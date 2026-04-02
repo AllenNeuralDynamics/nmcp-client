@@ -59,6 +59,7 @@ export const NEURON_BASE_FIELDS_FRAGMENT = gql`fragment NeuronBaseFields on Neur
 export const NEURON_VERSIONS_RELATIONSHIPS_FRAGMENT = gql`fragment NeuronVersionsRelationshipFields on Neuron {
     reconstructions {
         id
+        status
         createdAt
         precomputed {
             id
@@ -69,6 +70,9 @@ export const NEURON_VERSIONS_RELATIONSHIPS_FRAGMENT = gql`fragment NeuronVersion
             precomputed {
                 id
                 skeletonId
+            }
+            qualityControl {
+                id
             }
             createdAt
         }
