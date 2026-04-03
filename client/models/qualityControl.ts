@@ -16,6 +16,7 @@ export type QualityOutput = {
     serviceVersion: number;
     toolVersion: string;
     score: number;
+    passed: QualityControlTest[];
     warnings: QualityControlTest[];
     errors: QualityControlTest[];
     toolError?: QualityControlToolError;

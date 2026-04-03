@@ -54,6 +54,7 @@ export const QualityMetrics = ({qualityControlId}: QualityMetricsProps) => {
 const CurrentResult = ({output}: { output: QualityOutput }) => {
     const hasErrors = output.errors?.length > 0;
     const hasWarnings = output.warnings?.length > 0;
+    const hasPassed = output.passed?.length > 0;
 
     return (
         <Stack gap="md">
@@ -71,10 +72,11 @@ const CurrentResult = ({output}: { output: QualityOutput }) => {
                     </Card.Section>
                 </Card>
             ) : null}
-            {hasErrors || hasWarnings ? (
-                <SimpleGrid cols={2}>
-                    <IssuesSection issues={output.errors} kind="error"/>
-                    <IssuesSection issues={output.warnings} kind="warning"/>
+            {hasErrors || hasWarnings || hasPassed ? (
+                <SimpleGrid cols={(hasErrors || hasWarnings ? 2 : 0) + (hasPassed ? 1 : 0)}>
+                    {hasErrors || hasWarnings ? <IssuesSection issues={output.errors} kind="error"/> : null}
+                    {hasErrors || hasWarnings ? <IssuesSection issues={output.warnings} kind="warning"/> : null}
+                    {hasPassed ? <PassedSection tests={output.passed}/> : null}
                 </SimpleGrid>
             ) : (
                 <Text size="sm">No errors or warnings.</Text>
@@ -123,6 +125,23 @@ const IssuesSection = ({issues, kind}: { issues: QualityControlTest[], kind: "er
                         ))}
                     </Table.Tbody>
                 </Table>
+            </Card.Section>
+        </Card>
+    );
+};
+
+const PassedSection = ({tests}: { tests: QualityControlTest[] }) => {
+    return (
+        <Card withBorder>
+            <Card.Section bg="green.4" p={8}>
+                <Text fw={500}>Passed</Text>
+            </Card.Section>
+            <Card.Section p={12}>
+                <Stack gap={4}>
+                    {tests.map((test, idx) => (
+                        <Text key={idx} size="sm">{test.name}</Text>
+                    ))}
+                </Stack>
             </Card.Section>
         </Card>
     );

@@ -17,6 +17,9 @@ const QualityOutputFieldsFragment = gql`fragment QualityOutputFields on QualityO
     serviceVersion
     toolVersion
     score
+    passed {
+        ...QualityControlTestFields
+    }
     warnings {
         ...QualityControlTestFields
     }
