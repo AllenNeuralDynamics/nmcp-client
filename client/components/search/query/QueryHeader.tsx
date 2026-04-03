@@ -113,12 +113,17 @@ export const QueryHeader = observer(() => {
         return message ? <Text size="xs" c="dimmed">{message}</Text> : null;
     }
 
+    const renderCollections = () => {
+        return (
+            <CollectionsSelect limitCollections={uiQuery.limitCollections} onChangeSelectAll={(b) => uiQuery.limitCollections = b}
+                               values={uiQuery.collectionIds}
+                               onChange={(id) => uiQuery.collectionIds = id}/>
+        );
+    }
+
     const renderButtons = () => {
         return (
             <Group>
-                <CollectionsSelect limitCollections={uiQuery.limitCollections} onChangeSelectAll={(b) => uiQuery.limitCollections = b} values={uiQuery.collectionIds}
-                                   onChange={(id) => uiQuery.collectionIds = id}/>
-                <Divider orientation="vertical"/>
                 {renderResetButton()}
                 <Button variant="light" leftSection={<IconShare3 size={18}/>} disabled={queryResponse.status === QueryStatus.Loading} onClick={onShare}>
                     Share
@@ -136,12 +141,16 @@ export const QueryHeader = observer(() => {
     }
 
     return (
-        <Group p="12 0" justify="space-between" onClick={(evt) => evt.stopPropagation()}>
+        <Group p="12 0" justify="space-between" preventGrowOverflow={false} onClick={(evt) => evt.stopPropagation()}>
             <Group align="baseline">
                 <Text size="lg" fw={500}>Search Published Neurons</Text>
                 {renderMessage()}
             </Group>
-            {renderButtons()}
+            <Group justify="space-between" style={{marginLeft: "auto"}}>
+                {renderCollections()}
+                <Divider orientation="vertical"/>
+                {renderButtons()}
+            </Group>
         </Group>
     );
 });
