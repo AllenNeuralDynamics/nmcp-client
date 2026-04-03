@@ -1,7 +1,7 @@
 import {makeObservable, observable} from "mobx";
 
 import {findQueryPredicateKind, PredicateType, QUERY_PREDICATE_KIND_COMPARTMENT, QueryPredicateKind} from "./queryPredicateKind";
-import {FilterContents, IPosition, IPositionInput} from "./filterContents";
+import {FilterContents, FilterContentsState, IPosition, IPositionInput} from "./filterContents";
 import {DataConstants} from "../models/constants";
 import {SearchPredicate} from "../models/searchPredicate";
 
@@ -17,6 +17,13 @@ function createPositionInput(isCustomRegion: boolean, center: IPosition): IPosit
         y: arbNumberToString(isCustomRegion, center.y),
         z: arbNumberToString(isCustomRegion, center.z),
     }
+}
+
+export type UIQueryPredicateState = {
+    id: string;
+    index: number;
+    brainAreaFilterTypeOption: PredicateType;
+    filter: FilterContentsState;
 }
 
 // This captures some additional information/behavior for the updated search API (from the previous FilterContents class).  Some refactoring would be useful
@@ -63,7 +70,7 @@ export class UIQueryPredicate {
     }
 
     // Serialize for local browser storage or URL sharing.
-    public serialize() {
+    public serialize(): UIQueryPredicateState {
         return {
             id: this.id,
             index: this.index,
@@ -73,7 +80,7 @@ export class UIQueryPredicate {
     }
 
     // Deserialize for local browser storage or URL sharing.
-    public static deserialize(data: any, constants: DataConstants): UIQueryPredicate {
+    public static deserialize(data: UIQueryPredicateState, constants: DataConstants): UIQueryPredicate {
         const filter = new UIQueryPredicate();
 
         filter.id = data.id || "";

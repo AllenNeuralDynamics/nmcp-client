@@ -7,10 +7,19 @@ export enum DrawerState {
     Hidden = 1
 }
 
+export type AppLayoutState = {
+    neuronDrawerState: DrawerState;
+    atlasStructureDrawerState: DrawerState;
+    isQueryExpanded: boolean;
+    isAtlasStructureTreeExpanded: boolean;
+    isAtlasStructureHistoryExpanded: boolean;
+}
+
 export class AppLayout {
     public neuronDrawerState: DrawerState = DrawerState.Dock;
     public atlasStructureDrawerState: DrawerState = DrawerState.Dock;
     public isQueryExpanded: boolean = true;
+    public isAtlasStructureTreeExpanded: boolean = true;
     public isAtlasStructureHistoryExpanded: boolean = true;
     public isPreferencesWindowOpen: boolean = false;
 
@@ -26,7 +35,8 @@ export class AppLayout {
             this.neuronDrawerState = layout.neuronDrawerState ?? DrawerState.Dock;
             this.atlasStructureDrawerState = layout.atlasStructureDrawerState ?? DrawerState.Dock;
             this.isQueryExpanded = layout.isQueryExpanded ?? true;
-            this.isAtlasStructureHistoryExpanded = layout.isAtlasStructureHistoryExpanded ?? false;
+            this.isAtlasStructureTreeExpanded = layout.isAtlasStructureTreeExpanded ?? true;
+            this.isAtlasStructureHistoryExpanded = layout.isAtlasStructureHistoryExpanded ?? true;
             this.isPreferencesWindowOpen = layout.isPreferencesWindowOpen ?? false;
 
             this.neuroglancerControlsVisible = layout.neuroglancerControlsVisible ?? false;
@@ -71,6 +81,24 @@ export class AppLayout {
         const visible = !this.neuroglancerDimensionsVisible;
         this.updateNeuroglancerDimensionsVisible(visible);
         this.neuroglancerDimensionsVisible = visible;
+    }
+
+    public serialize(): AppLayoutState {
+        return {
+            neuronDrawerState: this.neuronDrawerState,
+            atlasStructureDrawerState: this.atlasStructureDrawerState,
+            isQueryExpanded: this.isQueryExpanded,
+            isAtlasStructureTreeExpanded: this.isAtlasStructureTreeExpanded,
+            isAtlasStructureHistoryExpanded: this.isAtlasStructureHistoryExpanded
+        }
+    }
+
+    public deserialize(state: AppLayoutState) {
+        this.neuronDrawerState = state.neuronDrawerState ?? DrawerState.Dock;
+        this.atlasStructureDrawerState = state.atlasStructureDrawerState ?? DrawerState.Dock;
+        this.isQueryExpanded = state.isQueryExpanded ?? true;
+        this.isAtlasStructureTreeExpanded = state.isAtlasStructureTreeExpanded ?? true;
+        this.isAtlasStructureHistoryExpanded = state.isAtlasStructureHistoryExpanded ?? true;
     }
 
     private updateNeuroglancerControlsVisible(visible: boolean) {

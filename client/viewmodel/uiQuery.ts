@@ -7,8 +7,14 @@ import {QUERY_PREDICATE_KIND_COMPARTMENT, QUERY_PREDICATE_KIND_SPHERE} from "./q
 import {SEARCH_NEURONS_QUERY, SearchContext, SearchNeuronsQueryResponse, SearchNeuronsQueryVariables} from "../graphql/search";
 import {FilterComposition, FilterContents, IPositionInput} from "./filterContents";
 import {UserPreferences} from "../util/userPreferences";
-import {QueryResponseViewModel} from "./queryResponseViewModel";
-import {UIQueryPredicate} from "./uiQueryPredicate";
+import {QueryResponseState, QueryResponseViewModel} from "./queryResponseViewModel";
+import {UIQueryPredicate, UIQueryPredicateState} from "./uiQueryPredicate";
+
+export type UIQueryState = {
+    predicates: UIQueryPredicateState[];
+    limitCollections: boolean;
+    collectionIds: string[];
+}
 
 export class UIQuery {
     public resetCount: number = 0;
@@ -32,6 +38,7 @@ export class UIQuery {
             removePredicate: action,
             replacePredicate: action,
             execute: action,
+            deserialize: action,
             deserializePredicates: action
         });
 
@@ -103,7 +110,7 @@ export class UIQuery {
         }
     };
 
-    public async execute(queryResponseViewModel: QueryResponseViewModel, client: ApolloClient<object>) {
+    public async execute(queryResponseViewModel: QueryResponseViewModel, client: ApolloClient<object>, responseState: QueryResponseState = null) {
         queryResponseViewModel.initiate(cuid());
 
         try {
@@ -129,10 +136,28 @@ export class UIQuery {
             queryResponseViewModel.update(data.searchNeurons.queryTime, data.searchNeurons.neurons, data.searchNeurons.totalCount);
             this._constants.neuronCount = data.searchNeurons.totalCount;
 
+            if (responseState) {
+                queryResponseViewModel.deserialize(responseState);
+            }
+
         } catch (err) {
             queryResponseViewModel.errored(err);
             console.error(err);
         }
+    }
+
+    public serialize(): UIQueryState {
+        return {
+            predicates: this.predicates.map(p => p.serialize()),
+            limitCollections: this.limitCollections,
+            collectionIds: this.collectionIds
+        }
+    }
+
+    public deserialize(state: UIQueryState) {
+        this.predicates = state.predicates.map(p => UIQueryPredicate.deserialize(p, this._constants));
+        this.limitCollections = state.limitCollections;
+        this.collectionIds = state.collectionIds;
     }
 }
 

@@ -6,20 +6,23 @@ import {Stack} from "@mantine/core";
 
 import {QueryPage} from "./QueryPage";
 import {UserPreferences} from "../../util/userPreferences";
-import {useConstants} from "../../hooks/useConstants";
-import {useUIQuery} from "../../hooks/useUIQuery";
 import {useQueryResponseViewModel} from "../../hooks/useQueryResponseViewModel";
+import {useSearchViewer} from "../../hooks/useSearchViewer";
+import {useUIQuery} from "../../hooks/useUIQuery";
 import {Footer} from "./Footer";
-import {UIQueryPredicate} from "../../viewmodel/uiQueryPredicate";
+import {QueryResponseState} from "../../viewmodel/queryResponseViewModel";
+import {useAppLayout} from "../../hooks/useAppLayout";
 
 export const Home = observer(() => {
     const client = useApolloClient();
 
-    const constants = useConstants();
+    const appLayout = useAppLayout();
 
-    const uiPredicates = useUIQuery();
+    const uiQuery = useUIQuery();
 
     const queryResponseViewModel = useQueryResponseViewModel();
+
+    const searchViewerRef = useSearchViewer();
 
     useEffect(() => {
         initializeQueryFilters();
@@ -27,64 +30,70 @@ export const Home = observer(() => {
 
     useEffect(() => {
         resetContent();
-    }, [uiPredicates.resetCount]);
+    }, [uiQuery.resetCount]);
 
-    function parseUrlQuery(): UIQueryPredicate[] | null {
+    function parseUrlQuery(): { responseState: QueryResponseState | null, viewerState: object | null } {
         const urlParams = new URLSearchParams(window.location.search);
         const queryParam = urlParams.get("q");
         const ngParam = window.location.hash;
 
-        let predicates: UIQueryPredicate[] = [];
-
-        if (ngParam) {
-            try {
-                const decodedState = JSON.parse(atob(ngParam.slice(2)));
-                // NeuroglancerProxy.applyQueryParameterState(decodedState);
-            } catch (e) {
-                console.warn("Invalid Neuroglancer query parameter:", e);
-            }
-        }
+        let responseState: QueryResponseState | null = null;
+        let viewerState: object | null = null;
 
         if (queryParam) {
             try {
                 const decodedQuery = JSON.parse(atob(queryParam));
-                if (decodedQuery && decodedQuery.filters && Array.isArray(decodedQuery.filters)) {
-                    predicates = decodedQuery.filters.map(f => UIQueryPredicate.deserialize(f, constants));
+
+                if (decodedQuery?.timestamp) {
+                    console.log(`shared query from ${new Date(decodedQuery?.timestamp).toLocaleString()}, version ${decodedQuery?.version} decoded.`);
+                } else {
+                    console.warn(`unexpected query parameter format`);
+                }
+
+                if (decodedQuery?.query) {
+                    uiQuery.deserialize(decodedQuery.query);
+                }
+
+                if (decodedQuery?.response) {
+                    responseState = decodedQuery.response;
+                }
+
+                if (decodedQuery?.layout) {
+                    appLayout.deserialize(decodedQuery.layout);
                 }
             } catch (e) {
                 console.warn("Invalid URL query parameter:", e);
             }
         }
 
+        if (ngParam) {
+            try {
+                viewerState = JSON.parse(atob(ngParam.slice(2)));
+            } catch (e) {
+                console.warn("Invalid Neuroglancer query parameter:", e);
+            }
+        }
+
         window.history.replaceState({}, document.title, "/");
 
-        return predicates;
-    }
-
-    function updateUrlWithQuery(predicates: UIQueryPredicate[]) {
-        // TODO Make the URL copyable w/contents of Share button
-        const queryData = {
-            timestamp: Date.now(),
-            filters: predicates.map(p => p.serialize())
-        };
-
-        const encodedQuery = btoa(JSON.stringify(queryData));
-        const url = new URL(window.location.href);
-        url.searchParams.set("q", encodedQuery);
-
-        window.history.replaceState({}, "", url.toString());
+        return {responseState, viewerState};
     }
 
     function initializeQueryFilters() {
-        const urlQuery = parseUrlQuery();
+        const {responseState, viewerState} = parseUrlQuery();
 
-        if (urlQuery && urlQuery.length > 0) {
-            uiPredicates.predicates = urlQuery;
+        if (uiQuery.predicates.length > 0) {
             setTimeout(async () => {
-                await uiPredicates.execute(queryResponseViewModel, client);
+                await uiQuery.execute(queryResponseViewModel, client, responseState);
+                if (viewerState) {
+                    searchViewerRef.applyState(viewerState);
+                }
             }, 100);
         } else {
-            uiPredicates.deserializePredicates(UserPreferences.Instance.LastQuery);
+            if (viewerState) {
+                searchViewerRef.applyState(viewerState);
+            }
+            uiQuery.deserializePredicates(UserPreferences.Instance.LastQuery);
         }
     }
 

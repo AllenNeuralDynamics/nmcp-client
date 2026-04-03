@@ -11,6 +11,9 @@ import {NeuronListContainerWidth} from "../NeuronListContainer";
 import {AtlasViewModel} from "../../../../viewmodel/atlasViewModel";
 import {useAtlas} from "../../../../hooks/useAtlas";
 
+const TreeAccordionKey = "tree";
+const HistoryAccordionKey = "history";
+
 export const AtlasContainer = observer(({maxHeight, atlasViewModel}: { maxHeight: number, atlasViewModel?: AtlasViewModel }) => {
     const appLayout = useAppLayout();
 
@@ -31,18 +34,32 @@ export const AtlasContainer = observer(({maxHeight, atlasViewModel}: { maxHeight
         </SimpleGrid>
     );
 
+    const onAccordionChange = (values: string[]) => {
+        appLayout.isAtlasStructureTreeExpanded = values.includes(TreeAccordionKey);
+        appLayout.isAtlasStructureHistoryExpanded = values.includes(HistoryAccordionKey);
+    }
+
+    const defaultValue = [];
+
+    if (appLayout.isAtlasStructureTreeExpanded) {
+        defaultValue.push(TreeAccordionKey);
+    }
+    if (appLayout.isAtlasStructureHistoryExpanded) {
+        defaultValue.push(HistoryAccordionKey);
+    }
+
     return (
         <Stack gap={0} w={NeuronListContainerWidth} style={{height: maxHeight, maxHeight: maxHeight, order: 2}}>
             {renderedHeader}
-            <Accordion multiple={true} defaultValue={["history", "all"]} style={{overflow: "auto"}}>
-                <Accordion.Item value="history">
+            <Accordion multiple={true} defaultValue={defaultValue} onChange={onAccordionChange} style={{overflow: "auto"}}>
+                <Accordion.Item value={HistoryAccordionKey}>
                     <Accordion.Control>History</Accordion.Control>
                     <Accordion.Panel styles={{content: {padding: 0}}}>
                         <Divider orientation="horizontal"/>
                         <StructureHistory atlas={atlas}/>
                     </Accordion.Panel>
                 </Accordion.Item>
-                <Accordion.Item value="all">
+                <Accordion.Item value={TreeAccordionKey}>
                     <Accordion.Control>All Structures</Accordion.Control>
                     <Accordion.Panel styles={{content: {padding: 0}}}>
                         <Divider orientation="horizontal"/>

@@ -1,8 +1,16 @@
-import {makeObservable, observable} from "mobx";
+import {action, makeObservable, observable} from "mobx";
 
 import {NeuronShape} from "../models/neuron";
-import {NEURON_VIEW_MODE_ALL, NeuronViewMode} from "./neuronViewMode";
+import {getViewMode, NEURON_VIEW_MODE_ALL, NeuronViewMode} from "./neuronViewMode";
 import {AtlasNode} from "../models/atlasNode";
+
+export type NeuronViewModelState = {
+    neuronId: string;
+    baseColor: string;
+    viewModeId: string;
+    isSelected: boolean;
+    isMirrored: boolean;
+}
 
 export class NeuronViewModel {
     neuron: NeuronShape = null;
@@ -11,7 +19,7 @@ export class NeuronViewModel {
 
     baseColor: string = "#000000";
 
-    mirror: boolean = false;
+    isMirrored: boolean = false;
 
     soma: AtlasNode = null;
 
@@ -29,7 +37,7 @@ export class NeuronViewModel {
 
         this.baseColor = color || "#000000";
 
-        this.mirror = false;
+        this.isMirrored = false;
 
         this.soma = neuron.published.soma;
 
@@ -40,8 +48,9 @@ export class NeuronViewModel {
             viewMode: observable,
             isSelected: observable,
             baseColor: observable,
-            mirror: observable
-        })
+            isMirrored: observable,
+            deserialize: action
+        });
     }
 
     public get Label(): string {
@@ -58,5 +67,26 @@ export class NeuronViewModel {
 
     public get SkeletonSegmentId(): number {
         return this.skeletonId;
+    }
+
+    public serialize(): NeuronViewModelState {
+        return {
+            neuronId: this.neuron.id,
+            baseColor: this.baseColor,
+            viewModeId: this.viewMode.id,
+            isSelected: this.isSelected,
+            isMirrored: this.isMirrored
+        }
+    }
+
+    public deserialize(state: NeuronViewModelState): void {
+        if (this.neuron.id != state.neuronId) {
+            return;
+        }
+
+        this.baseColor = state.baseColor;
+        this.viewMode = getViewMode(state.viewModeId);
+        this.isSelected  = state.isSelected;
+        this.isMirrored = state.isMirrored;
     }
 }

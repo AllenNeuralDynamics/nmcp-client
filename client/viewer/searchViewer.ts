@@ -174,9 +174,9 @@ export class SearchViewer extends AtlasViewer {
     }
 
     private updateReconstructionLayerPair(name: string, neurons: NeuronViewModel[], state: any): any {
-        let update = this.updateReconstructionLayer(name, neurons.filter(n => n.mirror == false), state);
+        let update = this.updateReconstructionLayer(name, neurons.filter(n => n.isMirrored == false), state);
 
-        return this.updateReconstructionLayer(`${name} ${Mirror}`, neurons.filter(n => n.mirror == true), update);
+        return this.updateReconstructionLayer(`${name} ${Mirror}`, neurons.filter(n => n.isMirrored == true), update);
     }
 
     private updateReconstructionLayer(name: string, neurons: NeuronViewModel[], state: any): any {

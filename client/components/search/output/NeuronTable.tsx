@@ -54,8 +54,8 @@ export const NeuronRow = observer((props: NeuronRowProps) => {
             </Table.Td>
 
             <Table.Td ta="center">
-                <ActionIcon variant="transparent" onClick={() => v.mirror = !v.mirror}>
-                    {isSelectedIcon(v.mirror)}
+                <ActionIcon variant="transparent" onClick={() => v.isMirrored = !v.isMirrored}>
+                    {isSelectedIcon(v.isMirrored)}
                 </ActionIcon>
             </Table.Td>
             <Table.Td style={{verticalAlign: "middle"}}>

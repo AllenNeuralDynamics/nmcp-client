@@ -2,7 +2,7 @@ import {action, computed, makeAutoObservable, makeObservable, observable} from "
 
 import {jet} from "../util/colors";
 import {NeuronShape} from "../models/neuron";
-import {NeuronViewModel} from "./neuronViewModel";
+import {NeuronViewModel, NeuronViewModelState} from "./neuronViewModel";
 import {NEURON_VIEW_MODE_ALL, NeuronViewMode} from "./neuronViewMode";
 import {isNullOrUndefined} from "../util/nodeUtil";
 
@@ -10,6 +10,10 @@ export enum QueryStatus {
     NeverQueried,
     Loading,
     Loaded
+}
+
+export type QueryResponseState = {
+    neurons: NeuronViewModelState[];
 }
 
 export class QueryResponseViewModel {
@@ -134,6 +138,24 @@ export class QueryResponseViewModel {
         if (!isNullOrUndefined(mode)) {
             this.defaultNeuronViewMode = mode;
             this.neuronViewModels.forEach(v => v.viewMode = mode);
+        }
+    }
+
+    public serialize(): QueryResponseState {
+        const neurons: NeuronViewModelState[] = [];
+
+        for (const viewModel of this.neuronViewModels) {
+            neurons.push(viewModel.serialize());
+        }
+
+        return {
+            neurons,
+        };
+    }
+
+    public deserialize(state: QueryResponseState) {
+        for (const neuronState of state.neurons) {
+            this.neuronViewModels.find(n => n.neuron.id == neuronState.neuronId)?.deserialize(neuronState);
         }
     }
 

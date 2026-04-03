@@ -10,6 +10,7 @@ import {useAppLayout} from "../../../hooks/useAppLayout";
 import {useAtlas} from "../../../hooks/useAtlas";
 import {useConstants} from "../../../hooks/useConstants";
 import {useQueryResponseViewModel} from "../../../hooks/useQueryResponseViewModel";
+import {useSearchViewer} from "../../../hooks/useSearchViewer";
 import {useSystemConfiguration} from "../../../hooks/useSystemConfiguration";
 import {AtlasNode} from "../../../models/atlasNode";
 import {DrawerState} from "../../../viewmodel/appLayout";
@@ -30,6 +31,7 @@ export const SearchView = observer(({height}: { height: number }) => {
     const appLayout = useAppLayout();
     const queryViewModel = useQueryResponseViewModel();
     const atlas = useAtlas();
+    const searchViewerRef = useSearchViewer();
 
     const scheme = useComputedColorScheme();
 
@@ -46,11 +48,16 @@ export const SearchView = observer(({height}: { height: number }) => {
 
         setViewer(v);
 
-        setTimeout(() => {
-            v?.resetView();
-        }, 1000);
+        const restoredState = searchViewerRef.register(v);
+
+        if (!restoredState) {
+            setTimeout(() => {
+                v?.resetView();
+            }, 1000);
+        }
 
         return () => {
+            searchViewerRef.unregister();
             v.unlink();
         }
     }, []);

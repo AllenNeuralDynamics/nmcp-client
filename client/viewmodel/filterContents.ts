@@ -31,6 +31,19 @@ export interface IPosition {
     [key: string]: string;
 }
 
+export type FilterContentsState = {
+    tracingIdsOrDOIs: string;
+    tracingIdsOrDOIsExactMatch: boolean;
+    neuronalStructureId: string;
+    operatorId: string;
+    amount: string;
+    brainAreaStructureIds: number[];
+    arbCenter: IPosition;
+    arbSize: string;
+    invert: boolean;
+    composition: FilterComposition;
+}
+
 // TODO This is from an older version of the API that has been subsumed by UIQueryPredicate and is now used as a child in that class.  Some refactor is needed
 // to consolidate.
 export class FilterContents {
@@ -86,7 +99,7 @@ export class FilterContents {
         return this.neuronalStructure.IsSoma;
     }
 
-    public serialize() {
+    public serialize(): FilterContentsState {
         return {
             tracingIdsOrDOIs: this.tracingIdsOrDOIs,
             tracingIdsOrDOIsExactMatch: this.tracingIdsOrDOIsExactMatch,
@@ -101,7 +114,7 @@ export class FilterContents {
         }
     }
 
-    public static deserialize(data: any, constants: DataConstants): FilterContents {
+    public static deserialize(data: FilterContentsState, constants: DataConstants): FilterContents {
         const filter = new FilterContents();
 
         filter.tracingIdsOrDOIs = data.tracingIdsOrDOIs || "";

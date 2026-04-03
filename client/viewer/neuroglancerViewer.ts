@@ -19,6 +19,7 @@ export class NeuroglancerViewer {
 
     private _isDarkColorScheme: boolean = false;
 
+    private _stateInitialized: boolean = false;
     private _stateChangeHandler: any = null;
     private _positionCallback: any = null;
 
@@ -46,8 +47,17 @@ export class NeuroglancerViewer {
         this.setMouseWheelToZoom();
     }
 
-    public updateState(state?: object) {
-        this.restoreState(state ?? this.defaultState);
+    public updateState(state?: object | null) {
+        if (state === undefined) {
+            if (this._stateInitialized) {
+                return;
+            }
+            this.restoreState(this.defaultState);
+        } else {
+            this.restoreState(state ?? this.defaultState);
+        }
+
+        this._stateInitialized = true;
     }
 
     public set stateListener(listener: StateListener) {
@@ -205,7 +215,7 @@ export class NeuroglancerViewer {
         setDefaultInputEventBindings(this.viewer.inputEventBindings)
     }
 
-    protected get currentState(): any {
+    public get currentState(): any {
         return this.viewer.state.toJSON();
     }
 

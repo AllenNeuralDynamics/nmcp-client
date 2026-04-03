@@ -2,7 +2,7 @@ import * as React from "react";
 import {useApolloClient} from "@apollo/client";
 import {observer} from "mobx-react-lite";
 import {Button, Divider, Group, Text} from "@mantine/core";
-import {IconPlus, IconRestore, IconSearch} from "@tabler/icons-react";
+import {IconPlus, IconRestore, IconSearch, IconShare3} from "@tabler/icons-react";
 
 import {QueryStatus} from "../../../viewmodel/queryResponseViewModel";
 import {useQueryResponseViewModel} from "../../../hooks/useQueryResponseViewModel";
@@ -10,6 +10,7 @@ import {useUIQuery} from "../../../hooks/useUIQuery";
 import {useAppLayout} from "../../../hooks/useAppLayout";
 import {useAtlas} from "../../../hooks/useAtlas";
 import {usePreferences} from "../../../hooks/usePreferences";
+import {useSearchViewer} from "../../../hooks/useSearchViewer";
 import {CollectionsSelect} from "../../common/CollectionsSelect";
 
 export const QueryHeader = observer(() => {
@@ -19,6 +20,7 @@ export const QueryHeader = observer(() => {
     const queryResponse = useQueryResponseViewModel();
     const uiQuery = useUIQuery();
     const atlas = useAtlas();
+    const searchViewerRef = useSearchViewer();
 
     const onResetPage = (evt: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         evt.stopPropagation();
@@ -47,22 +49,24 @@ export const QueryHeader = observer(() => {
 
     const onShare = async (evt: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         evt.stopPropagation();
+
         const queryData = {
             timestamp: Date.now(),
-            filters: uiQuery.predicates.map(p => p.serialize())
+            version: 1,
+            query: uiQuery.serialize(),
+            response: queryResponse.serialize(),
+            layout: appLayout.serialize()
         };
 
         const encodedQuery = btoa(JSON.stringify(queryData));
         const baseUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname}`;
         let shareUrl = `${baseUrl}?q=${encodedQuery}`;
 
-        /* TODO
-        const ngState = NeuroglancerProxy.SearchNeuroglancer?.State;
+        const ngState = searchViewerRef.currentState;
 
         if (ngState) {
             shareUrl += `#!${btoa(JSON.stringify(ngState))}`;
         }
-        */
 
         if (navigator.clipboard && navigator.clipboard.writeText) {
             try {
@@ -116,10 +120,9 @@ export const QueryHeader = observer(() => {
                                    onChange={(id) => uiQuery.collectionIds = id}/>
                 <Divider orientation="vertical"/>
                 {renderResetButton()}
-                {/*
                 <Button variant="light" leftSection={<IconShare3 size={18}/>} disabled={queryResponse.status === QueryStatus.Loading} onClick={onShare}>
                     Share
-                </Button>*/}
+                </Button>
                 <Divider orientation="vertical"/>
                 <Button variant="light" leftSection={<IconPlus size={18}/>} disabled={queryResponse.status === QueryStatus.Loading} onClick={onAddFilter}>
                     Add Filter
