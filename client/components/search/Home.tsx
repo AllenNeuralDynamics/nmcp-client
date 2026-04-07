@@ -32,11 +32,12 @@ export const Home = observer(() => {
         resetContent();
     }, [uiQuery.resetCount]);
 
-    function parseUrlQuery(): { responseState: QueryResponseState | null, viewerState: object | null } {
+    function parseUrlQuery(): { haveQuery: boolean, responseState: QueryResponseState | null, viewerState: object | null } {
         const urlParams = new URLSearchParams(window.location.search);
         const queryParam = urlParams.get("q");
         const ngParam = window.location.hash;
 
+        let haveQuery: boolean = false
         let responseState: QueryResponseState | null = null;
         let viewerState: object | null = null;
 
@@ -61,6 +62,8 @@ export const Home = observer(() => {
                 if (decodedQuery?.layout) {
                     appLayout.deserialize(decodedQuery.layout);
                 }
+
+                haveQuery = true;
             } catch (e) {
                 console.warn("Invalid URL query parameter:", e);
             }
@@ -76,13 +79,13 @@ export const Home = observer(() => {
 
         window.history.replaceState({}, document.title, "/");
 
-        return {responseState, viewerState};
+        return {haveQuery, responseState, viewerState};
     }
 
     function initializeQueryFilters() {
-        const {responseState, viewerState} = parseUrlQuery();
+        const {haveQuery, responseState, viewerState} = parseUrlQuery();
 
-        if (uiQuery.predicates.length > 0) {
+        if (haveQuery) {
             setTimeout(async () => {
                 await uiQuery.execute(queryResponseViewModel, client, responseState);
                 if (viewerState) {

@@ -30,6 +30,7 @@ export class AtlasConstants {
         this._structures = Array.from(structures).sort((s1, s2) => formatAtlasStructure(s1).localeCompare(formatAtlasStructure(s2)));
 
         this._structures.map(b => {
+            // TODO END Remove
             this._idLookup.set(b.id, b);
             this._structureIdLookup.set(b.structureId, b);
         });
@@ -86,7 +87,7 @@ export class AtlasConstants {
             return true;
         }
 
-        if (structure.aliasList?.some(a => a.toLowerCase().includes(filterValue))) {
+        if (structure.aliases?.some(a => a.toLowerCase().includes(filterValue))) {
             return true;
         }
 

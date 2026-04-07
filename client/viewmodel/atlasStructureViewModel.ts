@@ -33,8 +33,8 @@ export class AtlasStructureViewModel {
             matches = this.structure.acronym.toLowerCase().includes(str);
         }
 
-        if (!matches && this.structure.aliasList?.length > 0) {
-            matches = this.structure.aliasList.some(a => a.includes(str));
+        if (!matches && this.structure.aliases?.length > 0) {
+            matches = this.structure.aliases.some(a => a.includes(str));
         }
 
         return matches;

@@ -3,7 +3,7 @@ export type AtlasStructureShape = {
     name: string;
     depth: number;
     acronym: string;
-    aliasList: string[];
+    aliases: string[];
     structureId: number;
     structureIdPath: string;
     parentStructureId: number;

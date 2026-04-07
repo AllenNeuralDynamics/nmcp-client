@@ -6,4 +6,4 @@ mkdir -p /var/log/nmcp
 
 export DEBUG=mnb:*,nmcp:*
 
-node app.js >> /var/log/nmcp/nmcp-client-${logName}.log 2>&1
+node --max-http-header-size=32768 app.js >> /var/log/nmcp/nmcp-client-${logName}.log 2>&1

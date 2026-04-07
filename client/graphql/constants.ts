@@ -28,7 +28,7 @@ export const CONSTANTS_QUERY = gql`query ConstantsQuery {
     id
     name
     acronym
-    aliasList
+    aliases
     structureId
     depth
     parentStructureId

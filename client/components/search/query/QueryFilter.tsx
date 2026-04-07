@@ -142,7 +142,7 @@ export const QueryFilter = observer((props: IQueryFilterProps) => {
             return true;
         }
 
-        const matches = option.value.aliases.some(a => a.toLowerCase().includes(filterValue));
+        const matches = option.value.aliases?.some(a => a.toLowerCase().includes(filterValue));
 
         if (matches) {
             return true;
