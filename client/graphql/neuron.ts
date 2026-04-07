@@ -1,6 +1,6 @@
 import gql from "graphql-tag";
 
-import {NeuronShape, SomaFilterProperties, SomaLocation, SomaProperties} from "../models/neuron";
+import {NeuronShape, NeuronStatus, SomaFilterProperties, SomaLocation, SomaProperties} from "../models/neuron";
 
 
 // brainStructureId is used to determine whether the brain area is inherited or not.  brainAreas{} is the resolved brain are
@@ -124,6 +124,7 @@ export type NeuronsQueryVariables = {
         atlasStructureIds?: string[];
         keywords?: string[];
         somaProperties?: SomaFilterProperties;
+        status?: NeuronStatus;
         offset?: number;
         limit?: number;
     }

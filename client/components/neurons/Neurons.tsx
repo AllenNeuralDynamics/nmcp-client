@@ -9,26 +9,32 @@ import {toastCreateError, toastDeleteError} from "../common/NotificationHelper";
 import {PaginationHeader} from "../common/PaginationHeader";
 import {
     CREATE_NEURON_MUTATION,
-    CreateNeuronMutationResponse, CreateNeuronVariables,
-    DELETE_NEURON_MUTATION, DeleteNeuronMutationResponse, DeleteNeuronVariables,
-    NEURONS_QUERY, NeuronsQueryResponse, NeuronsQueryVariables
+    CreateNeuronMutationResponse,
+    CreateNeuronVariables,
+    DELETE_NEURON_MUTATION,
+    DeleteNeuronMutationResponse,
+    DeleteNeuronVariables,
+    NEURONS_QUERY,
+    NeuronsQueryResponse,
+    NeuronsQueryVariables
 } from "../../graphql/neuron";
 import {SpecimenShape} from "../../models/specimen";
 import {NeuronsTable} from "./NeuronsTable";
-import {formatNeuron, NeuronShape} from "../../models/neuron";
+import {formatNeuron, NeuronShape, NeuronStatus} from "../../models/neuron";
 import {UserPreferences} from "../../util/userPreferences";
 import {ImportSomasModal} from "./soma/ImportSomasModal";
 import {SpecimenFilter} from "../common/filters/SpecimenFilter";
 import {AtlasStructureMultiSelectFilter} from "../common/filters/AtlasStructureMultiSelectFilter";
 import {NeuronTagFilter} from "../common/filters/NeuronTagFilter";
-import {CandidateFilter} from "../../viewmodel/candidateFilter";
+import {CandidateFilter, OptionalFilter} from "../../viewmodel/candidateFilter";
 import {CandidateMetrics} from "../candidates/CandidateMetrics";
 import {SpecimenSelect} from "../common/SpecimenSelect";
-import {SpecimensQueryResponse, SPECIMENS_QUERY} from "../../graphql/specimen";
+import {SPECIMENS_QUERY, SpecimensQueryResponse} from "../../graphql/specimen";
 import {GraphQLErrorAlert} from "../common/GraphQLErrorAlert";
 import {usePreferences} from "../../hooks/usePreferences";
 import {MessageBox} from "../common/MessageBox";
 import {BulkUpdateModal} from "./BulkUpdateModal";
+import {NeuronStatusFilter} from "../common/filters/NeuronStatusFilter";
 
 interface INeuronsState {
     offset: number;
@@ -44,6 +50,7 @@ export const Neurons = observer(() => {
     const [isSampleLocked, setIsSampleLocked] = useState<boolean>(false);
 
     const [candidateFilter] = useState(new CandidateFilter());
+    const [statusFilter] = useState(new OptionalFilter<NeuronStatus>(NeuronStatus.Unpublished));
     const [showBulkUpdate, setShowBulkUpdate] = useState(false);
 
     const [state, setState] = useState<INeuronsState>({
@@ -78,7 +85,8 @@ export const Neurons = observer(() => {
                     specimenIds: candidateFilter.specimenIds,
                     atlasStructureIds: candidateFilter.atlasStructureIds,
                     keywords: candidateFilter.keywords,
-                    somaProperties: candidateFilter.somaFilter
+                    somaProperties: candidateFilter.somaFilter,
+                    status: statusFilter.isEnabled ? statusFilter.contents : undefined
                 }
             }
         });
@@ -259,6 +267,8 @@ export const Neurons = observer(() => {
                         <AtlasStructureMultiSelectFilter w={300} filter={candidateFilter.atlasStructureFilter}/>
                         <Divider orientation="vertical"/>
                         <NeuronTagFilter filter={candidateFilter.tagFilter}/>
+                        <Divider orientation="vertical"/>
+                        <NeuronStatusFilter filter={statusFilter}/>
                     </Group>
                     <Divider orientation="horizontal"/>
                 </Card.Section>

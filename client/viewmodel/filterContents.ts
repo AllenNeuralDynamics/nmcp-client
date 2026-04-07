@@ -92,7 +92,7 @@ export class FilterContents {
     }
 
     public get CanHaveThreshold(): boolean {
-        return !this.neuronalStructure || !this.neuronalStructure.IsSoma;
+        return !this.neuronalStructure || !this.IsSoma;
     }
 
     public get IsSoma(): boolean {

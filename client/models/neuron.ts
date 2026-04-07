@@ -34,6 +34,11 @@ export type SomaProperties = {
     volume?: number;
 }
 
+export enum NeuronStatus {
+    Unpublished = 100,
+    Published = 200,
+}
+
 export type NeuronShape = {
     __typename?: string;
     id?: string;
