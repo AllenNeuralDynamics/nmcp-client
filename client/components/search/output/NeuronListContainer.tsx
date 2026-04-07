@@ -45,7 +45,7 @@ export const NeuronListContainer = observer(({maxHeight}: { maxHeight: number })
                 <Menu.Item onClick={() => exportNeurons(ids, ExportFormat.SWC)}>
                     Export SWC
                 </Menu.Item>
-                <Menu.Item onClick={() => exportNeurons(ids, ExportFormat.JSON)}>
+                <Menu.Item onClick={() => exportNeurons(ids, ExportFormat.legacyJSON)}>
                     Export JSON
                 </Menu.Item>
             </Menu.Dropdown>

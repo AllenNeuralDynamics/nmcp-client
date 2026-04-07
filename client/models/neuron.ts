@@ -5,8 +5,8 @@ import {Reconstruction} from "./reconstruction";
 import {AtlasReconstruction} from "./atlasReconstruction";
 
 export enum ExportFormat {
-    SWC = 0,
-    JSON = 1
+    SWC = 100,
+    legacyJSON = 900
 }
 
 export enum SomaPropertyOperator {
