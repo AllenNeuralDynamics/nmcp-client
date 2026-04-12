@@ -144,7 +144,7 @@ export class SearchViewer extends AtlasViewer {
 
             this._somaModelMap.set(soma.id, n);
 
-            return {
+            const point = {
                 type: "point",
                 id: soma.id,
                 point: [
@@ -154,6 +154,12 @@ export class SearchViewer extends AtlasViewer {
                 ],
                 props: [n.baseColor, 3]
             };
+
+            if (n.isMirrored) {
+                point.point[2] = -soma.z / 10 + 1140;
+            }
+
+            return point;
         });
 
         return state;

@@ -1,7 +1,14 @@
 import {QualityControlStatus} from "./qualityControlStatus";
 
+export enum QualityControlTestKind {
+    Error = 100,
+    Warning = 200,
+    Passed = 300
+}
+
 export type QualityControlTest = {
     name: string;
+    safeName: string;
     description: string;
     nodes: number[];
 }

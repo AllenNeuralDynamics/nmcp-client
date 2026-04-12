@@ -9,6 +9,7 @@ export const QualityControlFieldsFragment = gql`fragment QualityControlFields on
 
 const QualityControlTestFieldsFragment = gql`fragment QualityControlTestFields on QualityControlTest {
     name
+    safeName
     description
     nodes
 }`;

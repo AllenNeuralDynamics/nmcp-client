@@ -28,7 +28,7 @@ const configuration: IServiceOptions = {
         endpoint: "/export"
     },
     exportLimit: 20,
-    doiHandler: "https://dois.org",
+    doiHandler: "https://doi.org",
     precomputedLocation: ""
 };
 
