@@ -327,25 +327,8 @@ export type UpdateReconstructionResponse = {
 }
 
 //
-// Upload/Create Unregistered Json/Swc Data
+// Upload/Create Unregistered Swc Data
 //
-
-export const UPLOAD_JSON_MUTATION = gql`
-    mutation UploadJsonData($uploadArgs: ReconstructionUploadArgs!) {
-        uploadJsonData(uploadArgs: $uploadArgs) {
-            id
-            status
-            specimenNodeCounts {
-                ...NodeCountsFields
-            }
-            atlasReconstruction {
-                ...AtlasReconstructionFields
-            }
-        }
-    }
-    ${NodeCountsFieldsFragment}
-    ${AtlasReconstructionFieldsFragment}
-`;
 
 export const UPLOAD_SWC_MUTATION = gql`
     mutation UploadSwcData($uploadArgs: ReconstructionUploadArgs!) {
@@ -373,16 +356,8 @@ type ReconstructionUploadArgs = UploadArgs & {
     file: File
 }
 
-export type UploadUnregisteredJsonVariables = {
-    uploadArgs: ReconstructionUploadArgs
-}
-
 export type UploadUnregisteredSwcVariables = {
     uploadArgs: ReconstructionUploadArgs
-}
-
-export type UploadJsonResponse = {
-    uploadJsonData: Reconstruction;
 }
 
 export type UploadSwcResponse = {

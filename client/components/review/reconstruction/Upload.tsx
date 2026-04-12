@@ -5,12 +5,7 @@ import {Button, Divider, Flex, Group, Loader, Stack, Table, Text} from "@mantine
 import {Dropzone} from "@mantine/dropzone";
 import {IconFileCode, IconUpload, IconX} from "@tabler/icons-react";
 
-import {
-    UPLOAD_JSON_MUTATION,
-    UPLOAD_SWC_MUTATION, UploadJsonResponse, UploadSwcResponse,
-    UploadUnregisteredJsonVariables,
-    UploadUnregisteredSwcVariables
-} from "../../../graphql/reconstruction";
+import {UPLOAD_SWC_MUTATION, UploadSwcResponse, UploadUnregisteredSwcVariables} from "../../../graphql/reconstruction";
 import {Reconstruction} from "../../../models/reconstruction";
 import {ReconstructionSpace} from "../../../models/reconstructionSpace";
 import {FilePreview} from "./FilePreview";
@@ -19,25 +14,12 @@ import {errorNotification, successNotification} from "../../common/NotificationH
 const previewHeight = 300;
 
 const dropMessage = new Map<ReconstructionSpace, string>();
-dropMessage.set(ReconstructionSpace.Specimen, "Drop a specimen-space SWC or NMCP JSON reconstruction file, or click to browse for a file.");
-dropMessage.set(ReconstructionSpace.Atlas, "Drop an atlas-space SWC or NMCP JSON reconstruction file, or click to browse for a file.");
+dropMessage.set(ReconstructionSpace.Specimen, "Drop a specimen-space SWC reconstruction file, or click to browse for a file.");
+dropMessage.set(ReconstructionSpace.Atlas, "Drop an atlas-space SWC reconstruction file, or click to browse for a file.");
 
 export const Upload = observer(({reconstruction, space}: { reconstruction: Reconstruction, space: ReconstructionSpace }) => {
     const [nodeCount, setNodeCount] = useState<[number, number]>(null);
     const [file, setFile] = useState<File>(null);
-
-    const [uploadJson, {loading: loadingJson}] = useMutation<UploadJsonResponse, UploadUnregisteredJsonVariables>(UPLOAD_JSON_MUTATION,
-        {
-            variables: {
-                uploadArgs: {
-                    reconstructionId: reconstruction.id,
-                    reconstructionSpace: space,
-                    file: file
-                }
-            }, refetchQueries: [],
-            onCompleted: () => onUploadComplete(),
-            onError: (error) => onUploadError(error)
-        });
 
     const [uploadSwc, {loading: loadingSwc}] = useMutation<UploadSwcResponse, UploadUnregisteredSwcVariables>(UPLOAD_SWC_MUTATION,
         {
@@ -68,9 +50,7 @@ export const Upload = observer(({reconstruction, space}: { reconstruction: Recon
     const performUpload = async (evt: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         evt.stopPropagation();
 
-        if (file.name.endsWith("json")) {
-            await uploadJson();
-        } else if (file.name.endsWith("swc")) {
+        if (file.name.endsWith("swc")) {
             await uploadSwc();
         }
     }
@@ -80,8 +60,8 @@ export const Upload = observer(({reconstruction, space}: { reconstruction: Recon
             return;
         }
 
-        if (acceptedFiles.some(s => !s.name.toLowerCase().endsWith(".swc") && !s.name.toLowerCase().endsWith(".json"))) {
-            errorNotification("Reconstruction File Mismatch", "Reconstruction files must be JSON or SWC");
+        if (acceptedFiles.some(s => !s.name.toLowerCase().endsWith(".swc"))) {
+            errorNotification("Reconstruction File Mismatch", "Reconstruction files must be SWC");
             return;
         }
 
@@ -128,11 +108,11 @@ export const Upload = observer(({reconstruction, space}: { reconstruction: Recon
 
     const haveFiles = file != null;
 
-    const disabled = loadingJson || loadingSwc || !haveFiles;
+    const disabled = loadingSwc || !haveFiles;
 
     const updateButton = <Button size="sm" disabled={disabled} onClick={performUpload}>{buttonText}</Button>;
 
-    const updateMessage = loadingJson || loadingSwc ? <Group><Loader type="dots" size="sm"/></Group> : null;
+    const updateMessage = loadingSwc ? <Group><Loader type="dots" size="sm"/></Group> : null;
 
     return (
         <Flex>
@@ -153,7 +133,7 @@ export const Upload = observer(({reconstruction, space}: { reconstruction: Recon
                                 </Flex>
                             </Dropzone.Reject>
                             <Dropzone.Idle>
-                                <Flex mt={file != null? 0 : 120} gap="sm" align="center" direction="row" wrap="nowrap">
+                                <Flex mt={file != null ? 0 : 120} gap="sm" align="center" direction="row" wrap="nowrap">
                                     {file != null ? <IconUpload size={52} color="var(--mantine-color-green-6)" stroke={1.5}/> :
                                         <IconFileCode size={52} color="var(--mantine-color-dimmed)" stroke={1.5}/>}
                                     {header}
