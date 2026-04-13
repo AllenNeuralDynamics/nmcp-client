@@ -40,7 +40,6 @@ export type FilterContentsState = {
     brainAreaStructureIds: number[];
     arbCenter: IPosition;
     arbSize: string;
-    invert: boolean;
     composition: FilterComposition;
 }
 
@@ -55,7 +54,6 @@ export class FilterContents {
     public brainAreas: AtlasStructureShape[];
     public arbCenter: IPosition;
     public arbSize: string;
-    public invert: boolean;
     public composition: FilterComposition;
     public nonce: string;
 
@@ -68,7 +66,6 @@ export class FilterContents {
         this.brainAreas = [];
         this.arbCenter = {x: "6500", y: "4000", z: "5500"};
         this.arbSize = "1000";
-        this.invert = false;
         this.composition = isDefaultQuery ? FilterComposition.or : FilterComposition.and;
         this.nonce = null;
 
@@ -81,7 +78,6 @@ export class FilterContents {
             brainAreas: observable,
             arbCenter: observable,
             arbSize: observable,
-            invert: observable,
             composition: observable,
             nonce: observable
         });
@@ -109,7 +105,6 @@ export class FilterContents {
             brainAreaStructureIds: this.brainAreas.map(b => b.structureId),
             arbCenter: this.arbCenter,
             arbSize: this.arbSize,
-            invert: this.invert,
             composition: this.composition
         }
     }
@@ -125,7 +120,6 @@ export class FilterContents {
         filter.brainAreas = data.brainAreaStructureIds ? data.brainAreaStructureIds.map(s => constants.AtlasConstants.findStructure(s)) : [];
         filter.arbCenter = data.arbCenter || {x: "6500", y: "4000", z: "5500"};
         filter.arbSize = data.arbSize || "1000";
-        filter.invert = data.invert || false;
         filter.composition = data.composition || FilterComposition.and;
 
         return filter;

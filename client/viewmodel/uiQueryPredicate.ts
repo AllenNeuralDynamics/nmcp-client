@@ -64,7 +64,6 @@ export class UIQueryPredicate {
             brainAreaIds: this.brainAreaFilterType.IsCompartmentQuery ? this.filter.brainAreas.map(b => b.id) : [],
             arbCenter: createPositionInput(this.brainAreaFilterType.IsCustomRegionQuery, this.filter.arbCenter),
             arbSize: arbNumberToString(this.brainAreaFilterType.IsCustomRegionQuery, this.filter.arbSize),
-            invert: this.filter.invert,
             composition: this.filter.composition
         };
     }

@@ -1,4 +1,4 @@
-import {IPositionInput} from "../viewmodel/filterContents";
+import {FilterComposition, IPositionInput} from "../viewmodel/filterContents";
 
 export enum PredicateTypeValue {
     AnatomicalRegion = "ANATOMICAL",
@@ -17,6 +17,5 @@ export type SearchPredicate = {
     brainAreaIds: string[];
     arbCenter: IPositionInput;
     arbSize: number;
-    invert: boolean;
-    composition: number;
+    composition: FilterComposition;
 }
