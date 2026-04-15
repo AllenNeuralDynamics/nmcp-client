@@ -32,7 +32,7 @@ export interface IPosition {
 }
 
 export type FilterContentsState = {
-    tracingIdsOrDOIs: string;
+    labelsOrDois: string;
     tracingIdsOrDOIsExactMatch: boolean;
     neuronalStructureId: string;
     operatorId: string;
@@ -46,7 +46,7 @@ export type FilterContentsState = {
 // TODO This is from an older version of the API that has been subsumed by UIQueryPredicate and is now used as a child in that class.  Some refactor is needed
 // to consolidate.
 export class FilterContents {
-    public tracingIdsOrDOIs: string;
+    public labelsOrDois: string;
     public tracingIdsOrDOIsExactMatch: boolean;
     public neuronalStructure: NeuronalStructure;
     public operator: IQueryOperator;
@@ -58,7 +58,7 @@ export class FilterContents {
     public nonce: string;
 
     public constructor(isDefaultQuery: boolean = false) {
-        this.tracingIdsOrDOIs = "";
+        this.labelsOrDois = "";
         this.tracingIdsOrDOIsExactMatch = true;
         this.neuronalStructure = null;
         this.operator = null;
@@ -70,7 +70,7 @@ export class FilterContents {
         this.nonce = null;
 
         makeObservable(this, {
-            tracingIdsOrDOIs: observable,
+            labelsOrDois: observable,
             tracingIdsOrDOIsExactMatch: observable,
             neuronalStructure: observable,
             operator: observable,
@@ -97,7 +97,7 @@ export class FilterContents {
 
     public serialize(): FilterContentsState {
         return {
-            tracingIdsOrDOIs: this.tracingIdsOrDOIs,
+            labelsOrDois: this.labelsOrDois,
             tracingIdsOrDOIsExactMatch: this.tracingIdsOrDOIsExactMatch,
             neuronalStructureId: this.neuronalStructure ? this.neuronalStructure.id : null,
             operatorId: this.operator ? this.operator.id : null,
@@ -112,7 +112,7 @@ export class FilterContents {
     public static deserialize(data: FilterContentsState, constants: DataConstants): FilterContents {
         const filter = new FilterContents();
 
-        filter.tracingIdsOrDOIs = data.tracingIdsOrDOIs || "";
+        filter.labelsOrDois = data.labelsOrDois || "";
         filter.tracingIdsOrDOIsExactMatch = data.tracingIdsOrDOIsExactMatch == null ? true : data.tracingIdsOrDOIsExactMatch;
         filter.neuronalStructure = constants.findNeuronalStructure(data.neuronalStructureId);
         filter.operator = constants.findQueryOperator(data.operatorId);

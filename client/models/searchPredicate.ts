@@ -8,13 +8,13 @@ export enum PredicateTypeValue {
 
 export type SearchPredicate = {
     predicateType: PredicateTypeValue;
-    tracingIdsOrDOIs: string[];
-    tracingIdsOrDOIsExactMatch: boolean;
-    tracingStructureIds: string[];
+    labelsOrDois: string[];
+    labelOrDoiExactMatch: boolean;
+    neuronStructureIds: string[];
     nodeStructureIds: string[];
     operatorId: string;
     amount: number;
-    brainAreaIds: string[];
+    atlasStructureIds: string[];
     arbCenter: IPositionInput;
     arbSize: number;
     composition: FilterComposition;

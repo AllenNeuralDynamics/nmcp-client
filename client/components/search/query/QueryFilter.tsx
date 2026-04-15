@@ -99,7 +99,7 @@ export const QueryFilter = observer((props: IQueryFilterProps) => {
 
     const onQueryTracingIdChanged = (value: string) => {
         const filter = props.queryFilter;
-        filter.filter.tracingIdsOrDOIs = value;
+        filter.filter.labelsOrDois = value;
         props.onChangeFilter?.(filter);
     };
 
@@ -270,7 +270,7 @@ export const QueryFilter = observer((props: IQueryFilterProps) => {
                         onBrainAreaFilterTypeChanged(queryPredicateLookup.get(value));
                     }
                 }}/>
-                <TextInput flex={1} label="Id or DOI (use comma-separated list for multiple)" value={props.queryFilter.filter.tracingIdsOrDOIs}
+                <TextInput flex={1} label="Id or DOI (use comma-separated list for multiple)" value={props.queryFilter.filter.labelsOrDois}
                            onChange={(evt) => onQueryTracingIdChanged(evt.currentTarget.value)}/>
                 <Checkbox style={{marginTop: "20px"}} label="Exact match" checked={props.queryFilter.filter.tracingIdsOrDOIsExactMatch}
                           onChange={() => onTracingIdsOrDOIsExactMatch()}/>

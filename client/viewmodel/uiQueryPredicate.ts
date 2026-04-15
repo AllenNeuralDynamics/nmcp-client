@@ -55,13 +55,13 @@ export class UIQueryPredicate {
 
         return {
             predicateType: this.brainAreaFilterType.value,
-            tracingIdsOrDOIs: this.brainAreaFilterType.IsIdQuery ? this.filter.tracingIdsOrDOIs.split(",").map(s => s.trim()).filter(s => s.length > 0) : [],
-            tracingIdsOrDOIsExactMatch: this.filter.tracingIdsOrDOIsExactMatch,
-            tracingStructureIds: tracingStructureId ? [tracingStructureId] : [],
+            labelsOrDois: this.brainAreaFilterType.IsIdQuery ? this.filter.labelsOrDois.split(",").map(s => s.trim()).filter(s => s.length > 0) : [],
+            labelOrDoiExactMatch: this.filter.tracingIdsOrDOIsExactMatch,
+            neuronStructureIds: tracingStructureId ? [tracingStructureId] : [],
             nodeStructureIds: nodeStructureId ? [nodeStructureId] : [],
             operatorId,
             amount: isNaN(amount) ? null : amount,
-            brainAreaIds: this.brainAreaFilterType.IsCompartmentQuery ? this.filter.brainAreas.map(b => b.id) : [],
+            atlasStructureIds: this.brainAreaFilterType.IsCompartmentQuery ? this.filter.brainAreas.map(b => b.id) : [],
             arbCenter: createPositionInput(this.brainAreaFilterType.IsCustomRegionQuery, this.filter.arbCenter),
             arbSize: arbNumberToString(this.brainAreaFilterType.IsCustomRegionQuery, this.filter.arbSize),
             composition: this.filter.composition
