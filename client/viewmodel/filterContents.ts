@@ -1,20 +1,20 @@
-import {makeObservable, observable} from "mobx";
+import {computed, makeAutoObservable, makeObservable, observable} from "mobx";
 
 import {IQueryOperator} from "../models/queryOperator";
 import {AtlasStructureShape} from "../models/atlasStructure";
 import {NeuronalStructure} from "../models/neuronalStructure";
 import {DataConstants} from "../models/constants";
 
-export enum FilterComposition {
+export enum PredicateComposition {
     and = 1,
     or = 2,
     not = 3
 }
 
-export const FilterCompositions = [
-    {label: "and", value: FilterComposition.and},
-    {label: "or", value: FilterComposition.or},
-    {label: "not", value: FilterComposition.not}
+export const PredicateCompositions = [
+    {label: "and", value: PredicateComposition.and},
+    {label: "or", value: PredicateComposition.or},
+    {label: "not", value: PredicateComposition.not}
 ];
 
 export interface IPositionInput {
@@ -31,7 +31,7 @@ export interface IPosition {
     [key: string]: string;
 }
 
-export type FilterContentsState = {
+export type PredicateState = {
     labelsOrDois: string;
     tracingIdsOrDOIsExactMatch: boolean;
     neuronalStructureId: string;
@@ -40,7 +40,7 @@ export type FilterContentsState = {
     brainAreaStructureIds: number[];
     arbCenter: IPosition;
     arbSize: string;
-    composition: FilterComposition;
+    composition: PredicateComposition;
 }
 
 // TODO This is from an older version of the API that has been subsumed by UIQueryPredicate and is now used as a child in that class.  Some refactor is needed
@@ -54,7 +54,7 @@ export class FilterContents {
     public brainAreas: AtlasStructureShape[];
     public arbCenter: IPosition;
     public arbSize: string;
-    public composition: FilterComposition;
+    public composition: PredicateComposition;
     public nonce: string;
 
     public constructor(isDefaultQuery: boolean = false) {
@@ -66,21 +66,10 @@ export class FilterContents {
         this.brainAreas = [];
         this.arbCenter = {x: "6500", y: "4000", z: "5500"};
         this.arbSize = "1000";
-        this.composition = isDefaultQuery ? FilterComposition.or : FilterComposition.and;
+        this.composition = isDefaultQuery ? PredicateComposition.or : PredicateComposition.and;
         this.nonce = null;
 
-        makeObservable(this, {
-            labelsOrDois: observable,
-            tracingIdsOrDOIsExactMatch: observable,
-            neuronalStructure: observable,
-            operator: observable,
-            amount: observable,
-            brainAreas: observable,
-            arbCenter: observable,
-            arbSize: observable,
-            composition: observable,
-            nonce: observable
-        });
+        makeAutoObservable(this);
     }
 
     public get IsAmountValid(): boolean {
@@ -92,10 +81,32 @@ export class FilterContents {
     }
 
     public get IsSoma(): boolean {
-        return this.neuronalStructure.IsSoma;
+        return this.neuronalStructure?.IsSoma;
     }
 
-    public serialize(): FilterContentsState {
+    public amountUnits(): string {
+        if (!this.neuronalStructure) {
+            return "nodes";
+        }
+
+        if (this.neuronalStructure.tracingStructure && !this.neuronalStructure.IsSoma) {
+            if (!this.neuronalStructure.structureIdentifier) {
+                return "µm";
+            }
+        }
+
+        if (!this.neuronalStructure.IsSoma) {
+            return "nodes";
+        }
+
+        return "";
+    }
+
+    public updateNeuronalStructure(neuronalStructure: NeuronalStructure) {
+        this.neuronalStructure = neuronalStructure;
+    }
+
+    public serialize(): PredicateState {
         return {
             labelsOrDois: this.labelsOrDois,
             tracingIdsOrDOIsExactMatch: this.tracingIdsOrDOIsExactMatch,
@@ -109,7 +120,7 @@ export class FilterContents {
         }
     }
 
-    public static deserialize(data: FilterContentsState, constants: DataConstants): FilterContents {
+    public static deserialize(data: PredicateState, constants: DataConstants): FilterContents {
         const filter = new FilterContents();
 
         filter.labelsOrDois = data.labelsOrDois || "";
@@ -120,7 +131,7 @@ export class FilterContents {
         filter.brainAreas = data.brainAreaStructureIds ? data.brainAreaStructureIds.map(s => constants.AtlasConstants.findStructure(s)) : [];
         filter.arbCenter = data.arbCenter || {x: "6500", y: "4000", z: "5500"};
         filter.arbSize = data.arbSize || "1000";
-        filter.composition = data.composition || FilterComposition.and;
+        filter.composition = data.composition || PredicateComposition.and;
 
         return filter;
     }

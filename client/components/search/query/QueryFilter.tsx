@@ -1,13 +1,13 @@
 import * as React from "react";
 import {observer} from "mobx-react-lite";
-import {ActionIcon, Checkbox, Flex, Select, TextInput} from "@mantine/core";
+import {ActionIcon, Checkbox, Flex, Select, Text, TextInput} from "@mantine/core";
 import {IconX} from "@tabler/icons-react";
 
 import {useConstants} from "../../../hooks/useConstants";
 import {AtlasStructureShape} from "../../../models/atlasStructure";
 import {NeuronalStructure} from "../../../models/neuronalStructure";
 import {IQueryOperator} from "../../../models/queryOperator";
-import {FilterComposition, FilterCompositions} from "../../../viewmodel/filterContents";
+import {PredicateComposition, PredicateCompositions} from "../../../viewmodel/filterContents";
 import {
     QUERY_PREDICATE_KINDS, QueryPredicateKind, PredicateType
 } from "../../../viewmodel/queryPredicateKind";
@@ -41,9 +41,9 @@ interface IQueryFilterProps {
 
 const compositionOptions = [];
 
-const compositionReverseLookup = new Map<FilterComposition, string>();
-const compositionLookup = new Map<string, FilterComposition>();
-FilterCompositions.map(c => {
+const compositionReverseLookup = new Map<PredicateComposition, string>();
+const compositionLookup = new Map<string, PredicateComposition>();
+PredicateCompositions.map(c => {
     compositionLookup.set(c.label, c.value);
     compositionReverseLookup.set(c.value, c.label);
     compositionOptions.push({label: c.label, value: c.label})
@@ -56,7 +56,7 @@ export const QueryFilter = observer((props: IQueryFilterProps) => {
     if (nodeStructureLookup.size == 0) {
         nodeStructureOptions = constants.NeuronStructures.map(q => {
             nodeStructureLookup.set(q.id, q);
-            return {label: q.display(), value: q.id}
+            return {label: q.predicateName(), value: q.id}
         });
     }
 
@@ -67,7 +67,7 @@ export const QueryFilter = observer((props: IQueryFilterProps) => {
         });
     }
 
-    const onCompositionChange = (value: FilterComposition) => {
+    const onCompositionChange = (value: PredicateComposition) => {
         const filter = props.queryFilter;
         filter.filter.composition = value;
         props.onChangeFilter?.(filter);
@@ -117,7 +117,7 @@ export const QueryFilter = observer((props: IQueryFilterProps) => {
 
     const onNeuronalStructureChange = (neuronalStructures?: NeuronalStructure) => {
         const filter = props.queryFilter;
-        filter.filter.neuronalStructure = neuronalStructures;
+        filter.filter.updateNeuronalStructure(neuronalStructures);
         props.onChangeFilter?.(filter);
     };
 
@@ -125,40 +125,6 @@ export const QueryFilter = observer((props: IQueryFilterProps) => {
         const filter = props.queryFilter;
         filter.filter.tracingIdsOrDOIsExactMatch = !filter.filter.tracingIdsOrDOIsExactMatch;
         props.onChangeFilter?.(filter);
-    };
-
-    const onFilterBrainArea = (option: any, filterValue: string) => {
-        if (!filterValue) {
-            return true;
-        }
-
-        const labelTest = (option["label"] as string).toLowerCase();
-
-        if (labelTest.indexOf(filterValue) >= 0) {
-            return true;
-        }
-
-        if (option.value.acronym.toLowerCase().includes(filterValue)) {
-            return true;
-        }
-
-        const matches = option.value.aliases?.some(a => a.toLowerCase().includes(filterValue));
-
-        if (matches) {
-            return true;
-        }
-
-        const parts = filterValue.split(/\s+/);
-
-        if (parts.length < 2) {
-            return false;
-        }
-
-        const itemParts = labelTest.split(/\s+/);
-
-        return parts.some(p => {
-            return itemParts.some(i => i === p);
-        });
     };
 
     const renderComposition = () => {
@@ -186,8 +152,14 @@ export const QueryFilter = observer((props: IQueryFilterProps) => {
         }
     };
 
-    const renderCompartmentQuery = () => {
+    const renderAnatomicalRegionPredicate = () => {
         const filter = props.queryFilter.filter;
+
+        const amountUnits = filter.amountUnits();
+
+        const rightSection = amountUnits ? <Text size="xs">{amountUnits}</Text> : null;
+
+        const opacity = props.queryFilter.filter.CanHaveThreshold ? 1 : 0.0;
 
         return (
             <Flex justify="stretch" align="center" direction="row" gap="md" p="0">
@@ -209,21 +181,23 @@ export const QueryFilter = observer((props: IQueryFilterProps) => {
                     }
                 }}/>
                 <Select label="Threshold" clearable placeholder="any" disabled={!props.queryFilter.filter.CanHaveThreshold} data={queryOperatorOptions}
-                        value={props.queryFilter.filter.operator?.id ?? null} onChange={(value) => {
+                        style={{opacity: opacity}} value={props.queryFilter.filter.operator?.id ?? null} onChange={(value) => {
                     if (value) {
                         onQueryOperatorChange(queryOperatorLookup.get(value));
                     } else {
                         onQueryOperatorChange(null);
+                        onQueryOperatorChange(null);
                     }
                 }}/>
-                <TextInput miw={100} flex={0} label="&nbsp;" value={props.queryFilter.filter.amount}
+                <TextInput miw={120} flex={0} label="&nbsp;" value={props.queryFilter.filter.amount} style={{opacity: opacity}}
                            disabled={!props.queryFilter.filter.CanHaveThreshold || props.queryFilter.filter.operator == null}
-                           onChange={(evt) => onAmountChange(evt.currentTarget.value)}/>
+                           onChange={(evt) => onAmountChange(evt.currentTarget.value)}
+                           rightSection={rightSection} rightSectionWidth={60}/>
             </Flex>
         );
     };
 
-    const renderSphereQuery = () => {
+    const renderCustomRegionPredicate = () => {
         return (
             <Flex justify="stretch" align="center" direction="row" gap="md" p="0">
                 <Select miw={200} label="Query Type" data={queryPredicateOptions} value={props.queryFilter.brainAreaFilterType.id} onChange={(value) => {
@@ -239,30 +213,11 @@ export const QueryFilter = observer((props: IQueryFilterProps) => {
                            onChange={(evt) => onArbCenterChanged(evt.currentTarget.value, "z")}/>
                 <TextInput flex={1} label="Radius (µm)" value={props.queryFilter.filter.arbSize}
                            onChange={(evt) => onArbSizeChanged(evt.currentTarget.value)}/>
-                <Select label="Node Structure" clearable placeholder="any" data={nodeStructureOptions}
-                        value={props.queryFilter.filter.neuronalStructure?.id ?? null} onChange={(value) => {
-                    if (value) {
-                        onNeuronalStructureChange(nodeStructureLookup.get(value));
-                    } else {
-                        onNeuronalStructureChange(null);
-                    }
-                }}/>
-                <Select label="Threshold" clearable placeholder="any" disabled={!props.queryFilter.filter.CanHaveThreshold} data={queryOperatorOptions}
-                        value={props.queryFilter.filter.operator?.id ?? null} onChange={(value) => {
-                    if (value) {
-                        onQueryOperatorChange(queryOperatorLookup.get(value));
-                    } else {
-                        onQueryOperatorChange(null);
-                    }
-                }}/>
-                <TextInput miw={100} flex={0} label="&nbsp;" value={props.queryFilter.filter.amount}
-                           disabled={!props.queryFilter.filter.CanHaveThreshold || props.queryFilter.filter.operator == null}
-                           onChange={(evt) => onAmountChange(evt.currentTarget.value)}/>
             </Flex>
         );
     };
 
-    const renderByIdQuery = () => {
+    const renderIdOrDoiPredicate = () => {
         return (
             <Flex justify="stretch" align="center" direction="row" gap="md" p="0">
                 <Select miw={200} label="Query Type" data={queryPredicateOptions} value={props.queryFilter.brainAreaFilterType.id} onChange={(value) => {
@@ -281,11 +236,11 @@ export const QueryFilter = observer((props: IQueryFilterProps) => {
     const chooseFilterRender = () => {
         switch (props.queryFilter.brainAreaFilterType.option) {
             case PredicateType.AnatomicalRegion:
-                return renderCompartmentQuery();
+                return renderAnatomicalRegionPredicate();
             case PredicateType.CustomRegion:
-                return renderSphereQuery();
+                return renderCustomRegionPredicate();
             case PredicateType.IdOrDoi:
-                return renderByIdQuery();
+                return renderIdOrDoiPredicate();
             default:
                 return null;
         }
@@ -299,17 +254,17 @@ export const QueryFilter = observer((props: IQueryFilterProps) => {
     const style = Object.assign({}, listItemStyle, (isCompartment ? compartmentItemStyle : (isId ? idOrDoiItemStyle : sphereItemStyle)));
 
     return (
-            <Flex justify="stretch" gap="md" align="center" p={8} bg="segment" style={style}>
-                <div style={{width: `${width}px`}}>
-                    {renderComposition()}
-                </div>
-                <div style={{flex: 1}}>
-                    {chooseFilterRender()}
-                </div>
-                <div style={{marginTop: "18px"}}>
-                    {renderRemoveElement()}
-                </div>
-            </Flex>
+        <Flex justify="stretch" gap="md" align="center" p={8} bg="segment" style={style}>
+            <div style={{width: `${width}px`}}>
+                {renderComposition()}
+            </div>
+            <div style={{flex: 1}}>
+                {chooseFilterRender()}
+            </div>
+            <div style={{marginTop: "18px"}}>
+                {renderRemoveElement()}
+            </div>
+        </Flex>
     );
 });
 

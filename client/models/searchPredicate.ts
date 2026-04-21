@@ -1,4 +1,4 @@
-import {FilterComposition, IPositionInput} from "../viewmodel/filterContents";
+import {PredicateComposition, IPositionInput} from "../viewmodel/filterContents";
 
 export enum PredicateTypeValue {
     AnatomicalRegion = "ANATOMICAL",
@@ -6,16 +6,28 @@ export enum PredicateTypeValue {
     IdOrDoi = "ID",
 }
 
-export type SearchPredicate = {
-    predicateType: PredicateTypeValue;
-    labelsOrDois: string[];
-    labelOrDoiExactMatch: boolean;
-    neuronStructureIds: string[];
-    nodeStructureIds: string[];
+export type AnatomicalPredicateInput = {
+    neuronStructureId: string;
+    nodeStructureId: string;
     operatorId: string;
     amount: number;
     atlasStructureIds: string[];
+}
+
+export type CustomRegionPredicateInput = {
     arbCenter: IPositionInput;
     arbSize: number;
-    composition: FilterComposition;
+}
+
+export type IdOrDoiPredicateInput = {
+    labelsOrDois: string[];
+    labelOrDoiExactMatch: boolean;
+}
+
+export type SearchPredicate = {
+    predicateType: PredicateTypeValue;
+    composition: PredicateComposition;
+    anatomicalPredicate?: AnatomicalPredicateInput;
+    customRegionPredicate?: CustomRegionPredicateInput;
+    idOrDoiPredicate?: IdOrDoiPredicateInput;
 }

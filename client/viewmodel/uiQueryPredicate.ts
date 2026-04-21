@@ -1,7 +1,7 @@
 import {makeObservable, observable} from "mobx";
 
 import {findQueryPredicateKind, PredicateType, QUERY_PREDICATE_KIND_COMPARTMENT, QueryPredicateKind} from "./queryPredicateKind";
-import {FilterContents, FilterContentsState, IPosition, IPositionInput} from "./filterContents";
+import {FilterContents, PredicateState, IPosition, IPositionInput} from "./filterContents";
 import {DataConstants} from "../models/constants";
 import {SearchPredicate} from "../models/searchPredicate";
 
@@ -23,7 +23,7 @@ export type UIQueryPredicateState = {
     id: string;
     index: number;
     brainAreaFilterTypeOption: PredicateType;
-    filter: FilterContentsState;
+    filter: PredicateState;
 }
 
 // This captures some additional information/behavior for the updated search API (from the previous FilterContents class).  Some refactoring would be useful
@@ -45,27 +45,38 @@ export class UIQueryPredicate {
 
     // Convert to the GraphQL representation of a predicate.
     public asSearchPredicate(): SearchPredicate {
-        const amount = this.filter.amount.length === 0 ? 0 : parseFloat(this.filter.amount);
-
-        const n = this.filter.neuronalStructure;
-
-        const tracingStructureId = n ? n.TracingStructureId : null;
-        const nodeStructureId = n ? n.StructureIdentifierId : null;
-        const operatorId = n && n.IsSoma ? null : (this.filter.operator ? this.filter.operator.id : null);
-
-        return {
+        const predicate: SearchPredicate = {
             predicateType: this.brainAreaFilterType.value,
-            labelsOrDois: this.brainAreaFilterType.IsIdQuery ? this.filter.labelsOrDois.split(",").map(s => s.trim()).filter(s => s.length > 0) : [],
-            labelOrDoiExactMatch: this.filter.tracingIdsOrDOIsExactMatch,
-            neuronStructureIds: tracingStructureId ? [tracingStructureId] : [],
-            nodeStructureIds: nodeStructureId ? [nodeStructureId] : [],
-            operatorId,
-            amount: isNaN(amount) ? null : amount,
-            atlasStructureIds: this.brainAreaFilterType.IsCompartmentQuery ? this.filter.brainAreas.map(b => b.id) : [],
-            arbCenter: createPositionInput(this.brainAreaFilterType.IsCustomRegionQuery, this.filter.arbCenter),
-            arbSize: arbNumberToString(this.brainAreaFilterType.IsCustomRegionQuery, this.filter.arbSize),
             composition: this.filter.composition
         };
+
+        if (this.brainAreaFilterType.IsCompartmentQuery) {
+            const amount = this.filter.amount.length === 0 ? 0 : parseFloat(this.filter.amount);
+            const n = this.filter.neuronalStructure;
+            const tracingStructureId = n ? n.TracingStructureId : null;
+            const nodeStructureId = n ? n.StructureIdentifierId : null;
+            const operatorId = n && n.IsSoma ? null : (this.filter.operator ? this.filter.operator.id : null);
+
+            predicate.anatomicalPredicate = {
+                neuronStructureId: tracingStructureId,
+                nodeStructureId: n?.IsSoma ? null : nodeStructureId,
+                operatorId,
+                amount: isNaN(amount) ? null : amount,
+                atlasStructureIds: this.filter.brainAreas.map(b => b.id)
+            };
+        } else if (this.brainAreaFilterType.IsCustomRegionQuery) {
+            predicate.customRegionPredicate = {
+                arbCenter: createPositionInput(true, this.filter.arbCenter),
+                arbSize: arbNumberToString(true, this.filter.arbSize)
+            };
+        } else if (this.brainAreaFilterType.IsIdQuery) {
+            predicate.idOrDoiPredicate = {
+                labelsOrDois: this.filter.labelsOrDois.split(",").map(s => s.trim()).filter(s => s.length > 0),
+                labelOrDoiExactMatch: this.filter.tracingIdsOrDOIsExactMatch
+            };
+        }
+
+        return predicate;
     }
 
     // Serialize for local browser storage or URL sharing.

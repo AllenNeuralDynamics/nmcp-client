@@ -5,7 +5,7 @@ import cuid from "cuid";
 import {DataConstants} from "../models/constants";
 import {QUERY_PREDICATE_KIND_COMPARTMENT, QUERY_PREDICATE_KIND_SPHERE} from "./queryPredicateKind";
 import {SEARCH_NEURONS_QUERY, SearchContext, SearchNeuronsQueryResponse, SearchNeuronsQueryVariables} from "../graphql/search";
-import {FilterComposition, FilterContents, IPositionInput} from "./filterContents";
+import {PredicateComposition, FilterContents, IPositionInput} from "./filterContents";
 import {UserPreferences} from "../util/userPreferences";
 import {QueryResponseState, QueryResponseViewModel} from "./queryResponseViewModel";
 import {UIQueryPredicate, UIQueryPredicateState} from "./uiQueryPredicate";
@@ -100,7 +100,7 @@ export class UIQuery {
             this.addPredicate({
                 brainAreaFilterType: QUERY_PREDICATE_KIND_SPHERE
             }, {
-                composition: FilterComposition.and,
+                composition: PredicateComposition.and,
                 arbCenter: {
                     x: position.x.toFixed(1),
                     y: position.y.toFixed(1),

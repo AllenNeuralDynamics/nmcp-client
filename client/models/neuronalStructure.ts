@@ -40,18 +40,26 @@ export class NeuronalStructure {
             str = displayStructureIdentifier(this.structureIdentifier);
         }
 
-        if (this.tracingStructure) {
-            str = displayNeuronStructure(this.tracingStructure, str.length > 0) + str;
+        if (this.tracingStructure && this.structureIdentifier?.swcValue !== NodeStructureKind.soma) {
+            str = displayNeuronStructure(this.tracingStructure, false) + " " + str;
         }
 
         return str;
     }
-}
 
-export function displayNeuronalStructure(structure: NeuronalStructure): string {
-    if (structure === null || structure === undefined) {
-        return "(none)";
+    public predicateName(): string {
+        if (this.IsSoma) {
+            return "soma";
+        }
+
+        if (!this.structureIdentifier) {
+            return this.tracingStructure ? displayNeuronStructure(this.tracingStructure, false) + " length" : "(none)";
+        }
+
+        if (this.structureIdentifier.swcValue === NodeStructureKind.soma) {
+            return this.display();
+        }
+
+        return this.display() + "s";
     }
-
-    return structure.display();
 }
