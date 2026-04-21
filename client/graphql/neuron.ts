@@ -51,6 +51,7 @@ export const NEURON_BASE_FIELDS_FRAGMENT = gql`fragment NeuronBaseFields on Neur
         y
         z
     }
+    canonicalDoi
     atlasStructureId
     createdAt
     updatedAt

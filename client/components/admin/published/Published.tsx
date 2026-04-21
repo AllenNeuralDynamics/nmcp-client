@@ -145,9 +145,7 @@ export const Published = observer(() => {
                         <Text size="lg" fw={500}>Reconstructions</Text>
                         <Badge variant="light">{statusOptions.find(s => s.value == statusFilter)?.label}</Badge>
                     </Group>
-                    {/*
                     <Button variant="light" loading={validating} onClick={() => setShowValidateDois(true)}>Validate DOIs...</Button>
-                    */}
                 </Group>
                 <Divider orientation="horizontal"/>
             </Card.Section>

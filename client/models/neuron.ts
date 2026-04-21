@@ -47,6 +47,7 @@ export type NeuronShape = {
     specimenSoma?: SomaLocation;
     atlasSoma?: SomaLocation;
     specimen?: SpecimenShape;
+    canonicalDoi?: string;
     atlasStructureId?: string;
     atlasStructure?: AtlasStructureShape;
     somaProperties?: SomaProperties;

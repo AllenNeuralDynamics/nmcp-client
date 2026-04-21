@@ -128,15 +128,24 @@ export const Neuron = () => {
                         </Stack>
                         <Stack gap={2} align="flex-end">
                             <Badge bg={isPublished ? "green" : "orange"}>{published}</Badge>
-                            {isPublished && data.neuron.published.doi &&
+                            {isPublished && data.neuron.canonicalDoi ?
                                 <Group gap={2}>
-                                    <Text size="sm">DOI:</Text>
+                                    <Text size="sm">Canonical DOI:</Text>
+                                    <Text size="sm" c="dimmed" td="underline" style={{cursor: "pointer"}}
+                                          onClick={() => {
+                                              clipboard.copy(`${systemConfiguration.doiHandler}/${data.neuron.canonicalDoi}`);
+                                              successNotification("DOI", "DOI copied to clipboard");
+                                          }}>{`${systemConfiguration.doiHandler}/${data.neuron.canonicalDoi}`}</Text>
+                                </Group> : null}
+                            {isPublished && data.neuron.published.doi ?
+                                <Group gap={2}>
+                                    <Text size="sm">Version-Specific DOI:</Text>
                                     <Text size="sm" c="dimmed" td="underline" style={{cursor: "pointer"}}
                                           onClick={() => {
                                               clipboard.copy(`${systemConfiguration.doiHandler}/${data.neuron.published.doi}`);
                                               successNotification("DOI", "DOI copied to clipboard");
                                           }}>{`${systemConfiguration.doiHandler}/${data.neuron.published.doi}`}</Text>
-                                </Group>}
+                                </Group> : null}
                         </Stack>
                     </Group>
                     <Divider orientation="horizontal"/>
