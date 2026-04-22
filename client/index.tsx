@@ -20,6 +20,7 @@ import "@mantine/core/styles.css";
 import "@mantine/dates/styles.css";
 import "@mantine/notifications/styles.css";
 import "@mantine/dropzone/styles.css";
+import "@mantine/charts/styles.css";
 
 const viewerBackgroundLightSource = [249, 250, 251];
 const viewerBackgroundDarkSource = [42, 42, 42];

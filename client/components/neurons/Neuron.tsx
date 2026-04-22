@@ -5,7 +5,7 @@ import {useQuery} from "@apollo/client";
 import {Alert, Anchor, Badge, Card, Divider, Group, Space, Stack, Table, Tabs, Text} from "@mantine/core";
 import {useClipboard, useLocalStorage} from "@mantine/hooks";
 import {useIsAuthenticated} from "@azure/msal-react";
-import {IconBinaryTree, IconBinaryTreeFilled, IconVersions} from "@tabler/icons-react";
+import {IconBinaryTree, IconBinaryTreeFilled, IconChartBar, IconVersions} from "@tabler/icons-react";
 import dayjs from "dayjs";
 
 import {NEURON_VERSIONS_QUERY, NeuronVersionsQueryResponse, NeuronVersionsQueryVariables} from "../../graphql/neuron";
@@ -18,6 +18,7 @@ import {NeuronSpecimenSpaceView} from "./NeuronSpecimenSpaceView";
 import {NeuronAtlasSpaceView} from "./NeuronAtlasSpaceView";
 import {NeuronHistory} from "./NeuronHistory";
 import {QualityMetrics} from "./QualityMetrics";
+import {ReconstructionMetrics} from "./ReconstructionMetrics";
 import {useSystemConfiguration} from "../../hooks/useSystemConfiguration";
 import {successNotification} from "../common/NotificationHelper";
 
@@ -192,7 +193,10 @@ export const Neuron = () => {
                                 Specimen-Space Reconstruction
                             </Tabs.Tab>
                             <Tabs.Tab value="quality" leftSection={<IconBinaryTree size={18} style={{transform: "rotate(-90deg)"}}/>}>
-                                Quality Control & Metrics
+                                Quality Control
+                            </Tabs.Tab>
+                            <Tabs.Tab value="metrics" leftSection={<IconChartBar size={18}/>}>
+                                Metrics
                             </Tabs.Tab>
                             <Tabs.Tab value="history" leftSection={<IconVersions size={18}/>}>
                                 History
@@ -207,6 +211,9 @@ export const Neuron = () => {
                         </Tabs.Panel>
                         <Tabs.Panel value="quality" key={`quality_${data.neuron.id}`}>
                             <QualityMetrics qualityControlId={qualityControlId}/>
+                        </Tabs.Panel>
+                        <Tabs.Panel value="metrics" key={`metrics_${data.neuron.id}`}>
+                            <ReconstructionMetrics reconstructionId={selectedReconstruction?.atlasReconstruction?.id}/>
                         </Tabs.Panel>
                         <Tabs.Panel value="history" key={`history_${data.neuron.id}`}>
                             <NeuronHistory neuronId={data.neuron.id}/>
