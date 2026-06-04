@@ -27,7 +27,7 @@ export const CandidateRow = (props: ICandidateRowProps) => {
 
     return (
         <Table.Tr {...subProps} onClick={() => props.onSelected(props.neuron)}>
-            <Table.Td><NeuronVersionLink neuron={props.neuron}/></Table.Td>
+            <Table.Td><NeuronVersionLink neuron={props.neuron} focusOnSoma/></Table.Td>
             <Table.Td>{props.neuron.specimen.label}</Table.Td>
             <Table.Td>{props.neuron.keywords}</Table.Td>
             <Table.Td>{formatAtlasStructure(props.neuron.atlasStructure, "(unspecified)")}</Table.Td>

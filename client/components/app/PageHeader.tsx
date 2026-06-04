@@ -8,7 +8,7 @@ import {IconMoon, IconSun} from "@tabler/icons-react";
 import {SignInSignOutButton} from "./SignInSignOutButton";
 import {UserPermissions} from "../../graphql/user";
 
-import logo from "../../../assets/nmcp_logo.png";
+import logo from "../../../assets/nmcp-logo.png";
 import {NotificationContext} from "./NotificationsApp";
 import {useUser} from "../../hooks/useUser";
 import {useConstants} from "../../hooks/useConstants";

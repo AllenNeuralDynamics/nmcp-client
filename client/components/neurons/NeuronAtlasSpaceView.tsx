@@ -8,7 +8,7 @@ import {useResizeObserver} from "@mantine/hooks";
 import {NEAREST_NODE_QUERY, NearestNodeQueryResponse, NearestNodeQueryVariables} from "../../graphql/search";
 import {useConstants} from "../../hooks/useConstants";
 import {useSystemConfiguration} from "../../hooks/useSystemConfiguration";
-import {NeuronShape} from "../../models/neuron";
+import {SomaLocation} from "../../models/neuron";
 import {Reconstruction} from "../../models/reconstruction";
 import {AtlasSpaceViewer} from "../../viewer/atlasSpaceViewer";
 import {AtlasViewModel} from "../../viewmodel/atlasViewModel";
@@ -17,11 +17,12 @@ import {AtlasContainer} from "../search/output/atlas/AtlasContainer";
 import {AtlasViewerSelection} from "./AtlasViewerSelection";
 
 type NeuronAtlasSpaceViewProps = {
-    neuron: NeuronShape;
     reconstruction?: Reconstruction;
+    focusSoma?: SomaLocation;
+    onFocusApplied?: () => void;
 };
 
-export const NeuronAtlasSpaceView = observer(({neuron, reconstruction}: NeuronAtlasSpaceViewProps) => {
+export const NeuronAtlasSpaceView = observer(({reconstruction, focusSoma, onFocusApplied}: NeuronAtlasSpaceViewProps) => {
     const scheme = useComputedColorScheme();
 
     const systemConfiguration = useSystemConfiguration();
@@ -56,6 +57,14 @@ export const NeuronAtlasSpaceView = observer(({neuron, reconstruction}: NeuronAt
         v.setNeuronSkeletonId(skeletonId ? [skeletonId] : null);
 
         v.updateAtlasStructures(displayedStructures);
+
+        if (focusSoma) {
+            if (Number.isFinite(focusSoma.x) && Number.isFinite(focusSoma.y) && Number.isFinite(focusSoma.z)) {
+                // viewerPosition does not scale; atlas space is voxels = microns / 10
+                v.viewerPosition = {x: focusSoma.x / 10, y: focusSoma.y / 10, z: focusSoma.z / 10};
+            }
+            onFocusApplied?.();
+        }
 
         setViewer(v);
 

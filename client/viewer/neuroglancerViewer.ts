@@ -14,6 +14,12 @@ export type PositionCallback = {
     (position: number[]): void;
 }
 
+export type Point3D = {
+    x: number;
+    y: number;
+    z: number;
+}
+
 export class NeuroglancerViewer {
     protected readonly _viewer: Viewer;
 
@@ -77,6 +83,10 @@ export class NeuroglancerViewer {
 
             this._positionCallback = this.viewer.state.viewer.mouseState.changed.add(positionCallback);
         }
+    }
+
+    public set viewerPosition(position: Point3D) {
+        this.restoreState(this.setPosition(this.currentState, position.x, position.y, position.z));
     }
 
     public set colorScheme(isDarkColorScheme: boolean) {
@@ -152,7 +162,7 @@ export class NeuroglancerViewer {
     }
 
     protected setPosition(state: any, x: number, y: number, z: number): any {
-        state.position = [x, y, z, 0];
+        state.position = [x, y, z];
 
         return state;
     }

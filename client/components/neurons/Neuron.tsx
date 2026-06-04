@@ -1,5 +1,5 @@
 import * as React from "react";
-import {useMemo} from "react";
+import {useEffect, useMemo} from "react";
 import {Navigate, useLocation, useNavigate, useParams} from "react-router-dom";
 import {useQuery} from "@apollo/client";
 import {Alert, Anchor, Badge, Card, Divider, Group, Space, Stack, Table, Tabs, Text} from "@mantine/core";
@@ -16,6 +16,7 @@ import {AppLoading} from "../app/AppLoading";
 import {useAppLayout} from "../../hooks/useAppLayout";
 import {NeuronSpecimenSpaceView} from "./NeuronSpecimenSpaceView";
 import {NeuronAtlasSpaceView} from "./NeuronAtlasSpaceView";
+import {NeuronLinkState} from "../common/NeuronVersionLink";
 import {NeuronHistory} from "./NeuronHistory";
 import {QualityMetrics} from "./QualityMetrics";
 import {ReconstructionMetrics} from "./ReconstructionMetrics";
@@ -83,6 +84,15 @@ export const Neuron = () => {
     }, [data?.neuron?.reconstructions, versionId]);
 
     const invalidVersion = (location.state as any)?.invalidVersion as string | undefined;
+
+    const focusOnSoma = (location.state as NeuronLinkState | null)?.focusOnSoma === true;
+
+    useEffect(() => {
+        if (focusOnSoma) {
+            setActiveTab("atlas");
+        }
+        // mount-only; intentionally not re-running on focusOnSoma changes
+    }, []);
 
     const onChangeTab = (tab: string) => {
         setActiveTab(tab);
@@ -204,7 +214,10 @@ export const Neuron = () => {
                         </Tabs.List>
 
                         <Tabs.Panel value="atlas" key={`atlas_${data.neuron.id}`}>
-                            <NeuronAtlasSpaceView neuron={data.neuron} reconstruction={selectedReconstruction}/>
+                            <NeuronAtlasSpaceView reconstruction={selectedReconstruction}
+                                                  focusSoma={focusOnSoma ? data.neuron.atlasSoma : undefined}
+                                                  onFocusApplied={() =>
+                                                      navigate(location.pathname, {replace: true, state: {}})}/>
                         </Tabs.Panel>
                         <Tabs.Panel value="specimen" key={`specimen_${data.neuron.id}`}>
                             <NeuronSpecimenSpaceView neuron={data.neuron} reconstruction={selectedReconstruction}/>
