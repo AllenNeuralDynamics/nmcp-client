@@ -44,5 +44,11 @@ the location URL, e.g., `s3://mybucket/skeletons/staging`.  The appropriate pref
 Neuroglancer data source (e.g., `precomputed://`)
 
 
+## Google Analytics
+`NMCP_GOOGLE_ANALYTICS_TAG` optionally sets the Google Analytics measurement ID (e.g., `G-XXXXXXXXXX`) used by the
+gtag.js snippet injected into `index.html` at server startup.  Set it to your own tag to distinguish deployments
+(e.g., production vs. test instances).  If it is left unset, no analytics script is included in the page.
+
+
 ## Development Status Notes
 See [here](client/README.md) for additional details on the status of the code.

@@ -37,6 +37,8 @@ if (process.env.NODE_ENV !== "production") {
 
     const rootPath = path.resolve(path.join(__dirname, "public"));
 
+    const indexHtml = renderIndexHtml(path.join(rootPath, "index.html"), ServerConfiguration.googleAnalyticsTag);
+
     const app = express();
 
     app.use(ServerConfiguration.systemEndpoint, (_, res) => {
@@ -60,10 +62,12 @@ if (process.env.NODE_ENV !== "production") {
     debug(`proxying ${ServerConfiguration.exportService.endpoint} to ${exportUri}`);
     app.use(`${ServerConfiguration.exportService.endpoint}`, proxy(`${exportUri}`, {proxyReqPathResolver: req => "/export" + req.url}));
 
-    app.use(express.static(rootPath));
+    // index: false so requests for "/" fall through to the handler below, which serves the
+    // Google-Analytics-injected index.html rather than the raw file on disk.
+    app.use(express.static(rootPath, {index: false}));
 
     app.use("/", (req, res) => {
-        res.sendFile(path.join(rootPath, "index.html"));
+        res.type("html").send(indexHtml);
     });
 
     app.listen(ServerConfiguration.port, "0.0.0.0", () => {
@@ -128,6 +132,31 @@ function devServer() {
     });
 
     return server;
+}
+
+function googleAnalyticsSnippet(tag: string): string {
+    if (!tag) {
+        return "";
+    }
+
+    return `<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=${tag}"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', '${tag}');
+</script>`;
+}
+
+function renderIndexHtml(indexPath: string, googleAnalyticsTag: string): string {
+    const template = fs.readFileSync(indexPath).toString();
+
+    if (googleAnalyticsTag) {
+        debug(`injecting Google Analytics tag ${googleAnalyticsTag}`);
+    }
+
+    return template.replace("<!--__GOOGLE_ANALYTICS__-->", googleAnalyticsSnippet(googleAnalyticsTag));
 }
 
 function readSystemVersion(): string {

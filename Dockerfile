@@ -6,6 +6,7 @@ COPY dist .
 
 RUN npm install --production=true
 
-CMD ["./docker-entry.sh"]
+RUN chmod +x docker-entry.sh
+CMD ["bash", "docker-entry.sh"]
 
 EXPOSE 5000

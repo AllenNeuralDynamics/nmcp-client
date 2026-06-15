@@ -12,6 +12,7 @@ export interface IServiceOptions {
     exportLimit: number;
     doiHandler: string;
     precomputedLocation: string;
+    googleAnalyticsTag: string;
 }
 
 const configuration: IServiceOptions = {
@@ -29,7 +30,8 @@ const configuration: IServiceOptions = {
     },
     exportLimit: 20,
     doiHandler: "https://doi.org",
-    precomputedLocation: ""
+    precomputedLocation: "",
+    googleAnalyticsTag: ""
 };
 
 function loadServerConfiguration() {
@@ -47,6 +49,8 @@ function loadServerConfiguration() {
     options.doiHandler =  process.env.DOI_HANDLER || options.doiHandler;
 
     options.precomputedLocation = process.env.NMCP_PRECOMPUTED_OUTPUT || options.precomputedLocation;
+
+    options.googleAnalyticsTag = process.env.NMCP_GOOGLE_ANALYTICS_TAG || options.googleAnalyticsTag;
 
     return options;
 }
