@@ -17,6 +17,8 @@ export const Collections = () => {
 
     const [selectedId, setSelectedId] = useState<string>(null);
 
+    const [adding, setAdding] = useState(false);
+
     if ((user?.permissions & UserPermissions.Admin) == 0) {
         return <Navigate to="/" replace/>;
     }
@@ -40,6 +42,7 @@ export const Collections = () => {
     const selected = collections.find((c: CollectionShape) => c.id === selectedId);
 
     const onRowClick = (collection: CollectionShape) => {
+        setAdding(false);
         setSelectedId(collection.id);
     };
 
@@ -53,7 +56,10 @@ export const Collections = () => {
                 <Card.Section bg="segment">
                     <Group p={12} justify="space-between">
                         <Text size="lg" fw={500}>Collections</Text>
-                        <Button leftSection={<IconPlus size={18}/>}>Add</Button>
+                        <Button leftSection={<IconPlus size={18}/>} onClick={() => {
+                            setSelectedId(null);
+                            setAdding(true);
+                        }}>Add</Button>
                     </Group>
                     <Divider orientation="horizontal"/>
                 </Card.Section>
@@ -79,7 +85,9 @@ export const Collections = () => {
                 </Card.Section>
             </Card>
             <Space h={24}/>
-            {selected ? <EditCollection collection={selected}/> : null}
+            {adding
+                ? <EditCollection key="new" collection={null} onCompleted={() => setAdding(false)}/>
+                : selected ? <EditCollection key={selected.id} collection={selected}/> : null}
         </div>
     );
 }

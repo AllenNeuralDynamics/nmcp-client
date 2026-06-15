@@ -13,7 +13,7 @@ import {
 import {toastCreateError, toastCreateSuccess, toastUpdateSuccess} from "../../common/NotificationHelper";
 import {IconInfoCircle} from "@tabler/icons-react";
 
-export const EditCollection = ({collection}: { collection: CollectionShape }) => {
+export const EditCollection = ({collection, onCompleted}: { collection: CollectionShape | null; onCompleted?: () => void }) => {
     const [state, setState] = useState({
         name: collection?.name ?? "",
         description: collection?.description ?? "",
@@ -25,6 +25,7 @@ export const EditCollection = ({collection}: { collection: CollectionShape }) =>
             refetchQueries: [COLLECTIONS_QUERY],
             onCompleted: () => {
                 toastCreateSuccess("The collection was created.");
+                onCompleted?.();
             },
             onError: (error) => toastCreateError(error)
         });
@@ -40,7 +41,7 @@ export const EditCollection = ({collection}: { collection: CollectionShape }) =>
     const updateDescription = (value: string) => setState({...state, description: value});
     const updateReference = (value: string) => setState({...state, reference: value});
 
-    const canUpdate = state.name.length > 0 && (state.name != collection.name || state.description != collection.description || state.reference != collection.reference);
+    const canUpdate = state.name.length > 0 && (state.name != collection?.name || state.description != collection?.description || state.reference != collection?.reference);
 
     const onCreateOrUpdate = async () => {
         if (collection?.id != null) {
@@ -59,16 +60,16 @@ export const EditCollection = ({collection}: { collection: CollectionShape }) =>
             impacts.</Alert> : null;
 
     return (
-        <Card key={collection.id} withBorder>
+        <Card key={collection?.id ?? "new"} withBorder>
             <Card.Section bg="segment">
                 <Group p={12} mih={72} justify="space-between">
                     <Group gap="sm">
-                        <Text fw={500}>{collection.name}</Text>
+                        <Text fw={500}>{collection?.name ?? "New Collection"}</Text>
                     </Group>
                     <Group>
                         {updateNameWarning}
                         <Button size="tiny" disabled={!canUpdate} onClick={onCreateOrUpdate}>
-                            Update
+                            {collection?.id != null ? "Update" : "Add"}
                         </Button>
                     </Group>
                 </Group>
