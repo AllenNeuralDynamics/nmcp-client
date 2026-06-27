@@ -28,7 +28,7 @@ export const SignOutButton = () => {
     return (
         <Menu>
             <Menu.Target>
-                <Avatar variant="filled" key={instance.getActiveAccount().username} name={instance.getActiveAccount().name} color="blue"/>
+                <Avatar variant="filled" key={instance.getActiveAccount().username} name={instance.getActiveAccount().name} color="brand"/>
             </Menu.Target>
             <Menu.Dropdown>
                 <Menu.Item leftSection={<IconSettings size={18}/>} onClick={() => appLayout.openSettingsDialog()}>

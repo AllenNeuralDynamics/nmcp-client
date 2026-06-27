@@ -56,8 +56,10 @@ const colorPalette = {
 
 const portalTheme = createTheme({
     white: "#f3f4f5",
+    primaryColor: "brand",
     colors: {
         ...colorPalette,
+        "brand": colorsTuple("#6464FF"),
         "segment": virtualColor({
             name: "segment",
             light: "segment-light",
