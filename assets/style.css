@@ -21,9 +21,48 @@
     color: white;
 }
 
+/*
+ * Switch track outline
+ *
+ * Mantine's default "off" Switch track is a low-contrast gray that reads as disabled.
+ * To make the off (unchecked, enabled) state more visible we stroke the track with the
+ * same color used to fill it when "on" (--switch-color, i.e. the switch's color prop /
+ * theme primary). The "on" and disabled states are left untouched.
+ *
+ * Dark mode uses the full-strength color; light mode uses a more subdued, semi-transparent
+ * version so it doesn't read as too bright.
+ *
+ * Configurable:
+ *   --switch-off-border-width         stroke thickness (both modes)
+ *   --switch-off-border-light-opacity how much of the on-color to keep in light mode
+ *                                     (lower = more subdued)
+ * The stroke color follows --switch-color automatically, so per-switch `color` props are
+ * respected without further changes.
+ */
+:root {
+    --switch-off-border-width: 1px;
+    --switch-off-border-light-opacity: 55%;
+}
+
+/* Reserve the border on every state so toggling on/off causes no layout shift. */
+.mantine-Switch-track {
+    border: var(--switch-off-border-width) solid transparent;
+}
+
+/* Off + enabled: stroke with the on-fill color (full strength, used as-is in dark mode). */
+.mantine-Switch-input:not(:checked):not(:disabled):not([data-disabled]) + .mantine-Switch-track {
+    border-color: var(--switch-color);
+}
+
+/* Light mode: subdue the stroke to a semi-transparent version of the on-fill color. */
+[data-mantine-color-scheme='light'] .mantine-Switch-input:not(:checked):not(:disabled):not([data-disabled]) + .mantine-Switch-track {
+    border-color: color-mix(in srgb, var(--switch-color) var(--switch-off-border-light-opacity), transparent);
+}
+
 :root {
     --neuroglancer-topview-height: 0;
     --neuroglancer-topview-visibility: collapse;
+    --neuroglancer-layout-controls-visibility: collapse;
     --neuroglancer-display-dimensions: collapse;
 }
 
@@ -75,9 +114,9 @@
     color: black !important;
 }
 
-/* Prevents switching out of 3D view */
+/* Toggled with the top control row; hidden by default prevents switching out of 3D view */
 .neuroglancer-data-panel-layout-controls {
-    visibility: collapse !important;
+    visibility: var(--neuroglancer-layout-controls-visibility) !important;
 }
 
 .neuroglancer-rendered-data-panel {

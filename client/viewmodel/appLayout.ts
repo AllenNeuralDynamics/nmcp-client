@@ -104,6 +104,7 @@ export class AppLayout {
     private updateNeuroglancerControlsVisible(visible: boolean) {
         document.documentElement.style.setProperty("--neuroglancer-topview-height", visible ? "30px" : "0px");
         document.documentElement.style.setProperty("--neuroglancer-topview-visibility", visible ? "visible" : "collapse");
+        document.documentElement.style.setProperty("--neuroglancer-layout-controls-visibility", visible ? "visible" : "collapse");
     }
 
     private updateNeuroglancerDimensionsVisible(visible: boolean) {
