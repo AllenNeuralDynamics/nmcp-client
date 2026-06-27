@@ -215,12 +215,16 @@ export const Neuron = () => {
 
                         <Tabs.Panel value="atlas" key={`atlas_${data.neuron.id}`}>
                             <NeuronAtlasSpaceView reconstruction={selectedReconstruction}
+                                                  soma={data.neuron.atlasSoma}
                                                   focusSoma={focusOnSoma ? data.neuron.atlasSoma : undefined}
                                                   onFocusApplied={() =>
                                                       navigate(location.pathname, {replace: true, state: {}})}/>
                         </Tabs.Panel>
                         <Tabs.Panel value="specimen" key={`specimen_${data.neuron.id}`}>
-                            <NeuronSpecimenSpaceView neuron={data.neuron} reconstruction={selectedReconstruction}/>
+                            <NeuronSpecimenSpaceView neuron={data.neuron} reconstruction={selectedReconstruction}
+                                                     focusSoma={focusOnSoma ? data.neuron.specimenSoma : undefined}
+                                                     onFocusApplied={() =>
+                                                         navigate(location.pathname, {replace: true, state: {}})}/>
                         </Tabs.Panel>
                         <Tabs.Panel value="quality" key={`quality_${data.neuron.id}`}>
                             <QualityMetrics qualityControlId={qualityControlId}/>

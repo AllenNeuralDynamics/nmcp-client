@@ -20,6 +20,40 @@ export type Point3D = {
     z: number;
 }
 
+// Appearance matches a selected candidate on the FindCandidates view.
+const SOMA_ANNOTATION_COLOR = "#00ff00ff";
+const SOMA_ANNOTATION_MARKER = "#ffffffff";
+const SOMA_ANNOTATION_SIZE = 5;
+
+const somaAnnotationLayerSource: NeuroglancerLayerSource = {
+    name: "Soma",
+    type: LayerType.annotation,
+    source: "local://annotations",
+    options: {
+        tab: "annotations",
+        annotationColor: "#2184d0",
+        annotations: [],
+        annotationProperties: [
+            {
+                id: "color",
+                type: "rgba",
+                default: "#ff0000ff"
+            },
+            {
+                id: "marker",
+                type: "rgba",
+                default: "#ffffffff"
+            },
+            {
+                id: "size",
+                type: "float32",
+                default: 5
+            }
+        ],
+        shader: "\nvoid main() {\n  setColor(prop_color());\n  setPointMarkerBorderWidth(0.1);\n  setPointMarkerBorderColor(prop_marker());\n  setPointMarkerSize(prop_size());\n}\n"
+    }
+};
+
 export class NeuroglancerViewer {
     protected readonly _viewer: Viewer;
 
@@ -87,6 +121,33 @@ export class NeuroglancerViewer {
 
     public set viewerPosition(position: Point3D) {
         this.restoreState(this.setPosition(this.currentState, position.x, position.y, position.z));
+    }
+
+    // Optional soma marker. Pass viewer-space coordinates to display a single point annotation, or null to remove it.
+    // Viewers that never receive a point simply never call this and carry no annotation layer.
+    public setSomaAnnotation(point: Point3D | null): void {
+        let state = this.currentState;
+
+        if (point == null || !Number.isFinite(point.x) || !Number.isFinite(point.y) || !Number.isFinite(point.z)) {
+            this.removeLayer(somaAnnotationLayerSource.name, state);
+            this.restoreState(state);
+            return;
+        }
+
+        state = this.ensureLayer(somaAnnotationLayerSource, state) ?? state;
+
+        const index = this.findLayer(somaAnnotationLayerSource.name, state);
+
+        if (index != null && index >= 0) {
+            state.layers[index].annotations = [{
+                type: "point",
+                id: "soma",
+                point: [point.x, point.y, point.z],
+                props: [SOMA_ANNOTATION_COLOR, SOMA_ANNOTATION_MARKER, SOMA_ANNOTATION_SIZE]
+            }];
+
+            this.restoreState(state);
+        }
     }
 
     public set colorScheme(isDarkColorScheme: boolean) {

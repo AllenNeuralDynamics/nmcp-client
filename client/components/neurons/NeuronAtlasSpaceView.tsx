@@ -18,11 +18,12 @@ import {AtlasViewerSelection} from "./AtlasViewerSelection";
 
 type NeuronAtlasSpaceViewProps = {
     reconstruction?: Reconstruction;
+    soma?: SomaLocation;
     focusSoma?: SomaLocation;
     onFocusApplied?: () => void;
 };
 
-export const NeuronAtlasSpaceView = observer(({reconstruction, focusSoma, onFocusApplied}: NeuronAtlasSpaceViewProps) => {
+export const NeuronAtlasSpaceView = observer(({reconstruction, soma, focusSoma, onFocusApplied}: NeuronAtlasSpaceViewProps) => {
     const scheme = useComputedColorScheme();
 
     const systemConfiguration = useSystemConfiguration();
@@ -44,6 +45,11 @@ export const NeuronAtlasSpaceView = observer(({reconstruction, focusSoma, onFocu
     const reconstructionRef = useRef(reconstruction);
     reconstructionRef.current = reconstruction;
 
+    // atlas space is voxels = microns / 10, matching viewerPosition scaling
+    const somaPoint = soma && Number.isFinite(soma.x) && Number.isFinite(soma.y) && Number.isFinite(soma.z)
+        ? {x: soma.x / 10, y: soma.y / 10, z: soma.z / 10}
+        : null;
+
     useEffect(() => {
         atlas.initialize(constants);
 
@@ -57,6 +63,8 @@ export const NeuronAtlasSpaceView = observer(({reconstruction, focusSoma, onFocu
         v.setNeuronSkeletonId(skeletonId ? [skeletonId] : null);
 
         v.updateAtlasStructures(displayedStructures);
+
+        v.setSomaAnnotation(somaPoint);
 
         if (focusSoma) {
             if (Number.isFinite(focusSoma.x) && Number.isFinite(focusSoma.y) && Number.isFinite(focusSoma.z)) {
@@ -79,6 +87,12 @@ export const NeuronAtlasSpaceView = observer(({reconstruction, focusSoma, onFocu
             viewer.setNeuronSkeletonId(skeletonId ? [skeletonId] : null);
         }
     }, [reconstruction]);
+
+    useEffect(() => {
+        if (viewer) {
+            viewer.setSomaAnnotation(somaPoint);
+        }
+    }, [soma?.x, soma?.y, soma?.z]);
 
     useEffect(() => {
         if (viewer) {
