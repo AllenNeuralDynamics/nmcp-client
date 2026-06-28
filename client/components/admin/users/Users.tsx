@@ -17,7 +17,7 @@ import {GraphQLErrorAlert} from "../../common/GraphQLErrorAlert";
 import {useUser} from "../../../hooks/useUser";
 import {AppLoading} from "../../app/AppLoading";
 import {PermissionsCheckBox} from "./PermissionsCheckBox";
-import {Badge, Card, Divider, Group, SimpleGrid, Switch, Table, Text} from "@mantine/core";
+import {Badge, Card, Center, Divider, Group, SimpleGrid, Switch, Table, Text} from "@mantine/core";
 
 
 export const Users = () => {
@@ -94,7 +94,8 @@ export const Users = () => {
                 </Group>
             </Card.Section>
             <Card.Section bg="segment">
-                <PaginationHeader total={pageCount} value={activePage} limit={state.limit} itemCount={totalCount} onLimitChange={onUpdateLimit}
+                <PaginationHeader total={pageCount} value={activePage} limit={state.limit} itemCount={totalCount}
+                                  onLimitChange={onUpdateLimit}
                                   onChange={onUpdateOffsetForPage}/>
             </Card.Section>
             <Card.Section>
@@ -111,7 +112,11 @@ export const Users = () => {
         </Card>
     );
 }
-const UserTable = ({adminUserId, users, includesImported}: { adminUserId: User, users: User[], includesImported: boolean }) => {
+const UserTable = ({adminUserId, users, includesImported}: {
+    adminUserId: User,
+    users: User[],
+    includesImported: boolean
+}) => {
     const rows = users.map((t: User) => {
         return <UserRow user={t} adminUserId={adminUserId.id} includesImported={includesImported}/>
     });
@@ -123,11 +128,11 @@ const UserTable = ({adminUserId, users, includesImported}: { adminUserId: User, 
                     <Table.Th>Name</Table.Th>
                     <Table.Th>Affiliation</Table.Th>
                     <Table.Th>Contact</Table.Th>
-                    <Table.Th>View</Table.Th>
-                    <Table.Th>Edit</Table.Th>
-                    <Table.Th>Peer Review</Table.Th>
-                    <Table.Th>Publish</Table.Th>
-                    <Table.Th>Admin</Table.Th>
+                    <Table.Th ta={"center"}>View & Annotate</Table.Th>
+                    <Table.Th ta={"center"}>Edit Specimens & Neurons</Table.Th>
+                    <Table.Th ta={"center"}>Peer Reviewer</Table.Th>
+                    <Table.Th ta={"center"}>Publish Reviewer</Table.Th>
+                    <Table.Th ta={"center"}>Admin</Table.Th>
                     {includesImported ? <Table.Th>Type</Table.Th> : null}
                 </Table.Tr>
             </Table.Thead>
@@ -138,7 +143,11 @@ const UserTable = ({adminUserId, users, includesImported}: { adminUserId: User, 
     )
 }
 
-const UserRow = ({user, adminUserId, includesImported}: { user: User, adminUserId: string, includesImported: boolean }) => {
+const UserRow = ({user, adminUserId, includesImported}: {
+    user: User,
+    adminUserId: string,
+    includesImported: boolean
+}) => {
     const [updatePermissions] = useMutation<UpdatePermissionsResponse, UpdatePermissionsVariables>(UPDATE_PERMISSIONS_MUTATION,
         {
             refetchQueries: ["UsersQuery"],
@@ -154,29 +163,39 @@ const UserRow = ({user, adminUserId, includesImported}: { user: User, adminUserI
             <Table.Td>{user.affiliation}</Table.Td>
             <Table.Td>{user.emailAddress}</Table.Td>
             <Table.Td>
-                <PermissionsCheckBox userId={user.id} updatePermissions={updatePermissions}
-                                     userPermissions={user.permissions}
-                                     permission={UserPermissions.ViewReconstructions}/>
+                <Center>
+                    <PermissionsCheckBox userId={user.id} updatePermissions={updatePermissions}
+                                         userPermissions={user.permissions}
+                                         permission={UserPermissions.ViewReconstructions}/>
+                </Center>
             </Table.Td>
             <Table.Td>
-                <PermissionsCheckBox userId={user.id} updatePermissions={updatePermissions}
-                                     userPermissions={user.permissions}
-                                     permission={UserPermissions.Edit}/>
+                <Center>
+                    <PermissionsCheckBox userId={user.id} updatePermissions={updatePermissions}
+                                         userPermissions={user.permissions}
+                                         permission={UserPermissions.Edit}/>
+                </Center>
             </Table.Td>
             <Table.Td>
-                <PermissionsCheckBox userId={user.id} updatePermissions={updatePermissions}
-                                     userPermissions={user.permissions}
-                                     permission={UserPermissions.PeerReview}/>
+                <Center>
+                    <PermissionsCheckBox userId={user.id} updatePermissions={updatePermissions}
+                                         userPermissions={user.permissions}
+                                         permission={UserPermissions.PeerReview}/>
+                </Center>
             </Table.Td>
             <Table.Td>
-                <PermissionsCheckBox userId={user.id} updatePermissions={updatePermissions}
-                                     userPermissions={user.permissions}
-                                     permission={UserPermissions.FullReview}/>
+                <Center>
+                    <PermissionsCheckBox userId={user.id} updatePermissions={updatePermissions}
+                                         userPermissions={user.permissions}
+                                         permission={UserPermissions.FullReview}/>
+                </Center>
             </Table.Td>
             <Table.Td>
-                <PermissionsCheckBox userId={user.id} updatePermissions={updatePermissions}
-                                     userPermissions={user.permissions}
-                                     permission={UserPermissions.Admin} disabled={user.id == adminUserId}/>
+                <Center>
+                    <PermissionsCheckBox userId={user.id} updatePermissions={updatePermissions}
+                                         userPermissions={user.permissions}
+                                         permission={UserPermissions.Admin} disabled={user.id == adminUserId}/>
+                </Center>
             </Table.Td>
             {includesImported ? <Table.Td>{createBadge(user.authDirectoryId != null)}</Table.Td> : null}
         </Table.Tr>

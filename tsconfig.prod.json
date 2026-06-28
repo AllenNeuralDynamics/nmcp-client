@@ -3,6 +3,7 @@
   "compileOnSave": false,
   "compilerOptions": {
     "sourceMap": false,
+    "rootDir": "server",
     "outDir": "dist"
   },
   "include": [

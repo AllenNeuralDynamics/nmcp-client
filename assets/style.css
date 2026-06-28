@@ -22,27 +22,29 @@
 }
 
 /*
- * Switch track outline
+ * Control "off" outline (Switch track + unchecked Checkbox box)
  *
- * Mantine's default "off" Switch track is a low-contrast gray that reads as disabled.
- * To make the off (unchecked, enabled) state more visible we stroke the track with the
- * same color used to fill it when "on" (--switch-color, i.e. the switch's color prop /
- * theme primary). The "on" and disabled states are left untouched.
+ * Mantine's default "off" Switch track and "unchecked" Checkbox box use a low-contrast gray
+ * that reads as disabled. To make them visible we stroke them with the same color used to
+ * fill them when on/checked (--switch-color / --checkbox-color, i.e. the component's color
+ * prop / theme primary). The on/checked, disabled and error states are left untouched.
  *
  * Dark mode uses the full-strength color; light mode uses a more subdued, semi-transparent
  * version so it doesn't read as too bright.
  *
  * Configurable:
- *   --switch-off-border-width         stroke thickness (both modes)
- *   --switch-off-border-light-opacity how much of the on-color to keep in light mode
- *                                     (lower = more subdued)
- * The stroke color follows --switch-color automatically, so per-switch `color` props are
- * respected without further changes.
+ *   --switch-off-border-width           Switch track stroke thickness (both modes)
+ *   --control-off-border-light-opacity  how much of the on/checked color to keep in light
+ *                                       mode, shared by Switch + Checkbox (lower = subtler)
+ * The stroke color follows each component's own color variable, so per-instance `color`
+ * props are respected without further changes.
  */
 :root {
     --switch-off-border-width: 1px;
-    --switch-off-border-light-opacity: 55%;
+    --control-off-border-light-opacity: 55%;
 }
+
+/* --- Switch track --- */
 
 /* Reserve the border on every state so toggling on/off causes no layout shift. */
 .mantine-Switch-track {
@@ -56,7 +58,19 @@
 
 /* Light mode: subdue the stroke to a semi-transparent version of the on-fill color. */
 [data-mantine-color-scheme='light'] .mantine-Switch-input:not(:checked):not(:disabled):not([data-disabled]) + .mantine-Switch-track {
-    border-color: color-mix(in srgb, var(--switch-color) var(--switch-off-border-light-opacity), transparent);
+    border-color: color-mix(in srgb, var(--switch-color) var(--control-off-border-light-opacity), transparent);
+}
+
+/* --- Checkbox box --- */
+
+/* Unchecked + enabled: stroke with the checked-fill color (full strength, used as-is in dark mode). */
+.mantine-Checkbox-input:not(:checked):not(:indeterminate):not([data-indeterminate]):not(:disabled):not([data-disabled]):not([data-error]) {
+    border-color: var(--checkbox-color);
+}
+
+/* Light mode: subdue the stroke to a semi-transparent version of the checked-fill color. */
+[data-mantine-color-scheme='light'] .mantine-Checkbox-input:not(:checked):not(:indeterminate):not([data-indeterminate]):not(:disabled):not([data-disabled]):not([data-error]) {
+    border-color: color-mix(in srgb, var(--checkbox-color) var(--control-off-border-light-opacity), transparent);
 }
 
 :root {
