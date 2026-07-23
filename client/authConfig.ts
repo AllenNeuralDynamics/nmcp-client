@@ -1,4 +1,4 @@
-import {Configuration, PopupRequest} from "@azure/msal-browser";
+import {Configuration, PopupRequest, SilentRequest} from "@azure/msal-browser";
 
 import {LogLevel} from "@azure/msal-browser";
 
@@ -22,7 +22,7 @@ const dev = {
 
 const source = process.env.AUTH_ENV == "production" ? prod : (process.env.AUTH_ENV == "staging" ? staging : dev);
 
-const scopes = ["User.Read", `api://${source.apiId}/internal.read`, `api://${source.apiId}/internal.read`];
+const apiScopes = [`api://${source.apiId}/internal.read`];
 
 const auth = {
     clientId: source.clientId,
@@ -66,7 +66,15 @@ export const msalConfig: Configuration = {
     }
 };
 
-// Add here scopes for id token to be used at MS Identity Platform endpoints.
+// Interactive sign-in.  The API scopes are consented here so that the silent acquisition below does not have to fall
+// back to interaction the first time the API is called.
 export const loginRequest: PopupRequest = {
-    scopes
+    scopes: apiScopes
+};
+
+// Token acquisition for calls to the API.  An access token is issued for a single resource, so this must request API
+// scopes only.  Including a scope belonging to another resource (Microsoft Graph's User.Read, previously listed here)
+// yields a token audienced for that other resource, which the API cannot verify.
+export const apiRequest: SilentRequest = {
+    scopes: apiScopes
 };

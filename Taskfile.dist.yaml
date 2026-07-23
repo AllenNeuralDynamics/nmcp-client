@@ -32,6 +32,8 @@ tasks:
       - task: compile
       - webpack -c webpack.config.cjs --progress
       - cp index.html dist/public/
+      # Referenced by index.html as /favicon.ico.  Not imported by any client source, so webpack will not emit it.
+      - cp assets/favicon.ico dist/public/
       - cp package.json dist/
       - cp package-lock.json dist/
       - cp LICENSE dist/

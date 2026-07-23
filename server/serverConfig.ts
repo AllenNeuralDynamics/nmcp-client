@@ -42,11 +42,11 @@ function loadServerConfiguration() {
     options.graphQLService.hostname = process.env.NMCP_API_HOST || options.graphQLService.hostname;
     options.graphQLService.port = parseInt(process.env.NMCP_API_PORT) || options.graphQLService.port;
 
-    options.exportService.hostname = process.env.EXPORT_API_HOST || options.exportService.hostname;
-    options.exportService.port = parseInt(process.env.EXPORT_API_PORT) || options.exportService.port;
+    options.exportService.hostname = process.env.NMCP_EXPORT_API_HOST || options.exportService.hostname;
+    options.exportService.port = parseInt(process.env.NMCP_EXPORT_API_PORT) || options.exportService.port;
     options.exportLimit = parseInt(process.env.NMCP_CLIENT_EXPORT_LIMIT) || options.exportLimit;
 
-    options.doiHandler =  process.env.DOI_HANDLER || options.doiHandler;
+    options.doiHandler =  process.env.NMCP_DOI_HANDLER || options.doiHandler;
 
     options.precomputedLocation = process.env.NMCP_PRECOMPUTED_OUTPUT || options.precomputedLocation;
 

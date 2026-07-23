@@ -7,7 +7,7 @@ import {InteractionRequiredAuthError} from "@azure/msal-browser";
 import {useAccount, useIsAuthenticated, useMsal} from "@azure/msal-react";
 
 import {AppConstants} from "./AppConstants";
-import {loginRequest} from "../../authConfig";
+import {apiRequest} from "../../authConfig";
 import {UserApp} from "./UserApp";
 import {AppRouter} from "./AppRouter";
 import {PageHeader} from "./PageHeader";
@@ -30,9 +30,9 @@ export const ApolloApp = () => {
     const acquireSilent = async () => {
         if (instance.getAllAccounts().length > 0) {
             try {
-                return await instance.acquireTokenSilent({scopes: loginRequest.scopes, account: instance.getAllAccounts()[0]})
+                return await instance.acquireTokenSilent({scopes: apiRequest.scopes, account: instance.getAllAccounts()[0]})
             } catch (error) {
-                await instance.acquireTokenRedirect({scopes: loginRequest.scopes});
+                await instance.acquireTokenRedirect({scopes: apiRequest.scopes});
                 return null;
             }
         }
@@ -46,7 +46,7 @@ export const ApolloApp = () => {
         return {
             headers: {
                 ...headers,
-                authorization: tokenResponse?.accessToken ?? null,
+                authorization: tokenResponse?.accessToken ? `Bearer ${tokenResponse.accessToken}` : null,
             }
         };
     })
@@ -64,7 +64,7 @@ export const ApolloApp = () => {
                 })()
             } else if (account) {
                 instance.acquireTokenSilent({
-                    scopes: loginRequest.scopes,
+                    scopes: apiRequest.scopes,
                     account: instance.getAllAccounts()[0]
                 }).then(tokenResponse => {
                     // localStorage.setItem("token", tokenResponse.accessToken);
@@ -72,7 +72,7 @@ export const ApolloApp = () => {
                     console.log(error)
                     if (error instanceof InteractionRequiredAuthError) {
                         // fallback to interaction when silent call fails
-                        return instance.acquireTokenRedirect({scopes: loginRequest.scopes})
+                        return instance.acquireTokenRedirect({scopes: apiRequest.scopes})
                     }
                     // handle other errors
                 });
