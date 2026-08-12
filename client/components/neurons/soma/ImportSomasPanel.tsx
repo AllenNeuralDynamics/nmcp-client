@@ -52,7 +52,7 @@ export const ImportSomasPanel = observer(({importData}: { importData: ImportSoma
             <div>
                 <Checkbox checked={importData.applyKeywords} label="Apply keyword(s) to candidates"
                           onChange={(event) => importData.applyKeywords = event.currentTarget.checked}/>
-                <TextInput label="Keyword(s)" description="Separate multiple keywords with a semicolon (;)" placeholder="AIND"
+                <TextInput label="Keyword(s)" description="Separate multiple keywords with a comma (,)" placeholder="AIND"
                            disabled={!importData.applyKeywords}
                            value={importData.keywords} onChange={(event) => importData.keywords = event.currentTarget.value}/>
             </div>

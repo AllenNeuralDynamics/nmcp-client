@@ -351,7 +351,7 @@ export type ImportSomasVariables = {
     file: File;
     options: {
         specimenId: string;
-        keywords: string[];
+        keywords?: string[];
         shouldLookupSoma: boolean;
         defaultBrightness: number;
         defaultVolume: number;

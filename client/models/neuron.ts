@@ -70,11 +70,11 @@ export function formatNeuron(neuron: NeuronShape, placeholder: string = "(no lab
 }
 
 export function parseKeywords(value: string): string[] {
-    return (value?.trim() ?? "").split(";").map(s => s.trim());
+    return (value?.trim() ?? "").split(",").map(s => s.trim()).filter(s => s.length > 0);
 }
 
 export function formatKeywords(keywords: string[]): string {
-    return keywords.join(";");
+    return (keywords ?? []).join(", ");
 }
 
 export function formatSomaCoords(x: number, y: number, z: number) {

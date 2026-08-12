@@ -2,7 +2,7 @@ import * as React from "react";
 import {Group, Table} from "@mantine/core";
 import {IconBrowserShare} from "@tabler/icons-react";
 
-import {formatHortaLocation, NeuronShape} from "../../models/neuron";
+import {formatHortaLocation, formatKeywords, NeuronShape} from "../../models/neuron";
 import {formatAtlasStructure} from "../../models/atlasStructure";
 import {AnnotatorWithStatus} from "../common/AnnotatorWithStatus";
 import {successNotification} from "../common/NotificationHelper";
@@ -29,7 +29,7 @@ export const CandidateRow = (props: ICandidateRowProps) => {
         <Table.Tr {...subProps} onClick={() => props.onSelected(props.neuron)}>
             <Table.Td><NeuronVersionLink neuron={props.neuron} focusOnSoma/></Table.Td>
             <Table.Td>{props.neuron.specimen.label}</Table.Td>
-            <Table.Td>{props.neuron.keywords}</Table.Td>
+            <Table.Td>{formatKeywords(props.neuron.keywords)}</Table.Td>
             <Table.Td>{formatAtlasStructure(props.neuron.atlasStructure, "(unspecified)")}</Table.Td>
             <Table.Td>{props.neuron.atlasSoma.x.toFixed(1)}</Table.Td>
             <Table.Td>{props.neuron.atlasSoma.y.toFixed(1)}</Table.Td>

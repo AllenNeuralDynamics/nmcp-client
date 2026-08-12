@@ -44,7 +44,9 @@ export const NeuronRow = (props: NeuronRowProps) => {
 
     const updateKeywords = async (value: string) => {
         const parsed = parseKeywords(value);
-        if (parsed !== props.neuron.keywords) {
+        // Compare the formatted forms rather than the arrays, which are never reference-equal.  This also
+        // ignores whitespace the user typed around separators, since that does not survive parsing.
+        if (formatKeywords(parsed) !== formatKeywords(props.neuron.keywords)) {
             await updateNeuron({
                 variables: {neuron: {id: props.neuron.id, keywords: parsed}},
                 optimisticResponse: {
