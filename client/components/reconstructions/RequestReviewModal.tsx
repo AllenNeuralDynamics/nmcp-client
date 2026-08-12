@@ -6,7 +6,7 @@ import {Badge, Button, Group, Modal, NumberInput, Select, Stack, Textarea} from 
 
 import {ReconstructionStatus} from "../../models/reconstructionStatus";
 import {ReconstructionMetadata} from "../../viewmodel/reconstructionMetadata";
-import {REQUEST_REVIEW_MUTATION, RequestReviewArgs, RequestReviewResponse} from "../../graphql/reconstruction";
+import {RECONSTRUCTIONS_QUERY, REQUEST_REVIEW_MUTATION, RequestReviewArgs, RequestReviewResponse} from "../../graphql/reconstruction";
 
 export type CompleteReconstructionDialogProps = {
     id: string;
@@ -20,7 +20,7 @@ export const RequestReviewModal = observer((props: CompleteReconstructionDialogP
 
     const [requestReview] = useMutation<RequestReviewResponse, RequestReviewArgs>(REQUEST_REVIEW_MUTATION,
         {
-            refetchQueries: ["ReconstructionsQuery", "ReviewableReconstructions"],
+            refetchQueries: [RECONSTRUCTIONS_QUERY],
             onError: (e) => console.log(e)
         });
 

@@ -1,11 +1,12 @@
 import * as React from "react";
 import {Link} from "react-router-dom";
 import {observer} from "mobx-react-lite";
-import {ActionIcon, Button, ColorPicker, ColorSwatch, Divider, Popover, Stack, Table, Text, Tooltip} from "@mantine/core";
+import {ActionIcon, Button, ColorPicker, ColorSwatch, Divider, Group, Popover, Stack, Table, Text, Tooltip} from "@mantine/core";
 import {useDisclosure} from "@mantine/hooks";
-import {IconSquare, IconSquareCheck} from "@tabler/icons-react";
+import {IconInfoCircle, IconSquare, IconSquareCheck} from "@tabler/icons-react";
 
 import {useQueryResponseViewModel} from "../../../hooks/useQueryResponseViewModel";
+import {useConstants} from "../../../hooks/useConstants";
 import {getViewMode, NEURON_VIEW_MODES} from "../../../viewmodel/neuronViewMode";
 import {NeuronViewModel} from "../../../viewmodel/neuronViewModel";
 import {NeuronViewModelModal} from "./NeuronViewModelModal";
@@ -28,6 +29,16 @@ const viewModeNames = NEURON_VIEW_MODES.map(n => n.id);
 
 export const NeuronRow = observer((props: NeuronRowProps) => {
     const v = props.neuronViewModel;
+
+    const constants = useConstants();
+
+    // The soma node carries the automatically assigned structure; the neuron carries the manual (curated) assignment.
+    const somaAcronym = v.soma ? constants.AtlasConstants.findStructure(v.soma.atlasStructureId)?.acronym ?? null : null;
+    const neuronAcronym = v.neuron.atlasStructure?.acronym ?? null;
+
+    const structureAcronym = neuronAcronym ?? somaAcronym ?? "unknown";
+
+    const hasStructureConflict = neuronAcronym !== null && somaAcronym !== null && neuronAcronym !== somaAcronym;
 
     return (
         <Table.Tr>
@@ -65,7 +76,21 @@ export const NeuronRow = observer((props: NeuronRowProps) => {
                 </Stack>
             </Table.Td>
             <Table.Td>
-                {v.neuron.atlasStructure ? v.neuron.atlasStructure.acronym : "unknown"}
+                <Group gap={4} justify="space-between" wrap="nowrap">
+                    <Text size="sm">{structureAcronym}</Text>
+                    {hasStructureConflict ? (
+                        <Tooltip label={
+                            <Stack gap={0}>
+                                <Text size="xs">{`Automatic soma location: ${somaAcronym}`}</Text>
+                                <Text size="xs">{`Manual soma location: ${neuronAcronym}`}</Text>
+                            </Stack>
+                        }>
+                            <Text component="span" c="dimmed" style={{display: "flex"}}>
+                                <IconInfoCircle size={14}/>
+                            </Text>
+                        </Tooltip>
+                    ) : null}
+                </Group>
             </Table.Td>
         </Table.Tr>
     );

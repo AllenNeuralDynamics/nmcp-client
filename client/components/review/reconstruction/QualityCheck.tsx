@@ -14,6 +14,7 @@ import {
     ReassessQualityControlResponse,
     ReassessQualityControlVariables
 } from "../../../graphql/qualityControl";
+import {RECONSTRUCTIONS_QUERY} from "../../../graphql/reconstruction";
 import {QualityControlOutputSection} from "../../common/QualityControlOutputSection";
 
 export type QualityCheckProps = {
@@ -31,7 +32,7 @@ export const QualityCheck = ({reconstruction, isActive}: QualityCheckProps) => {
 
     const [reassess, {loading: reassessing}] = useMutation<ReassessQualityControlResponse, ReassessQualityControlVariables>(REASSESS_QUALITY_CONTROL_MUTATION, {
         variables: {reconstructionId: reconstruction.id},
-        refetchQueries: ["ReviewableReconstructions"],
+        refetchQueries: [RECONSTRUCTIONS_QUERY],
         onCompleted: () => refetch()
     });
 
