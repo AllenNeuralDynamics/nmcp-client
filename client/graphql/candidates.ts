@@ -35,6 +35,7 @@ export type NeuronsQueryVariables = {
         specimenIds?: string[]
         atlasStructureIds?: string[]
         keywords?: string[]
+        genotype?: string[]
         somaProperties?: SomaFilterProperties;
     },
     includeInProgress: boolean;

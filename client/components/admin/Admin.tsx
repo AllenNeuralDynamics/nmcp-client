@@ -1,7 +1,7 @@
 import React, {useContext, useState} from "react"
 import {Navigate} from "react-router-dom";
 import {Indicator, Tabs} from "@mantine/core";
-import {IconBook, IconFlagExclamation, IconKey, IconPackage, IconUsers} from "@tabler/icons-react";
+import {IconBook, IconFlagExclamation, IconKey, IconPackage, IconUserPlus, IconUsers} from "@tabler/icons-react";
 
 import {usePreferences} from "../../hooks/usePreferences";
 import {NotificationContext} from "../app/NotificationsApp";
@@ -10,10 +10,11 @@ import {Collections} from "./system/Collections";
 import {Published} from "./published/Published";
 import {Issues} from "./issues/Issues";
 import {ApiKeys} from "./apiKeys/ApiKeys";
+import {AccessRequests} from "./accessRequests/AccessRequests";
 import {useUser} from "../../hooks/useUser";
 import {UserPermissions} from "../../graphql/user";
 
-const allowedTabs = ["users", "collections", "published", "issues", "apikeys"];
+const allowedTabs = ["users", "accessrequests", "collections", "published", "issues", "apikeys"];
 
 const iconSize = 24;
 
@@ -42,6 +43,9 @@ export const Admin = () => {
                 <Tabs.Tab value="users" leftSection={<IconUsers size={iconSize}/>}>
                     Users
                 </Tabs.Tab>
+                <Tabs.Tab value="accessrequests" leftSection={<IconUserPlus size={iconSize}/>}>
+                    Access Requests
+                </Tabs.Tab>
                 <Tabs.Tab value="collections" leftSection={<IconPackage size={iconSize}/>}>
                     Collections
                 </Tabs.Tab>
@@ -60,6 +64,10 @@ export const Admin = () => {
 
             <Tabs.Panel value="users" mt={16}>
                 <Users/>
+            </Tabs.Panel>
+
+            <Tabs.Panel value="accessrequests" mt={16}>
+                <AccessRequests/>
             </Tabs.Panel>
 
             <Tabs.Panel value="collections" mt={16}>

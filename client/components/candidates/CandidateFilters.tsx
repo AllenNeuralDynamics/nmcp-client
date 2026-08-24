@@ -3,6 +3,7 @@ import {observer} from "mobx-react-lite";
 import {Divider, Group, Switch} from "@mantine/core";
 
 import {NeuronTagFilter} from "../common/filters/NeuronTagFilter";
+import {NeuronGenotypeFilter} from "../common/filters/NeuronGenotypeFilter";
 import {SpecimenFilter} from "../common/filters/SpecimenFilter";
 import {AtlasStructureMultiSelectFilter} from "../common/filters/AtlasStructureMultiSelectFilter";
 import {CandidateFilter} from "../../viewmodel/candidateFilter";
@@ -27,6 +28,10 @@ export const CandidateFilters = observer(({candidateFilter}: { candidateFilter: 
             <Divider orientation="vertical"/>
 
             <NeuronTagFilter filter={candidateFilter.tagFilter}/>
+
+            <Divider orientation="vertical"/>
+
+            <NeuronGenotypeFilter filter={candidateFilter.genotypeFilter}/>
         </Group>
     );
 })

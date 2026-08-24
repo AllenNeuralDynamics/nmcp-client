@@ -1,7 +1,7 @@
 import {makeAutoObservable} from "mobx";
 
 import {AtlasStructureShape} from "../models/atlasStructure";
-import {SomaFilterProperties} from "../models/neuron";
+import {parseKeywords, SomaFilterProperties} from "../models/neuron";
 
 export class OptionalFilter<T> {
     public isEnabled: boolean = false;
@@ -21,6 +21,7 @@ export class CandidateFilter {
     public samplesFilter: OptionalFilter<string[]> = new OptionalFilter([]);
     public atlasStructureFilter: OptionalFilter<AtlasStructureShape[]> = new OptionalFilter([]);
     public tagFilter: OptionalFilter<string> = new OptionalFilter("");
+    public genotypeFilter: OptionalFilter<string> = new OptionalFilter("");
     public limitBrightness: boolean = false;
     public brightnessRange: [number, number] = [0, 5000];
     public limitVolume: boolean = false;
@@ -31,7 +32,7 @@ export class CandidateFilter {
     }
 
     public get anyEnabled(): boolean {
-        return this.includeInProgress || this.samplesFilter.isEnabled || this.atlasStructureFilter.isEnabled || this.tagFilter.isEnabled || this.limitBrightness || this.limitVolume
+        return this.includeInProgress || this.samplesFilter.isEnabled || this.atlasStructureFilter.isEnabled || this.tagFilter.isEnabled || this.genotypeFilter.isEnabled || this.limitBrightness || this.limitVolume
     }
 
     public get specimenIds(): string[] {
@@ -44,6 +45,10 @@ export class CandidateFilter {
 
     public get keywords(): string[] {
         return this.tagFilter.isEnabled && this.tagFilter.contents.trim().length > 0 ? [this.tagFilter.contents] : [];
+    }
+
+    public get genotypes(): string[] {
+        return this.genotypeFilter.isEnabled ? parseKeywords(this.genotypeFilter.contents) : [];
     }
 
     public get somaFilter(): SomaFilterProperties {

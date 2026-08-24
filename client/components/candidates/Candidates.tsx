@@ -34,6 +34,7 @@ export const Candidates = observer(() => {
                 specimenIds: candidateFilter.specimenIds,
                 atlasStructureIds: candidateFilter.atlasStructureIds,
                 keywords: candidateFilter.keywords,
+                genotype: candidateFilter.genotypes,
                 somaProperties: candidateFilter.somaFilter
             },
             includeInProgress: candidateFilter.includeInProgress
