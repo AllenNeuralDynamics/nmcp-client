@@ -1,4 +1,4 @@
-import {action, computed, makeAutoObservable, makeObservable, observable} from "mobx";
+import {action, computed, makeAutoObservable, observable} from "mobx";
 
 import {jet} from "../util/colors";
 import {NeuronShape} from "../models/neuron";

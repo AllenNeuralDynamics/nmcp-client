@@ -1,4 +1,4 @@
-import {computed, makeAutoObservable, makeObservable, observable} from "mobx";
+import {makeAutoObservable} from "mobx";
 
 import {IQueryOperator} from "../models/queryOperator";
 import {AtlasStructureShape} from "../models/atlasStructure";

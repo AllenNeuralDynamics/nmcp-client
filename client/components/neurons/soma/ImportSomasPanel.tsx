@@ -1,8 +1,8 @@
 import * as React from "react";
 import {observer} from "mobx-react-lite";
-import {Checkbox, Stack, Text, TextInput, Group, Code, NumberInput, SimpleGrid} from "@mantine/core";
+import {Checkbox, Stack, Text, TextInput, Group, Code} from "@mantine/core";
 import {Dropzone} from "@mantine/dropzone";
-import {IconFileTypeCsv, IconJson, IconUpload, IconX} from "@tabler/icons-react";
+import {IconFileTypeCsv, IconUpload, IconX} from "@tabler/icons-react";
 
 import {ImportSomaData} from "../../../viewmodel/importSomaData";
 

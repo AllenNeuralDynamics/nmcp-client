@@ -2,7 +2,7 @@ import * as React from "react";
 import {useEffect, useMemo} from "react";
 import {Navigate, useLocation, useNavigate, useParams} from "react-router-dom";
 import {useQuery} from "@apollo/client";
-import {Alert, Anchor, Badge, Card, Divider, Group, Space, Stack, Table, Tabs, Text} from "@mantine/core";
+import {Alert, Anchor, Badge, Card, Divider, Group, Stack, Table, Tabs, Text} from "@mantine/core";
 import {useClipboard, useLocalStorage} from "@mantine/hooks";
 import {useIsAuthenticated} from "@azure/msal-react";
 import {IconBinaryTree, IconBinaryTreeFilled, IconChartBar, IconVersions} from "@tabler/icons-react";
@@ -20,6 +20,7 @@ import {NeuronLinkState} from "../common/NeuronVersionLink";
 import {NeuronHistory} from "./NeuronHistory";
 import {QualityMetrics} from "./QualityMetrics";
 import {ReconstructionMetrics} from "./ReconstructionMetrics";
+import {NeuronDownloadMenu} from "./NeuronDownloadMenu";
 import {useSystemConfiguration} from "../../hooks/useSystemConfiguration";
 import {successNotification} from "../common/NotificationHelper";
 
@@ -162,9 +163,12 @@ export const Neuron = () => {
                     <Divider orientation="horizontal"/>
                 </Card.Section>
                 <Card.Section p={0}  bg="segment">
-                    <Group p={12} gap={8} align="baseline">
-                        <Text fw={500}>Open Dataset</Text>
-                        {!(isPublished && data.neuron.specimen.referenceDataset?.url) && <Text c="dimmed" size="sm">Not available.</Text>}
+                    <Group p={12} justify="space-between" align="center">
+                        <Group gap={8} align="baseline">
+                            <Text fw={500}>Open Dataset</Text>
+                            {!(isPublished && data.neuron.specimen.referenceDataset?.url) && <Text c="dimmed" size="sm">Not available.</Text>}
+                        </Group>
+                        <NeuronDownloadMenu reconstruction={selectedReconstruction}/>
                     </Group>
                     {isPublished && data.neuron.specimen.referenceDataset?.url && (
                         <Table variant="vertical" withColumnBorders>

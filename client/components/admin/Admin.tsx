@@ -43,9 +43,6 @@ export const Admin = () => {
                 <Tabs.Tab value="users" leftSection={<IconUsers size={iconSize}/>}>
                     Users
                 </Tabs.Tab>
-                <Tabs.Tab value="accessrequests" leftSection={<IconUserPlus size={iconSize}/>}>
-                    Access Requests
-                </Tabs.Tab>
                 <Tabs.Tab value="collections" leftSection={<IconPackage size={iconSize}/>}>
                     Collections
                 </Tabs.Tab>
@@ -57,6 +54,9 @@ export const Admin = () => {
                                                    ml={-2} mt={-12}/>}>
                     Issues
                 </Tabs.Tab>
+                <Tabs.Tab value="accessrequests" leftSection={<IconUserPlus size={iconSize}/>}>
+                    Access Requests
+                </Tabs.Tab>
                 <Tabs.Tab value="apikeys" leftSection={<IconKey size={iconSize}/>}>
                     API Keys
                 </Tabs.Tab>
@@ -64,10 +64,6 @@ export const Admin = () => {
 
             <Tabs.Panel value="users" mt={16}>
                 <Users/>
-            </Tabs.Panel>
-
-            <Tabs.Panel value="accessrequests" mt={16}>
-                <AccessRequests/>
             </Tabs.Panel>
 
             <Tabs.Panel value="collections" mt={16}>
@@ -80,6 +76,10 @@ export const Admin = () => {
 
             <Tabs.Panel value="issues" mt={16}>
                 <Issues/>
+            </Tabs.Panel>
+
+            <Tabs.Panel value="accessrequests" mt={16}>
+                <AccessRequests/>
             </Tabs.Panel>
 
             <Tabs.Panel value="apikeys" mt={16}>

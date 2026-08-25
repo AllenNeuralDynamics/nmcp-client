@@ -2,7 +2,7 @@ import * as React from "react";
 import {useState} from "react";
 import {useMutation} from "@apollo/client";
 import {observer} from "mobx-react-lite";
-import {Badge, Button, Group, Modal, NumberInput, Select, Stack, Textarea} from "@mantine/core";
+import {Badge, Button, Group, Modal, NumberInput, Stack, Textarea} from "@mantine/core";
 
 import {ReconstructionStatus} from "../../models/reconstructionStatus";
 import {ReconstructionMetadata} from "../../viewmodel/reconstructionMetadata";

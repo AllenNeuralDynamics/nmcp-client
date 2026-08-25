@@ -1,6 +1,6 @@
-import {ExportFormat} from "../models/neuron";
+import {ExportFormat, ReconstructionSpace} from "../models/neuron";
 
-export async function requestExport(ids: string[], format: ExportFormat): Promise<boolean> {
+export async function requestExport(ids: string[], format: ExportFormat, space: ReconstructionSpace): Promise<boolean> {
     try {
         const response = await fetch("/export", {
             method: "POST",
@@ -9,7 +9,8 @@ export async function requestExport(ids: string[], format: ExportFormat): Promis
             },
             body: JSON.stringify({
                 ids,
-                format
+                format,
+                reconstructionSpace: space
             })
         });
 

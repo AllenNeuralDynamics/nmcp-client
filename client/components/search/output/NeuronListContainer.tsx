@@ -9,7 +9,7 @@ import {useAppLayout} from "../../../hooks/useAppLayout";
 import {useQueryResponseViewModel} from "../../../hooks/useQueryResponseViewModel";
 import {NeuronTable} from "./NeuronTable";
 import {errorNotification, infoNotification} from "../../common/NotificationHelper";
-import {ExportFormat} from "../../../models/neuron";
+import {ExportFormat, ReconstructionSpace} from "../../../models/neuron";
 
 export const NeuronListContainerWidth = "450px";
 
@@ -25,9 +25,9 @@ export const NeuronListContainer = observer(({maxHeight}: { maxHeight: number })
             return;
         }
 
-        infoNotification("Export Requested", "A download will being when the data is ready.");
+        infoNotification("Export Requested", "A download will begin when the data is ready.");
 
-        if (!await requestExport(ids, format)) {
+        if (!await requestExport(ids, format, ReconstructionSpace.Atlas)) {
             errorNotification("Export Failed", "Additional details are not available.");
         }
     }

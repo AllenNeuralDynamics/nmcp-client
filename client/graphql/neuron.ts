@@ -1,6 +1,6 @@
 import gql from "graphql-tag";
 
-import {NeuronShape, NeuronStatus, SomaFilterProperties, SomaLocation, SomaProperties} from "../models/neuron";
+import {NeuronShape, NeuronStatus, SomaFilterProperties, SomaLocation} from "../models/neuron";
 
 
 // brainStructureId is used to determine whether the brain area is inherited or not.  brainAreas{} is the resolved brain are
@@ -62,12 +62,28 @@ export const NEURON_VERSIONS_RELATIONSHIPS_FRAGMENT = gql`fragment NeuronVersion
         id
         status
         createdAt
+        specimenNodeCounts {
+            axon {
+                total
+            }
+            dendrite {
+                total
+            }
+        }
         precomputed {
             id
             skeletonId
         }
         atlasReconstruction {
             id
+            nodeCounts {
+                axon {
+                    total
+                }
+                dendrite {
+                    total
+                }
+            }
             precomputed {
                 id
                 skeletonId

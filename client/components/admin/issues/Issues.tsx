@@ -1,7 +1,7 @@
 import React, {useState} from "react";
 import {Navigate} from "react-router-dom";
 import {useQuery} from "@apollo/client";
-import {Card, Center, Divider, Group, Stack, Table, Text} from "@mantine/core";
+import {Card, Center, Divider, Group, Table, Text} from "@mantine/core";
 import {IconCheck} from "@tabler/icons-react";
 import dayjs from "dayjs";
 

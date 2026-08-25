@@ -1,7 +1,7 @@
 import {action, computed, makeObservable, observable} from "mobx";
 
 import {AtlasStructureViewModel} from "./atlasStructureViewModel";
-import {AtlasConstants, DataConstants} from "../models/constants";
+import {AtlasConstants} from "../models/constants";
 import {AtlasStructureShape} from "../models/atlasStructure";
 
 const ROOT_ID = 997;

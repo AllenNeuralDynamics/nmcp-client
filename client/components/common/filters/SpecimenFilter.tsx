@@ -1,7 +1,7 @@
 import * as React from "react";
 import {useQuery} from "@apollo/client";
 import {observer} from "mobx-react-lite";
-import {Group, Loader, MultiSelect, Switch, Text} from "@mantine/core";
+import {Group, MultiSelect, Switch} from "@mantine/core";
 
 import {SPECIMENS_QUERY, SpecimensQueryResponse} from "../../../graphql/specimen";
 import {OptionalFilter} from "../../../viewmodel/candidateFilter";

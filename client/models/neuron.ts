@@ -9,6 +9,12 @@ export enum ExportFormat {
     legacyJSON = 900
 }
 
+// Values are sent to the export service as raw numbers and must match its ReconstructionSpace enum.
+export enum ReconstructionSpace {
+    Specimen = 100,
+    Atlas = 200
+}
+
 export enum SomaPropertyOperator {
     None = 0,
     Equals = 1,

@@ -112,6 +112,8 @@ export const Users = () => {
         </Card>
     );
 }
+const columnDivider = {borderRight: "1px solid var(--mantine-color-default-border)"};
+
 const UserTable = ({adminUserId, users, includesImported}: {
     adminUserId: User,
     users: User[],
@@ -127,11 +129,11 @@ const UserTable = ({adminUserId, users, includesImported}: {
                 <Table.Tr bg="table-header">
                     <Table.Th>Name</Table.Th>
                     <Table.Th>Affiliation</Table.Th>
-                    <Table.Th>Contact</Table.Th>
-                    <Table.Th ta={"center"}>View & Annotate</Table.Th>
-                    <Table.Th ta={"center"}>Edit Specimens & Neurons</Table.Th>
+                    <Table.Th style={columnDivider}>Contact</Table.Th>
+                    <Table.Th ta={"center"} style={columnDivider}>View & Annotate</Table.Th>
+                    <Table.Th ta={"center"} style={columnDivider}>Edit Specimens & Neurons</Table.Th>
                     <Table.Th ta={"center"}>Peer Reviewer</Table.Th>
-                    <Table.Th ta={"center"}>Publish Reviewer</Table.Th>
+                    <Table.Th ta={"center"} style={columnDivider}>Publish Reviewer</Table.Th>
                     <Table.Th ta={"center"}>Admin</Table.Th>
                     {includesImported ? <Table.Th>Type</Table.Th> : null}
                 </Table.Tr>
@@ -161,15 +163,15 @@ const UserRow = ({user, adminUserId, includesImported}: {
     return (<Table.Tr key={user.id}>
             <Table.Td>{user.firstName} {user.lastName}</Table.Td>
             <Table.Td>{user.affiliation}</Table.Td>
-            <Table.Td>{user.emailAddress}</Table.Td>
-            <Table.Td>
+            <Table.Td style={columnDivider}>{user.emailAddress}</Table.Td>
+            <Table.Td style={columnDivider}>
                 <Center>
                     <PermissionsCheckBox userId={user.id} updatePermissions={updatePermissions}
                                          userPermissions={user.permissions}
                                          permission={UserPermissions.ViewReconstructions}/>
                 </Center>
             </Table.Td>
-            <Table.Td>
+            <Table.Td style={columnDivider}>
                 <Center>
                     <PermissionsCheckBox userId={user.id} updatePermissions={updatePermissions}
                                          userPermissions={user.permissions}
@@ -183,7 +185,7 @@ const UserRow = ({user, adminUserId, includesImported}: {
                                          permission={UserPermissions.PeerReview}/>
                 </Center>
             </Table.Td>
-            <Table.Td>
+            <Table.Td style={columnDivider}>
                 <Center>
                     <PermissionsCheckBox userId={user.id} updatePermissions={updatePermissions}
                                          userPermissions={user.permissions}

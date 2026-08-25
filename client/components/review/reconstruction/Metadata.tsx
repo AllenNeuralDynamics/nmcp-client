@@ -1,7 +1,7 @@
 import React, {useState} from "react";
 import {useMutation} from "@apollo/client";
 import {observer} from "mobx-react-lite";
-import {Badge, NumberInput, Grid, Textarea, Group, Button, Center} from "@mantine/core";
+import {Badge, NumberInput, Grid, Textarea, Group, Button} from "@mantine/core";
 import {DatePickerInput} from "@mantine/dates";
 import {IconCalendar} from "@tabler/icons-react";
 import dayjs from "dayjs";

@@ -1,9 +1,7 @@
 import * as React from "react";
-import {Link} from "react-router-dom";
 import {Table} from "@mantine/core";
 
 import {Reconstruction} from "../../models/reconstruction";
-import {formatNeuron} from "../../models/neuron";
 import {formatAtlasStructure} from "../../models/atlasStructure";
 import {formatUser} from "../../models/user";
 import {ReconstructionStatusLabel} from "../common/ReconstructionStatus";
