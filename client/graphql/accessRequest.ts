@@ -1,6 +1,6 @@
 import gql from "graphql-tag";
 
-import {AccessRequestShape, RequestAccessResponse} from "../models/accessRequest";
+import {AccessRequest, AccessRequestShape, AccessRequestStatus, RequestAccessResponse} from "../models/accessRequest";
 
 //
 // Open
@@ -16,4 +16,58 @@ export type RequestAccessVariables = {
 
 export type RequestAccessMutationResponse = {
     requestAccess: RequestAccessResponse;
+}
+
+//
+// Secure
+//
+const ACCESS_REQUEST_FIELDS_FRAGMENT = gql`fragment AccessRequestFields on AccessRequest {
+    id
+    firstName
+    lastName
+    emailAddress
+    affiliation
+    purpose
+    notes
+    status
+    admin {
+        id
+        firstName
+        lastName
+    }
+    assigned {
+        id
+        firstName
+        lastName
+    }
+    createdAt
+    updatedAt
+}`;
+
+export const ACCESS_REQUESTS_QUERY = gql`query AccessRequestsQuery($input: AccessRequestQueryInput) {
+    accessRequests(input: $input) {
+        totalCount
+        offset
+        items {
+            ...AccessRequestFields
+        }
+    }
+}
+${ACCESS_REQUEST_FIELDS_FRAGMENT}
+`;
+
+export type AccessRequestsQueryVariables = {
+    input: {
+        status?: AccessRequestStatus[];
+        offset?: number;
+        limit?: number;
+    }
+}
+
+export type AccessRequestsQueryResponse = {
+    accessRequests: {
+        totalCount: number;
+        offset: number;
+        items: AccessRequest[];
+    }
 }
