@@ -8,10 +8,10 @@ import {User} from "../models/user";
  */
 export enum UserPermissions {
     None = 0x00,
-    View = 0x01,
-    // Any view permutations through 0x80
-    ViewReconstructions = 0x02,
-    ViewAll = View | ViewReconstructions,
+    AnnotateOne = 0x01,
+    // Any annotate permutations through 0x80
+    AnnotateMany = 0x02,
+    AnnotateAll = AnnotateOne | AnnotateMany,
     Edit = 0x10,
     // Any edit permutations through 0x800
     EditAll = Edit,

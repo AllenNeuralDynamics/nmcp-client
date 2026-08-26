@@ -114,6 +114,8 @@ export const Users = () => {
 }
 const columnDivider = {borderRight: "1px solid var(--mantine-color-default-border)"};
 
+const groupDivider = {borderRight: "2px solid var(--mantine-color-default-border)"};
+
 const UserTable = ({adminUserId, users, includesImported}: {
     adminUserId: User,
     users: User[],
@@ -127,18 +129,24 @@ const UserTable = ({adminUserId, users, includesImported}: {
         <Table>
             <Table.Thead>
                 <Table.Tr bg="table-header">
-                    <Table.Th>Name</Table.Th>
-                    <Table.Th>Affiliation</Table.Th>
-                    <Table.Th style={columnDivider}>Contact</Table.Th>
-                    <Table.Th ta={"center"} style={columnDivider}>View & Annotate</Table.Th>
-                    <Table.Th ta={"center"} style={columnDivider}>Edit Specimens & Neurons</Table.Th>
-                    <Table.Th ta={"center"}>Peer Reviewer</Table.Th>
-                    <Table.Th ta={"center"} style={columnDivider}>Publish Reviewer</Table.Th>
-                    <Table.Th ta={"center"}>Admin</Table.Th>
-                    {includesImported ? <Table.Th>Type</Table.Th> : null}
+                    <Table.Th rowSpan={2} style={columnDivider}>Name</Table.Th>
+                    <Table.Th rowSpan={2} style={columnDivider}>Affiliation</Table.Th>
+                    <Table.Th rowSpan={2} style={groupDivider}>Contact</Table.Th>
+                    <Table.Th ta={"center"} colSpan={2} style={groupDivider}>Annotate</Table.Th>
+                    <Table.Th ta={"center"} rowSpan={2} style={groupDivider}>Edit Specimens & Neurons</Table.Th>
+                    <Table.Th ta={"center"} colSpan={2} style={groupDivider}>Reviewer</Table.Th>
+                    <Table.Th ta={"center"} rowSpan={2}
+                              style={includesImported ? columnDivider : undefined}>Admin</Table.Th>
+                    {includesImported ? <Table.Th rowSpan={2}>Type</Table.Th> : null}
+                </Table.Tr>
+                <Table.Tr bg="table-header">
+                    <Table.Th ta={"center"} style={columnDivider}>Single</Table.Th>
+                    <Table.Th ta={"center"} style={groupDivider}>Multiple</Table.Th>
+                    <Table.Th ta={"center"} style={columnDivider}>Peer</Table.Th>
+                    <Table.Th ta={"center"} style={groupDivider}>Publish</Table.Th>
                 </Table.Tr>
             </Table.Thead>
-            <Table.Tbody bg="table-body">
+            <Table.Tbody bg="table">
                 {rows}
             </Table.Tbody>
         </Table>
@@ -161,38 +169,47 @@ const UserRow = ({user, adminUserId, includesImported}: {
     }, [user.authDirectoryId]);
 
     return (<Table.Tr key={user.id}>
-            <Table.Td>{user.firstName} {user.lastName}</Table.Td>
-            <Table.Td>{user.affiliation}</Table.Td>
-            <Table.Td style={columnDivider}>{user.emailAddress}</Table.Td>
+            <Table.Td style={columnDivider}>{user.firstName} {user.lastName}</Table.Td>
+            <Table.Td style={columnDivider}>{user.affiliation}</Table.Td>
+            <Table.Td style={groupDivider}>{user.emailAddress}</Table.Td>
             <Table.Td style={columnDivider}>
                 <Center>
                     <PermissionsCheckBox userId={user.id} updatePermissions={updatePermissions}
                                          userPermissions={user.permissions}
-                                         permission={UserPermissions.ViewReconstructions}/>
+                                         permission={UserPermissions.AnnotateOne}
+                                         exclusiveWith={UserPermissions.AnnotateMany}/>
                 </Center>
             </Table.Td>
-            <Table.Td style={columnDivider}>
+            <Table.Td style={groupDivider}>
+                <Center>
+                    <PermissionsCheckBox userId={user.id} updatePermissions={updatePermissions}
+                                         userPermissions={user.permissions}
+                                         permission={UserPermissions.AnnotateMany}
+                                         exclusiveWith={UserPermissions.AnnotateOne}/>
+                </Center>
+            </Table.Td>
+            <Table.Td style={groupDivider}>
                 <Center>
                     <PermissionsCheckBox userId={user.id} updatePermissions={updatePermissions}
                                          userPermissions={user.permissions}
                                          permission={UserPermissions.Edit}/>
                 </Center>
             </Table.Td>
-            <Table.Td>
+            <Table.Td style={columnDivider}>
                 <Center>
                     <PermissionsCheckBox userId={user.id} updatePermissions={updatePermissions}
                                          userPermissions={user.permissions}
                                          permission={UserPermissions.PeerReview}/>
                 </Center>
             </Table.Td>
-            <Table.Td style={columnDivider}>
+            <Table.Td style={groupDivider}>
                 <Center>
                     <PermissionsCheckBox userId={user.id} updatePermissions={updatePermissions}
                                          userPermissions={user.permissions}
                                          permission={UserPermissions.FullReview}/>
                 </Center>
             </Table.Td>
-            <Table.Td>
+            <Table.Td style={includesImported ? columnDivider : undefined}>
                 <Center>
                     <PermissionsCheckBox userId={user.id} updatePermissions={updatePermissions}
                                          userPermissions={user.permissions}

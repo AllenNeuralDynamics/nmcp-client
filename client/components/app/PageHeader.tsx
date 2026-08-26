@@ -66,7 +66,7 @@ export const PageHeader = () => {
         }
     }
 
-    const userCanView = user && (user?.permissions & UserPermissions.ViewReconstructions) != 0;
+    const userCanView = user && (user?.permissions & UserPermissions.AnnotateAll) != 0;
 
     const userCanEdit = user && (user?.permissions & UserPermissions.Edit) != 0;
 

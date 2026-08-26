@@ -121,7 +121,7 @@ const AccessRequestTable = ({requests}: { requests: AccessRequest[] }) => {
                     <Table.Th>Updated</Table.Th>
                 </Table.Tr>
             </Table.Thead>
-            <Table.Tbody bg="table-body">
+            <Table.Tbody bg="table">
                 {rows}
             </Table.Tbody>
         </Table>

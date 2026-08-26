@@ -27,7 +27,7 @@ export const Reconstructions = observer(() => {
     const preferences = usePreferences();
     const user = useUser();
 
-    if (!user || ((user.permissions & UserPermissions.ViewReconstructions) == 0)) {
+    if (!user || ((user.permissions & UserPermissions.AnnotateAll) == 0)) {
         return <Navigate to="/" replace/>;
     }
 
