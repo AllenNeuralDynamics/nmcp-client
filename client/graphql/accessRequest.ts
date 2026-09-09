@@ -71,3 +71,20 @@ export type AccessRequestsQueryResponse = {
         items: AccessRequest[];
     }
 }
+
+export const UPDATE_ACCESS_REQUEST_STATUS_MUTATION = gql`mutation UpdateAccessRequestStatus($id: String!, $status: Int!) {
+    updateAccessRequestStatus(id: $id, status: $status) {
+        ...AccessRequestFields
+    }
+}
+${ACCESS_REQUEST_FIELDS_FRAGMENT}
+`;
+
+export type UpdateAccessRequestStatusVariables = {
+    id: string;
+    status: AccessRequestStatus;
+}
+
+export type UpdateAccessRequestStatusResponse = {
+    updateAccessRequestStatus: AccessRequest;
+}

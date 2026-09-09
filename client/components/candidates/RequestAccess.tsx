@@ -2,11 +2,14 @@ import * as React from "react";
 import {useState} from "react";
 import {useMutation} from "@apollo/client";
 import {observer} from "mobx-react-lite";
-import {Button, Group, Popover, Stack, Text, TextInput} from "@mantine/core";
+import {Button, Group, Popover, Space, Stack, Text, TextInput} from "@mantine/core";
 
 import {AccessRequest} from "../../viewmodel/accessRequest";
 import {REQUEST_ACCESS_MUTATION, RequestAccessMutationResponse, RequestAccessVariables} from "../../graphql/accessRequest";
 import {RequestAccessResponse} from "../../models/accessRequest";
+
+const ProposedUse: string = "Please describe your scientific area of interest and how analysis of single neuron morphologies fit in your research plan. Include your brain area(s) of interest and the proposed scope of your proofreading effort (e.g., approximate number of brain areas and neurons).";
+const InfoText: string = "A member of the Neuron Morphology Community Portal will contact you regarding access to annotate and publish reconstructions in the portal. Before new users are granted access, they must attend a portal training webinar. Once access is granted, users are expected to actively engage with the portal user community including sharing progress updates on neuron annotations they have completed for their project.";
 
 export const RequestAccess = observer(({onResponse}: {onResponse: (response: RequestAccessResponse) => void}) => {
     const [opened, setOpened] = useState(false);
@@ -39,8 +42,9 @@ export const RequestAccess = observer(({onResponse}: {onResponse: (response: Req
                 <TextInput label="Proposed Use" placeholder="Please briefly describe your proposed use." withAsterisk={request.purpose?.length <= 0}
                            value={request.purpose}
                            onChange={(e) => request.purpose = e.target.value}/>
-                <Text size="sm" c="dimmed">A member of the Neuron Morphology Community Portal will contact you regarding access to annotate and publish
-                    reconstructions.</Text>
+                <Text size="sm" c="dimmed">{ProposedUse}</Text>
+                <Space h="m" />
+                <Text size="sm" c="dimmed">{InfoText}</Text>
                 <Group justify="end">
                     <Button size="small" disabled={!request.isValid} onClick={() => onRequestAccess()}>Request</Button>
                 </Group>

@@ -1,18 +1,27 @@
 import React, {useState} from "react";
 import {Navigate} from "react-router-dom";
-import {useQuery} from "@apollo/client";
+import {useMutation, useQuery} from "@apollo/client";
 import {observer} from "mobx-react-lite";
-import {Badge, Card, Center, Divider, Group, SimpleGrid, Table, Text} from "@mantine/core";
+import {Badge, Button, Card, Center, Divider, Group, SimpleGrid, Table, Text} from "@mantine/core";
+import {IconCheck, IconX} from "@tabler/icons-react";
 import dayjs from "dayjs";
 
 import {PaginationHeader} from "../../common/PaginationHeader";
 import {AccessRequestStatusFilter} from "../../common/filters/AccessRequestStatusFilter";
 import {GraphQLErrorAlert} from "../../common/GraphQLErrorAlert";
 import {AppLoading} from "../../app/AppLoading";
+import {errorNotification} from "../../common/NotificationHelper";
 import {OptionalFilter} from "../../../viewmodel/candidateFilter";
 import {useUser} from "../../../hooks/useUser";
 import {UserPermissions} from "../../../graphql/user";
-import {ACCESS_REQUESTS_QUERY, AccessRequestsQueryResponse, AccessRequestsQueryVariables} from "../../../graphql/accessRequest";
+import {
+    ACCESS_REQUESTS_QUERY,
+    AccessRequestsQueryResponse,
+    AccessRequestsQueryVariables,
+    UPDATE_ACCESS_REQUEST_STATUS_MUTATION,
+    UpdateAccessRequestStatusResponse,
+    UpdateAccessRequestStatusVariables
+} from "../../../graphql/accessRequest";
 import {AccessRequest, AccessRequestStatus, accessRequestStatusColor, accessRequestStatusName} from "../../../models/accessRequest";
 import {formatUser} from "../../../models/user";
 
@@ -26,14 +35,31 @@ export const AccessRequests = observer(() => {
     const [offset, setOffset] = useState(0);
     const [limit, setLimit] = useState(10);
 
-    // Pending requests are the ones that require action, so they are what is shown until the user asks for something else.
-    const [statusFilter] = useState(new OptionalFilter<AccessRequestStatus[]>([AccessRequestStatus.Pending], true));
+    const [selectionId, setSelectionId] = useState<string>(null);
+
+    // Unreviewed requests are the ones that require action, so they are what is shown until the user asks for something else.
+    const [statusFilter] = useState(new OptionalFilter<AccessRequestStatus[]>([AccessRequestStatus.Unreviewed], true));
 
     const status = statusFilter.isEnabled ? statusFilter.contents : [];
 
     const {data, previousData, loading, error} = useQuery<AccessRequestsQueryResponse, AccessRequestsQueryVariables>(ACCESS_REQUESTS_QUERY, {
         variables: {input: {offset: offset, limit: limit, status: status}},
         pollInterval: 10000
+    });
+
+    const [updateStatus, {loading: updating}] = useMutation<UpdateAccessRequestStatusResponse, UpdateAccessRequestStatusVariables>(UPDATE_ACCESS_REQUEST_STATUS_MUTATION, {
+        refetchQueries: [ACCESS_REQUESTS_QUERY],
+        awaitRefetchQueries: true,
+        onCompleted: (data) => {
+            if (!data.updateAccessRequestStatus) {
+                errorNotification("Access Request", "There was an unknown error updating the status.");
+                return;
+            }
+
+            // The default filter only shows unreviewed requests, so a reviewed request typically leaves the table.
+            setSelectionId(null);
+        },
+        onError: (e) => errorNotification("Access Request", e.message)
     });
 
     if (error) {
@@ -57,6 +83,10 @@ export const AccessRequests = observer(() => {
 
     const end = Math.min(offset + limit, totalCount);
 
+    const selected = selectionId ? requests.find(r => r.id === selectionId) : null;
+
+    const canReview = selected?.status === AccessRequestStatus.Unreviewed;
+
     const onUpdateLimit = (value: number) => {
         if (value !== limit) {
             if (offset < value) {
@@ -76,8 +106,18 @@ export const AccessRequests = observer(() => {
                 <Divider orientation="horizontal"/>
             </Card.Section>
             <Card.Section bg="segment">
-                <Group p={8}>
+                <Group p={8} justify="space-between">
                     <AccessRequestStatusFilter w={300} filter={statusFilter}/>
+                    <Group>
+                        <Button variant="light" color="teal" leftSection={<IconCheck size={18}/>} disabled={!canReview} loading={updating}
+                                onClick={() => updateStatus({variables: {id: selected.id, status: AccessRequestStatus.Accepted}})}>
+                            Accept
+                        </Button>
+                        <Button variant="light" color="red" leftSection={<IconX size={18}/>} disabled={!canReview} loading={updating}
+                                onClick={() => updateStatus({variables: {id: selected.id, status: AccessRequestStatus.Denied}})}>
+                            Deny
+                        </Button>
+                    </Group>
                 </Group>
                 <Divider orientation="horizontal"/>
             </Card.Section>
@@ -88,7 +128,7 @@ export const AccessRequests = observer(() => {
             </Card.Section>
             <Card.Section>
                 {requests.length > 0 ?
-                    <AccessRequestTable requests={requests}/> :
+                    <AccessRequestTable requests={requests} selectionId={selectionId} onSelect={setSelectionId}/> :
                     <Center p={24}><Text c="dimmed">There are no matching access requests.</Text></Center>}
             </Card.Section>
             {requests.length > 0 ?
@@ -104,8 +144,8 @@ export const AccessRequests = observer(() => {
     );
 });
 
-const AccessRequestTable = ({requests}: { requests: AccessRequest[] }) => {
-    const rows = requests.map(r => <AccessRequestRow key={r.id} request={r}/>);
+const AccessRequestTable = ({requests, selectionId, onSelect}: { requests: AccessRequest[], selectionId: string, onSelect: (id: string) => void }) => {
+    const rows = requests.map(r => <AccessRequestRow key={r.id} request={r} selected={r.id === selectionId} onSelect={onSelect}/>);
 
     return (
         <Table>
@@ -128,9 +168,11 @@ const AccessRequestTable = ({requests}: { requests: AccessRequest[] }) => {
     );
 }
 
-const AccessRequestRow = ({request}: { request: AccessRequest }) => {
+const AccessRequestRow = ({request, selected, onSelect}: { request: AccessRequest, selected: boolean, onSelect: (id: string) => void }) => {
+    const subProps = selected ? {bg: "table-selection"} : {};
+
     return (
-        <Table.Tr key={request.id}>
+        <Table.Tr key={request.id} {...subProps} onClick={() => onSelect(request.id)}>
             <Table.Td><Text size="sm" style={{whiteSpace: "nowrap"}}>{request.firstName} {request.lastName}</Text></Table.Td>
             <Table.Td>{request.emailAddress}</Table.Td>
             <Table.Td>{request.affiliation}</Table.Td>

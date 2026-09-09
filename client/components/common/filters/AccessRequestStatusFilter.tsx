@@ -5,7 +5,8 @@ import {Group, MultiSelect, Switch} from "@mantine/core";
 import {OptionalFilter} from "../../../viewmodel/candidateFilter";
 import {AccessRequestStatus, accessRequestStatusName} from "../../../models/accessRequest";
 
-const defaultAllowedValues = [AccessRequestStatus.Unreviewed, AccessRequestStatus.Pending, AccessRequestStatus.Accepted, AccessRequestStatus.Denied];
+// Pending is omitted while nothing in the workflow puts a request into that state.
+const defaultAllowedValues = [AccessRequestStatus.Unreviewed, AccessRequestStatus.Accepted, AccessRequestStatus.Denied];
 
 function createOptions(allowed: AccessRequestStatus[]): { label: string, value: string }[] {
     return allowed.map(a => {
