@@ -2,7 +2,7 @@ import * as React from "react";
 import {useState} from "react";
 import {useMutation} from "@apollo/client";
 import {observer} from "mobx-react-lite";
-import {Button, Group, Popover, Space, Stack, Text, TextInput} from "@mantine/core";
+import {Button, Group, Popover, Space, Stack, Text, Textarea, TextInput} from "@mantine/core";
 
 import {AccessRequest} from "../../viewmodel/accessRequest";
 import {REQUEST_ACCESS_MUTATION, RequestAccessMutationResponse, RequestAccessVariables} from "../../graphql/accessRequest";
@@ -39,11 +39,9 @@ export const RequestAccess = observer(({onResponse}: {onResponse: (response: Req
                            onChange={(e) => request.affiliation = e.target.value}/>
                 <TextInput label="Email" placeholder="Your email" withAsterisk={!request.isValidEmailAddress} value={request.emailAddress}
                            onChange={(e) => request.emailAddress = e.target.value}/>
-                <TextInput label="Proposed Use" placeholder="Please briefly describe your proposed use." withAsterisk={request.purpose?.length <= 0}
-                           value={request.purpose}
-                           onChange={(e) => request.purpose = e.target.value}/>
-                <Text size="sm" c="dimmed">{ProposedUse}</Text>
-                <Space h="m" />
+                <Textarea label="Proposed Use" placeholder={ProposedUse} withAsterisk={request.purpose?.length <= 0}
+                          autosize minRows={4} maxRows={20} value={request.purpose}
+                          onChange={(e) => request.purpose = e.target.value}/>
                 <Text size="sm" c="dimmed">{InfoText}</Text>
                 <Group justify="end">
                     <Button size="small" disabled={!request.isValid} onClick={() => onRequestAccess()}>Request</Button>
