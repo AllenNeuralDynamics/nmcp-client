@@ -11,7 +11,7 @@ import {NeuronTable} from "./NeuronTable";
 import {errorNotification, infoNotification} from "../../common/NotificationHelper";
 import {ExportFormat, ReconstructionSpace} from "../../../models/neuron";
 
-export const NeuronListContainerWidth = "450px";
+export const NeuronListContainerWidth = "470px";
 
 const exportLimit = 10;
 
