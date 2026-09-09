@@ -28,7 +28,7 @@ export const NeuronGenotypeFilter = observer(({filter}: { filter: OptionalFilter
         <Group gap="sm" align="center">
             <Switch label="Genotype" checked={filter.isEnabled} onChange={(event) => filter.isEnabled = event.currentTarget.checked || false}/>
 
-            <TextInput miw={200} placeholder="separate multiple with a comma (,)" value={state.genotypeWhileTyping} disabled={!filter.isEnabled}
+            <TextInput miw={200} placeholder="..." value={state.genotypeWhileTyping} disabled={!filter.isEnabled}
                        onKeyUp={handleKeyPress} onBlur={handleBlur} onChange={event => handleInputChange(event.currentTarget.value)}/>
         </Group>
     );
