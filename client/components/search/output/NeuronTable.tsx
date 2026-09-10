@@ -3,7 +3,7 @@ import {Link} from "react-router-dom";
 import {observer} from "mobx-react-lite";
 import {ActionIcon, Button, ColorPicker, ColorSwatch, Divider, Group, Popover, Stack, Table, Text, Tooltip} from "@mantine/core";
 import {useDisclosure} from "@mantine/hooks";
-import {IconInfoCircle, IconSquare, IconSquareCheck} from "@tabler/icons-react";
+import {IconSquare, IconSquareCheck} from "@tabler/icons-react";
 
 import {useQueryResponseViewModel} from "../../../hooks/useQueryResponseViewModel";
 import {useConstants} from "../../../hooks/useConstants";
@@ -76,21 +76,17 @@ export const NeuronRow = observer((props: NeuronRowProps) => {
                 </Stack>
             </Table.Td>
             <Table.Td>
-                <Group gap={4} justify="space-between" wrap="nowrap">
-                    <Text size="sm">{structureAcronym}</Text>
-                    {hasStructureConflict ? (
-                        <Tooltip label={
-                            <Stack gap={0}>
-                                <Text size="xs">{`Automatic soma location: ${somaAcronym}`}</Text>
-                                <Text size="xs">{`Manual soma location: ${neuronAcronym}`}</Text>
-                            </Stack>
-                        }>
-                            <Text component="span" c="dimmed" style={{display: "flex"}}>
-                                <IconInfoCircle size={14}/>
-                            </Text>
-                        </Tooltip>
-                    ) : null}
-                </Group>
+                <Tooltip disabled={!hasStructureConflict} label={
+                    <Stack gap={0}>
+                        <Text size="xs">{`Automatic soma location: ${somaAcronym}`}</Text>
+                        <Text size="xs">{`Manual soma location: ${neuronAcronym}`}</Text>
+                    </Stack>
+                }>
+                    <Group gap={4} wrap="nowrap">
+                        <Text size="sm">{structureAcronym}</Text>
+                        {hasStructureConflict ? <Text size="sm" c="dimmed">{`(${somaAcronym})`}</Text> : null}
+                    </Group>
+                </Tooltip>
             </Table.Td>
         </Table.Tr>
     );
