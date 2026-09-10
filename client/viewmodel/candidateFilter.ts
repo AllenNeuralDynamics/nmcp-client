@@ -1,7 +1,7 @@
 import {makeAutoObservable} from "mobx";
 
 import {AtlasStructureShape} from "../models/atlasStructure";
-import {parseKeywords, SomaFilterProperties} from "../models/neuron";
+import {SomaFilterProperties} from "../models/neuron";
 
 export class OptionalFilter<T> {
     public isEnabled: boolean = false;
@@ -21,7 +21,7 @@ export class CandidateFilter {
     public samplesFilter: OptionalFilter<string[]> = new OptionalFilter([]);
     public atlasStructureFilter: OptionalFilter<AtlasStructureShape[]> = new OptionalFilter([]);
     public tagFilter: OptionalFilter<string> = new OptionalFilter("");
-    public genotypeFilter: OptionalFilter<string> = new OptionalFilter("");
+    public genotypeFilter: OptionalFilter<string[]> = new OptionalFilter([]);
     public limitBrightness: boolean = false;
     public brightnessRange: [number, number] = [0, 5000];
     public limitVolume: boolean = false;
@@ -48,7 +48,7 @@ export class CandidateFilter {
     }
 
     public get genotypes(): string[] {
-        return this.genotypeFilter.isEnabled ? parseKeywords(this.genotypeFilter.contents) : [];
+        return this.genotypeFilter.isEnabled ? this.genotypeFilter.contents : [];
     }
 
     public get somaFilter(): SomaFilterProperties {

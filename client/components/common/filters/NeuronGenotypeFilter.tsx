@@ -1,35 +1,33 @@
 import * as React from "react";
-import {useState} from "react";
+import {useQuery} from "@apollo/client";
 import {observer} from "mobx-react-lite";
-import {Group, Switch, TextInput} from "@mantine/core";
+import {Group, MultiSelect, Switch} from "@mantine/core";
 
+import {GENOTYPES_QUERY, GenotypesQueryResponse} from "../../../graphql/genotype";
 import {OptionalFilter} from "../../../viewmodel/candidateFilter";
+import {LoadingGenotypes, sortedGenotypeOptions} from "../GenotypeAutosuggset";
 
-export const NeuronGenotypeFilter = observer(({filter}: { filter: OptionalFilter<string> }) => {
-    const [state, setState] = useState({
-        genotypeWhileTyping: filter.contents,
-    });
+export const NeuronGenotypeFilter = observer(({filter, w = null}: { filter: OptionalFilter<string[]>, w?: number }) => {
+    const {loading, error, data} = useQuery<GenotypesQueryResponse>(GENOTYPES_QUERY, {fetchPolicy: "cache-first"});
 
-    const handleKeyPress = (e: React.KeyboardEvent) => {
-        if (["Enter", "NumpadEnter"].includes(e.key)) {
-            filter.contents = state.genotypeWhileTyping;
-        }
-    };
+    if (loading) {
+        return <LoadingGenotypes/>;
+    }
 
-    const handleBlur = () => {
-        filter.contents = state.genotypeWhileTyping;
-    };
+    const options = sortedGenotypeOptions(data?.genotypes);
 
-    const handleInputChange = (value: string) => {
-        setState({...state, genotypeWhileTyping: value});
-    };
+    const props = w ? {w: w} : {miw: 200};
+
+    const isError = error != null || options.length == 0;
+
+    const placeholder = error ? "Genotypes not found" : (options.length == 0 ? "No genotypes defined" : null);
 
     return (
-        <Group gap="sm" align="center">
-            <Switch label="Genotype" checked={filter.isEnabled} onChange={(event) => filter.isEnabled = event.currentTarget.checked || false}/>
+        <Group gap="sm" align="center" justify="stretch">
+            <Switch label="Genotype" disabled={isError} checked={filter.isEnabled} onChange={(event) => filter.isEnabled = event.currentTarget.checked}/>
 
-            <TextInput miw={200} placeholder="..." value={state.genotypeWhileTyping} disabled={!filter.isEnabled}
-                       onKeyUp={handleKeyPress} onBlur={handleBlur} onChange={event => handleInputChange(event.currentTarget.value)}/>
+            <MultiSelect {...props} clearable placeholder={placeholder} data={options} value={filter.contents}
+                         disabled={!filter.isEnabled} error={isError} onChange={(value) => filter.contents = value}/>
         </Group>
     );
 });

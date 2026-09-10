@@ -31,7 +31,7 @@ export const CandidateFilters = observer(({candidateFilter}: { candidateFilter: 
 
             <Divider orientation="vertical"/>
 
-            <NeuronGenotypeFilter filter={candidateFilter.genotypeFilter}/>
+            <NeuronGenotypeFilter w={260} filter={candidateFilter.genotypeFilter}/>
         </Group>
     );
 })

@@ -1,6 +1,6 @@
 import * as React from "react";
 import {useQuery} from "@apollo/client";
-import {Group, Loader, Text} from "@mantine/core";
+import {ComboboxData, Group, Loader, Text} from "@mantine/core";
 
 import {GenotypeShape} from "../../models/genotype";
 import {GENOTYPES_QUERY, GenotypesQueryResponse} from "../../graphql/genotype";
@@ -16,6 +16,13 @@ export const LoadingGenotypes = () => {
 export function sortedCollectionOptions(genotypes: GenotypeShape[]): AutosuggestData[] {
     return genotypes ? genotypes.slice().sort((s1, s2) => s1.name < s2.name ? -1 : 1).map(s => {
         return {name: s.name, id: s.id}
+    }) : [];
+}
+
+// Keyed on name rather than id because the neuron query filters genotypes by name.
+export function sortedGenotypeOptions(genotypes: GenotypeShape[]): ComboboxData {
+    return genotypes ? genotypes.slice().sort((s1, s2) => s1.name < s2.name ? -1 : 1).map(s => {
+        return {label: s.name, value: s.name}
     }) : [];
 }
 
