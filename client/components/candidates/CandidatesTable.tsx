@@ -29,6 +29,7 @@ export const CandidatesTable = (props: CandidateTableProps) => {
                 <Table.Tr>
                     <Table.Th rowSpan={2}>Neuron</Table.Th>
                     <Table.Th rowSpan={2}>Specimen</Table.Th>
+                    <Table.Th rowSpan={2}>Genotype</Table.Th>
                     <Table.Th rowSpan={2}>Keywords</Table.Th>
                     <Table.Th colSpan={4} ta="center">Atlas Soma</Table.Th>
                     <Table.Th rowSpan={2} colSpan={1} ta="center">Specimen Soma (X, Y, Z)</Table.Th>

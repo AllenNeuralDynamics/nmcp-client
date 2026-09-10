@@ -25,10 +25,14 @@ export const CandidateRow = (props: ICandidateRowProps) => {
 
     const subProps = props.isSelected ? {bg: "table-selection"} : {};
 
+    const genotypeName = props.neuron.specimen.genotype?.name;
+    const [genotype, genotypeAlign]: [string, "left" | "center"] = genotypeName ? [genotypeName, "left"] : ["-", "center"];
+
     return (
         <Table.Tr {...subProps} onClick={() => props.onSelected(props.neuron)}>
             <Table.Td><NeuronVersionLink neuron={props.neuron} focusOnSoma/></Table.Td>
             <Table.Td>{props.neuron.specimen.label}</Table.Td>
+            <Table.Td ta={genotypeAlign}>{genotype}</Table.Td>
             <Table.Td>{formatKeywords(props.neuron.keywords)}</Table.Td>
             <Table.Td>{formatAtlasStructure(props.neuron.atlasStructure, "(unspecified)")}</Table.Td>
             <Table.Td>{props.neuron.atlasSoma.x.toFixed(1)}</Table.Td>
