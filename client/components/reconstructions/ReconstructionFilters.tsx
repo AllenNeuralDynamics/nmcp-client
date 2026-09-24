@@ -4,16 +4,9 @@ import {Divider, Group, Switch} from "@mantine/core";
 import {SpecimenFilter} from "../common/filters/SpecimenFilter";
 import {ReconstructionStatusFilter} from "../common/filters/ReconstructionStatusFilter";
 import {OptionalFilter} from "../../viewmodel/candidateFilter";
-import {ReconstructionStatus} from "../../models/reconstructionStatus";
+import {filterableReconstructionStatuses} from "../../models/reconstructionStatus";
 
-const statusFilterOptions = [
-    ReconstructionStatus.Published,
-    ReconstructionStatus.InProgress,
-    ReconstructionStatus.OnHold,
-    ReconstructionStatus.PublishReview,
-    ReconstructionStatus.Approved,
-    ReconstructionStatus.Rejected
-];
+const statusFilterOptions = filterableReconstructionStatuses();
 
 export function ReconstructionFilters(props: {
     checked: boolean,

@@ -16,6 +16,8 @@ export interface AtlasReconstruction {
     reviewer: User;
     precomputed?: Precomputed;
     searchIndexedAt: Date;
+    failureReason?: string;
+    failedAt?: Date;
     createdAt: Date;
     updatedAt: Date;
 }

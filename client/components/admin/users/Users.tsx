@@ -206,7 +206,7 @@ const UserRow = ({user, adminUserId, includesImported}: {
                 <Center>
                     <PermissionsCheckBox userId={user.id} updatePermissions={updatePermissions}
                                          userPermissions={user.permissions}
-                                         permission={UserPermissions.FullReview}/>
+                                         permission={UserPermissions.PublishReview}/>
                 </Center>
             </Table.Td>
             <Table.Td style={includesImported ? columnDivider : undefined}>

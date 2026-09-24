@@ -47,7 +47,7 @@ export const QualityCheck = ({reconstruction, isActive}: QualityCheckProps) => {
     const qc = data?.qualityControl;
     const qcStatus = qc?.status;
 
-    const isPending = qcStatus === QualityControlStatus.Pending;
+    const isPending = qcStatus === QualityControlStatus.Pending || qcStatus === QualityControlStatus.InProgress;
     const isTerminal = reconstruction.status === ReconstructionStatus.Published || reconstruction.status === ReconstructionStatus.Archived;
 
     return (

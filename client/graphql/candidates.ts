@@ -18,6 +18,7 @@ export const CANDIDATE_NEURONS_QUERY = gql`query CandidateNeuronsQuery ($input: 
         offset
         items {
             ...NeuronFields
+            untraceable
             reconstructions {
                 ...ReconstructionFieldsFragment
             }

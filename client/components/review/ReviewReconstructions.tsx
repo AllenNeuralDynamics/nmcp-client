@@ -8,41 +8,24 @@ import {useLocalStorage} from "@mantine/hooks";
 import {ReviewTable} from "./ReviewTable";
 import {Selection} from "./reconstruction/Selection";
 import {PaginationHeader} from "../common/PaginationHeader";
-import {ReconstructionStatusFilter} from "../common/filters/ReconstructionStatusFilter";
+import {ReviewStatusFilter} from "../common/filters/ReviewStatusFilter";
 import {OptionalFilter} from "../../viewmodel/candidateFilter";
 import {SpecimenFilter} from "../common/filters/SpecimenFilter";
 import {useUser} from "../../hooks/useUser";
 import {UserPermissions} from "../../graphql/user";
 import {NeuronTagFilter} from "../common/filters/NeuronTagFilter";
-import {ReconstructionStatus} from "../../models/reconstructionStatus";
+import {hasPermission} from "../../models/user";
+import {availableReviewEntries, reviewStatusFilters} from "./reviewAccess";
 import {RECONSTRUCTIONS_QUERY, ReconstructionQueryArgs, ReconstructionsResponse} from "../../graphql/reconstruction";
 import {Reconstruction} from "../../models/reconstruction";
 import {ReviewActions} from "./ReviewActions";
 import {Navigate} from "react-router-dom";
 
-const fullAllowedStatus = [ReconstructionStatus.PublishReview, ReconstructionStatus.Approved, ReconstructionStatus.WaitingForAtlasReconstruction, ReconstructionStatus.ReadyToPublish];
-const peerAllowedStatus = [ReconstructionStatus.PeerReview];
-
-const approvalOnlyFull = [ReconstructionStatus.PublishReview, ReconstructionStatus.Approved, ReconstructionStatus.ReadyToPublish];
-const approvalOnlyPeer = [ReconstructionStatus.PeerReview];
-
-function myAllowedStatus(approvalOnly: boolean, full: boolean, peer: boolean) {
-    if (full) {
-        if (approvalOnly) {
-            return peer ? [...approvalOnlyPeer, ...approvalOnlyFull] : approvalOnlyFull;
-        } else {
-            return peer ? [...peerAllowedStatus, ...fullAllowedStatus] : fullAllowedStatus;
-        }
-    }
-
-    return peerAllowedStatus;
-}
-
 export const ReviewReconstructions = observer(() => {
     const user = useUser();
 
-    const havePeer = (user?.permissions & UserPermissions.PeerReview) != 0;
-    const haveFull = (user?.permissions & UserPermissions.FullReview) != 0;
+    const havePeer = hasPermission(user?.permissions, UserPermissions.PeerReview);
+    const haveFull = hasPermission(user?.permissions, UserPermissions.PublishReview);
 
     if (!havePeer && !haveFull) {
         return <Navigate to="/" replace={true}/>;
@@ -54,21 +37,21 @@ export const ReviewReconstructions = observer(() => {
     const [approvalOnly, setApprovalOnly] = useState(false);
 
     const [specimenFilter] = useState(new OptionalFilter<string[]>([]));
-    const [statusFilter] = useState(new OptionalFilter<number[]>([]));
+    const [statusFilter] = useState(new OptionalFilter<string[]>([]));
     const [tagFilter] = useState(new OptionalFilter<string>(""));
 
     const [selectedId, setSelectedId] = useLocalStorage<string>({key: "review-reconstruction-id", defaultValue: null});
 
-    const allowedStatus = myAllowedStatus(approvalOnly, haveFull, havePeer);
+    const available = availableReviewEntries({peer: havePeer, publish: haveFull}, approvalOnly);
 
-    const statusFilters: number[] = (statusFilter.isEnabled && statusFilter.contents.length > 0) ? statusFilter.contents : allowedStatus;
+    const statusFilters = reviewStatusFilters(available, statusFilter.isEnabled ? statusFilter.contents : null);
 
     const sampleIds = specimenFilter.isEnabled ? specimenFilter.contents : [];
 
     const tag = tagFilter.isEnabled ? [tagFilter.contents] : [];
 
     const {data, loading, error, previousData} = useQuery<ReconstructionsResponse, ReconstructionQueryArgs>(RECONSTRUCTIONS_QUERY, {
-        variables: {queryArgs: {offset: offset, limit: limit, specimenIds: sampleIds, status: statusFilters, keywords: tag}},
+        variables: {queryArgs: {offset: offset, limit: limit, specimenIds: sampleIds, statusFilters, keywords: tag}},
         pollInterval: 10000
     });
 
@@ -112,7 +95,7 @@ export const ReviewReconstructions = observer(() => {
                         <Divider orientation="vertical"/>
                         <NeuronTagFilter filter={tagFilter}/>
                         <Divider orientation="vertical"/>
-                        {haveFull ? <ReconstructionStatusFilter w={300} filter={statusFilter} allowedValues={allowedStatus}/> : null}
+                        {haveFull ? <ReviewStatusFilter w={300} filter={statusFilter} available={available}/> : null}
                     </Group>
                     <Divider orientation="horizontal"/>
                 </Card.Section>

@@ -1,5 +1,5 @@
 import * as React from "react";
-import {Group, Table} from "@mantine/core";
+import {Badge, Group, Table} from "@mantine/core";
 import {IconBrowserShare} from "@tabler/icons-react";
 
 import {formatHortaLocation, formatKeywords, NeuronShape} from "../../models/neuron";
@@ -30,7 +30,12 @@ export const CandidateRow = (props: ICandidateRowProps) => {
 
     return (
         <Table.Tr {...subProps} onClick={() => props.onSelected(props.neuron)}>
-            <Table.Td><NeuronVersionLink neuron={props.neuron} focusOnSoma/></Table.Td>
+            <Table.Td>
+                <Group gap="xs" wrap="nowrap">
+                    <NeuronVersionLink neuron={props.neuron} focusOnSoma/>
+                    {props.neuron.untraceable ? <Badge size="xs" color="gray" variant="light">Untraceable</Badge> : null}
+                </Group>
+            </Table.Td>
             <Table.Td>{props.neuron.specimen.label}</Table.Td>
             <Table.Td ta={genotypeAlign}>{genotype}</Table.Td>
             <Table.Td>{formatKeywords(props.neuron.keywords)}</Table.Td>

@@ -5,6 +5,8 @@ export const AtlasReconstructionFieldsFragment = gql`fragment AtlasReconstructio
     sourceUrl
     status
     lengthMillimeters
+    failureReason
+    failedAt
     reviewer {
         id
         firstName

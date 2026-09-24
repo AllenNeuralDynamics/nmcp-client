@@ -1,14 +1,14 @@
 import {AtlasReconstructionStatus, atlasStatusName} from "./atlasReconstructionStatus";
 
 export function statusCanReopen(status: ReconstructionStatus): boolean {
-    return status == ReconstructionStatus.PublishReview || status == ReconstructionStatus.PeerReview || status == ReconstructionStatus.OnHold || status == ReconstructionStatus.Rejected;
+    return status == ReconstructionStatus.OnHold;
 }
 
 export enum ReconstructionStatus {
-    Initialized = 0,
     InProgress = 100,
     OnHold = 200,
     PeerReview = 300,
+    TeamReview = 350,
     PublishReview = 400,
     Approved = 500,                         // Approved, but can not run quality checks, node assignment, etc. for some reason
     WaitingForAtlasReconstruction = 600,    // In the process of running quality checks, node assignment, etc.
@@ -16,7 +16,9 @@ export enum ReconstructionStatus {
     Rejected = 800,
     Publishing = 900,                       // In the process of search indexing, etc.
     Published = 1000,
+    PublishFailed = 1100,                   // Search indexing failed; recovery is forward-only through requestSearchIndexing.
     Archived = 5000,
+    Untraceable = 6000,
     Discarded = 10000,
 
     // UI-only values not part of API.
@@ -29,6 +31,7 @@ export const statusName = (status: ReconstructionStatus, secondary: AtlasReconst
 
     switch (status) {
         case ReconstructionStatus.WaitingForAtlasReconstruction:
+        case ReconstructionStatus.PublishFailed:
             if (secondary != null && (secondary != AtlasReconstructionStatus.Initialized)) {
                 atlas = atlasStatusName(secondary)
             }
@@ -39,8 +42,6 @@ export const statusName = (status: ReconstructionStatus, secondary: AtlasReconst
 
 export const statusNameOnly = (status: ReconstructionStatus): string => {
     switch (status) {
-        case ReconstructionStatus.Initialized:
-            return "Initialized";
         case ReconstructionStatus.InProgress:
             return "In Progress";
         case ReconstructionStatus.OnHold:
@@ -49,6 +50,8 @@ export const statusNameOnly = (status: ReconstructionStatus): string => {
             return "In Review";
         case ReconstructionStatus.PeerReview:
             return "In Peer Review";
+        case ReconstructionStatus.TeamReview:
+            return "In Team Review";
         case ReconstructionStatus.Approved:
             return "Approved";
         case ReconstructionStatus.WaitingForAtlasReconstruction:
@@ -59,10 +62,14 @@ export const statusNameOnly = (status: ReconstructionStatus): string => {
             return "Publishing";
         case ReconstructionStatus.Published:
             return "Published";
+        case ReconstructionStatus.PublishFailed:
+            return "Publish Failed";
         case ReconstructionStatus.Rejected:
             return "Returned";
         case ReconstructionStatus.Archived:
             return "Archived";
+        case ReconstructionStatus.Untraceable:
+            return "Untraceable";
         case ReconstructionStatus.Discarded:
             return "Discarded";
         case ReconstructionStatus.Multiple:
@@ -74,13 +81,13 @@ export const statusNameOnly = (status: ReconstructionStatus): string => {
 
 export const statusColor = (status: ReconstructionStatus): string => {
     switch (status) {
-        case ReconstructionStatus.Initialized:
-            return "white";
         case ReconstructionStatus.InProgress:
             return "cyan";
         case ReconstructionStatus.OnHold:
             return "orange";
         case ReconstructionStatus.PeerReview:
+            return "blue";
+        case ReconstructionStatus.TeamReview:
             return "blue";
         case ReconstructionStatus.PublishReview:
             return "indigo";
@@ -94,12 +101,16 @@ export const statusColor = (status: ReconstructionStatus): string => {
             return "teal";
         case ReconstructionStatus.Published:
             return "green";
+        case ReconstructionStatus.PublishFailed:
+            return "red";
         case ReconstructionStatus.Rejected:
             return "red";
         case ReconstructionStatus.Discarded:
             return "red";
         case ReconstructionStatus.Archived:
             return "red";
+        case ReconstructionStatus.Untraceable:
+            return "gray";
         case ReconstructionStatus.Multiple:
             return "dimmed";
         default:
@@ -107,4 +118,9 @@ export const statusColor = (status: ReconstructionStatus): string => {
     }
 }
 
-
+// Multiple is a UI sentinel, and no row is ever at rest at Approved.
+export function filterableReconstructionStatuses(): ReconstructionStatus[] {
+    return Object.values(ReconstructionStatus)
+        .filter((v): v is ReconstructionStatus => typeof v === "number")
+        .filter(s => s != ReconstructionStatus.Multiple && s != ReconstructionStatus.Approved);
+}

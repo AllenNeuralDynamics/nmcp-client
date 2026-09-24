@@ -7,7 +7,14 @@ import {formatAtlasStructure} from "../../../models/atlasStructure";
 import {Reconstruction} from "../../../models/reconstruction";
 import {ReconstructionStatusLabel} from "../../common/ReconstructionStatus";
 
-export const PublishedTable = ({reconstructions}: { reconstructions: Reconstruction[] }) => {
+type PublishedTableProps = {
+    reconstructions: Reconstruction[];
+    selectedId: string;
+
+    onRowClick(reconstruction: Reconstruction): void;
+}
+
+export const PublishedTable = ({reconstructions, selectedId, onRowClick}: PublishedTableProps) => {
     return (
         <Table withColumnBorders>
             <Table.Thead bg="table-header">
@@ -26,16 +33,26 @@ export const PublishedTable = ({reconstructions}: { reconstructions: Reconstruct
             </Table.Thead>
             <Table.Tbody bg="table">
                 {reconstructions.map((reconstruction: Reconstruction) => (
-                    <PublishedRow reconstruction={reconstruction}/>
+                    <PublishedRow key={reconstruction.id} reconstruction={reconstruction} isSelected={reconstruction.id === selectedId}
+                                  onClick={() => onRowClick(reconstruction)}/>
                 ))}
             </Table.Tbody>
         </Table>
     );
 }
 
-const PublishedRow = ({reconstruction}: { reconstruction: Reconstruction }) => {
+type PublishedRowProps = {
+    reconstruction: Reconstruction;
+    isSelected: boolean;
+
+    onClick(): void;
+}
+
+const PublishedRow = ({reconstruction, isSelected, onClick}: PublishedRowProps) => {
+    const rowProps = isSelected ? {bg: "table-selection"} : {};
+
     return (
-        <Table.Tr key={reconstruction.id}>
+        <Table.Tr {...rowProps} onClick={onClick}>
             <Table.Td>
                 <Link to={`/neuron/${reconstruction.neuron.id}`}>{formatNeuron(reconstruction.neuron)}</Link>
             </Table.Td>

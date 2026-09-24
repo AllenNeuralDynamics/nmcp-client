@@ -3,6 +3,7 @@ import {AtlasReconstruction} from "./atlasReconstruction";
 import {ReconstructionStatus} from "./reconstructionStatus";
 import {NeuronShape} from "./neuron";
 import {Precomputed} from "./precomputed";
+import {AtlasReconstructionStatus} from "./atlasReconstructionStatus";
 
 export type NodeCount = {
     total: number;
@@ -22,6 +23,13 @@ export enum ReconstructionRevisionKind {
     AtlasSpace = 1
 }
 
+// failedAt arrives as epoch milliseconds, like every Date-typed field here; wrap it in new Date() before use.
+export type PhaseFailure = {
+    phase: AtlasReconstructionStatus;
+    reason?: string;
+    failedAt?: Date;
+}
+
 export type Reconstruction = {
     id: string;
     sourceUrl: string;
@@ -38,6 +46,8 @@ export type Reconstruction = {
     neuron: NeuronShape;
     precomputed: Precomputed;
     atlasReconstruction: AtlasReconstruction;
+    // Null unless the child sits at one of the PhaseFailureStatuses.
+    phaseFailure?: PhaseFailure;
     publishedAt: Date;
     createdAt: Date;
     updatedAt: Date;

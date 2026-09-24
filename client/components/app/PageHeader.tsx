@@ -7,6 +7,7 @@ import {IconMoon, IconSun} from "@tabler/icons-react";
 
 import {SignInSignOutButton} from "./SignInSignOutButton";
 import {UserPermissions} from "../../graphql/user";
+import {hasPermission} from "../../models/user";
 
 import logo from "../../../assets/nmcp-logo.png";
 import {NotificationContext} from "./NotificationsApp";
@@ -66,13 +67,13 @@ export const PageHeader = () => {
         }
     }
 
-    const userCanView = user && (user?.permissions & UserPermissions.AnnotateAll) != 0;
+    const userCanView = user && hasPermission(user.permissions, UserPermissions.AnnotateAll);
 
-    const userCanEdit = user && (user?.permissions & UserPermissions.Edit) != 0;
+    const userCanEdit = user && hasPermission(user.permissions, UserPermissions.Edit);
 
-    const userCanReview = user && ((user?.permissions & UserPermissions.FullReview) != 0) || ((user?.permissions & UserPermissions.PeerReview) != 0);
+    const userCanReview = user && hasPermission(user.permissions, UserPermissions.ReviewAll);
 
-    const userCanAdmin = user && (user?.permissions & UserPermissions.Admin) != 0;
+    const userCanAdmin = user && hasPermission(user.permissions, UserPermissions.Admin);
 
     const candidates = isAuthenticated ? "Find Candidate Neurons" : "Explore Candidate Neurons";
 

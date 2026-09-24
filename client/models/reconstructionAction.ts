@@ -8,10 +8,12 @@ export enum ReconstructionAction {
     ApprovePublish = 6,
     Publish = 7,
     Reject = 8,
-    Archive = 9,
     Discard = 10,
     ReportIssue = 11,
-    CreateRevision = 12
+    CreateRevision = 12,
+    MarkUntraceable = 13,
+    RetryPhase = 14,
+    ResetPipeline = 15
 }
 
 export const actionColor = (status: ReconstructionAction): string => {
@@ -34,13 +36,17 @@ export const actionColor = (status: ReconstructionAction): string => {
             return "green";
         case ReconstructionAction.Reject:
             return "red";
-        case ReconstructionAction.Archive:
-            return "red";
         case ReconstructionAction.Discard:
             return "red";
         case ReconstructionAction.ReportIssue:
             return "red";
         case ReconstructionAction.CreateRevision:
+            return "orange";
+        case ReconstructionAction.MarkUntraceable:
+            return "gray";
+        case ReconstructionAction.RetryPhase:
+            return "orange";
+        case ReconstructionAction.ResetPipeline:
             return "orange";
         default:
             return "black";
@@ -67,14 +73,18 @@ export const actionName = (status: ReconstructionAction): string => {
             return "Publish";
         case ReconstructionAction.Reject:
             return "Rescind";
-        case ReconstructionAction.Archive:
-            return "Archive";
         case ReconstructionAction.Discard:
             return "Discard";
         case ReconstructionAction.ReportIssue:
             return "Report an Issue";
         case ReconstructionAction.CreateRevision:
             return "Create Revision";
+        case ReconstructionAction.MarkUntraceable:
+            return "Untraceable";
+        case ReconstructionAction.RetryPhase:
+            return "Retry Phase";
+        case ReconstructionAction.ResetPipeline:
+            return "Replay Pipeline";
         default:
             return "UNKNOWN";
     }
@@ -100,14 +110,18 @@ export const actionTooltip = (status: ReconstructionAction): string => {
             return "Publish the reconstruction to the open portal search";
         case ReconstructionAction.Reject:
             return "Mark the reconstruction as not accepted.  The annotator may reopen the reconstruction and request review again after changes have been made.";
-        case ReconstructionAction.Archive:
-            return "The published reconstruction will be removed from the open portal search.  It will still be available as part of the neuron version history with the same DOI.";
         case ReconstructionAction.Discard:
-            return `Permanently stop work on the reconstruction.  If you wish to pause annotation with the option to resume later, choose the ${actionName(ReconstructionAction.Hold)} action.`;
+            return "Permanently stop work on the reconstruction.  This cannot be undone.";
         case ReconstructionAction.ReportIssue:
             return "Report an issue with this candidate neuron";
         case ReconstructionAction.CreateRevision:
             return "Create a new revision of the specimen-space or atlas-space reconstruction for the associated neuron.";
+        case ReconstructionAction.MarkUntraceable:
+            return "The neuron cannot be traced.  The reconstruction will be withdrawn and the neuron returned to the candidate pool.";
+        case ReconstructionAction.RetryPhase:
+            return "Re-run the automated phase that failed for this reconstruction.";
+        case ReconstructionAction.ResetPipeline:
+            return "Discard the current atlas-space pipeline run and start it again from the beginning.";
         default:
             return "UNKNOWN";
     }

@@ -1,5 +1,5 @@
 import * as React from "react";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {useMutation} from "@apollo/client";
 import {Badge, Divider, Group, Stack, Text} from "@mantine/core";
 import {useClipboard} from "@mantine/hooks";
@@ -9,25 +9,38 @@ import {
     APPROVE_RECONSTRUCTION_MUTATION,
     ApproveReconstructionArgs,
     ApproveReconstructionResponse,
+    DISCARD_RECONSTRUCTION_MUTATION,
+    DiscardReconstructionResponse,
     ReconstructionStatusModifierArgs,
     REJECT_RECONSTRUCTION_MUTATION,
     RejectReconstructionResponse,
+    RESET_RECONSTRUCTION_PIPELINE_MUTATION,
+    ResetReconstructionPipelineResponse,
     RECONSTRUCTIONS_QUERY, PublishReconstructionResponse, PublishReconstructionVariables, PUBLISH_RECONSTRUCTION_MUTATION
 } from "../../graphql/reconstruction";
 import {Reconstruction} from "../../models/reconstruction";
 import {errorNotification} from "../common/NotificationHelper";
 import {ReconstructionAction} from "../../models/reconstructionAction";
+import {gateFor} from "../../models/reconstructionGates";
 import {ReconstructionActionButton} from "../common/ReconstructionAction";
 import {ReconstructionStatus} from "../../models/reconstructionStatus";
-import {AtlasReconstructionStatus} from "../../models/atlasReconstructionStatus";
+import {atlasStatusName} from "../../models/atlasReconstructionStatus";
 import {useAppLayout} from "../../hooks/useAppLayout";
+import {useUser} from "../../hooks/useUser";
+import {useRetryPhase} from "../../hooks/useRetryPhase";
 import {ArchiveConfirmationModal} from "./ArchiveConfirmationModal";
+import {ResetPipelineConfirmationModal} from "./ResetPipelineConfirmationModal";
 
+// Every hook stays above the no-selection return: the Review tab mounts this bar before a row is chosen and then
+// re-renders the same instance with the selection.
 export const ReviewActions = ({reconstruction}: { reconstruction: Reconstruction }) => {
     const clipboard = useClipboard();
     const appLayout = useAppLayout();
+    const user = useUser();
+    const retryPhase = useRetryPhase();
 
     const [isArchiveModelOpen, setIsArchiveModelOpen] = useState<boolean>(false);
+    const [isResetModalOpen, setIsResetModalOpen] = useState<boolean>(false);
 
     const [rejectAnnotation] = useMutation<RejectReconstructionResponse, ReconstructionStatusModifierArgs>(REJECT_RECONSTRUCTION_MUTATION,
         {
@@ -56,53 +69,63 @@ export const ReviewActions = ({reconstruction}: { reconstruction: Reconstruction
             }
         });
 
+    const [discardReconstruction] = useMutation<DiscardReconstructionResponse, ReconstructionStatusModifierArgs>(DISCARD_RECONSTRUCTION_MUTATION,
+        {
+            refetchQueries: [RECONSTRUCTIONS_QUERY],
+            onError: (e) => errorNotification("Error Discarding Reconstruction", e.message)
+        });
+
+    const [resetPipeline] = useMutation<ResetReconstructionPipelineResponse, ReconstructionStatusModifierArgs>(RESET_RECONSTRUCTION_PIPELINE_MUTATION,
+        {
+            refetchQueries: [RECONSTRUCTIONS_QUERY],
+            onError: (e) => errorNotification("Error Replaying Pipeline", e.message)
+        });
+
+    // Keyed on primitives: the reconstructions query polls, replacing the object every few seconds.
+    useEffect(() => {
+        const failure = reconstruction?.phaseFailure;
+
+        if (failure) {
+            errorNotification(atlasStatusName(failure.phase), failure.reason ?? "No reason was recorded.");
+        }
+    }, [reconstruction?.id, reconstruction?.phaseFailure?.failedAt]);
+
     if (!reconstruction) {
         return <NoSelection/>;
     }
 
     const variables = {variables: {reconstructionId: reconstruction.id}};
 
-    let peerReviewButton = null;
-    let approveButton = null;
-    let publishButton = null;
+    const actionButton = (action: ReconstructionAction, onClick: () => void) => {
+        const gate = gateFor(action, {
+            area: "review",
+            status: reconstruction.status,
+            childStatus: reconstruction.atlasReconstruction?.status,
+            permissions: user?.permissions ?? 0,
+            annotatorId: reconstruction.annotatorId,
+            userId: user?.id
+        });
 
-    let moreThanReject = false;
+        return gate.visible ? <ReconstructionActionButton key={action} action={action} disabled={!gate.enabled} onClick={onClick}/> : null;
+    };
 
-    const rejectButtons = <ReconstructionActionButton action={ReconstructionAction.Reject} onClick={() => rejectAnnotation(variables)}/>
+    const approve = (targetStatus: ReconstructionStatus) => approveAnnotation({variables: {reconstructionId: reconstruction.id, targetStatus}});
 
-    if (reconstruction.status == ReconstructionStatus.PublishReview && reconstruction?.atlasReconstruction?.status == AtlasReconstructionStatus.ReadyToProcess) {
-        approveButton = <ReconstructionActionButton action={ReconstructionAction.ApprovePublish}
-                                                    onClick={() => approveAnnotation({
-                                                        variables: {
-                                                            reconstructionId: reconstruction.id,
-                                                            targetStatus: ReconstructionStatus.Approved
-                                                        }
-                                                    })}/>;
-        moreThanReject = true;
-    }
-
-    if (reconstruction.status == ReconstructionStatus.PeerReview) {
-        peerReviewButton =
-            <ReconstructionActionButton action={ReconstructionAction.ApprovePeer}
-                                        onClick={() => approveAnnotation({
-                                            variables: {
-                                                reconstructionId: reconstruction.id,
-                                                targetStatus: ReconstructionStatus.PublishReview
-                                            }
-                                        })}/>;
-        moreThanReject = true;
-    }
-
-    if (reconstruction.status == ReconstructionStatus.ReadyToPublish) {
-        publishButton = <ReconstructionActionButton action={ReconstructionAction.Publish}
-                                                    onClick={() => publishReconstruction({
-                                                        variables: {
-                                                            reconstructionId: reconstruction.id,
-                                                            replaceExisting: false
-                                                        }
-                                                    })}/>;
-        moreThanReject = true;
-    }
+    const groups = [
+        [
+            actionButton(ReconstructionAction.Reject, () => rejectAnnotation(variables)),
+            actionButton(ReconstructionAction.Discard, () => discardReconstruction(variables))
+        ],
+        [
+            actionButton(ReconstructionAction.ApprovePublish, () => approve(ReconstructionStatus.Approved)),
+            actionButton(ReconstructionAction.ApprovePeer, () => approve(ReconstructionStatus.PublishReview)),
+            actionButton(ReconstructionAction.Publish, () => publishReconstruction({variables: {reconstructionId: reconstruction.id, replaceExisting: false}}))
+        ],
+        [
+            actionButton(ReconstructionAction.RetryPhase, () => retryPhase(reconstruction)),
+            actionButton(ReconstructionAction.ResetPipeline, () => setIsResetModalOpen(true))
+        ]
+    ].map(g => g.filter(b => b != null)).filter(g => g.length > 0);
 
     async function tryArchiveReconstruction(replaceExisting: boolean) {
         if (replaceExisting) {
@@ -117,13 +140,23 @@ export const ReviewActions = ({reconstruction}: { reconstruction: Reconstruction
         setIsArchiveModelOpen(false);
     }
 
+    async function onResetClosed(confirmed: boolean) {
+        setIsResetModalOpen(false);
+
+        if (confirmed) {
+            await resetPipeline(variables);
+        }
+    }
+
     const actions = <Group justify="flex-end">
-        {rejectButtons}
-        {moreThanReject ? <Divider orientation="vertical"/> : null}
-        {approveButton}
-        {peerReviewButton}
-        {publishButton}
+        {groups.map((g, index) => (
+            <React.Fragment key={index}>
+                {index > 0 ? <Divider orientation="vertical"/> : null}
+                {g}
+            </React.Fragment>
+        ))}
         <ArchiveConfirmationModal show={isArchiveModelOpen} onClose={(b) => tryArchiveReconstruction(b)}/>
+        <ResetPipelineConfirmationModal show={isResetModalOpen} sourceStatus={reconstruction.status} onClose={(b) => onResetClosed(b)}/>
     </Group>
 
     const info = appLayout.showReferenceIds ? (

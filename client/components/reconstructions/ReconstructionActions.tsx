@@ -8,6 +8,8 @@ import {Reconstruction} from "../../models/reconstruction";
 import {
     DISCARD_RECONSTRUCTION_MUTATION,
     DiscardReconstructionResponse,
+    MARK_UNTRACEABLE_MUTATION,
+    MarkUntraceableResponse,
     PAUSE_RECONSTRUCTION_MUTATION,
     PauseReconstructionResponse,
     ReconstructionStatusModifierArgs,
@@ -15,11 +17,14 @@ import {
     ResumeReconstructionResponse,
     RECONSTRUCTIONS_QUERY
 } from "../../graphql/reconstruction";
-import {ReconstructionStatus, statusCanReopen} from "../../models/reconstructionStatus";
+import {ReconstructionStatus} from "../../models/reconstructionStatus";
 import {ReconstructionAction} from "../../models/reconstructionAction";
+import {gateFor} from "../../models/reconstructionGates";
 import {ReconstructionActionButton} from "../common/ReconstructionAction";
 import {ReconstructionStatusLabel} from "../common/ReconstructionStatus";
+import {errorNotification} from "../common/NotificationHelper";
 import {useAppLayout} from "../../hooks/useAppLayout";
+import {useUser} from "../../hooks/useUser";
 import {CreateRevisionPopover} from "./CreateRevisionPopover";
 
 export type ReconstructionPanelProps = {
@@ -32,6 +37,7 @@ export type ReconstructionPanelProps = {
 export const ReconstructionActions = (props: ReconstructionPanelProps) => {
     const clipboard = useClipboard();
     const appLayout = useAppLayout();
+    const user = useUser();
 
     const [pauseReconstruction] = useMutation<PauseReconstructionResponse, ReconstructionStatusModifierArgs>(PAUSE_RECONSTRUCTION_MUTATION,
         {
@@ -51,58 +57,50 @@ export const ReconstructionActions = (props: ReconstructionPanelProps) => {
             onError: (e) => console.log(e)
         });
 
+    const [markUntraceable] = useMutation<MarkUntraceableResponse, ReconstructionStatusModifierArgs>(MARK_UNTRACEABLE_MUTATION,
+        {
+            refetchQueries: [RECONSTRUCTIONS_QUERY],
+            onError: (e) => errorNotification("Error Marking Reconstruction Untraceable", e.message)
+        });
+
     if (props.reconstruction == null) {
         return (<NoReconstruction/>);
     }
 
-    let reopenButton = null;
-    let holdButton = null;
-    let peerReviewButton = null;
-    let reviewButton = null;
-    let cancelButton = null;
-    let revisePopover = null;
+    const reconstruction = props.reconstruction;
 
-    let moreThanCancel = false;
+    const variables = {variables: {reconstructionId: reconstruction.id}};
 
-    if (props.reconstruction.annotatorId == props.userId) {
-        if (props.reconstruction.status != ReconstructionStatus.Published) {
-            cancelButton = <ReconstructionActionButton action={ReconstructionAction.Discard}
-                                                       onClick={() => cancelAnnotation({variables: {reconstructionId: props.reconstruction.id}})}/>
-        }
+    const actionButton = (action: ReconstructionAction, onClick: () => void) => {
+        const gate = gateFor(action, {
+            area: "annotator",
+            status: reconstruction.status,
+            childStatus: reconstruction.atlasReconstruction?.status,
+            permissions: user?.permissions ?? 0,
+            annotatorId: reconstruction.annotatorId,
+            userId: props.userId
+        });
 
-        if (statusCanReopen(props.reconstruction.status)) {
-            reopenButton = <ReconstructionActionButton action={ReconstructionAction.Reopen}
-                                                       onClick={() => resumeReconstruction({variables: {reconstructionId: props.reconstruction.id}})}/>
-            moreThanCancel = true;
-        }
+        return gate.visible ? <ReconstructionActionButton action={action} disabled={!gate.enabled} onClick={onClick}/> : null;
+    };
 
-        if (props.reconstruction.status == ReconstructionStatus.InProgress) {
-            holdButton = <ReconstructionActionButton action={ReconstructionAction.Hold}
-                                                     onClick={() => pauseReconstruction({variables: {reconstructionId: props.reconstruction.id}})}/>
-            peerReviewButton = <ReconstructionActionButton action={ReconstructionAction.RequestPeerReview}
-                                                           onClick={() => props.showRequestReviewDialog(props.reconstruction.id, ReconstructionStatus.PeerReview)}/>
-            reviewButton = <ReconstructionActionButton action={ReconstructionAction.RequestPublishReview}
-                                                       onClick={() => props.showRequestReviewDialog(props.reconstruction.id, ReconstructionStatus.PublishReview)}/>
-            moreThanCancel = true;
-        }
-    }
+    const isOwner = reconstruction.annotatorId == props.userId;
 
-    if (props.reconstruction.status == ReconstructionStatus.Published) {
-        revisePopover = <CreateRevisionPopover id={props.reconstruction.id}/>
-    }
+    const revisePopover = reconstruction.status == ReconstructionStatus.Published ? <CreateRevisionPopover id={reconstruction.id}/> : null;
 
     const actions = <Group justify="flex-end">
-        {cancelButton}
-        {cancelButton && moreThanCancel ? <Divider orientation="vertical"/> : null}
-        {reopenButton}
-        {holdButton}
-        {peerReviewButton}
-        {reviewButton}
+        {actionButton(ReconstructionAction.Discard, () => cancelAnnotation(variables))}
+        {actionButton(ReconstructionAction.MarkUntraceable, () => markUntraceable(variables))}
+        {isOwner ? <Divider orientation="vertical"/> : null}
+        {actionButton(ReconstructionAction.Reopen, () => resumeReconstruction(variables))}
+        {actionButton(ReconstructionAction.Hold, () => pauseReconstruction(variables))}
+        {actionButton(ReconstructionAction.RequestPeerReview, () => props.showRequestReviewDialog(reconstruction.id, ReconstructionStatus.PeerReview))}
+        {actionButton(ReconstructionAction.RequestPublishReview, () => props.showRequestReviewDialog(reconstruction.id, ReconstructionStatus.PublishReview))}
         {revisePopover}
     </Group>
 
     const info = appLayout.showReferenceIds ? (
-        <Badge variant="light" onClick={() => clipboard.copy(props.reconstruction.id)}>{props.reconstruction.id}</Badge>) : null;
+        <Badge variant="light" onClick={() => clipboard.copy(reconstruction.id)}>{reconstruction.id}</Badge>) : null;
 
     return (
         <Group p={12} justify="space-between">
@@ -110,12 +108,12 @@ export const ReconstructionActions = (props: ReconstructionPanelProps) => {
                 <IconGitMerge color="var(--mantine-color-green-4)" size={32}/>
                 <Stack justify="flex-start" align="flex-start" gap={0}>
                     <Group>
-                        <Text size="lg" fw={500}> {props.reconstruction.neuron.label}</Text>
-                        <ReconstructionStatusLabel reconstructions={props.reconstruction}/>
+                        <Text size="lg" fw={500}> {reconstruction.neuron.label}</Text>
+                        <ReconstructionStatusLabel reconstructions={reconstruction}/>
                         {info}
                     </Group>
                     <Group>
-                        <Text c="dimmed" fw={400} size="sm">Specimen {props.reconstruction.neuron.specimen.label}</Text>
+                        <Text c="dimmed" fw={400} size="sm">Specimen {reconstruction.neuron.specimen.label}</Text>
                     </Group>
                 </Stack>
             </Group>

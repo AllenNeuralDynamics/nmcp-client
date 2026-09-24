@@ -60,6 +60,7 @@ export type NeuronShape = {
     reconstructions?: Reconstruction[];
     reconstructionCount?: number;
     published?: AtlasReconstruction;
+    untraceable?: boolean;
     createdAt?: number;
     updatedAt?: number;
 }

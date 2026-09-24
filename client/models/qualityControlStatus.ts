@@ -1,6 +1,7 @@
 export enum QualityControlStatus {
     NotReady = 0,
     Pending = 100,
+    InProgress = 200,
     Error = 300,
     Failed = 400,
     Passed = 500
@@ -12,6 +13,8 @@ export function qualityControlStatus(status: QualityControlStatus): string {
             return "Not Ready";
         case QualityControlStatus.Pending:
             return "Pending"
+        case QualityControlStatus.InProgress:
+            return "In Progress";
         case QualityControlStatus.Error:
             return "Tool or Service Error";
         case QualityControlStatus.Failed:
@@ -29,6 +32,8 @@ export function qualityControlColor(status: QualityControlStatus): string {
             return "cyan";
         case QualityControlStatus.Pending:
             return "indigo";
+        case QualityControlStatus.InProgress:
+            return "blue";
         case QualityControlStatus.Error:
             return "red";
         case QualityControlStatus.Failed:

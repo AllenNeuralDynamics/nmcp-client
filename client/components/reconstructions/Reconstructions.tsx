@@ -17,6 +17,7 @@ import {ReconstructionFilters} from "./ReconstructionFilters";
 import {ReconstructionTable} from "./ReconstructionTable";
 import {ReconstructionStatus} from "../../models/reconstructionStatus";
 import {UserPermissions} from "../../graphql/user";
+import {hasPermission} from "../../models/user";
 import {Navigate} from "react-router-dom";
 
 function noReconstructionsText(userOnly: boolean, haveFilters: boolean) {
@@ -27,7 +28,7 @@ export const Reconstructions = observer(() => {
     const preferences = usePreferences();
     const user = useUser();
 
-    if (!user || ((user.permissions & UserPermissions.AnnotateAll) == 0)) {
+    if (!user || !hasPermission(user.permissions, UserPermissions.AnnotateAll)) {
         return <Navigate to="/" replace/>;
     }
 
@@ -44,7 +45,7 @@ export const Reconstructions = observer(() => {
     const [isCompleteDialogVisible, setIsCompleteDialogVisible] = useState(false);
 
     const [reviewRequestId, setReviewRequestId] = useState("");
-    const [reviewRequestStatus, setReviewRequestStatus] = useState<ReconstructionStatus>(ReconstructionStatus.Initialized);
+    const [reviewRequestStatus, setReviewRequestStatus] = useState<ReconstructionStatus | null>(null);
 
     const status: number[] = statusFilter.isEnabled ? statusFilter.contents : []
 
