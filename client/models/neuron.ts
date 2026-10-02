@@ -84,12 +84,33 @@ export function formatKeywords(keywords: string[]): string {
     return (keywords ?? []).join(", ");
 }
 
-export function formatSomaCoords(x: number, y: number, z: number) {
+export enum BracesKind {
+    None = 0,
+    Paren = 1,
+    Bracket = 2
+}
+
+export function bracesPair(braces: BracesKind): string[] {
+    switch (braces) {
+        case BracesKind.None:
+            return ["", ""];
+        case BracesKind.Paren:
+            return ["(", ")"];
+        case BracesKind.Bracket:
+            return ["[", "]"];
+        default:
+            return ["", ""];
+    }
+}
+
+export function formatSomaCoords(x: number, y: number, z: number, braces: BracesKind = BracesKind.Paren) {
     const nx = !isNullOrUndefined(x) ? x.toFixed(1) : "n/a";
     const ny = !isNullOrUndefined(y) ? y.toFixed(1) : "n/a";
     const nz = !isNullOrUndefined(z) ? z.toFixed(1) : "n/a";
 
-    return `(${nx}, ${ny}, ${nz})`;
+    const bracesChar = bracesPair(braces);
+
+    return `${bracesChar[0]}${nx}, ${ny}, ${nz}${bracesChar[1]}`;
 }
 
 export function formatSomaLocation(neuron: NeuronShape) {
@@ -100,9 +121,9 @@ export function formatSomaLocation(neuron: NeuronShape) {
     }
 }
 
-export function formatHortaLocation(neuron: NeuronShape) {
+export function formatHortaLocation(neuron: NeuronShape, braces: BracesKind = BracesKind.Paren) {
     if (neuron) {
-        return formatSomaCoords(neuron.specimenSoma?.x, neuron.specimenSoma?.y, neuron.specimenSoma?.z);
+        return formatSomaCoords(neuron.specimenSoma?.x, neuron.specimenSoma?.y, neuron.specimenSoma?.z, braces);
     } else {
         return "(n/a)";
     }

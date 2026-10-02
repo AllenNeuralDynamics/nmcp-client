@@ -1,12 +1,12 @@
 import * as React from "react";
 import {describe, expect, it, vi} from "vitest";
-import {screen, waitFor} from "@testing-library/react";
+import {getDefaultNormalizer, screen, waitFor} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import {renderWithProviders} from "../../test/render";
 import {makeReconstruction, makeUser} from "../../test/fixtures";
 import {ReconstructionActions} from "./ReconstructionActions";
-import {actionName, ReconstructionAction} from "../../models/reconstructionAction";
+import {actionName, actionTooltip, ReconstructionAction} from "../../models/reconstructionAction";
 import {ReconstructionStatus} from "../../models/reconstructionStatus";
 import {UserPermissions} from "../../graphql/user";
 import {DISCARD_RECONSTRUCTION_MUTATION} from "../../graphql/reconstruction";
@@ -85,6 +85,18 @@ describe("ReconstructionActions", () => {
         rerender(<ReconstructionActions reconstruction={makeReconstruction({status: ReconstructionStatus.InProgress, annotatorId: owner.id})} {...props}/>);
 
         expect(button(ReconstructionAction.Hold)).toBeEnabled();
+    });
+
+    it("Discard is the annotator's action, by name and tooltip", async () => {
+        renderBar(ReconstructionStatus.InProgress);
+
+        const discard = button(ReconstructionAction.Discard);
+
+        expect(discard).toHaveAccessibleName(actionName(ReconstructionAction.Discard));
+
+        await userEvent.hover(discard);
+
+        expect(await screen.findByText(actionTooltip(ReconstructionAction.Discard), {normalizer: getDefaultNormalizer({collapseWhitespace: false})})).toBeInTheDocument();
     });
 
     it("Discard sends discardReconstruction with the reconstruction id", async () => {

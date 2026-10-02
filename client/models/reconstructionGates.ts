@@ -150,9 +150,10 @@ function ownerGate(ctx: GateContext, enabled: boolean): Gate {
 export function gateFor(action: ReconstructionAction, ctx: GateContext): Gate {
     switch (action) {
         case ReconstructionAction.Discard:
-            // The annotator bar never shows owner controls on someone else's reconstruction.  Elsewhere it shows to
-            // anyone who could discard at some status.
-            return {visible: ctx.area == "annotator" ? isOwner(ctx) : canOperatePipeline(ctx), enabled: canDiscard(ctx)};
+            // The annotator bar never shows owner controls on someone else's reconstruction.  The API and workflow also
+            // allow reviewers to discard, but the Review tab deliberately doesn't offer it for now: a reviewer rescinds,
+            // and the annotator can then choose to discard.
+            return {visible: ctx.area == "annotator" && isOwner(ctx), enabled: canDiscard(ctx)};
         case ReconstructionAction.Reopen:
             return ownerGate(ctx, statusCanReopen(ctx.status));
         case ReconstructionAction.Hold:
@@ -169,8 +170,11 @@ export function gateFor(action: ReconstructionAction, ctx: GateContext): Gate {
             // A peer reviewer can reject at some status, so visibility does not depend on this one.
             return {visible: isAdmin(ctx) || has(ctx.permissions, UserPermissions.ReviewAll), enabled: isRejectable(ctx) && canReject(ctx)};
         case ReconstructionAction.ApprovePeer:
+            // An exception to showing whatever the role can do: two Approve buttons side by side confuse, so anyone
+            // who also sees ApprovePublish gets this one only while it is actually an option.
             return {
-                visible: isAdmin(ctx) || has(ctx.permissions, UserPermissions.PeerReview),
+                visible: (isAdmin(ctx) || has(ctx.permissions, UserPermissions.PeerReview))
+                    && (!gateFor(ReconstructionAction.ApprovePublish, ctx).visible || ctx.status == ReconstructionStatus.PeerReview),
                 enabled: ctx.status == ReconstructionStatus.PeerReview && canApprove(ctx, ReconstructionStatus.PublishReview)
             };
         case ReconstructionAction.ApprovePublish:
@@ -188,7 +192,9 @@ export function gateFor(action: ReconstructionAction, ctx: GateContext): Gate {
                 enabled: ctx.area == "published" ? isPublishFailedPair(ctx) : PhaseFailureStatuses.includes(ctx.childStatus)
             };
         case ReconstructionAction.ResetPipeline:
-            return {visible: canOperatePipeline(ctx), enabled: isAbandonableFailure(ctx)};
+            // The API and workflow also allow publish reviewers to replay the pipeline, but for now only admins are
+            // offered it.
+            return {visible: isAdmin(ctx), enabled: isAbandonableFailure(ctx)};
         default:
             return hidden;
     }

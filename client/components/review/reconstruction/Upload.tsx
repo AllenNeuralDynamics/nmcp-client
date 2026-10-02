@@ -40,8 +40,12 @@ export const Upload = observer(({reconstruction, space}: { reconstruction: Recon
     }
 
     const onUploadError = (error: ApolloError) => {
-        if (error.cause && error.cause["statusCode"] == 401) {
-            errorNotification("Unauthorized", `You are not authorized to upload sample space reconstructions.`);
+        const spaceName = space == ReconstructionSpace.Atlas ? "atlas-space" : "specimen-space";
+
+        if (error.graphQLErrors?.[0]?.extensions?.code == 1009) {
+            errorNotification("Upload Not Allowed", error.graphQLErrors[0].message);
+        } else if (error.cause && error.cause["statusCode"] == 401) {
+            errorNotification("Unauthorized", `You are not authorized to upload ${spaceName} reconstructions.`);
         } else {
             errorNotification("Reconstruction Failed", `The reconstruction could not be added to ${reconstruction?.neuron.label}`);
         }

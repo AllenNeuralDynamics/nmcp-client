@@ -2,7 +2,7 @@ import * as React from "react";
 import {Badge, Group, Table} from "@mantine/core";
 import {IconBrowserShare} from "@tabler/icons-react";
 
-import {formatHortaLocation, formatKeywords, NeuronShape} from "../../models/neuron";
+import {BracesKind, formatHortaLocation, formatKeywords, NeuronShape} from "../../models/neuron";
 import {formatAtlasStructure} from "../../models/atlasStructure";
 import {AnnotatorWithStatus} from "../common/AnnotatorWithStatus";
 import {successNotification} from "../common/NotificationHelper";
@@ -19,8 +19,9 @@ export interface ICandidateRowProps {
 
 export const CandidateRow = (props: ICandidateRowProps) => {
     const onCopyHorta = async () => {
-        await navigator.clipboard.writeText(formatHortaLocation(props.neuron));
-        successNotification("Location Copied to Clipboard", formatHortaLocation(props.neuron));
+        const coords = formatHortaLocation(props.neuron, BracesKind.Bracket);
+        await navigator.clipboard.writeText(coords);
+        successNotification("Location Copied to Clipboard", coords);
     }
 
     const subProps = props.isSelected ? {bg: "table-selection"} : {};

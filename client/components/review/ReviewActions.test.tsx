@@ -1,12 +1,12 @@
 import * as React from "react";
 import {beforeEach, describe, expect, it, vi} from "vitest";
-import {getDefaultNormalizer, screen, waitFor} from "@testing-library/react";
+import {screen, waitFor} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import {renderWithProviders} from "../../test/render";
 import {makeReconstruction, makeUser} from "../../test/fixtures";
 import {ReviewActions} from "./ReviewActions";
-import {actionName, actionTooltip, ReconstructionAction} from "../../models/reconstructionAction";
+import {actionName, ReconstructionAction} from "../../models/reconstructionAction";
 import {ReconstructionStatus} from "../../models/reconstructionStatus";
 import {AtlasReconstructionStatus} from "../../models/atlasReconstructionStatus";
 import {UserPermissions} from "../../graphql/user";
@@ -18,6 +18,7 @@ vi.mock("../common/NotificationHelper");
 
 const peer = makeUser(UserPermissions.PeerReview, "peer");
 const publisher = makeUser(UserPermissions.PublishReview, "publisher");
+const both = makeUser(UserPermissions.ReviewAll, "both");
 const admin = makeUser(UserPermissions.Admin, "admin");
 
 const S = ReconstructionStatus;
@@ -52,37 +53,83 @@ describe("ReviewActions visibility", () => {
         expect(button(ReconstructionAction.ResetPipeline)).not.toBeInTheDocument();
     });
 
-    it("admin at PeerReview: Discard enabled", () => {
-        renderBar(admin, S.PeerReview);
+    it.each([
+        ["peer reviewer", peer],
+        ["publish reviewer", publisher],
+        ["peer and publish reviewer", both],
+        ["admin", admin]
+    ])("%s never sees Discard", (_, user) => {
+        renderBar(user, S.PeerReview);
 
-        expect(button(ReconstructionAction.Discard)).toBeEnabled();
+        expect(button(ReconstructionAction.Discard)).not.toBeInTheDocument();
     });
 
-    it("publish reviewer at PeerReview: Discard disabled", () => {
-        renderBar(publisher, S.PeerReview);
-
-        expect(button(ReconstructionAction.Discard)).toBeDisabled();
-    });
-
-    it("publish reviewer at PublishFailed + FailedSearchIndexing: Retry and Reject enabled, Replay and Discard disabled", () => {
+    it("publish reviewer at PublishFailed + FailedSearchIndexing: Retry and Reject enabled, no Replay", () => {
         renderBar(publisher, S.PublishFailed, A.FailedSearchIndexing);
 
         expect(button(ReconstructionAction.RetryPhase)).toBeEnabled();
         expect(button(ReconstructionAction.Reject)).toBeEnabled();
-        expect(button(ReconstructionAction.ResetPipeline)).toBeDisabled();
-        expect(button(ReconstructionAction.Discard)).toBeDisabled();
+        expect(button(ReconstructionAction.ResetPipeline)).not.toBeInTheDocument();
     });
 
-    it("Discard is the annotator's action, by name and tooltip", async () => {
-        renderBar(admin, S.PeerReview);
+    it("admin at PublishFailed + FailedSearchIndexing: Replay shown, disabled", () => {
+        renderBar(admin, S.PublishFailed, A.FailedSearchIndexing);
 
-        const discard = button(ReconstructionAction.Discard);
+        expect(button(ReconstructionAction.ResetPipeline)).toBeDisabled();
+    });
+});
 
-        expect(discard).toHaveAccessibleName(actionName(ReconstructionAction.Discard));
+describe("ReviewActions approval labels", () => {
+    it.each([
+        ["peer reviewer", peer],
+        ["publish reviewer", publisher]
+    ])("%s sees a single plain Approve", (_, user) => {
+        renderBar(user, S.PeerReview);
 
-        await userEvent.hover(discard);
+        expect(screen.getAllByRole("button", {name: "Approve"})).toHaveLength(1);
+        expect(screen.queryByRole("button", {name: /Approve \(/})).not.toBeInTheDocument();
+    });
 
-        expect(await screen.findByText(actionTooltip(ReconstructionAction.Discard), {normalizer: getDefaultNormalizer({collapseWhitespace: false})})).toBeInTheDocument();
+    it.each([
+        ["peer and publish reviewer", both],
+        ["admin", admin]
+    ])("%s sees Approve (Peer) and Approve (Publish)", (_, user) => {
+        renderBar(user, S.PeerReview);
+
+        expect(screen.getByRole("button", {name: "Approve (Peer)"})).toBeEnabled();
+        expect(screen.getByRole("button", {name: "Approve (Publish)"})).toBeDisabled();
+        expect(screen.queryByRole("button", {name: "Approve"})).not.toBeInTheDocument();
+    });
+
+    it.each([
+        ["peer and publish reviewer", both],
+        ["admin", admin]
+    ])("%s outside PeerReview sees a single plain Approve", (_, user) => {
+        renderBar(user, S.PublishReview, A.ReadyToProcess);
+
+        const approvals = screen.getAllByRole("button", {name: "Approve"});
+        expect(approvals).toHaveLength(1);
+        expect(approvals[0]).toBeEnabled();
+        expect(screen.queryByRole("button", {name: /Approve \(/})).not.toBeInTheDocument();
+    });
+
+    it("Approve (Peer) comes before Approve (Publish)", () => {
+        renderBar(both, S.PeerReview);
+
+        const names = screen.getAllByRole("button").map(b => b.textContent);
+
+        expect(names.indexOf("Approve (Peer)")).toBeLessThan(names.indexOf("Approve (Publish)"));
+    });
+});
+
+describe("ReviewActions ordering", () => {
+    it("Publish is the rightmost button", () => {
+        renderBar(admin, S.ReadyToPublish);
+
+        const buttons = screen.getAllByRole("button");
+
+        expect(buttons.length).toBeGreaterThan(1);
+        expect(buttons[buttons.length - 1]).toHaveAccessibleName(actionName(ReconstructionAction.Publish));
     });
 });
 

@@ -96,34 +96,40 @@ export const ReviewActions = ({reconstruction}: { reconstruction: Reconstruction
 
     const variables = {variables: {reconstructionId: reconstruction.id}};
 
-    const actionButton = (action: ReconstructionAction, onClick: () => void) => {
-        const gate = gateFor(action, {
-            area: "review",
-            status: reconstruction.status,
-            childStatus: reconstruction.atlasReconstruction?.status,
-            permissions: user?.permissions ?? 0,
-            annotatorId: reconstruction.annotatorId,
-            userId: user?.id
-        });
+    const gate = (action: ReconstructionAction) => gateFor(action, {
+        area: "review",
+        status: reconstruction.status,
+        childStatus: reconstruction.atlasReconstruction?.status,
+        permissions: user?.permissions ?? 0,
+        annotatorId: reconstruction.annotatorId,
+        userId: user?.id
+    });
 
-        return gate.visible ? <ReconstructionActionButton key={action} action={action} disabled={!gate.enabled} onClick={onClick}/> : null;
+    const actionButton = (action: ReconstructionAction, onClick: () => void, label?: string) => {
+        const g = gate(action);
+
+        return g.visible ? <ReconstructionActionButton key={action} action={action} disabled={!g.enabled} onClick={onClick}>{label}</ReconstructionActionButton> : null;
     };
 
     const approve = (targetStatus: ReconstructionStatus) => approveAnnotation({variables: {reconstructionId: reconstruction.id, targetStatus}});
 
+    // Both approvals share the plain "Approve" label, so a user who holds both permissions needs them told apart.
+    const showsBothApprovals = gate(ReconstructionAction.ApprovePeer).visible && gate(ReconstructionAction.ApprovePublish).visible;
+
+    // The approval group goes last so that Publish is always the rightmost button.
     const groups = [
         [
             actionButton(ReconstructionAction.Reject, () => rejectAnnotation(variables)),
             actionButton(ReconstructionAction.Discard, () => discardReconstruction(variables))
         ],
         [
-            actionButton(ReconstructionAction.ApprovePublish, () => approve(ReconstructionStatus.Approved)),
-            actionButton(ReconstructionAction.ApprovePeer, () => approve(ReconstructionStatus.PublishReview)),
-            actionButton(ReconstructionAction.Publish, () => publishReconstruction({variables: {reconstructionId: reconstruction.id, replaceExisting: false}}))
-        ],
-        [
             actionButton(ReconstructionAction.RetryPhase, () => retryPhase(reconstruction)),
             actionButton(ReconstructionAction.ResetPipeline, () => setIsResetModalOpen(true))
+        ],
+        [
+            actionButton(ReconstructionAction.ApprovePeer, () => approve(ReconstructionStatus.PublishReview), showsBothApprovals ? "Approve (Peer)" : undefined),
+            actionButton(ReconstructionAction.ApprovePublish, () => approve(ReconstructionStatus.Approved), showsBothApprovals ? "Approve (Publish)" : undefined),
+            actionButton(ReconstructionAction.Publish, () => publishReconstruction({variables: {reconstructionId: reconstruction.id, replaceExisting: false}}))
         ]
     ].map(g => g.filter(b => b != null)).filter(g => g.length > 0);
 

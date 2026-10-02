@@ -17,6 +17,7 @@ const roles = {
     nonOwner: makeUser(UserPermissions.AnnotateAll, "other"),
     peer: makeUser(UserPermissions.PeerReview, "peer"),
     publish: makeUser(UserPermissions.PublishReview, "publish"),
+    both: makeUser(UserPermissions.ReviewAll, "both"),
     admin: makeUser(UserPermissions.Admin, "admin"),
     adminOwner: makeUser(UserPermissions.Admin, OWNER_ID)
 };
@@ -49,13 +50,14 @@ describe("Discard", () => {
         ["annotator", "nonOwner", S.InProgress, A.Initialized, false, false],
         // An admin could discard it, but the annotator bar never shows owner controls to a non-owner.
         ["annotator", "admin", S.InProgress, A.Initialized, false, true],
+        // Reviewers could discard at some of these, but the Review tab doesn't offer it.
         ["review", "peer", S.PeerReview, A.Initialized, false, false],
-        ["review", "admin", S.PeerReview, A.Initialized, true, true],
-        ["review", "publish", S.PeerReview, A.Initialized, true, false],
-        ["review", "publish", S.ReadyToPublish, A.ReadyToPublish, true, true],
-        ...AbandonableFailureStatuses.map((child): Row => ["review", "publish", S.WaitingForAtlasReconstruction, child, true, true]),
-        ["review", "publish", S.PublishFailed, A.FailedSearchIndexing, true, false],
-        ["review", "admin", S.PublishFailed, A.FailedSearchIndexing, true, false],
+        ["review", "admin", S.PeerReview, A.Initialized, false, true],
+        ["review", "publish", S.PeerReview, A.Initialized, false, false],
+        ["review", "publish", S.ReadyToPublish, A.ReadyToPublish, false, true],
+        ...AbandonableFailureStatuses.map((child): Row => ["review", "publish", S.WaitingForAtlasReconstruction, child, false, true]),
+        ["review", "publish", S.PublishFailed, A.FailedSearchIndexing, false, false],
+        ["review", "admin", S.PublishFailed, A.FailedSearchIndexing, false, false],
         ["review", "peer", S.PublishFailed, A.FailedSearchIndexing, false, false],
         ["annotator", "owner", S.PublishFailed, A.FailedSearchIndexing, true, false],
         ["annotator", "adminOwner", S.PublishFailed, A.FailedSearchIndexing, true, false]
@@ -79,14 +81,16 @@ describe("RetryPhase", () => {
 
 describe("ResetPipeline", () => {
     check(ReconstructionAction.ResetPipeline, [
+        // Publish reviewers could replay at some of these, but only admins are offered it.
         ["review", "peer", S.ReadyToPublish, A.ReadyToPublish, false, true],
-        ["review", "publish", S.ReadyToPublish, A.ReadyToPublish, true, true],
-        ...AbandonableFailureStatuses.map((child): Row => ["review", "publish", S.WaitingForAtlasReconstruction, child, true, true]),
-        ["review", "publish", S.PublishFailed, A.FailedSearchIndexing, true, false],
+        ["review", "publish", S.ReadyToPublish, A.ReadyToPublish, false, true],
+        ...AbandonableFailureStatuses.map((child): Row => ["review", "publish", S.WaitingForAtlasReconstruction, child, false, true]),
+        ["review", "publish", S.PublishFailed, A.FailedSearchIndexing, false, false],
         // The pair pitfall: an abandonable child under any other parent is not abandonable.
-        ["review", "publish", S.PublishReview, A.FailedPrecomputed, true, false],
-        ["review", "publish", S.Publishing, A.FailedPrecomputed, true, false],
-        ["review", "admin", S.PublishFailed, A.FailedPrecomputed, true, false]
+        ["review", "admin", S.PublishReview, A.FailedPrecomputed, true, false],
+        ["review", "admin", S.Publishing, A.FailedPrecomputed, true, false],
+        ["review", "admin", S.PublishFailed, A.FailedPrecomputed, true, false],
+        ...AbandonableFailureStatuses.map((child): Row => ["review", "admin", S.WaitingForAtlasReconstruction, child, true, true])
     ]);
 });
 
@@ -123,7 +127,9 @@ describe("ApprovePeer", () => {
     check(ReconstructionAction.ApprovePeer, [
         ["review", "publish", S.PeerReview, A.Initialized, false, false],
         ...statuses.map((status): Row => ["review", "peer", status, A.Initialized, true, status == S.PeerReview]),
-        ["review", "admin", S.PeerReview, A.Initialized, true, true]
+        // Anyone who also sees ApprovePublish sees this one only at PeerReview.
+        ...statuses.map((status): Row => ["review", "both", status, A.Initialized, status == S.PeerReview, status == S.PeerReview]),
+        ...statuses.map((status): Row => ["review", "admin", status, A.Initialized, status == S.PeerReview, status == S.PeerReview])
     ]);
 });
 
