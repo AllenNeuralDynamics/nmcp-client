@@ -33,7 +33,7 @@ export const NeuronRow = observer((props: NeuronRowProps) => {
     const constants = useConstants();
 
     // The soma node carries the automatically assigned structure; the neuron carries the manual (curated) assignment.
-    const somaAcronym = v.soma ? constants.AtlasConstants.findStructure(v.soma.atlasStructureId)?.acronym ?? null : null;
+    const somaAcronym = v.soma ? constants.findAtlasStructure(v.soma.atlasStructureId)?.acronym ?? null : null;
     const neuronAcronym = v.neuron.atlasStructure?.acronym ?? null;
 
     const structureAcronym = neuronAcronym ?? somaAcronym ?? "unknown";

@@ -1,116 +1,20 @@
 import {makeObservable, observable} from "mobx";
 
 import {ConstantsQueryResponse} from "../graphql/constants";
-import {formatAtlasStructure, AtlasStructureShape} from "./atlasStructure";
+import {AtlasStructureShape} from "./atlasStructure";
+import {Atlas, AtlasShape} from "./atlas";
+import {AtlasKindId, AtlasKindShape} from "./atlasKind";
 import {NodeStructureShape, NodeStructureKind} from "./structureIdentifier";
 import {NeuronalStructure} from "./neuronalStructure";
 import {NeuronStructureShape, AxonStructureName, NeuronStructureKey, DendriteStructureName, SomaStructureName} from "./neuronStructure";
 import {IQueryOperator} from "./queryOperator";
 
-export class AtlasConstants {
-    private _structures: AtlasStructureShape[] = [];
-    private _structuresWithGeometry: AtlasStructureShape[] = [];
-    private _idLookup = new Map<string, AtlasStructureShape>();
-    private _structureIdLookup = new Map<number, AtlasStructureShape>();
-    private _colorLookup: Map<string, string> = new Map();
-
-    public get Structures(): AtlasStructureShape[] {
-        return this._structures;
-    }
-
-    public get StructuresWithGeometry(): AtlasStructureShape[] {
-        return this._structuresWithGeometry;
-    }
-
-    public get StructureColors(): Map<string, string> {
-        return this._colorLookup;
-    }
-
-    public load(structures: AtlasStructureShape[]) {
-        this._structures = Array.from(structures).sort((s1, s2) => formatAtlasStructure(s1).localeCompare(formatAtlasStructure(s2)));
-
-        this._structures.map(b => {
-            // TODO END Remove
-            this._idLookup.set(b.id, b);
-            this._structureIdLookup.set(b.structureId, b);
-        });
-
-        this._structuresWithGeometry = this._structures.filter(b => b.hasGeometry).sort((a: AtlasStructureShape, b: AtlasStructureShape) => {
-            if (a.depth === b.depth) {
-                return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
-            }
-            return a.depth - b.depth;
-        });
-
-        this._structures.forEach(b => {
-            if (b.hasGeometry) {
-                this._colorLookup[b.structureId.toString()] = "#" + b.defaultColor;
-            }
-        });
-    }
-
-    public findStructure(id: string | number): AtlasStructureShape | undefined {
-        if (typeof id === "string")
-            return this._idLookup.get(id);
-        else
-            return this._structureIdLookup.get(id);
-    }
-
-    public findStructureWithId(id: string): AtlasStructureShape | undefined {
-        return this._idLookup.get(id);
-    }
-
-    public findStructures(id: string[]): AtlasStructureShape[] {
-        return id.map(s => this._idLookup.get(s));
-    }
-
-    public structureMatchesText(value: string, option: string | AtlasStructureShape) {
-        if (!value || !option) {
-            return true;
-        }
-
-        let structure: AtlasStructureShape;
-
-        if (typeof option === "string") {
-            structure = this.findStructure(option);
-        } else {
-            structure = option;
-        }
-
-        const filterValue = value.toLowerCase();
-
-        if (structure.name.toLowerCase().includes(filterValue)) {
-            return true;
-        }
-
-        if (structure.acronym.toLowerCase().includes(filterValue)) {
-            return true;
-        }
-
-        if (structure.aliases?.some(a => a.toLowerCase().includes(filterValue))) {
-            return true;
-        }
-
-        const parts = filterValue.split(/\s+/);
-
-        if (parts.length < 2) {
-            return false;
-        }
-
-        const itemParts = structure.name.split(/\s+/);
-
-        return parts.some(p => {
-            return itemParts.some(i => i === p);
-        });
-    }
-
-    public matchesText(value: string) {
-        return this._structures.filter(s => this.structureMatchesText(value, s));
-    }
-}
-
 export class DataConstants {
-    private _atlasConstants: AtlasConstants = new AtlasConstants();
+    private _atlasKinds: AtlasKindShape[] = [];
+    private _atlasKindMap = new Map<string, AtlasKindShape>();
+    private _atlases: Atlas[] = [];
+    private _atlasMap = new Map<string, Atlas>();
+    private _atlasStructureMap = new Map<string, AtlasStructureShape>();
 
     private _QueryOperators: IQueryOperator[] = [];
     private _queryOperatorMap = new Map<string, IQueryOperator>();
@@ -142,7 +46,7 @@ export class DataConstants {
         this._apiVersion = data.systemSettings.apiVersion;
         this.neuronCount = data.systemSettings.neuronCount;
 
-        this._atlasConstants.load(data.atlasStructures);
+        this.loadAtlases(data.atlasKinds, data.atlases);
 
         this.loadQueryOperators(data.queryOperators);
         this.loadStructureIdentifiers(data.nodeStructures)
@@ -163,8 +67,38 @@ export class DataConstants {
         return this._QueryOperators;
     }
 
-    public get AtlasConstants(): AtlasConstants {
-        return this._atlasConstants;
+    public get Atlases(): Atlas[] {
+        return this._atlases;
+    }
+
+    public get AtlasKinds(): AtlasKindShape[] {
+        return this._atlasKinds;
+    }
+
+    // Deliberately no fallback to another kind: legacy numeric structure ids are read against this atlas, and in a
+    // non-Mouse atlas the same numbers name different structures.
+    public get DefaultAtlas(): Atlas | undefined {
+        return this._atlases.find(a => a.atlasKind?.kind === AtlasKindId.Mouse);
+    }
+
+    public get DefaultAtlasKind(): AtlasKindShape | undefined {
+        return this._atlasKinds.find(k => k.kind === AtlasKindId.Mouse);
+    }
+
+    public getAtlas(id: string): Atlas | undefined {
+        return this._atlasMap.get(id);
+    }
+
+    public getAtlasKind(id: string): AtlasKindShape | undefined {
+        return this._atlasKindMap.get(id);
+    }
+
+    public findAtlasStructure(id: string): AtlasStructureShape | undefined {
+        if (!id) {
+            return undefined;
+        }
+
+        return this._atlasStructureMap.get(id);
     }
 
     public findStructureIdentifier(id: string) {
@@ -177,6 +111,23 @@ export class DataConstants {
 
     public findNeuronalStructure(id: string) {
         return this._neuronStructureMap.get(id);
+    }
+
+    private loadAtlases(atlasKinds: AtlasKindShape[], atlases: AtlasShape[]) {
+        this._atlasKinds = atlasKinds ?? [];
+
+        this._atlasKinds.forEach(k => this._atlasKindMap.set(k.id, k));
+
+        (atlases ?? []).forEach(shape => {
+            const atlas = new Atlas();
+
+            atlas.load(shape, shape.atlasStructures ?? [], this._atlasKindMap.get(shape.atlasKindId) ?? null);
+
+            this._atlases.push(atlas);
+            this._atlasMap.set(atlas.id, atlas);
+
+            atlas.Structures.forEach(s => this._atlasStructureMap.set(s.id, s));
+        });
     }
 
     private loadStructureIdentifiers(structures: NodeStructureShape[]) {

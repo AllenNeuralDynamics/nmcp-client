@@ -16,6 +16,8 @@ export class OptionalFilter<T> {
 }
 
 export class CandidateFilter {
+    public atlasId: string = null;
+
     public includeInProgress: boolean = false;
 
     public samplesFilter: OptionalFilter<string[]> = new OptionalFilter([]);
@@ -27,8 +29,20 @@ export class CandidateFilter {
     public limitVolume: boolean = false;
     public volumeRange: [number, number] = [0, 100000];
 
-    public constructor() {
+    public constructor(atlasId: string = null) {
+        this.atlasId = atlasId;
+
         makeAutoObservable(this);
+    }
+
+    // The structure filter holds structures of the previous atlas.
+    public selectAtlas(atlasId: string) {
+        if (atlasId === this.atlasId) {
+            return;
+        }
+
+        this.atlasId = atlasId;
+        this.atlasStructureFilter.contents = [];
     }
 
     public get anyEnabled(): boolean {

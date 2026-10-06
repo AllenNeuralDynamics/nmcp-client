@@ -1,41 +1,46 @@
 import {NeuroglancerViewer} from "./neuroglancerViewer";
-import {LayerType, NeuroglancerLayerSource} from "./neuroglancerLayer";
-
-export const defaultAtlasLayerSource: NeuroglancerLayerSource = {
-    name: "Atlas",
-    type: LayerType.segmentation,
-    source: "precomputed://gs://allen_neuroglancer_ccf/ccf_test1"
-};
+import {AtlasLayerName, createAtlasLayerSource} from "./atlasLayer";
+import {AtlasViewModel} from "../viewmodel/atlasViewModel";
+import {Atlas} from "../models/atlas";
 
 export class AtlasViewer extends NeuroglancerViewer {
-    private readonly _atlasSegmentColors: Map<string, string>
+    // Null only when no Mouse atlas is loaded; the viewer then has no atlas layer.
+    private readonly _atlasViewModel: AtlasViewModel;
 
-    public constructor(elementId: string, atlasSegmentColors: Map<string, string>, isDarkColorScheme: boolean = false) {
+    public constructor(elementId: string, atlasViewModel: AtlasViewModel, isDarkColorScheme: boolean = false) {
         super(elementId, isDarkColorScheme);
 
-        this._atlasSegmentColors = atlasSegmentColors;
+        this._atlasViewModel = atlasViewModel;
+    }
+
+    protected get atlas(): Atlas {
+        return this._atlasViewModel?.atlas ?? null;
     }
 
     protected get defaultState() {
         const state: object = super.defaultState;
 
-        return this.ensureLayer(Object.assign({}, defaultAtlasLayerSource, {
-            options: {
-                segments: [997],
-                segmentColors: this._atlasSegmentColors,
-                objectAlpha: 0.20
-            }
-        }), state);
+        if (!this.atlas) {
+            return state;
+        }
+
+        return this.ensureLayer(createAtlasLayerSource(this.atlas), state);
     }
 
     protected includeAtlasStructures(ids: number[], state: any, includeRoot: boolean = false): any {
-        if (includeRoot && ids.findIndex(s => s == 997) == -1) {
-            ids.push(997);
+        if (!this.atlas) {
+            return state;
+        }
+
+        const rootId = this.atlas.rootStructureId;
+
+        if (includeRoot && ids.findIndex(s => s == rootId) == -1) {
+            ids.push(rootId);
         }
 
         const segments = ids.map(s => s.toString());
 
-        const layerIndex = this.findLayer(defaultAtlasLayerSource.name, state);
+        const layerIndex = this.findLayer(AtlasLayerName, state);
 
         state.layers[layerIndex].segments = segments;
 

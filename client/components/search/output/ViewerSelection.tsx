@@ -5,12 +5,13 @@ import {Accordion, Anchor, Divider, Group, Space, Stack, Table, Text, Tooltip} f
 import {useMouse} from "@mantine/hooks";
 
 import {useConstants} from "../../../hooks/useConstants";
-import {useAtlas} from "../../../hooks/useAtlas";
+import {useSearchAtlas} from "../../../hooks/useSearchAtlas";
 import {NodeStructureKind} from "../../../models/structureIdentifier";
 import {useUIQuery} from "../../../hooks/useUIQuery";
 import {useAppLayout} from "../../../hooks/useAppLayout";
 import {NeuronViewModel} from "../../../viewmodel/neuronViewModel";
 import {AtlasNode} from "../../../models/atlasNode";
+import {AtlasStructureShape} from "../../../models/atlasStructure";
 
 // Small table-padding (compact tables)
 const stp: number = 4;
@@ -28,7 +29,7 @@ export const ViewerSelection = observer(({neuron, node}: { neuron: NeuronViewMod
     const constants = useConstants();
     const appLayout = useAppLayout();
     const uiQuery = useUIQuery();
-    const atlas = useAtlas();
+    const searchAtlas = useSearchAtlas();
 
     if (!node) {
         return;
@@ -38,20 +39,36 @@ export const ViewerSelection = observer(({neuron, node}: { neuron: NeuronViewMod
         return constants.findStructureIdentifier(id);
     };
 
-    const lookupStructure = (id: string | number) => {
-        return constants.AtlasConstants.findStructure(id);
+    const lookupStructure = (id: string) => {
+        return constants.findAtlasStructure(id);
+    };
+
+    const findDisplayStructure = (structure: AtlasStructureShape) => {
+        return structure ? constants.getAtlas(structure.atlasId)?.findStructureWithGeometry(structure) : undefined;
+    };
+
+    // A structure with no geometry ancestor (possible under a marmoset root without geometry) has nothing to toggle,
+    // so its label is plain text.
+    const renderStructureLabel = (structure: AtlasStructureShape, displayStructure: AtlasStructureShape, text: string) => {
+        if (!structure) {
+            return null;
+        }
+
+        return (
+            <Tooltip zIndex={2000} label={structure.name}>
+                {displayStructure ? (
+                    <Anchor size="sm" onClick={() => searchAtlas.atlasViewModel?.toggle(displayStructure.id)}>{text}</Anchor>
+                ) : (
+                    <Text size="sm" span>{text}</Text>
+                )}
+            </Tooltip>
+        );
     };
 
     const renderSelection = () => {
         const atlasStructure = lookupStructure(node.atlasStructureId);
 
-        let displayStructure = atlasStructure;
-
-        if (displayStructure) {
-            while (!displayStructure.hasGeometry) {
-                displayStructure = lookupStructure(displayStructure.parentStructureId);
-            }
-        }
+        const displayStructure = findDisplayStructure(atlasStructure);
 
         const structure = lookupStructureIdentifier(node.nodeStructureId);
 
@@ -66,30 +83,10 @@ export const ViewerSelection = observer(({neuron, node}: { neuron: NeuronViewMod
         if (structure.swcValue !== NodeStructureKind.soma && neuron && neuron.soma) {
             const somaStructure = lookupStructure(neuron.soma.atlasStructureId);
 
-            let somaDisplayStructure = somaStructure;
-
-            if (somaDisplayStructure) {
-                while (!somaDisplayStructure.hasGeometry) {
-                    somaDisplayStructure = lookupStructure(somaDisplayStructure.parentStructureId);
-                }
-            }
-
-            somaStructureLabel = somaStructure ? (
-                <Tooltip zIndex={2000} label={somaStructure.name}>
-                    <Anchor size="sm" onClick={() => atlas.toggle(somaDisplayStructure.id)}>
-                        {` ${somaStructure.acronym}`}
-                    </Anchor>
-                </Tooltip>
-            ) : null;
+            somaStructureLabel = renderStructureLabel(somaStructure, findDisplayStructure(somaStructure), ` ${somaStructure?.acronym}`);
         }
 
-        const structureLabel = displayStructure ? (
-            <Tooltip zIndex={2000} label={atlasStructure.name}>
-                <Anchor size="sm" onClick={() => atlas.toggle(displayStructure.id)}>
-                    {`${atlasStructure.acronym}`}
-                </Anchor>
-            </Tooltip>
-        ) : null;
+        const structureLabel = renderStructureLabel(atlasStructure, displayStructure, `${atlasStructure?.acronym}`);
 
         return (
             <Stack gap={0}>

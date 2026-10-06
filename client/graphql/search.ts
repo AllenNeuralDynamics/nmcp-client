@@ -21,6 +21,7 @@ export const SEARCH_NEURONS_QUERY = gql`query SearchNeurons($context: SearchCont
             specimen {
                 id
                 label
+                atlasId
             }
             published {
                 id
@@ -55,6 +56,7 @@ ${NodeCountsFieldsFragment}
 export type SearchContext = {
     nonce: string,
     collectionIds: string[],
+    atlasKindIds: string[],
     predicates: SearchPredicate[];
 }
 

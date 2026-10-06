@@ -17,24 +17,23 @@ import {AtlasContainer} from "../search/output/atlas/AtlasContainer";
 import {AtlasViewerSelection} from "./AtlasViewerSelection";
 
 type NeuronAtlasSpaceViewProps = {
+    atlasId: string;
     reconstruction?: Reconstruction;
     soma?: SomaLocation;
     focusSoma?: SomaLocation;
     onFocusApplied?: () => void;
 };
 
-export const NeuronAtlasSpaceView = observer(({reconstruction, soma, focusSoma, onFocusApplied}: NeuronAtlasSpaceViewProps) => {
+export const NeuronAtlasSpaceView = observer(({atlasId, reconstruction, soma, focusSoma, onFocusApplied}: NeuronAtlasSpaceViewProps) => {
     const scheme = useComputedColorScheme();
 
     const systemConfiguration = useSystemConfiguration();
 
-    const constants = useConstants().AtlasConstants;
+    const constants = useConstants();
 
     const [viewer, setViewer] = useState<AtlasSpaceViewer>(null);
 
-    const [atlas, setAtlas] = useState(new AtlasViewModel());
-
-    const [displayedStructures, setDisplayedStructures] = useState<number[]>([997]);
+    const [atlasViewModel] = useState(() => new AtlasViewModel(constants.getAtlas(atlasId)));
 
     const [getNearest, {data}] = useLazyQuery<NearestNodeQueryResponse, NearestNodeQueryVariables>(NEAREST_NODE_QUERY);
 
@@ -51,9 +50,7 @@ export const NeuronAtlasSpaceView = observer(({reconstruction, soma, focusSoma, 
         : null;
 
     useEffect(() => {
-        atlas.initialize(constants);
-
-        const v = new AtlasSpaceViewer("neuron-atlas-ng-container", constants.StructureColors, systemConfiguration.precomputedLocation, scheme == "dark");
+        const v = new AtlasSpaceViewer("neuron-atlas-ng-container", atlasViewModel, systemConfiguration.precomputedLocation, scheme == "dark");
 
         v.updateState();
 
@@ -62,7 +59,7 @@ export const NeuronAtlasSpaceView = observer(({reconstruction, soma, focusSoma, 
         const skeletonId = reconstruction?.atlasReconstruction?.precomputed?.skeletonId;
         v.setNeuronSkeletonId(skeletonId ? [skeletonId] : null);
 
-        v.updateAtlasStructures(displayedStructures);
+        v.updateAtlasStructures(atlasViewModel.displayedStructures.map(c => c.structure.structureId));
 
         v.setSomaAnnotation(somaPoint);
 
@@ -96,21 +93,15 @@ export const NeuronAtlasSpaceView = observer(({reconstruction, soma, focusSoma, 
 
     useEffect(() => {
         if (viewer) {
-            viewer.updateAtlasStructures(displayedStructures);
-        }
-    }, [displayedStructures]);
-
-    useEffect(() => {
-        if (viewer) {
             viewer.colorScheme = scheme == "dark";
         }
     }, [scheme]);
 
     useEffect(() => {
         if (viewer) {
-            viewer.updateAtlasStructures(atlas.displayedStructures.map(c => c.structure.structureId));
+            viewer.updateAtlasStructures(atlasViewModel.displayedStructures.map(c => c.structure.structureId));
         }
-    }, [atlas.displayedStructures]);
+    }, [atlasViewModel.displayedStructures]);
 
     const selectNeuron = async (location: number[]) => {
         const atlasReconstructionId = reconstructionRef.current?.atlasReconstruction?.id;
@@ -129,11 +120,11 @@ export const NeuronAtlasSpaceView = observer(({reconstruction, soma, focusSoma, 
         <Group ref={ref} gap={0} align="stretch" style={{flexGrow: 1, flexShrink: 0, flexBasis: 0, minHeight: 0}} preventGrowOverflow={false}>
             <Stack gap={0} style={{flexGrow: 1}}>
                 <NeuroglancerControls viewer={viewer} allowResetView={true}/>
-                <Divider orientation="horizontal"/><AtlasViewerSelection node={data?.nearestNode?.node ?? null} onClick={(id) => {atlas.toggle(id)}}/>
+                <Divider orientation="horizontal"/><AtlasViewerSelection atlas={atlasViewModel.atlas} node={data?.nearestNode?.node ?? null} onClick={(id) => {atlasViewModel.toggle(id)}}/>
                 <div id="neuron-atlas-ng-container" className="ng-default-container" style={{flexGrow: 1, minHeight: "600px"}}/>
             </Stack>
             <Divider orientation="vertical"/>
-            <AtlasContainer atlasViewModel={atlas} maxHeight={height}/>
+            <AtlasContainer atlasViewModel={atlasViewModel} maxHeight={height}/>
         </Group>
     )
 });

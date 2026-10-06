@@ -32,6 +32,7 @@ import {SpecimenSelect} from "../common/SpecimenSelect";
 import {SPECIMENS_QUERY, SpecimensQueryResponse} from "../../graphql/specimen";
 import {GraphQLErrorAlert} from "../common/GraphQLErrorAlert";
 import {usePreferences} from "../../hooks/usePreferences";
+import {useConstants} from "../../hooks/useConstants";
 import {MessageBox} from "../common/MessageBox";
 import {BulkUpdateModal} from "./BulkUpdateModal";
 import {NeuronStatusFilter} from "../common/filters/NeuronStatusFilter";
@@ -49,7 +50,9 @@ export const Neurons = observer(() => {
     const [sampleId, setSampleId] = useState<string>(null);
     const [isSampleLocked, setIsSampleLocked] = useState<boolean>(false);
 
-    const [candidateFilter] = useState(new CandidateFilter());
+    const constants = useConstants();
+
+    const [candidateFilter] = useState(() => new CandidateFilter(constants.DefaultAtlas?.id ?? null));
     const [statusFilter] = useState(new OptionalFilter<NeuronStatus>(NeuronStatus.Unpublished));
     const [showBulkUpdate, setShowBulkUpdate] = useState(false);
 
@@ -264,7 +267,7 @@ export const Neurons = observer(() => {
                     <Group p={12} align="center">
                         <SpecimenFilter w={160} filter={candidateFilter.samplesFilter}/>
                         <Divider orientation="vertical"/>
-                        <AtlasStructureMultiSelectFilter w={300} filter={candidateFilter.atlasStructureFilter}/>
+                        <AtlasStructureMultiSelectFilter w={300} atlasId={candidateFilter.atlasId} filter={candidateFilter.atlasStructureFilter}/>
                         <Divider orientation="vertical"/>
                         <NeuronTagFilter filter={candidateFilter.tagFilter}/>
                         <Divider orientation="vertical"/>

@@ -9,19 +9,12 @@ import {StructureHistory} from "./StructureHistory";
 import {AtlasTree} from "./AtlasTree";
 import {NeuronListContainerWidth} from "../NeuronListContainer";
 import {AtlasViewModel} from "../../../../viewmodel/atlasViewModel";
-import {useAtlas} from "../../../../hooks/useAtlas";
 
 const TreeAccordionKey = "tree";
 const HistoryAccordionKey = "history";
 
-export const AtlasContainer = observer(({maxHeight, atlasViewModel}: { maxHeight: number, atlasViewModel?: AtlasViewModel }) => {
+export const AtlasContainer = observer(({maxHeight, atlasViewModel}: { maxHeight: number, atlasViewModel: AtlasViewModel }) => {
     const appLayout = useAppLayout();
-
-    const atlas = atlasViewModel ?? useAtlas();
-
-    if (!atlas.initialized) {
-        return null;
-    }
 
     const renderedHeader = (
         <SimpleGrid p={8} cols={3} bg="section" style={{height: "40px"}}>
@@ -56,14 +49,14 @@ export const AtlasContainer = observer(({maxHeight, atlasViewModel}: { maxHeight
                     <Accordion.Control>History</Accordion.Control>
                     <Accordion.Panel styles={{content: {padding: 0}}}>
                         <Divider orientation="horizontal"/>
-                        <StructureHistory atlas={atlas}/>
+                        <StructureHistory atlas={atlasViewModel}/>
                     </Accordion.Panel>
                 </Accordion.Item>
                 <Accordion.Item value={TreeAccordionKey}>
                     <Accordion.Control>All Structures</Accordion.Control>
                     <Accordion.Panel styles={{content: {padding: 0}}}>
                         <Divider orientation="horizontal"/>
-                        <AtlasTree atlas={atlas}/>
+                        <AtlasTree atlas={atlasViewModel}/>
                     </Accordion.Panel>
                 </Accordion.Item>
             </Accordion>

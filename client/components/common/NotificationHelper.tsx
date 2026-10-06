@@ -32,6 +32,10 @@ export function successNotification(title: string, message: string) {
     notifications.show({title: title, message: message ? message : "(no additional details available)", color: "green"});
 }
 
+export function warningNotification(title: string, message: string) {
+    notifications.show({title: title, message: message ? message : "(no additional details available)", color: "yellow", autoClose: false});
+}
+
 export function errorNotification(title: string, error: Error | string) {
     notifications.show({title: title, message: error ? ((typeof error === "string") ? error : error.message) : "(no additional details available)", color: "red", autoClose: false});
 }

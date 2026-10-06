@@ -8,7 +8,7 @@ import {QueryStatus} from "../../../viewmodel/queryResponseViewModel";
 import {useQueryResponseViewModel} from "../../../hooks/useQueryResponseViewModel";
 import {useUIQuery} from "../../../hooks/useUIQuery";
 import {useAppLayout} from "../../../hooks/useAppLayout";
-import {useAtlas} from "../../../hooks/useAtlas";
+import {useSearchAtlas} from "../../../hooks/useSearchAtlas";
 import {usePreferences} from "../../../hooks/usePreferences";
 import {useSearchViewer} from "../../../hooks/useSearchViewer";
 import {CollectionsSelect} from "../../common/CollectionsSelect";
@@ -19,7 +19,7 @@ export const QueryHeader = observer(() => {
     const appLayout = useAppLayout();
     const queryResponse = useQueryResponseViewModel();
     const uiQuery = useUIQuery();
-    const atlas = useAtlas();
+    const searchAtlas = useSearchAtlas();
     const searchViewerRef = useSearchViewer();
 
     const onResetPage = (evt: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
@@ -28,7 +28,7 @@ export const QueryHeader = observer(() => {
         uiQuery.reset();
         queryResponse.reset();
 
-        atlas.clear();
+        searchAtlas.atlasViewModel?.clear();
 
         appLayout.isQueryExpanded = true;
     };

@@ -40,7 +40,7 @@ function formatPercent(value: number): string {
 }
 
 function resolveStructureName(constants: DataConstants, id: string): string {
-    const s = constants?.AtlasConstants?.findStructure(id);
+    const s = constants?.findAtlasStructure(id);
     return s?.acronym ?? s?.name ?? id;
 }
 

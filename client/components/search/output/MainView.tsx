@@ -9,9 +9,11 @@ import {NeuronListContainer} from "./NeuronListContainer";
 import {AtlasContainer} from "./atlas/AtlasContainer";
 import {DrawerState} from "../../../viewmodel/appLayout";
 import {SearchView} from "./SearchView";
+import {useSearchAtlas} from "../../../hooks/useSearchAtlas";
 
 export const MainView = observer(() => {
     const appLayout = useAppLayout();
+    const searchAtlas = useSearchAtlas();
 
     const [ref, rect] = useResizeObserver();
 
@@ -19,7 +21,8 @@ export const MainView = observer(() => {
 
     const neuronListDock = appLayout.neuronDrawerState == DrawerState.Dock ? <NeuronListContainer maxHeight={height}/> : null;
 
-    const compartmentListDock = appLayout.atlasStructureDrawerState == DrawerState.Dock ? <AtlasContainer maxHeight={height}/> : null;
+    const compartmentListDock = appLayout.atlasStructureDrawerState == DrawerState.Dock && searchAtlas.atlasViewModel ?
+        <AtlasContainer atlasViewModel={searchAtlas.atlasViewModel} maxHeight={height}/> : null;
 
     return (
         <Group ref={ref} gap={0} align="stretch" style={{flexGrow: 1, flexShrink: 0, flexBasis: 0, minHeight: 0}} preventGrowOverflow={false}>

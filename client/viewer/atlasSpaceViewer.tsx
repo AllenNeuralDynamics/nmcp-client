@@ -1,4 +1,5 @@
 import {AtlasViewer} from "./atlasViewer";
+import {AtlasViewModel} from "../viewmodel/atlasViewModel";
 import {LayerType} from "./neuroglancerLayer";
 
 const LAYER_NAME = "Atlas Space Reconstruction"
@@ -12,8 +13,8 @@ export class AtlasSpaceViewer extends AtlasViewer {
 
     private readonly _precomputedUrl: string;
 
-    public constructor(elementId: string, atlasSegmentColors: Map<string, string>, precomputedUrl: string, isDarkColorScheme: boolean = false) {
-        super(elementId, atlasSegmentColors, isDarkColorScheme);
+    public constructor(elementId: string, atlasViewModel: AtlasViewModel, precomputedUrl: string, isDarkColorScheme: boolean = false) {
+        super(elementId, atlasViewModel, isDarkColorScheme);
 
         this._precomputedUrl = precomputedUrl;
     }

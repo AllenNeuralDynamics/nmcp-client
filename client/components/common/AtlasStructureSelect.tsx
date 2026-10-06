@@ -1,11 +1,12 @@
 import * as React from "react";
-import {useRef, useState} from "react";
+import {useMemo, useState} from "react";
 import {ComboboxItem, OptionsFilter, Select} from "@mantine/core";
 
 import {useConstants} from "../../hooks/useConstants";
 import {formatAtlasStructure, AtlasStructureShape} from "../../models/atlasStructure";
 
 type AtlasStructureSelectProps = {
+    atlasId: string;
     value: AtlasStructureShape;
     label?: string;
     clearable?: boolean;
@@ -13,31 +14,23 @@ type AtlasStructureSelectProps = {
     onChange(value: AtlasStructureShape): void;
 }
 
-export const AtlasStructureSelect = ({value, label, clearable, onChange}: AtlasStructureSelectProps) => {
-    let optionMap = useRef<Map<string, ComboboxItem>>(new Map());
-
+export const AtlasStructureSelect = ({atlasId, value, label, clearable, onChange}: AtlasStructureSelectProps) => {
     const [localValue, setLocalValue] = useState<string>(value?.id);
 
-    const constants = useConstants().AtlasConstants;
+    const atlas = useConstants().getAtlas(atlasId);
 
-    if (optionMap.current.size == 0) {
-        constants.Structures.forEach(s => {
-            optionMap.current.set(s.id, {value: s.id, label: formatAtlasStructure(s)})
-        });
-    }
+    const options = useMemo(() => atlas?.Structures.map(s => ({value: s.id, label: formatAtlasStructure(s)})) ?? [], [atlas]);
 
     const optionsFilter: OptionsFilter = ({options, search}) => {
         return (options as ComboboxItem[]).filter((option) => {
-            return constants.structureMatchesText(search, option.value);
+            return atlas?.structureMatchesText(search, option.value);
         });
     };
 
     const onChangeLocal = (v: string) => {
         setLocalValue(v);
-        onChange(constants.findStructureWithId(v));
+        onChange(atlas?.findStructureWithId(v));
     }
-
-    const options = Array.from(optionMap.current.values());
 
     return (
         <Select label={label ?? null} data={options} value={localValue} onChange={onChangeLocal} allowDeselect={false} clearable={clearable} searchable filter={optionsFilter}/>

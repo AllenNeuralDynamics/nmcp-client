@@ -9,6 +9,7 @@ export type AtlasStructureShape = {
     parentStructureId: number;
     defaultColor: string;
     hasGeometry: boolean;
+    atlasId: string;
 }
 
 export function formatAtlasStructure(structure: AtlasStructureShape, placeholder = "(none)") {

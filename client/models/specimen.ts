@@ -44,6 +44,7 @@ export type SpecimenShape = {
     tomography?: Tomography;
     somaProperties?: SomaFeaturesShape;
     collection: CollectionShape;
+    atlasId: string;
     genotype: GenotypeShape;
     injections: InjectionShape[];
     neurons: NeuronShape[];

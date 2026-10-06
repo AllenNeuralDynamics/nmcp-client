@@ -1,7 +1,7 @@
 import {makeObservable, observable} from "mobx";
 
 import {findQueryPredicateKind, PredicateType, QUERY_PREDICATE_KIND_COMPARTMENT, QueryPredicateKind} from "./queryPredicateKind";
-import {FilterContents, PredicateState, IPosition, IPositionInput} from "./filterContents";
+import {FilterContents, PredicateState, IPosition, IPositionInput, RestoreTally} from "./filterContents";
 import {DataConstants} from "../models/constants";
 import {SearchPredicate} from "../models/searchPredicate";
 
@@ -90,13 +90,15 @@ export class UIQueryPredicate {
     }
 
     // Deserialize for local browser storage or URL sharing.
-    public static deserialize(data: UIQueryPredicateState, constants: DataConstants): UIQueryPredicate {
+    public static deserialize(data: UIQueryPredicateState, constants: DataConstants, tally: RestoreTally = null): UIQueryPredicate {
         const filter = new UIQueryPredicate();
 
         filter.id = data.id || "";
         filter.index = data.index || 0;
         filter.brainAreaFilterType = findQueryPredicateKind(data.brainAreaFilterTypeOption || PredicateType.AnatomicalRegion);
-        filter.filter = data.filter ? FilterContents.deserialize(data.filter, constants) : null;
+        // Saved structures only reach the API for an anatomical predicate, so only there can an unresolved one make
+        // the restored query differ from the saved one.
+        filter.filter = data.filter ? FilterContents.deserialize(data.filter, constants, filter.brainAreaFilterType.IsCompartmentQuery ? tally : null) : null;
 
         return filter;
     }

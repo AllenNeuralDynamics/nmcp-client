@@ -2,13 +2,14 @@ import * as React from "react";
 import {useEffect, useState} from "react";
 import {Divider, Stack, useComputedColorScheme} from "@mantine/core";
 
-import {useConstants} from "../../hooks/useConstants";
 import {usePreferences} from "../../hooks/usePreferences";
 import {NeuronShape} from "../../models/neuron";
 import {CandidateViewer} from "../../viewer/candidateViewer";
 import {NeuroglancerControls} from "../common/NeuroglancerControls";
+import {AtlasViewModel} from "../../viewmodel/atlasViewModel";
 
 export interface CandidatesViewProps {
+    atlasViewModel: AtlasViewModel;
     neurons: NeuronShape[];
     selected: NeuronShape;
 
@@ -18,13 +19,12 @@ export interface CandidatesViewProps {
 export const CandidatesView = (props: CandidatesViewProps) => {
     const [viewer, setViewer] = useState<CandidateViewer>(null);
 
-    const constants = useConstants().AtlasConstants;
     const preferences = usePreferences();
 
     const scheme = useComputedColorScheme();
 
     useEffect(() => {
-        const v = new CandidateViewer("candidate-ng-container", constants.StructureColors, scheme == "dark");
+        const v = new CandidateViewer("candidate-ng-container", props.atlasViewModel, scheme == "dark");
 
         v.selectionListener = selectNeuron;
 

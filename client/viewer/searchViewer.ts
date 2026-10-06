@@ -1,6 +1,7 @@
 import {AtlasViewer} from "./atlasViewer";
 import {LayerType, NeuroglancerLayerSource} from "./neuroglancerLayer";
-import {mirrorCCFv3Transform} from "./neuroglancerViewerState";
+import {ccfMirrorTransform} from "./atlasLayer";
+import {AtlasViewModel} from "../viewmodel/atlasViewModel";
 import {NeuronViewModel} from "../viewmodel/neuronViewModel";
 import {NEURON_VIEW_MODE_ALL, NEURON_VIEW_MODE_AXON, NEURON_VIEW_MODE_DENDRITE, NEURON_VIEW_MODE_SOMA, NeuronViewMode} from "../viewmodel/neuronViewMode";
 
@@ -61,12 +62,12 @@ const DefaultReconstructionLayerConfiguration: ReconstructionLayerConfiguration[
     }
 ]
 
-const createReconstructionSource = (name: string, source: string, isMirror: boolean = false): NeuroglancerLayerSource => {
+const createReconstructionSource = (name: string, source: string, transform: object = null): NeuroglancerLayerSource => {
     return {
         name: name,
         type: LayerType.segmentation,
         source: source,
-        transform: isMirror ? mirrorCCFv3Transform : null
+        transform
     }
 }
 
@@ -89,8 +90,8 @@ export class SearchViewer extends AtlasViewer {
     private readonly _modelMap = new Map<number, NeuronViewModel>();
     private readonly _somaModelMap = new Map<string, NeuronViewModel>();
 
-    public constructor(elementId: string, atlasSegmentColors: Map<string, string>, precomputedUrl: string, isDarkColorScheme: boolean = false) {
-        super(elementId, atlasSegmentColors, isDarkColorScheme);
+    public constructor(elementId: string, atlasViewModel: AtlasViewModel, precomputedUrl: string, isDarkColorScheme: boolean = false) {
+        super(elementId, atlasViewModel, isDarkColorScheme);
 
         this._precomputedUrl = precomputedUrl;
 
@@ -127,13 +128,11 @@ export class SearchViewer extends AtlasViewer {
     private updateSomas(neurons: NeuronViewModel[], state: any): any {
         const somas = neurons.filter(n => n.viewMode == NEURON_VIEW_MODE_SOMA && n.soma);
 
-        if (!somas || somas.length === 0) {
-            return state;
-        }
+        const isMirrorFlipped = ccfMirrorTransform(this.atlas) != null;
 
         const layerIdx = this.findLayer(SomaLayerName, state);
 
-        if (layerIdx == null) {
+        if (layerIdx == null || layerIdx < 0) {
             return state;
         }
 
@@ -155,7 +154,7 @@ export class SearchViewer extends AtlasViewer {
                 props: [n.baseColor, 3]
             };
 
-            if (n.isMirrored) {
+            if (n.isMirrored && isMirrorFlipped) {
                 point.point[2] = -soma.z / 10 + 1140;
             }
 
@@ -209,9 +208,11 @@ export class SearchViewer extends AtlasViewer {
 
         state = this.ensureLayer(somaLayerSource, state);
 
+        const mirror = ccfMirrorTransform(this.atlas);
+
         for (const configuration of this._configurations) {
             state = this.ensureLayer(createReconstructionSource(configuration.name, `precomputed://${this._precomputedUrl}/${configuration.precomputedLocation}`), state);
-            state = this.ensureLayer(createReconstructionSource(`${configuration.name} ${Mirror}`, `precomputed://${this._precomputedUrl}/${configuration.precomputedLocation}`, true), state);
+            state = this.ensureLayer(createReconstructionSource(`${configuration.name} ${Mirror}`, `precomputed://${this._precomputedUrl}/${configuration.precomputedLocation}`, mirror), state);
         }
 
         return state;

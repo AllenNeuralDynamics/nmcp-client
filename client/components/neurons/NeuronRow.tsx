@@ -19,7 +19,7 @@ type NeuronRowProps = {
 }
 
 export const NeuronRow = (props: NeuronRowProps) => {
-    const constants = useConstants().AtlasConstants;
+    const constants = useConstants();
 
     const [updateNeuron] = useMutation<UpdateNeuronMutationResponse, UpdateNeuronVariables>(UPDATE_NEURON_MUTATION,
         {
@@ -160,7 +160,7 @@ export const NeuronRow = (props: NeuronRowProps) => {
                     <Text size="sm" c="dimmed">{formatSomaLocation(props.neuron)}</Text>
                 </Table.Td>
                 <Table.Td>
-                    <Text size="sm" c="dimmed">{props.neuron.atlasStructure ? constants.findStructure(props.neuron.atlasStructure.id).name : "(none)"}</Text>
+                    <Text size="sm" c="dimmed">{props.neuron.atlasStructure ? constants.findAtlasStructure(props.neuron.atlasStructure.id)?.name : "(none)"}</Text>
                 </Table.Td>
                 <Table.Td style={{width: "180px"}}>
                     <Badge p={8} color="green" variant="light">
@@ -194,7 +194,7 @@ export const NeuronRow = (props: NeuronRowProps) => {
                                 isValidValueFcn={v => !parseSomaLocation(v).error}/>
                 </Table.Td>
                 <Table.Td>
-                    <AtlasStructureSelect value={props.neuron.atlasStructure ? constants.findStructure(props.neuron.atlasStructure.id) : null} clearable={true}
+                    <AtlasStructureSelect atlasId={props.neuron.specimen.atlasId} value={props.neuron.atlasStructure ? constants.findAtlasStructure(props.neuron.atlasStructure.id) : null} clearable={true}
                                           onChange={(s) => setTimeout(() => updateAtlasStructure(s), 200)}/>
                 </Table.Td>
                 <Table.Td style={{width: "180px"}}>

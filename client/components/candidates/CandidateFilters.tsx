@@ -23,7 +23,7 @@ export const CandidateFilters = observer(({candidateFilter}: { candidateFilter: 
 
             <Divider orientation="vertical"/>
 
-            <AtlasStructureMultiSelectFilter w={300} filter={candidateFilter.atlasStructureFilter}/>
+            <AtlasStructureMultiSelectFilter w={300} atlasId={candidateFilter.atlasId} filter={candidateFilter.atlasStructureFilter}/>
 
             <Divider orientation="vertical"/>
 

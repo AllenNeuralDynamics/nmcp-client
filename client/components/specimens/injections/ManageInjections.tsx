@@ -44,7 +44,7 @@ export const EditInjectionsPanel = (props: IEditInjectionsPanelProps) => {
         injectionToDelete: null
     });
 
-    const constants = useConstants().AtlasConstants;
+    const constants = useConstants();
 
     const [updateInjection] = useMutation<UpdateInjectionMutationResponse, UpdateInjectionVariables>(UPDATE_INJECTION_MUTATION,
         {
@@ -112,7 +112,7 @@ export const EditInjectionsPanel = (props: IEditInjectionsPanelProps) => {
         const rows = injections.map(t => (
                 <Table.Tr key={t.id}>
                     <Table.Td>
-                        <AtlasStructureSelect value={constants.findStructure(t.atlasStructure.id)}
+                        <AtlasStructureSelect atlasId={props.sample.atlasId} value={constants.findAtlasStructure(t.atlasStructure.id)}
                                               onChange={(structure) => onAcceptAtlasStructure(t, structure, updateInjection)}/>
                     </Table.Td>
                     <Table.Td>

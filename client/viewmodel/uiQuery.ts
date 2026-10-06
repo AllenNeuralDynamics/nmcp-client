@@ -5,7 +5,7 @@ import cuid from "cuid";
 import {DataConstants} from "../models/constants";
 import {QUERY_PREDICATE_KIND_COMPARTMENT, QUERY_PREDICATE_KIND_SPHERE} from "./queryPredicateKind";
 import {SEARCH_NEURONS_QUERY, SearchContext, SearchNeuronsQueryResponse, SearchNeuronsQueryVariables} from "../graphql/search";
-import {PredicateComposition, FilterContents, IPositionInput} from "./filterContents";
+import {PredicateComposition, FilterContents, IPositionInput, RestoreTally} from "./filterContents";
 import {UserPreferences} from "../util/userPreferences";
 import {QueryResponseState, QueryResponseViewModel} from "./queryResponseViewModel";
 import {UIQueryPredicate, UIQueryPredicateState} from "./uiQueryPredicate";
@@ -14,6 +14,7 @@ export type UIQueryState = {
     predicates: UIQueryPredicateState[];
     limitCollections: boolean;
     collectionIds: string[];
+    atlasKindIds?: string[];
 }
 
 export class UIQuery {
@@ -25,6 +26,8 @@ export class UIQuery {
 
     public collectionIds: string[] = [];
 
+    public atlasKindIds: string[] = [];
+
     private _constants: DataConstants = null;
 
     public constructor() {
@@ -32,8 +35,10 @@ export class UIQuery {
             predicates: observable,
             limitCollections: observable,
             collectionIds: observable,
+            atlasKindIds: observable,
             resetCount: observable,
             reset: action,
+            initialize: action,
             addPredicate: action,
             removePredicate: action,
             replacePredicate: action,
@@ -51,16 +56,31 @@ export class UIQuery {
         this.predicates = [Object.assign(new UIQueryPredicate(), DEFAULT_QUERY_FILTER(), {id: cuid()})];
     }
 
-    public set Constants(constants: DataConstants) {
+    public initialize(constants: DataConstants) {
+        if (constants === this._constants) {
+            return;
+        }
+
+        const isFirst = this._constants == null;
+
         this._constants = constants;
+
+        if (isFirst) {
+            this.atlasKindIds = this.defaultAtlasKindIds();
+        }
     }
 
-    public deserializePredicates(serializedPredicates: any[]) {
+    // Returns the number of saved atlas structure ids that could not be resolved.
+    public deserializePredicates(serializedPredicates: any[]): number {
+        const tally: RestoreTally = {unresolvedStructures: 0};
+
         if (serializedPredicates && serializedPredicates.length > 0 && this._constants) {
             this.predicates = serializedPredicates.map(f => {
-                return UIQueryPredicate.deserialize(f, this._constants);
+                return UIQueryPredicate.deserialize(f, this._constants, tally);
             });
         }
+
+        return tally.unresolvedStructures;
     }
 
     public addPredicate(uiModifiers: any = {}, predicateModifiers: any = {}) {
@@ -119,6 +139,7 @@ export class UIQuery {
             const context: SearchContext = {
                 nonce: queryResponseViewModel.queryNonce,
                 collectionIds: this.limitCollections ? this.collectionIds : [],
+                atlasKindIds: this.atlasKindIds,
                 predicates: this.predicates.map(f => f.asSearchPredicate())
             };
 
@@ -150,14 +171,28 @@ export class UIQuery {
         return {
             predicates: this.predicates.map(p => p.serialize()),
             limitCollections: this.limitCollections,
-            collectionIds: this.collectionIds
+            collectionIds: this.collectionIds,
+            atlasKindIds: this.atlasKindIds
         }
     }
 
-    public deserialize(state: UIQueryState) {
-        this.predicates = state.predicates.map(p => UIQueryPredicate.deserialize(p, this._constants));
+    // Returns the number of saved atlas structure ids that could not be resolved.
+    public deserialize(state: UIQueryState): number {
+        const tally: RestoreTally = {unresolvedStructures: 0};
+
+        this.predicates = state.predicates.map(p => UIQueryPredicate.deserialize(p, this._constants, tally));
         this.limitCollections = state.limitCollections;
         this.collectionIds = state.collectionIds;
+        // Absent in state saved before atlas kinds; an explicit empty list means no restriction and is kept.
+        this.atlasKindIds = Array.isArray(state.atlasKindIds) ? state.atlasKindIds : this.defaultAtlasKindIds();
+
+        return tally.unresolvedStructures;
+    }
+
+    private defaultAtlasKindIds(): string[] {
+        const kind = this._constants?.DefaultAtlasKind;
+
+        return kind ? [kind.id] : [];
     }
 }
 

@@ -1,5 +1,5 @@
 import * as React from "react";
-import {useState} from "react";
+import {useMemo, useState} from "react";
 import {useQuery} from "@apollo/client";
 import {observer} from "mobx-react-lite";
 import {Card, Center, Divider, Group, Loader, SimpleGrid, Space, Stack, Text} from "@mantine/core";
@@ -14,6 +14,8 @@ import {CandidateActions} from "./CandidateActions";
 import {CandidateFilters} from "./CandidateFilters";
 import {CandidateMetrics} from "./CandidateMetrics";
 import {GraphQLErrorAlert} from "../common/GraphQLErrorAlert";
+import {useConstants} from "../../hooks/useConstants";
+import {AtlasViewModel} from "../../viewmodel/atlasViewModel";
 
 function noCandidatesText(isFiltered: boolean) {
     return isFiltered ? "There are no candidates that match the current filtering options." : "There are no candidates without annotations in progress.  Enable the In Progress toggle to see any candidates that have  active annotations.";
@@ -24,7 +26,15 @@ export const Candidates = observer(() => {
 
     const [offset, setOffset] = useState(0);
     const [limit, setLimit] = useState(10);
-    const [candidateFilter] = useState(new CandidateFilter());
+    const constants = useConstants();
+
+    const [candidateFilter] = useState(() => new CandidateFilter(constants.DefaultAtlas?.id ?? null));
+
+    const atlasViewModel = useMemo(() => {
+        const atlas = constants.getAtlas(candidateFilter.atlasId);
+
+        return atlas ? new AtlasViewModel(atlas) : null;
+    }, [constants, candidateFilter.atlasId]);
 
     const {data, loading, error, previousData} = useQuery<CandidateNeuronsResponse, NeuronsQueryVariables>(CANDIDATE_NEURONS_QUERY, {
         variables: {
@@ -132,7 +142,7 @@ export const Candidates = observer(() => {
                         <Divider orientation="horizontal"/>
                     </Card.Section> : null}
                 <Card.Section>
-                    <CandidatesView neurons={candidateCache} selected={selection} onViewerSelected={onNeuronSelectedFromViewer}/>
+                    <CandidatesView atlasViewModel={atlasViewModel} neurons={candidateCache} selected={selection} onViewerSelected={onNeuronSelectedFromViewer}/>
                 </Card.Section>
             </Card>
             <Space h={16}/>

@@ -13,6 +13,7 @@ import {
 } from "../../../viewmodel/queryPredicateKind";
 import {UIQueryPredicate} from "../../../viewmodel/uiQueryPredicate";
 import {AtlasStructureMultiSelect} from "../../common/AtlasStructureMultiSelect";
+import {useSearchAtlas} from "../../../hooks/useSearchAtlas";
 
 const queryPredicateLookup = new Map<string, QueryPredicateKind>();
 
@@ -52,6 +53,7 @@ PredicateCompositions.map(c => {
 
 export const QueryFilter = observer((props: IQueryFilterProps) => {
     const constants = useConstants();
+    const searchAtlas = useSearchAtlas();
 
     if (nodeStructureLookup.size == 0) {
         nodeStructureOptions = constants.NeuronStructures.map(q => {
@@ -169,7 +171,7 @@ export const QueryFilter = observer((props: IQueryFilterProps) => {
                     }
                 }}/>
                 <div style={{flex: 1}}>
-                    <AtlasStructureMultiSelect label="Target Atlas Structures (multiple treated as an OR condition)" selection={filter.brainAreas}
+                    <AtlasStructureMultiSelect atlasId={searchAtlas.atlasId} label="Target Atlas Structures (multiple treated as an OR condition)" selection={filter.brainAreas}
                                                onSelectionChange={(brainAreas: AtlasStructureShape[]) => onBrainAreaChange(brainAreas)}/>
                 </div>
                 <Select label="Neuron Structure" clearable placeholder="any" data={nodeStructureOptions}

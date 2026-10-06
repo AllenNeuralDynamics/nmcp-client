@@ -37,10 +37,16 @@ export type PredicateState = {
     neuronalStructureId: string;
     operatorId: string;
     amount: string;
-    brainAreaStructureIds: number[];
+    atlasStructureIds?: string[];
+    // Read from state saved before structure ids; never written.
+    brainAreaStructureIds?: number[];
     arbCenter: IPosition;
     arbSize: string;
     composition: PredicateComposition;
+}
+
+export type RestoreTally = {
+    unresolvedStructures: number;
 }
 
 // TODO This is from an older version of the API that has been subsumed by UIQueryPredicate and is now used as a child in that class.  Some refactor is needed
@@ -113,14 +119,14 @@ export class FilterContents {
             neuronalStructureId: this.neuronalStructure ? this.neuronalStructure.id : null,
             operatorId: this.operator ? this.operator.id : null,
             amount: this.amount,
-            brainAreaStructureIds: this.brainAreas.map(b => b.structureId),
+            atlasStructureIds: this.brainAreas.map(b => b.id),
             arbCenter: this.arbCenter,
             arbSize: this.arbSize,
             composition: this.composition
         }
     }
 
-    public static deserialize(data: PredicateState, constants: DataConstants): FilterContents {
+    public static deserialize(data: PredicateState, constants: DataConstants, tally: RestoreTally = null): FilterContents {
         const filter = new FilterContents();
 
         filter.labelsOrDois = data.labelsOrDois || "";
@@ -128,11 +134,34 @@ export class FilterContents {
         filter.neuronalStructure = constants.findNeuronalStructure(data.neuronalStructureId);
         filter.operator = constants.findQueryOperator(data.operatorId);
         filter.amount = data.amount || "0";
-        filter.brainAreas = data.brainAreaStructureIds ? data.brainAreaStructureIds.map(s => constants.AtlasConstants.findStructure(s)) : [];
+        filter.brainAreas = FilterContents.restoreStructures(data, constants, tally);
         filter.arbCenter = data.arbCenter || {x: "6500", y: "4000", z: "5500"};
         filter.arbSize = data.arbSize || "1000";
         filter.composition = data.composition || PredicateComposition.and;
 
         return filter;
+    }
+
+    private static restoreStructures(data: PredicateState, constants: DataConstants, tally: RestoreTally): AtlasStructureShape[] {
+        let requested: AtlasStructureShape[];
+
+        // An empty new-format list means "no structures" and must not fall through to the legacy ids.
+        if (Array.isArray(data.atlasStructureIds)) {
+            requested = data.atlasStructureIds.map(id => constants.findAtlasStructure(id));
+        } else if (Array.isArray(data.brainAreaStructureIds)) {
+            // Legacy ids are CCFv3 numbers. Without a Mouse atlas they stay unresolved rather than being read
+            // against an atlas where the same numbers name other structures.
+            requested = data.brainAreaStructureIds.map(n => constants.DefaultAtlas?.findStructure(n));
+        } else {
+            requested = [];
+        }
+
+        const resolved = requested.filter(s => s != null);
+
+        if (tally) {
+            tally.unresolvedStructures += requested.length - resolved.length;
+        }
+
+        return resolved;
     }
 }

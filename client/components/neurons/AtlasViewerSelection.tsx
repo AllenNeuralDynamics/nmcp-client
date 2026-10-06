@@ -1,16 +1,16 @@
 import * as React from "react";
 import {useRef, useState} from "react";
 import {observer} from "mobx-react-lite";
-import {Accordion, Anchor, Stack, Table, Tooltip} from "@mantine/core";
+import {Accordion, Anchor, Stack, Table, Text, Tooltip} from "@mantine/core";
 import {useMouse} from "@mantine/hooks";
 
-import {useConstants} from "../../hooks/useConstants";
 import {AtlasNode} from "../../models/atlasNode";
+import {Atlas} from "../../models/atlas";
 
 // Small table-padding (compact tables)
 const stp: number = 8;
 
-export const AtlasViewerSelection = observer(({node, onClick}: { node: AtlasNode, onClick: (id: string) => void }) => {
+export const AtlasViewerSelection = observer(({atlas, node, onClick}: { atlas: Atlas, node: AtlasNode, onClick: (id: string) => void }) => {
     const [top, setTop] = useState<number>(200);
     const [left, setLeft] = useState<number>(10);
     const {x, y} = useMouse();
@@ -20,35 +20,26 @@ export const AtlasViewerSelection = observer(({node, onClick}: { node: AtlasNode
     const startLeftRef = useRef<number>(0);
     const startMouseRef = useRef<{ x: number, y: number }>({x: 0, y: 0});
 
-    const constants = useConstants();
-
     if (!node) {
         return;
     }
 
-    const lookupStructureIdentifier = (id: string) => {
-        return constants.findStructureIdentifier(id);
-    };
-
-    const lookupStructure = (id: string | number) => {
-        return constants.AtlasConstants.findStructure(id);
-    };
-
     const renderSelection = () => {
-        const atlasStructure = lookupStructure(node.atlasStructureId);
+        const atlasStructure = atlas.findStructureWithId(node.atlasStructureId);
 
-        let displayStructure = atlasStructure;
+        const displayStructure = atlasStructure ? atlas.findStructureWithGeometry(atlasStructure) : undefined;
 
-        if (displayStructure) {
-            while (!displayStructure.hasGeometry) {
-                displayStructure = lookupStructure(displayStructure.parentStructureId);
-            }
-        }
-        const structureLabel = displayStructure ? (
+        // A structure with no geometry ancestor (possible under a marmoset root without geometry) has nothing to
+        // toggle, so its label is plain text.
+        const structureLabel = atlasStructure ? (
             <Tooltip zIndex={2000} label={atlasStructure.name}>
-                <Anchor size="sm" onClick={() => {onClick(displayStructure.id)}}>
-                    {`${atlasStructure.acronym}`}
-                </Anchor>
+                {displayStructure ? (
+                    <Anchor size="sm" onClick={() => {onClick(displayStructure.id)}}>
+                        {`${atlasStructure.acronym}`}
+                    </Anchor>
+                ) : (
+                    <Text size="sm" span>{atlasStructure.acronym}</Text>
+                )}
             </Tooltip>
         ) : null;
 

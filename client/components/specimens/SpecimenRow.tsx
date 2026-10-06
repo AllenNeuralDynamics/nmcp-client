@@ -17,6 +17,7 @@ import {Link} from "react-router-dom";
 import {ReferenceDatasetModal} from "./ReferenceDatasetModal";
 import {SomaFeaturesModal} from "./SomaFeaturesModal";
 import {TomographyModal} from "./TomographyModal";
+import {useConstants} from "../../hooks/useConstants";
 
 export type SpecimenRowProps = {
     specimen: SpecimenShape;
@@ -26,6 +27,8 @@ export type SpecimenRowProps = {
 }
 
 export const SpecimenRow = ({specimen, manageInjections, requestDelete}: SpecimenRowProps) => {
+    const constants = useConstants();
+
     const [isRefDataSetModalOpen, setIsRefDataSetModalOpen] = useState(false);
     const [isSomaModalOpen, setIsSomaModalOpen] = useState(false);
     const [isTomographyModalOpen, setIsTomographyModalOpen] = useState(false);
@@ -105,6 +108,7 @@ export const SpecimenRow = ({specimen, manageInjections, requestDelete}: Specime
                     <InjectionList injections={specimen.injections} isExpanded={true}/>
                 </a>
             </Table.Td>
+            <Table.Td><Text size="sm">{constants.getAtlas(specimen.atlasId)?.name}</Text></Table.Td>
             <Table.Td>
                 <CollectionSelect value={specimen.collection?.id} onChange={updateCollection}/>
             </Table.Td>

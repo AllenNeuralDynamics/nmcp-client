@@ -32,7 +32,7 @@ type AddInjectionProps = {
 }
 
 export const AddInjection = (props: AddInjectionProps) => {
-    const constants = useConstants().AtlasConstants;
+    const constants = useConstants();
 
     const [state, setState] = useState<InjectionVariables>({
         specimenId: props.sample.id,
@@ -82,7 +82,7 @@ export const AddInjection = (props: AddInjectionProps) => {
     return (
         <Stack>
             <Text fw={500}>Add Labeling</Text>
-            <AtlasStructureSelect label="Atlas Structure" value={constants.findStructure(state.atlasStructureId)} onChange={onStructureChange}/>
+            <AtlasStructureSelect atlasId={props.sample.atlasId} label="Atlas Structure" value={constants.findAtlasStructure(state.atlasStructureId)} onChange={onStructureChange}/>
             <Autosuggest label="Virus" immediateMode placeholder="select or name a new virus" data={props.injectionViruses}
                          value={state.injectionVirusName} onChange={onVirusChange}/>
             <Autosuggest label="Fluorophore" immediateMode placeholder="select or name a new fluorophore" data={props.fluorophores}

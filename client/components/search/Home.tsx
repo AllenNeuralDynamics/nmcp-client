@@ -12,6 +12,7 @@ import {useUIQuery} from "../../hooks/useUIQuery";
 import {Footer} from "./Footer";
 import {QueryResponseState} from "../../viewmodel/queryResponseViewModel";
 import {useAppLayout} from "../../hooks/useAppLayout";
+import {warningNotification} from "../common/NotificationHelper";
 
 export const Home = observer(() => {
     const client = useApolloClient();
@@ -32,7 +33,7 @@ export const Home = observer(() => {
         resetContent();
     }, [uiQuery.resetCount]);
 
-    function parseUrlQuery(): { haveQuery: boolean, responseState: QueryResponseState | null, viewerState: object | null } {
+    function parseUrlQuery(): { haveQuery: boolean, responseState: QueryResponseState | null, viewerState: object | null, unresolvedStructures: number } {
         const urlParams = new URLSearchParams(window.location.search);
         const queryParam = urlParams.get("q");
         const ngParam = window.location.hash;
@@ -40,6 +41,7 @@ export const Home = observer(() => {
         let haveQuery: boolean = false
         let responseState: QueryResponseState | null = null;
         let viewerState: object | null = null;
+        let unresolvedStructures = 0;
 
         if (queryParam) {
             try {
@@ -52,7 +54,7 @@ export const Home = observer(() => {
                 }
 
                 if (decodedQuery?.query) {
-                    uiQuery.deserialize(decodedQuery.query);
+                    unresolvedStructures = uiQuery.deserialize(decodedQuery.query);
                 }
 
                 if (decodedQuery?.response) {
@@ -79,13 +81,18 @@ export const Home = observer(() => {
 
         window.history.replaceState({}, document.title, "/");
 
-        return {haveQuery, responseState, viewerState};
+        return {haveQuery, responseState, viewerState, unresolvedStructures};
     }
 
     function initializeQueryFilters() {
-        const {haveQuery, responseState, viewerState} = parseUrlQuery();
+        const {haveQuery, responseState, viewerState, unresolvedStructures} = parseUrlQuery();
 
-        if (haveQuery) {
+        if (haveQuery && unresolvedStructures > 0) {
+            // The shared response and viewer states describe results of the original query, which this
+            // reconstructed query is not, and earlier results must not stand in for it either.
+            queryResponseViewModel.reset();
+            warnPartialRestore(unresolvedStructures);
+        } else if (haveQuery) {
             setTimeout(async () => {
                 await uiQuery.execute(queryResponseViewModel, client, responseState);
                 if (viewerState) {
@@ -96,8 +103,17 @@ export const Home = observer(() => {
             if (viewerState) {
                 searchViewerRef.applyState(viewerState);
             }
-            uiQuery.deserializePredicates(UserPreferences.Instance.LastQuery);
+
+            const unresolved = uiQuery.deserializePredicates(UserPreferences.Instance.LastQuery);
+
+            if (unresolved > 0) {
+                warnPartialRestore(unresolved);
+            }
         }
+    }
+
+    function warnPartialRestore(count: number) {
+        warningNotification("Query Partially Restored", `${count} atlas structure${count === 1 ? "" : "s"} in the saved query could not be identified. The query was reconstructed with the structures that could be, and has not been run.`);
     }
 
     function resetContent() {

@@ -6,6 +6,8 @@ import {MemoryRouter} from "react-router-dom";
 
 import {UserContext} from "../components/app/UserApp";
 import {User} from "../models/user";
+import {DataConstants} from "../models/constants";
+import {ConstantsContext} from "../components/app/AppConstants";
 
 const noTransition = {transitionProps: {duration: 0}};
 
@@ -25,15 +27,18 @@ const testTheme = createTheme({
 type ProviderOptions = {
     user?: User;
     mocks?: ReadonlyArray<MockedResponse>;
+    constants?: DataConstants;
 };
 
-export function Providers({user = null, mocks = [], children}: ProviderOptions & { children: React.ReactNode }) {
+export function Providers({user = null, mocks = [], constants = null, children}: ProviderOptions & { children: React.ReactNode }) {
     return (
         <MemoryRouter>
             <MockedProvider mocks={mocks}>
                 <MantineProvider theme={testTheme}>
                     <UserContext.Provider value={user}>
-                        {children}
+                        <ConstantsContext.Provider value={constants}>
+                            {children}
+                        </ConstantsContext.Provider>
                     </UserContext.Provider>
                 </MantineProvider>
             </MockedProvider>

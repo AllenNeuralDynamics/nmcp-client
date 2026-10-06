@@ -23,6 +23,7 @@ export const SPECIMEN_FIELDS_FRAGMENT = gql`fragment SpecimenFields on Specimen 
         }
     }
     collectionId
+    atlasId
     neuronCount
     somaProperties {
         defaultBrightness
@@ -116,7 +117,7 @@ type SpecimenMutateArgs = {
 /// Create Specimen Mutation
 ///
 
-export const SPECIMEN_SAMPLE_MUTATION = gql`mutation CreateSpecimen($specimen: SpecimenInput) {
+export const SPECIMEN_SAMPLE_MUTATION = gql`mutation CreateSpecimen($specimen: SpecimenCreateInput) {
     createSpecimen(specimen: $specimen) {
         ...SpecimenFields
     }
@@ -124,8 +125,12 @@ export const SPECIMEN_SAMPLE_MUTATION = gql`mutation CreateSpecimen($specimen: S
 ${SPECIMEN_FIELDS_FRAGMENT}
 `;
 
+type SpecimenCreateArgs = SpecimenMutateArgs & {
+    atlasId: string;
+}
+
 export type CreateSpecimenVariables = {
-    specimen: SpecimenMutateArgs;
+    specimen: SpecimenCreateArgs;
 }
 
 export type CreateSampleMutationResponse = {

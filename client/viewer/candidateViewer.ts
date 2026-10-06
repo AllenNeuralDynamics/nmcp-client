@@ -1,4 +1,5 @@
 import {AtlasViewer} from "./atlasViewer";
+import {AtlasViewModel} from "../viewmodel/atlasViewModel";
 import {LayerType, NeuroglancerLayerSource} from "./neuroglancerLayer";
 import {NeuronShape} from "../models/neuron";
 
@@ -37,8 +38,8 @@ const candidateLayerSource: NeuroglancerLayerSource = {
 export class CandidateViewer extends AtlasViewer {
     private _selectionListener: SelectionListener;
 
-    public constructor(elementId: string, atlasSegmentColors: Map<string, string>, isDarkColorScheme: boolean = false) {
-        super(elementId, atlasSegmentColors, isDarkColorScheme);
+    public constructor(elementId: string, atlasViewModel: AtlasViewModel, isDarkColorScheme: boolean = false) {
+        super(elementId, atlasViewModel, isDarkColorScheme);
     }
 
     public updateNeurons(neurons: NeuronShape[], selected: NeuronShape) {

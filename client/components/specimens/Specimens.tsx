@@ -19,6 +19,8 @@ import {PaginationHeader} from "../common/PaginationHeader";
 import {MessageBox} from "../common/MessageBox";
 import {GraphQLErrorAlert} from "../common/GraphQLErrorAlert";
 import {CollectionSelect} from "../common/CollectionSelect";
+import {AtlasSelect} from "../common/AtlasSelect";
+import {useConstants} from "../../hooks/useConstants";
 import {COLLECTIONS_QUERY, CollectionsResponse} from "../../graphql/collection";
 
 type SpecimensTableState = {
@@ -31,8 +33,10 @@ type SpecimensTableState = {
 
 export const SpecimensTable = () => {
     const preferences = usePreferences();
+    const constants = useConstants();
 
     const [collectionId, setCollectionId] = useState<string>(null);
+    const [atlasId, setAtlasId] = useState<string>(null);
 
     const [state, setState] = useState<SpecimensTableState>({
         offset: preferences.samplePageOffset,
@@ -86,6 +90,8 @@ export const SpecimensTable = () => {
         selectedCollectionId = collectionsData.collections[0].id;
     }
 
+    const selectedAtlasId = atlasId ?? constants.DefaultAtlas?.id ?? null;
+
     const onUpdateOffsetForPage = (page: number) => {
         const offset = state.limit * (page - 1);
 
@@ -112,7 +118,7 @@ export const SpecimensTable = () => {
     }
 
     const onCreateSpecimen = async () => {
-        await createSample({variables: {specimen: {collectionId: selectedCollectionId}}})
+        await createSample({variables: {specimen: {collectionId: selectedCollectionId, atlasId: selectedAtlasId}}})
     }
 
     const onRequestManageInjections = (forSample: SpecimenShape) => {
@@ -182,6 +188,7 @@ export const SpecimensTable = () => {
                     <Table.Th>Notes</Table.Th>
                     <Table.Th>Genotype</Table.Th>
                     <Table.Th>Labeling</Table.Th>
+                    <Table.Th>Atlas</Table.Th>
                     <Table.Th>Collection</Table.Th>
                     <Table.Th>Ref. Data Set</Table.Th>
                     <Table.Th>Tomography</Table.Th>
@@ -204,8 +211,9 @@ export const SpecimensTable = () => {
                     <Group justify="space-between" p={12}>
                         <Text size="lg" fw={500}>Specimens</Text>
                         <Group>
+                            <AtlasSelect value={selectedAtlasId} onChange={setAtlasId}/>
                             <CollectionSelect value={selectedCollectionId} onChange={setCollectionId}/>
-                            <Button loading={createLoading} leftSection={<IconPlus size={18}/>} disabled={!selectedCollectionId}
+                            <Button loading={createLoading} leftSection={<IconPlus size={18}/>} disabled={!selectedCollectionId || !selectedAtlasId}
                                     onClick={() => onCreateSpecimen()}>Add</Button>
                         </Group>
                     </Group>

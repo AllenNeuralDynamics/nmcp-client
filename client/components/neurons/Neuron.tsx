@@ -218,7 +218,8 @@ export const Neuron = () => {
                         </Tabs.List>
 
                         <Tabs.Panel value="atlas" key={`atlas_${data.neuron.id}`}>
-                            <NeuronAtlasSpaceView reconstruction={selectedReconstruction}
+                            <NeuronAtlasSpaceView atlasId={data.neuron.specimen.atlasId}
+                                                  reconstruction={selectedReconstruction}
                                                   soma={data.neuron.atlasSoma}
                                                   focusSoma={focusOnSoma ? data.neuron.atlasSoma : undefined}
                                                   onFocusApplied={() =>

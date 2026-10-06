@@ -7,8 +7,7 @@ import {IconChevronLeft, IconChevronRight} from "@tabler/icons-react";
 
 import {NEAREST_NODE_QUERY, NearestNodeQueryResponse, NearestNodeQueryVariables} from "../../../graphql/search";
 import {useAppLayout} from "../../../hooks/useAppLayout";
-import {useAtlas} from "../../../hooks/useAtlas";
-import {useConstants} from "../../../hooks/useConstants";
+import {useSearchAtlas} from "../../../hooks/useSearchAtlas";
 import {useQueryResponseViewModel} from "../../../hooks/useQueryResponseViewModel";
 import {useSearchViewer} from "../../../hooks/useSearchViewer";
 import {useSystemConfiguration} from "../../../hooks/useSystemConfiguration";
@@ -26,11 +25,10 @@ export const SearchView = observer(({height}: { height: number }) => {
 
     const [soma, setSoma] = useState<AtlasNode>(null);
 
-    const constants = useConstants().AtlasConstants;
+    const atlasViewModel = useSearchAtlas().atlasViewModel;
     const systemConfiguration = useSystemConfiguration();
     const appLayout = useAppLayout();
     const queryViewModel = useQueryResponseViewModel();
-    const atlas = useAtlas();
     const searchViewerRef = useSearchViewer();
 
     const scheme = useComputedColorScheme();
@@ -38,7 +36,7 @@ export const SearchView = observer(({height}: { height: number }) => {
     const [getNearest, {called, loading, data}] = useLazyQuery<NearestNodeQueryResponse, NearestNodeQueryVariables>(NEAREST_NODE_QUERY);
 
     useEffect(() => {
-        const v = new SearchViewer("neuroglancer-container", constants.StructureColors, systemConfiguration.precomputedLocation, scheme == "dark");
+        const v = new SearchViewer("neuroglancer-container", atlasViewModel, systemConfiguration.precomputedLocation, scheme == "dark");
 
         v.updateState();
 
@@ -69,10 +67,10 @@ export const SearchView = observer(({height}: { height: number }) => {
     }, [scheme]);
 
     useEffect(() => {
-        if (viewer) {
-            viewer.updateAtlasStructures(atlas.displayedStructures.map(c => c.structure.structureId));
+        if (viewer && atlasViewModel) {
+            viewer.updateAtlasStructures(atlasViewModel.displayedStructures.map(c => c.structure.structureId));
         }
-    }, [atlas.displayedStructures]);
+    }, [atlasViewModel?.displayedStructures]);
 
     if (viewer) {
         const known = queryViewModel.neuronViewModels.filter(n => n.isSelected);
@@ -97,7 +95,8 @@ export const SearchView = observer(({height}: { height: number }) => {
     };
 
     const renderAtlasStructureOpen = () => {
-        if (appLayout.atlasStructureDrawerState == DrawerState.Hidden) {
+        // Without an atlas there is no drawer to open, and docking would hide this control.
+        if (appLayout.atlasStructureDrawerState == DrawerState.Hidden && atlasViewModel) {
             return (
                 <Group p={8} gap={0} justify="end" align="center">
                     <Divider orientation="vertical"/>

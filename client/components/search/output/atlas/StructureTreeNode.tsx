@@ -1,4 +1,5 @@
 import * as React from "react";
+import {useMemo} from "react";
 import {observer} from "mobx-react-lite";
 import {ActionIcon, getTreeExpandedState, Group, Text, Tree, TreeNodeData, useTree} from "@mantine/core";
 import {IconChevronRight} from "@tabler/icons-react";
@@ -22,18 +23,8 @@ function generateTree(root: AtlasStructureViewModel): StructureTreeNodeData {
     }
 }
 
-let staticTree = [];
-
-function getTree(atlas: AtlasViewModel): StructureTreeNodeData[] {
-    if (staticTree.length == 0) {
-        staticTree = [generateTree(atlas.rootStructure)]
-    }
-
-    return staticTree;
-}
-
 export const StructureTree = observer(({atlas}: {atlas: AtlasViewModel}) => {
-    const data = getTree(atlas);
+    const data = useMemo(() => atlas.rootStructure ? [generateTree(atlas.rootStructure)] : [], [atlas]);
 
     const onClick =(evt: any, n: StructureTreeNodeData) => {
         evt.stopPropagation();
@@ -41,8 +32,12 @@ export const StructureTree = observer(({atlas}: {atlas: AtlasViewModel}) => {
     }
 
     const tree = useTree({
-        initialExpandedState: getTreeExpandedState(data, [atlas.rootStructure.structure.id]),
+        initialExpandedState: getTreeExpandedState(data, atlas.rootStructure ? [atlas.rootStructure.structure.id] : []),
     });
+
+    if (!atlas.rootStructure) {
+        return null;
+    }
 
     return (
         <Tree tree={tree} data={data} levelOffset={23}

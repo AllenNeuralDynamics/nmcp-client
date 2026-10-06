@@ -3,7 +3,8 @@ import gql from "graphql-tag";
 import {NeuronStructureShape} from "../models/neuronStructure";
 import {NodeStructureShape} from "../models/structureIdentifier";
 import {IQueryOperator} from "../models/queryOperator";
-import {AtlasStructureShape} from "../models/atlasStructure";
+import {AtlasShape} from "../models/atlas";
+import {AtlasKindShape} from "../models/atlasKind";
 
 export const CONSTANTS_QUERY = gql`query ConstantsQuery {
   systemSettings {
@@ -24,17 +25,38 @@ export const CONSTANTS_QUERY = gql`query ConstantsQuery {
     display
     operator
   }
-  atlasStructures {
+  atlasKinds {
     id
     name
-    acronym
-    aliases
-    structureId
-    depth
-    parentStructureId
-    structureIdPath
-    defaultColor
-    hasGeometry
+    description
+    kind
+    family
+    createdAt
+    updatedAt
+  }
+  atlases {
+    id
+    name
+    description
+    reference
+    geometryUrl
+    rootStructureId
+    atlasKindId
+    createdAt
+    updatedAt
+    atlasStructures {
+      id
+      name
+      acronym
+      aliases
+      structureId
+      depth
+      parentStructureId
+      structureIdPath
+      defaultColor
+      hasGeometry
+      atlasId
+    }
   }
 }`;
 
@@ -48,5 +70,6 @@ export type ConstantsQueryResponse = {
     neuronStructures: NeuronStructureShape[];
     nodeStructures: NodeStructureShape[];
     queryOperators: IQueryOperator[];
-    atlasStructures: AtlasStructureShape[];
+    atlasKinds: AtlasKindShape[];
+    atlases: AtlasShape[];
 }
