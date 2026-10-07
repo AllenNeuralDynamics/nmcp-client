@@ -259,6 +259,28 @@ export type MarkUntraceableResponse = {
     markReconstructionUntraceable: Reconstruction;
 }
 
+export const MARK_INCOMPLETE_MUTATION = gql`mutation MarkReconstructionIncomplete($reconstructionId: String!) {
+    markReconstructionIncomplete(reconstructionId: $reconstructionId) {
+        id
+        status
+    }
+}`;
+
+export type MarkIncompleteResponse = {
+    markReconstructionIncomplete: Reconstruction;
+}
+
+export const MARK_DUPLICATE_MUTATION = gql`mutation MarkReconstructionDuplicate($reconstructionId: String!) {
+    markReconstructionDuplicate(reconstructionId: $reconstructionId) {
+        id
+        status
+    }
+}`;
+
+export type MarkDuplicateResponse = {
+    markReconstructionDuplicate: Reconstruction;
+}
+
 export const REQUEST_QUALITY_CONTROL_REASSESSMENT_MUTATION = gql`mutation RequestQualityControlReassessment($reconstructionId: String!) {
     requestQualityControlReassessment(reconstructionId: $reconstructionId) {
         ...AtlasReconstructionFields

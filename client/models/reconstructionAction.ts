@@ -13,7 +13,9 @@ export enum ReconstructionAction {
     CreateRevision = 12,
     MarkUntraceable = 13,
     RetryPhase = 14,
-    ResetPipeline = 15
+    ResetPipeline = 15,
+    MarkIncomplete = 16,
+    MarkDuplicate = 17
 }
 
 export const actionColor = (status: ReconstructionAction): string => {
@@ -48,6 +50,10 @@ export const actionColor = (status: ReconstructionAction): string => {
             return "orange";
         case ReconstructionAction.ResetPipeline:
             return "orange";
+        case ReconstructionAction.MarkIncomplete:
+            return "gray";
+        case ReconstructionAction.MarkDuplicate:
+            return "gray";
         default:
             return "black";
     }
@@ -85,6 +91,10 @@ export const actionName = (status: ReconstructionAction): string => {
             return "Retry Phase";
         case ReconstructionAction.ResetPipeline:
             return "Replay Pipeline";
+        case ReconstructionAction.MarkIncomplete:
+            return "Incomplete";
+        case ReconstructionAction.MarkDuplicate:
+            return "Duplicate";
         default:
             return "UNKNOWN";
     }
@@ -122,6 +132,10 @@ export const actionTooltip = (status: ReconstructionAction): string => {
             return "Re-run the automated phase that failed for this reconstruction.";
         case ReconstructionAction.ResetPipeline:
             return "Discard the current atlas-space pipeline run and start it again from the beginning.";
+        case ReconstructionAction.MarkIncomplete:
+            return "The reconstruction will be set aside as incomplete and not considered in progress.  It can be reopened later.";
+        case ReconstructionAction.MarkDuplicate:
+            return "The reconstruction will be set aside as a duplicate and not considered in progress.  It can be reopened later.";
         default:
             return "UNKNOWN";
     }

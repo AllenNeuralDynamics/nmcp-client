@@ -1,6 +1,6 @@
 import {describe, expect, it} from "vitest";
 
-import {filterableReconstructionStatuses, ReconstructionStatus, statusCanReopen, statusColor, statusName, statusNameOnly} from "./reconstructionStatus";
+import {filterableReconstructionStatuses, ReconstructionStatus, statusColor, statusName, statusNameOnly} from "./reconstructionStatus";
 import {AtlasReconstructionStatus, atlasStatusName} from "./atlasReconstructionStatus";
 
 const members = Object.values(ReconstructionStatus).filter((v): v is ReconstructionStatus => typeof v === "number");
@@ -10,11 +10,27 @@ describe("mappers", () => {
         expect(statusNameOnly(status)).not.toBe("UNKNOWN");
         expect(statusColor(status)).not.toBe("black");
     });
+
+    it("names the two reviews apart", () => {
+        expect(statusNameOnly(ReconstructionStatus.PeerReview)).toBe("In Peer Review");
+        expect(statusNameOnly(ReconstructionStatus.PublishReview)).toBe("In Publish Review");
+    });
 });
 
-describe("statusCanReopen", () => {
-    it.each(members)("%s", status => {
-        expect(statusCanReopen(status)).toBe(status == ReconstructionStatus.OnHold);
+describe("holds added for the API", () => {
+    it("mirrors the API's values", () => {
+        expect(ReconstructionStatus.Incomplete).toBe(210);
+        expect(ReconstructionStatus.Duplicate).toBe(220);
+    });
+
+    it("names each by its status name", () => {
+        expect(statusNameOnly(ReconstructionStatus.Incomplete)).toBe("Incomplete");
+        expect(statusNameOnly(ReconstructionStatus.Duplicate)).toBe("Duplicate");
+    });
+
+    it("colours each as Untraceable", () => {
+        expect(statusColor(ReconstructionStatus.Incomplete)).toBe(statusColor(ReconstructionStatus.Untraceable));
+        expect(statusColor(ReconstructionStatus.Duplicate)).toBe(statusColor(ReconstructionStatus.Untraceable));
     });
 });
 
@@ -46,5 +62,7 @@ describe("filterableReconstructionStatuses", () => {
         expect(filterable).toContain(ReconstructionStatus.TeamReview);
         expect(filterable).toContain(ReconstructionStatus.Untraceable);
         expect(filterable).toContain(ReconstructionStatus.PublishFailed);
+        expect(filterable).toContain(ReconstructionStatus.Incomplete);
+        expect(filterable).toContain(ReconstructionStatus.Duplicate);
     });
 });

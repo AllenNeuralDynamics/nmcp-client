@@ -1,4 +1,4 @@
-import {ReconstructionStatus, statusCanReopen} from "./reconstructionStatus";
+import {ReconstructionStatus} from "./reconstructionStatus";
 import {AbandonableFailureStatuses, AtlasReconstructionStatus, PhaseFailureStatuses} from "./atlasReconstructionStatus";
 import {ReconstructionAction} from "./reconstructionAction";
 import {UserPermissions} from "../graphql/user";
@@ -25,6 +25,8 @@ export type GateContext = {
 const UntraceableSourceStatuses: ReconstructionStatus[] = [
     ReconstructionStatus.InProgress,
     ReconstructionStatus.OnHold,
+    ReconstructionStatus.Incomplete,
+    ReconstructionStatus.Duplicate,
     ReconstructionStatus.Rejected
 ];
 
@@ -38,9 +40,17 @@ const PausableSourceStatuses: ReconstructionStatus[] = [
     ReconstructionStatus.Rejected
 ];
 
+const ResumableSourceStatuses: ReconstructionStatus[] = [
+    ReconstructionStatus.OnHold,
+    ReconstructionStatus.Incomplete,
+    ReconstructionStatus.Duplicate
+];
+
 const DiscardableSourceStatuses: ReconstructionStatus[] = [
     ReconstructionStatus.InProgress,
     ReconstructionStatus.OnHold,
+    ReconstructionStatus.Incomplete,
+    ReconstructionStatus.Duplicate,
     ReconstructionStatus.Rejected
 ];
 
@@ -55,6 +65,16 @@ const RejectableSourceStatuses: ReconstructionStatus[] = [
     ReconstructionStatus.TeamReview,
     ReconstructionStatus.PublishReview,
     ReconstructionStatus.ReadyToPublish
+];
+
+// Not mirrored from the API.  The Reconstructions page closes a reconstruction only while it is still with its
+// annotator, whatever the API would accept once it has gone to review, the pipeline or publishing.
+const AnnotatorHeldStatuses: ReconstructionStatus[] = [
+    ReconstructionStatus.InProgress,
+    ReconstructionStatus.OnHold,
+    ReconstructionStatus.Incomplete,
+    ReconstructionStatus.Duplicate,
+    ReconstructionStatus.Rejected
 ];
 
 const hidden: Gate = {visible: false, enabled: false};
@@ -147,25 +167,35 @@ function ownerGate(ctx: GateContext, enabled: boolean): Gate {
     return {visible: isOwner(ctx), enabled};
 }
 
+function closeEnabled(ctx: GateContext, enabled: boolean): boolean {
+    return enabled && (ctx.area != "annotator" || AnnotatorHeldStatuses.includes(ctx.status));
+}
+
 export function gateFor(action: ReconstructionAction, ctx: GateContext): Gate {
     switch (action) {
         case ReconstructionAction.Discard:
             // The annotator bar never shows owner controls on someone else's reconstruction.  The API and workflow also
             // allow reviewers to discard, but the Review tab deliberately doesn't offer it for now: a reviewer rescinds,
             // and the annotator can then choose to discard.
-            return {visible: ctx.area == "annotator" && isOwner(ctx), enabled: canDiscard(ctx)};
+            return {visible: ctx.area == "annotator" && isOwner(ctx), enabled: closeEnabled(ctx, canDiscard(ctx))};
         case ReconstructionAction.Reopen:
-            return ownerGate(ctx, statusCanReopen(ctx.status));
+            // Like ApprovePeer, an exception to showing whatever the role can do: reopening is rare, so the button
+            // appears only while it is an option rather than sitting disabled on the bar.
+            return {
+                visible: isOwner(ctx) && ResumableSourceStatuses.includes(ctx.status),
+                enabled: ResumableSourceStatuses.includes(ctx.status)
+            };
         case ReconstructionAction.Hold:
-            return ownerGate(ctx, PausableSourceStatuses.includes(ctx.status));
+        case ReconstructionAction.MarkIncomplete:
+        case ReconstructionAction.MarkDuplicate:
+            return ownerGate(ctx, closeEnabled(ctx, PausableSourceStatuses.includes(ctx.status)));
         case ReconstructionAction.RequestPeerReview:
         case ReconstructionAction.RequestPublishReview:
             return ownerGate(ctx, ReviewRequestSourceStatuses.includes(ctx.status));
         case ReconstructionAction.MarkUntraceable:
-            return {
-                visible: isOwner(ctx) || isAdmin(ctx) || has(ctx.permissions, UserPermissions.ReviewAll),
-                enabled: UntraceableSourceStatuses.includes(ctx.status)
-            };
+            // The API and workflow also let peer and publish reviewers and admins mark a reconstruction untraceable,
+            // but the annotator bar offers it only to the reconstruction's own annotator.
+            return ownerGate(ctx, closeEnabled(ctx, UntraceableSourceStatuses.includes(ctx.status)));
         case ReconstructionAction.Reject:
             // A peer reviewer can reject at some status, so visibility does not depend on this one.
             return {visible: isAdmin(ctx) || has(ctx.permissions, UserPermissions.ReviewAll), enabled: isRejectable(ctx) && canReject(ctx)};

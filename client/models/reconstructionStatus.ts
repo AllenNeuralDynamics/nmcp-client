@@ -1,12 +1,10 @@
 import {AtlasReconstructionStatus, atlasStatusName} from "./atlasReconstructionStatus";
 
-export function statusCanReopen(status: ReconstructionStatus): boolean {
-    return status == ReconstructionStatus.OnHold;
-}
-
 export enum ReconstructionStatus {
     InProgress = 100,
     OnHold = 200,
+    Incomplete = 210,                       // A hold, as OnHold is: left only by resumeReconstruction.
+    Duplicate = 220,                        // A hold, as OnHold is: left only by resumeReconstruction.
     PeerReview = 300,
     TeamReview = 350,
     PublishReview = 400,
@@ -46,8 +44,12 @@ export const statusNameOnly = (status: ReconstructionStatus): string => {
             return "In Progress";
         case ReconstructionStatus.OnHold:
             return "On Hold";
+        case ReconstructionStatus.Incomplete:
+            return "Incomplete";
+        case ReconstructionStatus.Duplicate:
+            return "Duplicate";
         case ReconstructionStatus.PublishReview:
-            return "In Review";
+            return "In Publish Review";
         case ReconstructionStatus.PeerReview:
             return "In Peer Review";
         case ReconstructionStatus.TeamReview:
@@ -109,6 +111,8 @@ export const statusColor = (status: ReconstructionStatus): string => {
             return "red";
         case ReconstructionStatus.Archived:
             return "red";
+        case ReconstructionStatus.Incomplete:
+        case ReconstructionStatus.Duplicate:
         case ReconstructionStatus.Untraceable:
             return "gray";
         case ReconstructionStatus.Multiple:

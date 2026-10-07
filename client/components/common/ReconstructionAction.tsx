@@ -4,11 +4,13 @@ import {
     IconBook,
     IconCheck,
     IconCircleOff,
+    IconCopy,
     IconEdit,
     IconFlagExclamation,
     IconFolderOpen,
     IconGitBranch,
     IconPencilPause,
+    IconProgressX,
     IconRefresh,
     IconRotateClockwise,
     IconUserEdit,
@@ -17,7 +19,7 @@ import {
 
 import {actionColor, actionName, actionTooltip, ReconstructionAction} from "../../models/reconstructionAction";
 
-function icon(action: ReconstructionAction, size: number = 18): React.JSX.Element {
+export function actionIcon(action: ReconstructionAction, size: number = 18): React.JSX.Element {
     switch (action) {
         case ReconstructionAction.Open:
             return <IconEdit size={size}/>
@@ -49,6 +51,10 @@ function icon(action: ReconstructionAction, size: number = 18): React.JSX.Elemen
             return <IconRefresh size={size}/>
         case ReconstructionAction.ResetPipeline:
             return <IconRotateClockwise size={size}/>
+        case ReconstructionAction.MarkIncomplete:
+            return <IconProgressX size={size}/>
+        case ReconstructionAction.MarkDuplicate:
+            return <IconCopy size={size}/>
     }
 }
 
@@ -70,7 +76,7 @@ export const ReconstructionActionButton = ({action, iconSize, children, tooltip,
         }
     };
 
-    const button = <Button variant="light" leftSection={icon(action, iconSize ?? 18)} color={actionColor(action)} disabled={disabled}
+    const button = <Button variant="light" leftSection={actionIcon(action, iconSize ?? 18)} color={actionColor(action)} disabled={disabled}
                            onClick={onModifiedClick}>{children ?? actionName(action)}</Button>;
 
     if (typeof tooltip == "boolean" && tooltip == false) {

@@ -161,7 +161,9 @@ export const SpecimensTable = () => {
         setState({...state, requestedSampleForDelete: sample})
     };
 
-    const actualOffset = Math.min(Math.max(specimens.length - state.offset, 0), state.offset);
+    const lastPageOffset = Math.max(0, (Math.ceil(specimens.length / state.limit) - 1) * state.limit);
+
+    const actualOffset = Math.min(state.offset, lastPageOffset);
 
     const specimenSubset = specimens.slice(actualOffset, actualOffset + state.limit);
 

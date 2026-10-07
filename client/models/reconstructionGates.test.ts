@@ -19,7 +19,8 @@ const roles = {
     publish: makeUser(UserPermissions.PublishReview, "publish"),
     both: makeUser(UserPermissions.ReviewAll, "both"),
     admin: makeUser(UserPermissions.Admin, "admin"),
-    adminOwner: makeUser(UserPermissions.Admin, OWNER_ID)
+    adminOwner: makeUser(UserPermissions.Admin, OWNER_ID),
+    reviewerOwner: makeUser(UserPermissions.AnnotateAll | UserPermissions.ReviewAll, OWNER_ID)
 };
 
 type Role = keyof typeof roles;
@@ -45,6 +46,8 @@ describe("Discard", () => {
     check(ReconstructionAction.Discard, [
         ["annotator", "owner", S.InProgress, A.Initialized, true, true],
         ["annotator", "owner", S.OnHold, A.Initialized, true, true],
+        ["annotator", "owner", S.Incomplete, A.Initialized, true, true],
+        ["annotator", "owner", S.Duplicate, A.Initialized, true, true],
         ["annotator", "owner", S.Rejected, A.Initialized, true, true],
         ["annotator", "owner", S.Publishing, A.PendingSearchIndexing, true, false],
         ["annotator", "nonOwner", S.InProgress, A.Initialized, false, false],
@@ -152,13 +155,25 @@ describe("Publish", () => {
 });
 
 describe("Reopen", () => {
+    const resumable = [S.OnHold, S.Incomplete, S.Duplicate];
+
     check(ReconstructionAction.Reopen, [
-        ...statuses.map((status): Row => ["annotator", "owner", status, A.Initialized, true, status == S.OnHold]),
-        ["annotator", "nonOwner", S.OnHold, A.Initialized, false, true]
+        // Shown only while it is an option, unlike the rest of the bar.
+        ...statuses.map((status): Row => ["annotator", "owner", status, A.Initialized, resumable.includes(status), resumable.includes(status)]),
+        ["annotator", "nonOwner", S.OnHold, A.Initialized, false, true],
+        ["annotator", "nonOwner", S.Incomplete, A.Initialized, false, true],
+        ["annotator", "admin", S.Duplicate, A.Initialized, false, true],
+        ["annotator", "adminOwner", S.Incomplete, A.Initialized, true, true]
     ]);
 });
 
-describe.each([ReconstructionAction.Hold, ReconstructionAction.RequestPeerReview, ReconstructionAction.RequestPublishReview])("owner action %s", action => {
+describe.each([
+    ReconstructionAction.Hold,
+    ReconstructionAction.MarkIncomplete,
+    ReconstructionAction.MarkDuplicate,
+    ReconstructionAction.RequestPeerReview,
+    ReconstructionAction.RequestPublishReview
+])("owner action %s", action => {
     check(action, [
         ...statuses.map((status): Row => ["annotator", "owner", status, A.Initialized, true, status == S.InProgress || status == S.Rejected]),
         ["annotator", "nonOwner", S.InProgress, A.Initialized, false, true]
@@ -166,22 +181,26 @@ describe.each([ReconstructionAction.Hold, ReconstructionAction.RequestPeerReview
 });
 
 describe("MarkUntraceable", () => {
-    const sources = [S.InProgress, S.OnHold, S.Rejected];
+    const sources = [S.InProgress, S.OnHold, S.Incomplete, S.Duplicate, S.Rejected];
 
     check(ReconstructionAction.MarkUntraceable, [
         ...statuses.map((status): Row => ["annotator", "owner", status, A.Initialized, true, sources.includes(status)]),
         ["annotator", "nonOwner", S.InProgress, A.Initialized, false, true],
-        ["annotator", "peer", S.InProgress, A.Initialized, true, true],
-        ["annotator", "publish", S.InProgress, A.Initialized, true, true],
-        ["annotator", "admin", S.InProgress, A.Initialized, true, true]
+        // Reviewers and admins could mark it untraceable, but the annotator bar offers it only to the owner.
+        ["annotator", "peer", S.InProgress, A.Initialized, false, true],
+        ["annotator", "publish", S.InProgress, A.Initialized, false, true],
+        ["annotator", "both", S.InProgress, A.Initialized, false, true],
+        ["annotator", "admin", S.InProgress, A.Initialized, false, true],
+        ["annotator", "adminOwner", S.InProgress, A.Initialized, true, true]
     ]);
 });
 
 describe("TeamReview, passively", () => {
     const ownerActions = [
         ReconstructionAction.Discard,
-        ReconstructionAction.Reopen,
         ReconstructionAction.Hold,
+        ReconstructionAction.MarkIncomplete,
+        ReconstructionAction.MarkDuplicate,
         ReconstructionAction.RequestPeerReview,
         ReconstructionAction.RequestPublishReview,
         ReconstructionAction.MarkUntraceable
@@ -191,7 +210,39 @@ describe("TeamReview, passively", () => {
         expect(gateFor(action, ctx("annotator", "owner", S.TeamReview, A.ReadyToProcess))).toEqual<Gate>({visible: true, enabled: false});
     });
 
-    it("an admin owner can discard", () => {
-        expect(gateFor(ReconstructionAction.Discard, ctx("annotator", "adminOwner", S.TeamReview, A.ReadyToProcess))).toEqual<Gate>({visible: true, enabled: true});
+    it("a non-admin owner does not see Reopen", () => {
+        expect(gateFor(ReconstructionAction.Reopen, ctx("annotator", "owner", S.TeamReview, A.ReadyToProcess))).toEqual<Gate>({visible: false, enabled: false});
+    });
+
+    it("an admin owner is not offered Discard on the Reconstructions page", () => {
+        expect(gateFor(ReconstructionAction.Discard, ctx("annotator", "adminOwner", S.TeamReview, A.ReadyToProcess))).toEqual<Gate>({visible: true, enabled: false});
+    });
+});
+
+describe("Close actions on the Reconstructions page", () => {
+    const closeActions = [
+        ReconstructionAction.Hold,
+        ReconstructionAction.MarkIncomplete,
+        ReconstructionAction.MarkDuplicate,
+        ReconstructionAction.Discard,
+        ReconstructionAction.MarkUntraceable
+    ];
+
+    const held = [S.InProgress, S.OnHold, S.Incomplete, S.Duplicate, S.Rejected];
+
+    // Children at which the API would let an admin or publish reviewer discard, so only the page's rule disables it.
+    const child = (status: ReconstructionStatus) => status == S.WaitingForAtlasReconstruction ? AbandonableFailureStatuses[0]
+        : status == S.PublishFailed ? A.FailedSearchIndexing : A.ReadyToProcess;
+
+    describe.each(closeActions)("action %s", action => {
+        it.each(statuses.filter(s => !held.includes(s)).flatMap(status => (["owner", "adminOwner", "reviewerOwner"] as Role[]).map(role => [role, status] as const)))(
+            "%s at status %s: disabled", (role, status) => {
+                expect(gateFor(action, ctx("annotator", role, status, child(status)))).toEqual<Gate>({visible: true, enabled: false});
+            });
+    });
+
+    it("leaves the Review tab's Discard as the API allows it", () => {
+        expect(gateFor(ReconstructionAction.Discard, ctx("review", "adminOwner", S.PeerReview, A.Initialized)).enabled).toBe(true);
+        expect(gateFor(ReconstructionAction.Discard, ctx("review", "reviewerOwner", S.ReadyToPublish, A.ReadyToPublish)).enabled).toBe(true);
     });
 });

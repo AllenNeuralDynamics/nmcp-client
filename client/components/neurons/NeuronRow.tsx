@@ -33,6 +33,7 @@ export const NeuronRow = (props: NeuronRowProps) => {
                 variables: {neuron: {id: props.neuron.id, label: value}},
                 optimisticResponse: {
                     updateNeuron: {
+                        ...props.neuron,
                         id: props.neuron.id,
                         __typename: "Neuron",
                         label: value
@@ -51,6 +52,7 @@ export const NeuronRow = (props: NeuronRowProps) => {
                 variables: {neuron: {id: props.neuron.id, keywords: parsed}},
                 optimisticResponse: {
                     updateNeuron: {
+                        ...props.neuron,
                         id: props.neuron.id,
                         __typename: "Neuron",
                         keywords: parsed
@@ -71,6 +73,7 @@ export const NeuronRow = (props: NeuronRowProps) => {
             variables: {neuron: {id: props.neuron.id, atlasSoma: {x: result.x, y: result.y, z: result.z}}},
             optimisticResponse: {
                 updateNeuron: {
+                    ...props.neuron,
                     id: props.neuron.id,
                     __typename: "Neuron",
                     atlasSoma: {x: result.x, y: result.y, z: result.z}
@@ -90,6 +93,7 @@ export const NeuronRow = (props: NeuronRowProps) => {
             variables: {neuron: {id: props.neuron.id, specimenSoma: {x: result.x, y: result.y, z: result.z}}},
             optimisticResponse: {
                 updateNeuron: {
+                    ...props.neuron,
                     id: props.neuron.id,
                     __typename: "Neuron",
                     specimenSoma: {x: result.x, y: result.y, z: result.z}
@@ -109,8 +113,10 @@ export const NeuronRow = (props: NeuronRowProps) => {
                     variables: {neuron: {id: props.neuron.id, atlasStructureId: structure.id}},
                     optimisticResponse: {
                         updateNeuron: {
+                            ...props.neuron,
                             id: props.neuron.id,
                             __typename: "Neuron",
+                            atlasStructureId: structure.id,
                             atlasStructure: structure,
                         },
                     }
@@ -122,8 +128,10 @@ export const NeuronRow = (props: NeuronRowProps) => {
                     variables: {neuron: {id: props.neuron.id, atlasStructureId: null}},
                     optimisticResponse: {
                         updateNeuron: {
+                            ...props.neuron,
                             id: props.neuron.id,
                             __typename: "Neuron",
+                            atlasStructureId: null,
                             atlasStructure: null,
                         },
                     }

@@ -4,7 +4,7 @@ import {screen} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import {renderWithProviders} from "../../test/render";
-import {ReconstructionActionButton} from "./ReconstructionAction";
+import {actionIcon, ReconstructionActionButton} from "./ReconstructionAction";
 import {actionName, actionTooltip, ReconstructionAction} from "../../models/reconstructionAction";
 
 describe("ReconstructionActionButton", () => {
@@ -58,5 +58,13 @@ describe("ReconstructionActionButton", () => {
 
             expect(await screen.findByText(actionTooltip(ReconstructionAction.Hold))).toBeInTheDocument();
         });
+    });
+});
+
+describe("actionIcon", () => {
+    const members = Object.values(ReconstructionAction).filter((v): v is ReconstructionAction => typeof v === "number");
+
+    it.each(members)("has an icon for %s", action => {
+        expect(actionIcon(action)).toBeTruthy();
     });
 });

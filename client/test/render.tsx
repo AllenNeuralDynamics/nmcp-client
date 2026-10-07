@@ -1,7 +1,7 @@
 import * as React from "react";
 import {render} from "@testing-library/react";
 import {MockedProvider, MockedResponse} from "@apollo/client/testing";
-import {colorsTuple, Combobox, createTheme, MantineProvider, Modal, Tooltip} from "@mantine/core";
+import {colorsTuple, Combobox, createTheme, MantineProvider, Menu, Modal, Tooltip} from "@mantine/core";
 import {MemoryRouter} from "react-router-dom";
 
 import {UserContext} from "../components/app/UserApp";
@@ -11,16 +11,17 @@ import {ConstantsContext} from "../components/app/AppConstants";
 
 const noTransition = {transitionProps: {duration: 0}};
 
-// Zero-duration transitions so tooltips, modals and option lists mount synchronously.  jsdom lays everything out as a
-// zero rect, which floating-ui's hide middleware reads as a detached anchor, so hideDetached must be off for any
-// Combobox dropdown to be visible.
+// Zero-duration transitions so tooltips, modals, menus and option lists mount synchronously.  jsdom lays everything out
+// as a zero rect, which floating-ui's hide middleware reads as a detached anchor, so hideDetached must be off for any
+// Combobox or Menu dropdown to be visible.
 const testTheme = createTheme({
     // The one app colour a test asserts on: the row selection background.
     colors: {"table-selection": colorsTuple("#e7f5ff")},
     components: {
         Tooltip: Tooltip.extend({defaultProps: noTransition}),
         Modal: Modal.extend({defaultProps: noTransition}),
-        Combobox: Combobox.extend({defaultProps: {...noTransition, hideDetached: false}})
+        Combobox: Combobox.extend({defaultProps: {...noTransition, hideDetached: false}}),
+        Menu: Menu.extend({defaultProps: {...noTransition, hideDetached: false}})
     }
 });
 
