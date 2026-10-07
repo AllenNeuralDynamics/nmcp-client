@@ -34,7 +34,7 @@ export const CandidateActions = ({neuron, showAnnotators}: { neuron: NeuronShape
         });
 
     const onRequestAccessResponse = (response: RequestAccessResponse) => {
-        let message = "The request for access has been received.  A member of the Neuron Morphology Community Portal be in contact."
+        let message = "The request for access has been received.  A member of the Neuron Morphology Community Portal team will be in contact."
 
         switch (response) {
             case RequestAccessResponse.Throttled:
@@ -44,7 +44,7 @@ export const CandidateActions = ({neuron, showAnnotators}: { neuron: NeuronShape
             case RequestAccessResponse.DuplicateDenied:
             case RequestAccessResponse.DuplicateOpen:
                 message = "Access has already be requested for this email address.  If you have not yet received a response, a member of the Neuron Morphology" +
-                    "Community Portal be in contact in soon as your request can be processed."
+                    "Community Portal team will be in contact as soon as your request can be processed."
                 break;
         }
 

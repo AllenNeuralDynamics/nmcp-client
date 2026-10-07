@@ -9,7 +9,7 @@ import {REQUEST_ACCESS_MUTATION, RequestAccessMutationResponse, RequestAccessVar
 import {RequestAccessResponse} from "../../models/accessRequest";
 
 const ProposedUse: string = "Please describe your scientific area of interest and how analysis of single neuron morphologies fit in your research plan. Include your brain area(s) of interest and the proposed scope of your proofreading effort (e.g., approximate number of brain areas and neurons).";
-const InfoText: string = "A member of the Neuron Morphology Community Portal will contact you regarding access to annotate and publish reconstructions in the portal. Before new users are granted access, they must attend a portal training webinar. Once access is granted, users are expected to actively engage with the portal user community including sharing progress updates on neuron annotations they have completed for their project.";
+const InfoText: string = "A member of the Neuron Morphology Community Portal team will contact you regarding access to annotate and publish reconstructions in the portal. Before new users are granted access, they must attend a portal training webinar. Once access is granted, users are expected to actively engage with the portal user community including sharing progress updates on neuron annotations they have completed for their project.";
 
 export const RequestAccess = observer(({onResponse}: {onResponse: (response: RequestAccessResponse) => void}) => {
     const [opened, setOpened] = useState(false);
