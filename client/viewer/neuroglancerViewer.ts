@@ -59,6 +59,8 @@ export class NeuroglancerViewer {
 
     private _isDarkColorScheme: boolean = false;
 
+    private _somaFocus: Point3D | null = null;
+
     private _stateInitialized: boolean = false;
     private _stateChangeHandler: any = null;
     private _positionCallback: any = null;
@@ -150,6 +152,18 @@ export class NeuroglancerViewer {
         }
     }
 
+    // Marks the soma and centers the view on it, now and on every resetView, so the marker and the view center always
+    // agree. Pass viewer-space coordinates, or null to remove the marker and fall back to the default position.
+    public setSomaFocus(point: Point3D | null): void {
+        this._somaFocus = point != null && Number.isFinite(point.x) && Number.isFinite(point.y) && Number.isFinite(point.z) ? point : null;
+
+        this.setSomaAnnotation(this._somaFocus);
+
+        if (this._somaFocus) {
+            this.viewerPosition = this._somaFocus;
+        }
+    }
+
     public set colorScheme(isDarkColorScheme: boolean) {
         this._isDarkColorScheme = isDarkColorScheme;
 
@@ -157,7 +171,15 @@ export class NeuroglancerViewer {
     }
 
     public resetView() {
-        this.restoreState({...this.currentState, ...immutableDefaultState});
+        this.restoreState(this.applySomaFocus({...this.currentState, ...immutableDefaultState}));
+    }
+
+    protected applySomaFocus(state: any): any {
+        if (this._somaFocus) {
+            return this.setPosition(state, this._somaFocus.x, this._somaFocus.y, this._somaFocus.z);
+        }
+
+        return state;
     }
 
     public unlink(): void {

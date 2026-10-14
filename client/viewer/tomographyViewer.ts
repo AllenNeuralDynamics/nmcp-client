@@ -84,7 +84,7 @@ export class TomographyViewer extends NeuroglancerViewer {
     }
 
     public resetView() {
-        this.restoreState({...this.currentState, ...defaultTomographyViewerState});
+        this.restoreState(this.applySomaFocus({...this.currentState, ...defaultTomographyViewerState}));
     }
 
     protected get defaultState() {

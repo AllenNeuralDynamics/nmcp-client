@@ -37,6 +37,21 @@ export type SomaLocation = {
     z: number;
 }
 
+// The API stores an unset soma as the origin rather than null, and its atlas-soma back-fill treats any component
+// below 0.01 as unset, so match that rather than testing for null alone.
+export function isSomaLocationSet(location: SomaLocation | null | undefined): boolean {
+    return location != null && [location.x, location.y, location.z].every(v => Number.isFinite(v) && v >= 0.01);
+}
+
+// The neuron's own soma wins whenever it is set; the reconstruction's soma node is only a fallback.
+export function selectSomaLocation(neuronSoma: SomaLocation | null | undefined, reconstructionSoma: SomaLocation | null | undefined): SomaLocation | null {
+    if (isSomaLocationSet(neuronSoma)) {
+        return neuronSoma;
+    }
+
+    return isSomaLocationSet(reconstructionSoma) ? reconstructionSoma : null;
+}
+
 export type SomaProperties = {
     brightness?: number;
     volume?: number;

@@ -33,7 +33,7 @@ export const CandidateRow = (props: ICandidateRowProps) => {
         <Table.Tr {...subProps} onClick={() => props.onSelected(props.neuron)}>
             <Table.Td>
                 <Group gap="xs" wrap="nowrap">
-                    <NeuronVersionLink neuron={props.neuron} focusOnSoma/>
+                    <NeuronVersionLink neuron={props.neuron} openAtlasTab/>
                     {props.neuron.untraceable ? <Badge size="xs" color="gray" variant="light">Untraceable</Badge> : null}
                 </Group>
             </Table.Td>

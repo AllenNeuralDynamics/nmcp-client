@@ -5,11 +5,11 @@ import {Group, Text} from "@mantine/core";
 import {formatNeuron, NeuronShape} from "../../models/neuron";
 
 export type NeuronLinkState = {
-    focusOnSoma?: boolean;
+    openAtlasTab?: boolean;
 };
 
-export const NeuronVersionLink = ({neuron, focusOnSoma = false}: { neuron: NeuronShape; focusOnSoma?: boolean }) => {
-    const state: NeuronLinkState | undefined = focusOnSoma ? {focusOnSoma: true} : undefined;
+export const NeuronVersionLink = ({neuron, openAtlasTab = false}: { neuron: NeuronShape; openAtlasTab?: boolean }) => {
+    const state: NeuronLinkState | undefined = openAtlasTab ? {openAtlasTab: true} : undefined;
 
     return (
         <Group>

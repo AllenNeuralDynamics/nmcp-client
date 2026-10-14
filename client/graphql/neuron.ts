@@ -79,8 +79,20 @@ export const NEURON_VERSIONS_RELATIONSHIPS_FRAGMENT = gql`fragment NeuronVersion
             id
             skeletonId
         }
+        soma {
+            id
+            x
+            y
+            z
+        }
         atlasReconstruction {
             id
+            soma {
+                id
+                x
+                y
+                z
+            }
             nodeCounts {
                 axon {
                     total

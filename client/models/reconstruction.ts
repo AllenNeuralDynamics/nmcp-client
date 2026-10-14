@@ -4,6 +4,7 @@ import {ReconstructionStatus} from "./reconstructionStatus";
 import {NeuronShape} from "./neuron";
 import {Precomputed} from "./precomputed";
 import {AtlasReconstructionStatus} from "./atlasReconstructionStatus";
+import {SpecimenNode} from "./specimenNode";
 
 export type NodeCount = {
     total: number;
@@ -36,6 +37,7 @@ export type Reconstruction = {
     status: ReconstructionStatus;
     specimenNodeCounts: NodeCounts;
     specimenLengthMillimeters: number;
+    soma?: SpecimenNode;
     durationHours: number;
     notes: string;
     startedAt: Date;

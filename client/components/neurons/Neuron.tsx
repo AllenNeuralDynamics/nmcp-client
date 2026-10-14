@@ -86,13 +86,15 @@ export const Neuron = () => {
 
     const invalidVersion = (location.state as any)?.invalidVersion as string | undefined;
 
-    const focusOnSoma = (location.state as NeuronLinkState | null)?.focusOnSoma === true;
+    const openAtlasTab = (location.state as NeuronLinkState | null)?.openAtlasTab === true;
 
     useEffect(() => {
-        if (focusOnSoma) {
+        if (openAtlasTab) {
             setActiveTab("atlas");
+            // Clear it so a refresh restores the last tab used instead of forcing the atlas tab again.
+            navigate(location.pathname, {replace: true, state: {}});
         }
-        // mount-only; intentionally not re-running on focusOnSoma changes
+        // mount-only; intentionally not re-running on openAtlasTab changes
     }, []);
 
     const onChangeTab = (tab: string) => {
@@ -220,16 +222,10 @@ export const Neuron = () => {
                         <Tabs.Panel value="atlas" key={`atlas_${data.neuron.id}`}>
                             <NeuronAtlasSpaceView atlasId={data.neuron.specimen.atlasId}
                                                   reconstruction={selectedReconstruction}
-                                                  soma={data.neuron.atlasSoma}
-                                                  focusSoma={focusOnSoma ? data.neuron.atlasSoma : undefined}
-                                                  onFocusApplied={() =>
-                                                      navigate(location.pathname, {replace: true, state: {}})}/>
+                                                  soma={data.neuron.atlasSoma}/>
                         </Tabs.Panel>
                         <Tabs.Panel value="specimen" key={`specimen_${data.neuron.id}`}>
-                            <NeuronSpecimenSpaceView neuron={data.neuron} reconstruction={selectedReconstruction}
-                                                     focusSoma={focusOnSoma ? data.neuron.specimenSoma : undefined}
-                                                     onFocusApplied={() =>
-                                                         navigate(location.pathname, {replace: true, state: {}})}/>
+                            <NeuronSpecimenSpaceView neuron={data.neuron} reconstruction={selectedReconstruction}/>
                         </Tabs.Panel>
                         <Tabs.Panel value="quality" key={`quality_${data.neuron.id}`}>
                             <QualityMetrics qualityControlId={qualityControlId}/>

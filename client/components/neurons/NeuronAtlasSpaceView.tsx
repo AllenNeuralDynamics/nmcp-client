@@ -8,7 +8,7 @@ import {useResizeObserver} from "@mantine/hooks";
 import {NEAREST_NODE_QUERY, NearestNodeQueryResponse, NearestNodeQueryVariables} from "../../graphql/search";
 import {useConstants} from "../../hooks/useConstants";
 import {useSystemConfiguration} from "../../hooks/useSystemConfiguration";
-import {SomaLocation} from "../../models/neuron";
+import {selectSomaLocation, SomaLocation} from "../../models/neuron";
 import {Reconstruction} from "../../models/reconstruction";
 import {AtlasSpaceViewer} from "../../viewer/atlasSpaceViewer";
 import {AtlasViewModel} from "../../viewmodel/atlasViewModel";
@@ -20,11 +20,9 @@ type NeuronAtlasSpaceViewProps = {
     atlasId: string;
     reconstruction?: Reconstruction;
     soma?: SomaLocation;
-    focusSoma?: SomaLocation;
-    onFocusApplied?: () => void;
 };
 
-export const NeuronAtlasSpaceView = observer(({atlasId, reconstruction, soma, focusSoma, onFocusApplied}: NeuronAtlasSpaceViewProps) => {
+export const NeuronAtlasSpaceView = observer(({atlasId, reconstruction, soma}: NeuronAtlasSpaceViewProps) => {
     const scheme = useComputedColorScheme();
 
     const systemConfiguration = useSystemConfiguration();
@@ -44,10 +42,10 @@ export const NeuronAtlasSpaceView = observer(({atlasId, reconstruction, soma, fo
     const reconstructionRef = useRef(reconstruction);
     reconstructionRef.current = reconstruction;
 
-    // atlas space is voxels = microns / 10, matching viewerPosition scaling
-    const somaPoint = soma && Number.isFinite(soma.x) && Number.isFinite(soma.y) && Number.isFinite(soma.z)
-        ? {x: soma.x / 10, y: soma.y / 10, z: soma.z / 10}
-        : null;
+    const somaLocation = selectSomaLocation(soma, reconstruction?.atlasReconstruction?.soma);
+
+    // atlas space is voxels = microns / 10
+    const somaPoint = somaLocation ? {x: somaLocation.x / 10, y: somaLocation.y / 10, z: somaLocation.z / 10} : null;
 
     useEffect(() => {
         const v = new AtlasSpaceViewer("neuron-atlas-ng-container", atlasViewModel, systemConfiguration.precomputedLocation, scheme == "dark");
@@ -61,15 +59,7 @@ export const NeuronAtlasSpaceView = observer(({atlasId, reconstruction, soma, fo
 
         v.updateAtlasStructures(atlasViewModel.displayedStructures.map(c => c.structure.structureId));
 
-        v.setSomaAnnotation(somaPoint);
-
-        if (focusSoma) {
-            if (Number.isFinite(focusSoma.x) && Number.isFinite(focusSoma.y) && Number.isFinite(focusSoma.z)) {
-                // viewerPosition does not scale; atlas space is voxels = microns / 10
-                v.viewerPosition = {x: focusSoma.x / 10, y: focusSoma.y / 10, z: focusSoma.z / 10};
-            }
-            onFocusApplied?.();
-        }
+        v.setSomaFocus(somaPoint);
 
         setViewer(v);
 
@@ -87,9 +77,9 @@ export const NeuronAtlasSpaceView = observer(({atlasId, reconstruction, soma, fo
 
     useEffect(() => {
         if (viewer) {
-            viewer.setSomaAnnotation(somaPoint);
+            viewer.setSomaFocus(somaPoint);
         }
-    }, [soma?.x, soma?.y, soma?.z]);
+    }, [somaLocation?.x, somaLocation?.y, somaLocation?.z]);
 
     useEffect(() => {
         if (viewer) {
