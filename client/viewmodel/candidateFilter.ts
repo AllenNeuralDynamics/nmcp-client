@@ -2,6 +2,7 @@ import {makeAutoObservable} from "mobx";
 
 import {AtlasStructureShape} from "../models/atlasStructure";
 import {SomaFilterProperties} from "../models/neuron";
+import {ReconstructionStatus} from "../models/reconstructionStatus";
 
 export class OptionalFilter<T> {
     public isEnabled: boolean = false;
@@ -15,10 +16,20 @@ export class OptionalFilter<T> {
     }
 }
 
+// Mirrors CandidateExcludedStatuses in ../nmcp-api/src/models/reconstruction.ts, the API's default for
+// excludedReconstructionStatuses; it must hold the same members.
+export const CandidateExcludedStatuses: ReconstructionStatus[] = [
+    ReconstructionStatus.Duplicate,
+    ReconstructionStatus.Incomplete,
+    ReconstructionStatus.Untraceable
+];
+
+export const CandidateIncludeOptions: ReconstructionStatus[] = [ReconstructionStatus.InProgress, ...CandidateExcludedStatuses];
+
 export class CandidateFilter {
     public atlasId: string = null;
 
-    public includeInProgress: boolean = false;
+    public includedStatuses: ReconstructionStatus[] = [];
 
     public samplesFilter: OptionalFilter<string[]> = new OptionalFilter([]);
     public atlasStructureFilter: OptionalFilter<AtlasStructureShape[]> = new OptionalFilter([]);
@@ -46,7 +57,21 @@ export class CandidateFilter {
     }
 
     public get anyEnabled(): boolean {
-        return this.includeInProgress || this.samplesFilter.isEnabled || this.atlasStructureFilter.isEnabled || this.tagFilter.isEnabled || this.genotypeFilter.isEnabled || this.limitBrightness || this.limitVolume
+        return this.includedStatuses.length > 0 || this.samplesFilter.isEnabled || this.atlasStructureFilter.isEnabled || this.tagFilter.isEnabled || this.genotypeFilter.isEnabled || this.limitBrightness || this.limitVolume
+    }
+
+    public get includeInProgress(): boolean {
+        return this.includedStatuses.includes(ReconstructionStatus.InProgress);
+    }
+
+    // Undefined rather than the full list when none is included, so the request omits the argument and the API's
+    // default applies.
+    public get excludedReconstructionStatuses(): ReconstructionStatus[] {
+        if (!CandidateExcludedStatuses.some(s => this.includedStatuses.includes(s))) {
+            return undefined;
+        }
+
+        return CandidateExcludedStatuses.filter(s => !this.includedStatuses.includes(s));
     }
 
     public get specimenIds(): string[] {

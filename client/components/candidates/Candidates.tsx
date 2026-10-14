@@ -18,7 +18,7 @@ import {useConstants} from "../../hooks/useConstants";
 import {AtlasViewModel} from "../../viewmodel/atlasViewModel";
 
 function noCandidatesText(isFiltered: boolean) {
-    return isFiltered ? "There are no candidates that match the current filtering options." : "There are no candidates without annotations in progress.  Enable the In Progress toggle to see any candidates that have  active annotations.";
+    return isFiltered ? "There are no candidates that match the current filtering options." : "There are no candidates without annotations in progress.  Use Include to see candidates with annotations that are in progress, duplicate, incomplete or untraceable.";
 }
 
 export const Candidates = observer(() => {
@@ -47,7 +47,8 @@ export const Candidates = observer(() => {
                 genotype: candidateFilter.genotypes,
                 somaProperties: candidateFilter.somaFilter
             },
-            includeInProgress: candidateFilter.includeInProgress
+            includeInProgress: candidateFilter.includeInProgress,
+            excludedReconstructionStatuses: candidateFilter.excludedReconstructionStatuses
         },
         fetchPolicy: "network-only",
         pollInterval: 60000

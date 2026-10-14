@@ -1,7 +1,8 @@
 import * as React from "react";
 import {observer} from "mobx-react-lite";
-import {Divider, Group, Switch} from "@mantine/core";
+import {Divider, Group} from "@mantine/core";
 
+import {CandidateIncludeFilter} from "./CandidateIncludeFilter";
 import {NeuronTagFilter} from "../common/filters/NeuronTagFilter";
 import {NeuronGenotypeFilter} from "../common/filters/NeuronGenotypeFilter";
 import {SpecimenFilter} from "../common/filters/SpecimenFilter";
@@ -11,11 +12,7 @@ import {CandidateFilter} from "../../viewmodel/candidateFilter";
 export const CandidateFilters = observer(({candidateFilter}: { candidateFilter: CandidateFilter }) => {
     return (
         <Group p={12} justify="left" align="center">
-            <Switch label="Include in progress" key="in-progress-filter"
-                    checked={candidateFilter.includeInProgress}
-                    onChange={(event) => {
-                        candidateFilter.includeInProgress = event.currentTarget.checked;
-                    }}/>
+            <CandidateIncludeFilter candidateFilter={candidateFilter}/>
 
             <Divider orientation="vertical"/>
 

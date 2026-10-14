@@ -1,6 +1,7 @@
 import gql from "graphql-tag";
 
 import {NeuronShape, SomaFilterProperties} from "../models/neuron";
+import {ReconstructionStatus} from "../models/reconstructionStatus";
 import {NEURON_BASE_FIELDS_FRAGMENT, NEURON_RELATIONSHIP_FIELDS_FRAGMENT} from "./neuron";
 import {ReconstructionFieldsFragment} from "./reconstruction";
 
@@ -12,8 +13,8 @@ export const NeuronFieldsFragment = gql`fragment NeuronFields on Neuron {
 ${NEURON_BASE_FIELDS_FRAGMENT}
 ${NEURON_RELATIONSHIP_FIELDS_FRAGMENT}`;
 
-export const CANDIDATE_NEURONS_QUERY = gql`query CandidateNeuronsQuery ($input: NeuronQueryInput, $includeInProgress: Boolean) {
-    candidateNeurons(input: $input, includeInProgress: $includeInProgress) {
+export const CANDIDATE_NEURONS_QUERY = gql`query CandidateNeuronsQuery ($input: NeuronQueryInput, $includeInProgress: Boolean, $excludedReconstructionStatuses: [Int!]) {
+    candidateNeurons(input: $input, includeInProgress: $includeInProgress, excludedReconstructionStatuses: $excludedReconstructionStatuses) {
         totalCount
         offset
         items {
@@ -40,6 +41,7 @@ export type NeuronsQueryVariables = {
         somaProperties?: SomaFilterProperties;
     },
     includeInProgress: boolean;
+    excludedReconstructionStatuses?: ReconstructionStatus[];
 }
 
 export type NeuronsQueryData = {
