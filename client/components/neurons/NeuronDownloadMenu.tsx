@@ -16,10 +16,10 @@ export const NeuronDownloadMenu = ({reconstruction}: NeuronDownloadMenuProps) =>
     const hasSpecimen = reconstruction?.specimenNodeCounts != null;
     const hasAtlas = reconstruction?.atlasReconstruction?.nodeCounts != null;
 
-    async function download(id: string, space: ReconstructionSpace) {
+    async function download(id: string, format: ExportFormat, space: ReconstructionSpace) {
         infoNotification("Export Requested", "A download will begin when the data is ready.");
 
-        if (!await requestExport([id], ExportFormat.SWC, space)) {
+        if (!await requestExport([id], format, space)) {
             errorNotification("Export Failed", "Additional details are not available.");
         }
     }
@@ -33,12 +33,20 @@ export const NeuronDownloadMenu = ({reconstruction}: NeuronDownloadMenuProps) =>
             </Menu.Target>
             <Menu.Dropdown>
                 <Menu.Item disabled={!hasSpecimen}
-                           onClick={() => download(reconstruction.id, ReconstructionSpace.Specimen)}>
+                           onClick={() => download(reconstruction.id, ExportFormat.SWC, ReconstructionSpace.Specimen)}>
                     Specimen-Space SWC
                 </Menu.Item>
                 <Menu.Item disabled={!hasAtlas}
-                           onClick={() => download(reconstruction.atlasReconstruction.id, ReconstructionSpace.Atlas)}>
+                           onClick={() => download(reconstruction.atlasReconstruction.id, ExportFormat.SWC, ReconstructionSpace.Atlas)}>
                     Atlas-Space SWC
+                </Menu.Item>
+                <Menu.Item disabled={!hasSpecimen}
+                           onClick={() => download(reconstruction.id, ExportFormat.Parquet, ReconstructionSpace.Specimen)}>
+                    Specimen-Space Parquet
+                </Menu.Item>
+                <Menu.Item disabled={!hasAtlas}
+                           onClick={() => download(reconstruction.atlasReconstruction.id, ExportFormat.Parquet, ReconstructionSpace.Atlas)}>
+                    Atlas-Space Parquet
                 </Menu.Item>
             </Menu.Dropdown>
         </Menu>

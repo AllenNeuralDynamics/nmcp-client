@@ -4,8 +4,10 @@ import {SpecimenShape} from "./specimen";
 import {Reconstruction} from "./reconstruction";
 import {AtlasReconstruction} from "./atlasReconstruction";
 
+// Values are sent to the export service as raw numbers and must match its ExportFormat enum.
 export enum ExportFormat {
     SWC = 100,
+    Parquet = 400,
     legacyJSON = 900
 }
 
