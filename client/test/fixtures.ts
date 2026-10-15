@@ -129,7 +129,7 @@ export function makeMarmosetAtlasShape(): AtlasShape {
 // Marmoset is listed first so tests prove "first Mouse atlas" rather than "first atlas".
 export function makeConstantsResponse(atlases: AtlasShape[] = [makeMarmosetAtlasShape(), makeMouseAtlasShape()]): ConstantsQueryResponse {
     return {
-        systemSettings: {apiVersion: "test", neuronCount: 0},
+        systemSettings: {apiVersion: "test", neuronCount: 0, enableExperimentalFeatures: false},
         neuronStructures: [],
         nodeStructures: [],
         queryOperators: [],
@@ -144,4 +144,10 @@ export function makeConstants(response: ConstantsQueryResponse = makeConstantsRe
     constants.load(response);
 
     return constants;
+}
+
+export function makeExperimentalConstants(): DataConstants {
+    const response = makeConstantsResponse();
+
+    return makeConstants({...response, systemSettings: {...response.systemSettings, enableExperimentalFeatures: true}});
 }

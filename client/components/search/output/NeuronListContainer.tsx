@@ -7,6 +7,7 @@ import {requestExport} from "../../../services/exportService";
 import {DrawerState} from "../../../viewmodel/appLayout";
 import {useAppLayout} from "../../../hooks/useAppLayout";
 import {useQueryResponseViewModel} from "../../../hooks/useQueryResponseViewModel";
+import {useEnableExperimentalFeatures} from "../../../hooks/useEnableExperimentalFeatures";
 import {NeuronTable} from "./NeuronTable";
 import {errorNotification, infoNotification} from "../../common/NotificationHelper";
 import {ExportFormat, ReconstructionSpace} from "../../../models/neuron";
@@ -19,6 +20,8 @@ export const NeuronListContainer = observer(({maxHeight}: { maxHeight: number })
     const appLayout = useAppLayout();
 
     const queryResponse = useQueryResponseViewModel();
+
+    const enableExperimentalFeatures = useEnableExperimentalFeatures();
 
     async function exportNeurons(ids: string[], format: ExportFormat) {
         if (ids.length === 0) {
@@ -48,9 +51,10 @@ export const NeuronListContainer = observer(({maxHeight}: { maxHeight: number })
                 <Menu.Item onClick={() => exportNeurons(ids, ExportFormat.legacyJSON)}>
                     Export JSON
                 </Menu.Item>
-                <Menu.Item onClick={() => exportNeurons(ids, ExportFormat.Parquet)}>
-                    Export Parquet
-                </Menu.Item>
+                {enableExperimentalFeatures &&
+                    <Menu.Item onClick={() => exportNeurons(ids, ExportFormat.Parquet)}>
+                        Export Parquet
+                    </Menu.Item>}
             </Menu.Dropdown>
         </Menu>
     );

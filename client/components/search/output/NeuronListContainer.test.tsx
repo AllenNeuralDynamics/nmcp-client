@@ -9,6 +9,8 @@ import {QueryResponseViewModel} from "../../../viewmodel/queryResponseViewModel"
 import {QueryResponseViewModelContext} from "../../../hooks/useQueryResponseViewModel";
 import {ExportFormat, NeuronShape, ReconstructionSpace} from "../../../models/neuron";
 import {requestExport} from "../../../services/exportService";
+import {DataConstants} from "../../../models/constants";
+import {makeConstants, makeExperimentalConstants} from "../../../test/fixtures";
 
 vi.mock("./NeuronTable", () => ({NeuronTable: () => null}));
 vi.mock("../../../services/exportService", () => ({requestExport: vi.fn(async () => true)}));
@@ -19,7 +21,7 @@ function makeNeuron(index: number): NeuronShape {
 }
 
 // Every view model update() creates starts out selected.
-async function openExportMenu(count: number) {
+async function openExportMenu(count: number, constants: DataConstants = makeExperimentalConstants()) {
     const response = new QueryResponseViewModel();
 
     const neurons = Array.from({length: count}, (_, i) => makeNeuron(i + 1));
@@ -29,7 +31,8 @@ async function openExportMenu(count: number) {
     const {container} = renderWithProviders(
         <QueryResponseViewModelContext.Provider value={response}>
             <NeuronListContainer maxHeight={600}/>
-        </QueryResponseViewModelContext.Provider>
+        </QueryResponseViewModelContext.Provider>,
+        {constants}
     );
 
     // The menu target is a bare icon with no accessible name.
@@ -47,6 +50,14 @@ describe("NeuronListContainer export menu", () => {
         const items = within(screen.getByRole("menu")).getAllByRole("menuitem").map(i => i.textContent.trim());
 
         expect(items).toEqual(["Export SWC", "Export JSON", "Export Parquet"]);
+    });
+
+    it("omits Parquet when experimental features are disabled", async () => {
+        await openExportMenu(2, makeConstants());
+
+        const items = within(screen.getByRole("menu")).getAllByRole("menuitem").map(i => i.textContent.trim());
+
+        expect(items).toEqual(["Export SWC", "Export JSON"]);
     });
 
     it("exports the selected atlas reconstructions as Parquet", async () => {

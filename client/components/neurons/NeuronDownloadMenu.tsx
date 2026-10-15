@@ -5,6 +5,7 @@ import {IconChevronDown, IconDownload} from "@tabler/icons-react";
 import {requestExport} from "../../services/exportService";
 import {ExportFormat, ReconstructionSpace} from "../../models/neuron";
 import {Reconstruction} from "../../models/reconstruction";
+import {useEnableExperimentalFeatures} from "../../hooks/useEnableExperimentalFeatures";
 import {errorNotification, infoNotification} from "../common/NotificationHelper";
 
 type NeuronDownloadMenuProps = {
@@ -12,6 +13,8 @@ type NeuronDownloadMenuProps = {
 }
 
 export const NeuronDownloadMenu = ({reconstruction}: NeuronDownloadMenuProps) => {
+    const enableExperimentalFeatures = useEnableExperimentalFeatures();
+
     // A null node-counts column means node data was never stored, matching the API's own availability test.
     const hasSpecimen = reconstruction?.specimenNodeCounts != null;
     const hasAtlas = reconstruction?.atlasReconstruction?.nodeCounts != null;
@@ -40,14 +43,16 @@ export const NeuronDownloadMenu = ({reconstruction}: NeuronDownloadMenuProps) =>
                            onClick={() => download(reconstruction.atlasReconstruction.id, ExportFormat.SWC, ReconstructionSpace.Atlas)}>
                     Atlas-Space SWC
                 </Menu.Item>
-                <Menu.Item disabled={!hasSpecimen}
-                           onClick={() => download(reconstruction.id, ExportFormat.Parquet, ReconstructionSpace.Specimen)}>
-                    Specimen-Space Parquet
-                </Menu.Item>
-                <Menu.Item disabled={!hasAtlas}
-                           onClick={() => download(reconstruction.atlasReconstruction.id, ExportFormat.Parquet, ReconstructionSpace.Atlas)}>
-                    Atlas-Space Parquet
-                </Menu.Item>
+                {enableExperimentalFeatures && <>
+                    <Menu.Item disabled={!hasSpecimen}
+                               onClick={() => download(reconstruction.id, ExportFormat.Parquet, ReconstructionSpace.Specimen)}>
+                        Specimen-Space Parquet
+                    </Menu.Item>
+                    <Menu.Item disabled={!hasAtlas}
+                               onClick={() => download(reconstruction.atlasReconstruction.id, ExportFormat.Parquet, ReconstructionSpace.Atlas)}>
+                        Atlas-Space Parquet
+                    </Menu.Item>
+                </>}
             </Menu.Dropdown>
         </Menu>
     );

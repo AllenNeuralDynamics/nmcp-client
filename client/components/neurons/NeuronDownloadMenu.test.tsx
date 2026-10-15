@@ -4,10 +4,11 @@ import {screen, waitFor, within} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import {renderWithProviders} from "../../test/render";
-import {makeReconstruction} from "../../test/fixtures";
+import {makeConstants, makeExperimentalConstants, makeReconstruction} from "../../test/fixtures";
 import {NeuronDownloadMenu} from "./NeuronDownloadMenu";
 import {ExportFormat, ReconstructionSpace} from "../../models/neuron";
 import {Reconstruction} from "../../models/reconstruction";
+import {DataConstants} from "../../models/constants";
 import {ReconstructionStatus} from "../../models/reconstructionStatus";
 import {requestExport} from "../../services/exportService";
 import {errorNotification, infoNotification} from "../common/NotificationHelper";
@@ -26,8 +27,8 @@ const bothSpaces: Reconstruction = {...specimenOnly, specimenNodeCounts: specime
 
 const atlasUnavailable: Reconstruction = {...bothSpaces, atlasReconstruction: null};
 
-async function openMenu(reconstruction?: Reconstruction) {
-    renderWithProviders(<NeuronDownloadMenu reconstruction={reconstruction}/>);
+async function openMenu(reconstruction?: Reconstruction, constants: DataConstants = makeExperimentalConstants()) {
+    renderWithProviders(<NeuronDownloadMenu reconstruction={reconstruction}/>, {constants});
 
     await userEvent.click(screen.getByRole("button", {name: "Download"}));
 }
@@ -43,6 +44,14 @@ describe("NeuronDownloadMenu", () => {
         const items = within(screen.getByRole("menu")).getAllByRole("menuitem").map(i => i.textContent.trim());
 
         expect(items).toEqual([SPECIMEN_SWC, ATLAS_SWC, SPECIMEN_PARQUET, ATLAS_PARQUET]);
+    });
+
+    it("omits Parquet when experimental features are disabled", async () => {
+        await openMenu(bothSpaces, makeConstants());
+
+        const items = within(screen.getByRole("menu")).getAllByRole("menuitem").map(i => i.textContent.trim());
+
+        expect(items).toEqual([SPECIMEN_SWC, ATLAS_SWC]);
     });
 
     it.each([
@@ -89,7 +98,7 @@ describe("NeuronDownloadMenu", () => {
     });
 
     it("disables Download without a reconstruction", () => {
-        renderWithProviders(<NeuronDownloadMenu/>);
+        renderWithProviders(<NeuronDownloadMenu/>, {constants: makeConstants()});
 
         expect(screen.getByRole("button", {name: "Download"})).toBeDisabled();
     });

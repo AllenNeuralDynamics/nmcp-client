@@ -25,6 +25,7 @@ export class DataConstants {
     private _neuronStructureMap = new Map<string, NeuronalStructure>();
 
     private _apiVersion: string = "";
+    private _enableExperimentalFeatures: boolean = false;
 
     public neuronCount = -1;
 
@@ -44,6 +45,7 @@ export class DataConstants {
         }
 
         this._apiVersion = data.systemSettings.apiVersion;
+        this._enableExperimentalFeatures = data.systemSettings.enableExperimentalFeatures ?? false;
         this.neuronCount = data.systemSettings.neuronCount;
 
         this.loadAtlases(data.atlasKinds, data.atlases);
@@ -53,6 +55,10 @@ export class DataConstants {
         this.loadNeuronalStructures(data.neuronStructures, data.nodeStructures);
 
         this._isLoaded = true;
+    }
+
+    public get EnableExperimentalFeatures(): boolean {
+        return this._enableExperimentalFeatures;
     }
 
     public get ApiVersion(): string {

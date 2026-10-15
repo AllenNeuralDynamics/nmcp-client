@@ -10,6 +10,7 @@ export const CONSTANTS_QUERY = gql`query ConstantsQuery {
   systemSettings {
     apiVersion
     neuronCount
+    enableExperimentalFeatures
   }
   neuronStructures {
     id
@@ -63,6 +64,7 @@ export const CONSTANTS_QUERY = gql`query ConstantsQuery {
 export type SystemSettings = {
     apiVersion: string;
     neuronCount: number;
+    enableExperimentalFeatures: boolean;
 }
 
 export type ConstantsQueryResponse = {
