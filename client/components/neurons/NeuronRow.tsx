@@ -1,16 +1,27 @@
 import * as React from "react";
+import {useState} from "react";
 import {Link} from "react-router-dom";
 import {useMutation} from "@apollo/client";
-import {Badge, Button, Group, Table, Text} from "@mantine/core";
+import {Badge, Button, Group, Stack, Table, Text} from "@mantine/core";
 import {IconShare3, IconTrash} from "@tabler/icons-react";
 
 import {useConstants} from "../../hooks/useConstants";
-import {formatHortaLocation, formatKeywords, formatSomaLocation, NeuronShape, parseKeywords, parseSomaLocation} from "../../models/neuron";
+import {
+    formatHortaLocation,
+    formatKeywords,
+    formatSomaLocation,
+    NeuronMetadata,
+    NeuronMetadataFields,
+    NeuronShape,
+    parseKeywords,
+    parseSomaLocation
+} from "../../models/neuron";
 import {AtlasStructureShape} from "../../models/atlasStructure";
 import {toastUpdateError, toastUpdateSuccess} from "../common/NotificationHelper";
 import {UPDATE_NEURON_MUTATION, UpdateNeuronMutationResponse, UpdateNeuronVariables} from "../../graphql/neuron";
 import {InputPopup} from "../common/InputPopup";
 import {AtlasStructureSelect} from "../common/AtlasStructureSelect";
+import {NeuronMetadataModal} from "./NeuronMetadataModal";
 
 type NeuronRowProps = {
     neuron: NeuronShape;
@@ -20,6 +31,8 @@ type NeuronRowProps = {
 
 export const NeuronRow = (props: NeuronRowProps) => {
     const constants = useConstants();
+
+    const [isMetadataModalOpen, setIsMetadataModalOpen] = useState(false);
 
     const [updateNeuron] = useMutation<UpdateNeuronMutationResponse, UpdateNeuronVariables>(UPDATE_NEURON_MUTATION,
         {
@@ -146,6 +159,8 @@ export const NeuronRow = (props: NeuronRowProps) => {
 
     const isPublished = props.neuron.published != null;
 
+    const hasMetadata = NeuronMetadataFields.some(f => isMetadataValueSet(props.neuron.metadata?.[f.key]));
+
     if (isPublished) {
         return (
             <Table.Tr key={props.neuron.id}>
@@ -160,6 +175,9 @@ export const NeuronRow = (props: NeuronRowProps) => {
                 </Table.Td>
                 <Table.Td style={{minWidth: "60px", maxWidth: "60px"}}>
                     <Text size="sm" c="dimmed">{formatKeywords(props.neuron.keywords)}</Text>
+                </Table.Td>
+                <Table.Td>
+                    {hasMetadata ? MetadataDisplay(props.neuron.metadata, true) : <Text size="sm" c="dimmed">(none)</Text>}
                 </Table.Td>
                 <Table.Td style={{maxWidth: "140px"}}>
                     <Text size="sm" c="dimmed">{formatHortaLocation(props.neuron)}</Text>
@@ -193,6 +211,12 @@ export const NeuronRow = (props: NeuronRowProps) => {
                 <Table.Td style={{minWidth: "60px", maxWidth: "60px"}}>
                     <InputPopup value={formatKeywords(props.neuron.keywords)} placeholder="(none)" onAccept={updateKeywords}/>
                 </Table.Td>
+                <Table.Td>
+                    {hasMetadata
+                        ? <a style={{cursor: "pointer"}} onClick={() => setIsMetadataModalOpen(true)}>{MetadataDisplay(props.neuron.metadata, false)}</a>
+                        : <Text size="sm" c="dimmed" style={{cursor: "pointer"}} onClick={() => setIsMetadataModalOpen(true)}>click to edit</Text>}
+                    <NeuronMetadataModal neuron={props.neuron} opened={isMetadataModalOpen} onClose={() => setIsMetadataModalOpen(false)}/>
+                </Table.Td>
                 <Table.Td style={{maxWidth: "140px"}}>
                     <InputPopup value={formatHortaLocation(props.neuron)} placeholder="(undefined)" onAccept={updateSampleSoma}
                                 isValidValueFcn={v => !parseSomaLocation(v).error}/>
@@ -217,6 +241,24 @@ export const NeuronRow = (props: NeuronRowProps) => {
             </Table.Tr>
         );
     }
+}
+
+function isMetadataValueSet(value: number | string | null | undefined): boolean {
+    return value != null && value !== "";
+}
+
+function MetadataDisplay(metadata: NeuronMetadata, isDimmed: boolean) {
+    const rows = NeuronMetadataFields
+        .filter(f => isMetadataValueSet(metadata?.[f.key]))
+        .slice(0, 2)
+        .map(f => (
+            <Group key={f.key} gap="sm" wrap="nowrap">
+                <Text size="sm" miw={80} c="dimmed">{f.label}</Text>
+                <Text size="sm" c={isDimmed ? "dimmed" : undefined}>{metadata[f.key]}</Text>
+            </Group>
+        ));
+
+    return <Stack gap={0}>{rows}</Stack>;
 }
 
 function onNeuronUpdated(data: NeuronShape) {

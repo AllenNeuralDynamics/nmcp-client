@@ -7,6 +7,7 @@ import {formatAtlasStructure} from "../../models/atlasStructure";
 import {NodeCounts, Reconstruction} from "../../models/reconstruction";
 import {User} from "../../models/user";
 import {NeuronVersionLink} from "../common/NeuronVersionLink";
+import {SpecimenLink} from "../common/SpecimenLink";
 import {ReconstructionStatusLabel} from "../common/ReconstructionStatus";
 
 export type ReviewTableProps = {
@@ -81,7 +82,7 @@ const ReviewRow = (props: ReviewRowProps) => {
     return (
         <Table.Tr key={props.reconstruction.id} {...rowProps} onClick={() => props.onRowClick(props.reconstruction)}>
             <Table.Td><NeuronVersionLink neuron={props.reconstruction.neuron}/></Table.Td>
-            <Table.Td>{props.reconstruction.neuron.specimen.label}</Table.Td>
+            <Table.Td><SpecimenLink specimen={props.reconstruction.neuron.specimen}/></Table.Td>
             {...cellsForNodeCounts(props.reconstruction.specimenNodeCounts, scheme)}
             <Table.Td><Text size="sm" lineClamp={1}>{formatAtlasStructure(props.reconstruction.neuron?.atlasStructure, "(unspecified)")}</Text></Table.Td>
             <Table.Td ta="end">{props.reconstruction.neuron.atlasSoma.x.toFixed(1)}</Table.Td>

@@ -1,6 +1,6 @@
 import gql from "graphql-tag";
 
-import {NeuronShape, NeuronStatus, SomaFilterProperties, SomaLocation} from "../models/neuron";
+import {NeuronMetadata, NeuronShape, NeuronStatus, SomaFilterProperties, SomaLocation} from "../models/neuron";
 
 
 // brainStructureId is used to determine whether the brain area is inherited or not.  brainAreas{} is the resolved brain are
@@ -55,6 +55,11 @@ export const NEURON_BASE_FIELDS_FRAGMENT = gql`fragment NeuronBaseFields on Neur
         x
         y
         z
+    }
+    metadata {
+        instance
+        priority
+        somaGroup
     }
     canonicalDoi
     atlasStructureId
@@ -183,6 +188,7 @@ type NeuronVariables = {
     keywords?: string[];
     specimenSoma?: SomaLocation;
     atlasSoma?: SomaLocation;
+    metadata?: NeuronMetadata | null;
     atlasStructureId?: string;
     specimenId?: string;
 }

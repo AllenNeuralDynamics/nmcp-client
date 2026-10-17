@@ -1,11 +1,14 @@
 import * as React from "react";
-import {Table} from "@mantine/core";
+import {Group, Table, Tooltip} from "@mantine/core";
+import {IconCopy} from "@tabler/icons-react";
 
 import {Reconstruction} from "../../models/reconstruction";
 import {formatAtlasStructure} from "../../models/atlasStructure";
 import {formatUser} from "../../models/user";
 import {ReconstructionStatusLabel} from "../common/ReconstructionStatus";
 import {NeuronVersionLink} from "../common/NeuronVersionLink";
+import {SpecimenLink} from "../common/SpecimenLink";
+import {successNotification} from "../common/NotificationHelper";
 
 type ReconstructionTableProps = {
     reconstructions: Reconstruction[];
@@ -57,10 +60,26 @@ export const ReconstructionRow = (props: ReconstructionRowProps) => {
 
     const nodeCounts = props.reconstruction.atlasReconstruction.nodeCounts ?? props.reconstruction.specimenNodeCounts;
 
+    const fragmentsUrl = props.reconstruction.neuron.specimen.referenceDataset?.segmentationUrl;
+
+    const onCopyFragmentsUrl = async (evt: React.MouseEvent) => {
+        evt.stopPropagation();
+        await navigator.clipboard.writeText(fragmentsUrl);
+        successNotification("Segmentation URL Copied to Clipboard", fragmentsUrl);
+    }
+
     return (
         <Table.Tr key={props.reconstruction.id} {...subProps} onClick={() => props.onSelected(props.reconstruction)}>
             <Table.Td><NeuronVersionLink neuron={props.reconstruction.neuron}/></Table.Td>
-            <Table.Td>{props.reconstruction.neuron.specimen.label}</Table.Td>
+            <Table.Td>
+                <Group justify="space-between" wrap="nowrap" gap="xs">
+                    <SpecimenLink specimen={props.reconstruction.neuron.specimen}/>
+                    {fragmentsUrl ?
+                        <Tooltip label="Copy specimen segmentation url">
+                            <IconCopy size={14} style={{cursor: "pointer"}} onClick={onCopyFragmentsUrl}/>
+                        </Tooltip> : null}
+                </Group>
+            </Table.Td>
             <Table.Td>{formatAtlasStructure(props.reconstruction.neuron.atlasStructure, "(unspecified)")}</Table.Td>
             <Table.Td>{props.reconstruction.neuron.atlasSoma?.x.toFixed(1)}</Table.Td>
             <Table.Td>{props.reconstruction.neuron.atlasSoma?.y.toFixed(1)}</Table.Td>

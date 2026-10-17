@@ -11,6 +11,7 @@ import {GraphQLErrorAlert} from "../common/GraphQLErrorAlert";
 import {AppLoading} from "../app/AppLoading";
 import {useAppLayout} from "../../hooks/useAppLayout";
 import {SpecimenTomographyView} from "./SpecimenTomographyView";
+import {successNotification} from "../common/NotificationHelper";
 
 const NONE = "(none)";
 const UNSPECIFIED = "(unspecified)";
@@ -44,7 +45,12 @@ export const Specimen = observer(() => {
 
     const neuronCount = `${specimen.neuronCount} neuron${specimen.neuronCount != 1 ? "s" : ""}`;
 
-    const tomography = specimen.tomography?.url ?? NONE;
+    // || rather than ??: the reference data set editor saves cleared fields as "" rather than null.
+    const referenceUrl = specimen.referenceDataset?.url || NONE;
+
+    const fragmentsUrl = specimen.referenceDataset?.segmentationUrl || NONE;
+
+    const tomography = specimen.tomography?.url || NONE;
 
     const range = specimen.tomography?.options?.range ? `[${specimen.tomography.options.range[0]}, ${specimen.tomography.options.range[1]}]` : UNSPECIFIED;
 
@@ -55,6 +61,15 @@ export const Specimen = observer(() => {
 
     const simpleCell = (value: string) => {
         const props = (value == NONE || value == UNSPECIFIED) ? {c: "dimmed"} : {};
+        return <Text size="sm" truncate="end" {...props}>{value}</Text>;
+    }
+    const copyableCell = (title: string, value: string) => {
+        const props = value == NONE ? {c: "dimmed"} : {
+            onClick: () => {
+                clipboard.copy(value);
+                successNotification(title, `${title} copied to clipboard`);
+            }
+        };
         return <Text size="sm" truncate="end" {...props}>{value}</Text>;
     }
     const simpleSomaCell = (value: number) => {
@@ -80,7 +95,7 @@ export const Specimen = observer(() => {
                 </Card.Section>
                 <Card.Section>
                     <Group gap={0} align="flex-start">
-                        <Table variant="vertical" w={300} withColumnBorders>
+                        <Table variant="vertical" w={380} withColumnBorders>
                             <Table.Tr>
                                 <Table.Th bg="table-header">Date</Table.Th>
                                 <Table.Td>{simpleCell(date)}</Table.Td>
@@ -113,14 +128,18 @@ export const Specimen = observer(() => {
                             </Table.Tr>
                             <Table.Tr>
                                 <Table.Th bg="table-header">URL</Table.Th>
-                                <Table.Td maw={200}><Tooltip label={specimen.referenceDataset?.url ?? NONE}>{simpleCell(specimen.referenceDataset?.url ?? NONE)}</Tooltip></Table.Td>
+                                <Table.Td maw={220}><Tooltip label={referenceUrl}>{copyableCell("Reference Data Set URL", referenceUrl)}</Tooltip></Table.Td>
+                            </Table.Tr>
+                            <Table.Tr>
+                                <Table.Th bg="table-header">Segmentation URL</Table.Th>
+                                <Table.Td maw={220}><Tooltip label={fragmentsUrl}>{copyableCell("Segmentation URL", fragmentsUrl)}</Tooltip></Table.Td>
                             </Table.Tr>
                             <Table.Tr>
                                 <Table.Th colSpan={2} ta="center">Tomography</Table.Th>
                             </Table.Tr>
                             <Table.Tr>
                                 <Table.Th bg="table-header">Source</Table.Th>
-                                <Table.Td maw={200}><Tooltip label={tomography}>{simpleCell(tomography)}</Tooltip></Table.Td>
+                                <Table.Td maw={220}><Tooltip label={tomography}>{copyableCell("Tomography Source", tomography)}</Tooltip></Table.Td>
                             </Table.Tr>
                             <Table.Tr>
                                 <Table.Th bg="table-header">Range</Table.Th>

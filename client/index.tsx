@@ -1,3 +1,7 @@
+// Must stay the first import: the package root installs the Symbol.dispose polyfill that Neuroglancer's classes use
+// as a method key when their modules evaluate, and registers the layer types, data sources and s3://, gs:// and
+// https:// stores that every precomputed and zarr source is read through.
+import "neuroglancer";
 import * as React from "react";
 import {createRoot} from "react-dom/client";
 import {BrowserRouter} from "react-router-dom";
@@ -12,9 +16,6 @@ import {ApolloApp} from "./components/app/ApolloApp";
 require("file-loader?name=index.html!../index.html");
 
 import "../assets/style.css";
-
-import "neuroglancer/unstable/layer/enabled_frontend_modules.js";
-import "neuroglancer/unstable/datasource/enabled_frontend_modules.js";
 
 import "@mantine/core/styles.css";
 import "@mantine/dates/styles.css";
