@@ -4,15 +4,26 @@ The Portal Client is the user-facing front end application.
 
 ## Installation and Build
 
-The `nmcp-client` and Neuroglancer repositories should be cloned under the same top-level directory.  If that is not
-possible, `package.json` will need to be modified to correctly reference the location of the Neuroglancer repository: `"neuroglancer": "file:../nmcp-neuroglancer/dist/package"`
+Building requires Node.js 22.18 or later (the GitHub workflow uses Node 24).
 
-* Clone the NMCP Neuroglancer fork
-* In the repository directory `npm run build-package`
-
+Neuroglancer is installed from a pinned commit of [google/neuroglancer](https://github.com/google/neuroglancer),
+recorded in `package.json` and `package-lock.json`.  `npm install` downloads and builds that commit, so no separate
+Neuroglancer checkout is needed.  The build installs Neuroglancer's own development dependencies, which include a
+Playwright Chromium download; set `PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1` for the install to skip it.
 
 * Clone the `nmcp-client` repository
 * In the repository directory `npm install`
+
+#### Updating Neuroglancer
+
+* Pick a commit on the upstream `master` branch and copy its full 40-character SHA.  A shortened SHA is not enough:
+  npm keeps the commit already in `package-lock.json` and reports the install as up to date.
+* `npm install --save-dev github:google/neuroglancer#<full-sha>` updates `package.json` and `package-lock.json`
+  together.
+* Compare the `overrides` in Neuroglancer's `package.json` at that commit with the ones here and mirror any change.
+  npm applies `overrides` only from the root project, so Neuroglancer's entries (today, keeping `ikonate`'s unused
+  build tooling out of the install) have no effect unless copied.
+* Build, run the tests and check each Neuroglancer view.
 
 #### Run Local
 Depending on your setup, a number of env vars for the host/port of the database, API service, etc... will likely need to be set.

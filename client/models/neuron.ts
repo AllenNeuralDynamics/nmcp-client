@@ -52,6 +52,18 @@ export function selectSomaLocation(neuronSoma: SomaLocation | null | undefined, 
     return isSomaLocationSet(reconstructionSoma) ? reconstructionSoma : null;
 }
 
+export type NeuronMetadata = {
+    instance?: number;
+    priority?: number;
+    somaGroup?: string;
+}
+
+export const NeuronMetadataFields: { key: keyof NeuronMetadata, label: string }[] = [
+    {key: "instance", label: "Instance"},
+    {key: "priority", label: "Priority"},
+    {key: "somaGroup", label: "Soma Group"}
+];
+
 export type SomaProperties = {
     brightness?: number;
     volume?: number;
@@ -74,6 +86,7 @@ export type NeuronShape = {
     atlasStructureId?: string;
     atlasStructure?: AtlasStructureShape;
     somaProperties?: SomaProperties;
+    metadata?: NeuronMetadata;
     reconstructions?: Reconstruction[];
     reconstructionCount?: number;
     published?: AtlasReconstruction;

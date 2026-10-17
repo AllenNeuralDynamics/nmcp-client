@@ -27,6 +27,7 @@ export const NeuronsTable = (props: NeuronTableProps) => {
                     <Table.Th>Id</Table.Th>
                     <Table.Th>Specimen</Table.Th>
                     <Table.Th>Keywords</Table.Th>
+                    <Table.Th>Metadata</Table.Th>
                     <Table.Th>Specimen Soma</Table.Th>
                     <Table.Th>Atlas Soma</Table.Th>
                     <Table.Th>Atlas Soma Structure</Table.Th>

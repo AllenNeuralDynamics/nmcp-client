@@ -20,7 +20,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: "20.x"
+          node-version: "24.x"
       - name: Login to Github Packages
         uses: docker/login-action@v2
         with:
@@ -28,23 +28,12 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and Push Docker Images
+        env:
+          # npm ci builds the pinned Neuroglancer commit, which installs Neuroglancer's own devDependencies; this skips
+          # the Chromium download one of them (Playwright) would otherwise make on every run.
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
         run: |
           npm i -g typescript@5.9
-          current_working_dir=$(pwd)
-          cd ~
-          nmcp_dir=$(pwd)
-          echo "Cloning and pre-building neuroglancer"
-          git clone https://github.com/AllenNeuralDynamics/nmcp-neuroglancer.git
-          cd nmcp-neuroglancer && git checkout debounce-resize
-          npm install
-          npm run build-package
-
-          echo "Linking neuroglancer and publishing images"
-          cd $current_working_dir
-          npm install
-          npm remove neuroglancer
-          npm install --dev $nmcp_dir/nmcp-neuroglancer/dist/package
-          npm list
-          ls $nmcp_dir/nmcp-neuroglancer/dist/package
+          npm ci
           chmod +x docker-entry.sh
           task release

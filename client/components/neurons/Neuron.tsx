@@ -166,9 +166,17 @@ export const Neuron = () => {
                 </Card.Section>
                 <Card.Section p={0}  bg="segment">
                     <Group p={12} justify="space-between" align="center">
-                        <Group gap={8} align="baseline">
-                            <Text fw={500}>Open Dataset</Text>
-                            {!(isPublished && data.neuron.specimen.referenceDataset?.url) && <Text c="dimmed" size="sm">Not available.</Text>}
+                        <Group gap={32} align="baseline">
+                            <Group gap={8} align="baseline">
+                                <Text fw={500}>Open Dataset</Text>
+                                {!(isPublished && data.neuron.specimen.referenceDataset?.url) && <Text c="dimmed" size="sm">Not available.</Text>}
+                            </Group>
+                            <Group gap={8} align="baseline">
+                                <Text fw={500}>Segmentation</Text>
+                                {data.neuron.specimen.referenceDataset?.segmentationUrl ?
+                                    <Anchor size="sm" href={data.neuron.specimen.referenceDataset.segmentationUrl} target="_blank">{data.neuron.specimen.referenceDataset.segmentationUrl}</Anchor> :
+                                    <Text c="dimmed" size="sm">Not available.</Text>}
+                            </Group>
                         </Group>
                         <NeuronDownloadMenu reconstruction={selectedReconstruction}/>
                     </Group>

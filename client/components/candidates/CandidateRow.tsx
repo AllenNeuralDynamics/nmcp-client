@@ -7,6 +7,7 @@ import {formatAtlasStructure} from "../../models/atlasStructure";
 import {AnnotatorWithStatus} from "../common/AnnotatorWithStatus";
 import {successNotification} from "../common/NotificationHelper";
 import {NeuronVersionLink} from "../common/NeuronVersionLink";
+import {SpecimenLink} from "../common/SpecimenLink";
 
 export interface ICandidateRowProps {
     key: string
@@ -37,7 +38,7 @@ export const CandidateRow = (props: ICandidateRowProps) => {
                     {props.neuron.untraceable ? <Badge size="xs" color="gray" variant="light">Untraceable</Badge> : null}
                 </Group>
             </Table.Td>
-            <Table.Td>{props.neuron.specimen.label}</Table.Td>
+            <Table.Td><SpecimenLink specimen={props.neuron.specimen}/></Table.Td>
             <Table.Td ta={genotypeAlign}>{genotype}</Table.Td>
             <Table.Td>{formatKeywords(props.neuron.keywords)}</Table.Td>
             <Table.Td>{formatAtlasStructure(props.neuron.atlasStructure, "(unspecified)")}</Table.Td>
