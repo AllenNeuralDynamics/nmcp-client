@@ -43,4 +43,17 @@ describe("CandidateIncludeFilter", () => {
 
         expect(pills).toEqual(["Untraceable"]);
     });
+
+    it("shows the None placeholder only while nothing is selected", async () => {
+        const filter = new CandidateFilter();
+
+        renderWithProviders(<CandidateIncludeFilter candidateFilter={filter}/>);
+
+        expect(screen.getByRole("textbox").getAttribute("placeholder")).toBe("None");
+
+        await userEvent.click(screen.getByRole("textbox"));
+        await userEvent.click(await screen.findByRole("option", {name: "Duplicate"}));
+
+        expect(screen.getByRole("textbox").getAttribute("placeholder")).toBeNull();
+    });
 });

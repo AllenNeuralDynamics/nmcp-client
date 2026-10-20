@@ -9,6 +9,11 @@ export default defineConfig({
     test: {
         environment: "jsdom",
         include: ["client/**/*.test.{ts,tsx}"],
-        setupFiles: ["client/test/setup.ts"]
+        setupFiles: ["client/test/setup.ts"],
+        server: {
+            // Neuroglancer's modules import CSS, which Node's loader rejects when the package is externalized.  Inlining
+            // it lets Vite stub the CSS out.
+            deps: {inline: ["neuroglancer"]}
+        }
     }
 });

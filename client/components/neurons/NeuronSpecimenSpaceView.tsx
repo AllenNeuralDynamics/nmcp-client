@@ -72,7 +72,7 @@ export const NeuronSpecimenSpaceView = observer(({neuron, reconstruction}: Neuro
 
     return (
         <Stack gap={0} style={{flexGrow: 1}}>
-            <NeuroglancerControls viewer={viewer} allowResetView={true}/>
+            <NeuroglancerControls viewer={viewer} allowResetView={true} allowStateExport={true}/>
             <Divider orientation="horizontal"/>
             <div id="neuron-specimen-ng-container" className="ng-default-container" style={{flexGrow: 1, minHeight: "600px"}}/>
         </Stack>

@@ -3,12 +3,18 @@ import {useEffect, useState} from "react";
 import {observer} from "mobx-react-lite";
 import {ActionIcon, Divider, Group, Text, Tooltip} from "@mantine/core";
 import {useThrottledCallback} from "@mantine/hooks";
-import {IconAdjustmentsAlt, IconAlertTriangle, IconChartScatter3d, IconInfoCircle, IconRestore} from "@tabler/icons-react";
+import {IconAdjustmentsAlt, IconAlertTriangle, IconChartScatter3d, IconCopy, IconExternalLink, IconInfoCircle, IconRestore} from "@tabler/icons-react";
 
 import {NeuroglancerViewer} from "../../viewer/neuroglancerViewer";
+import {formatViewerState, standaloneViewerUrl} from "../../viewer/neuroglancerStateExport";
 import {useAppLayout} from "../../hooks/useAppLayout";
+import {errorNotification, successNotification} from "./NotificationHelper";
 
-export const NeuroglancerControls = observer(({viewer, allowResetView}: { viewer: NeuroglancerViewer, allowResetView: boolean }) => {
+export const NeuroglancerControls = observer(({viewer, allowResetView, allowStateExport = false}: {
+    viewer: NeuroglancerViewer,
+    allowResetView: boolean,
+    allowStateExport?: boolean
+}) => {
     const appLayout = useAppLayout();
 
     const [position, setPosition] = useState<number[]>([]);
@@ -21,6 +27,27 @@ export const NeuroglancerControls = observer(({viewer, allowResetView}: { viewer
 
     const resetNeuroglancerView = () => {
         viewer?.resetView();
+    };
+
+    // Must stay synchronous so the click's user activation still allows the popup.  With noopener, window.open
+    // returns null even on success.
+    const openInNeuroglancer = () => {
+        if (viewer) {
+            window.open(standaloneViewerUrl(viewer.currentState), "_blank", "noopener,noreferrer");
+        }
+    };
+
+    const copyNeuroglancerState = async () => {
+        if (!viewer) {
+            return;
+        }
+
+        try {
+            await navigator.clipboard.writeText(formatViewerState(viewer.currentState));
+            successNotification("Copied to Clipboard", "Neuroglancer state copied to clipboard");
+        } catch (err) {
+            errorNotification("Copy Failed", err);
+        }
     };
 
     const positionChanged = useThrottledCallback((p: number[]) => {
@@ -56,6 +83,20 @@ export const NeuroglancerControls = observer(({viewer, allowResetView}: { viewer
                     <Tooltip label="Reset the view scale and orientation">
                         <ActionIcon variant="subtle" onClick={resetNeuroglancerView}>
                             <IconRestore size={18}/>
+                        </ActionIcon>
+                    </Tooltip> : null}
+                {allowStateExport ?
+                    <Divider orientation="vertical"/> : null}
+                {allowStateExport ?
+                    <Tooltip label="Open this view in Neuroglancer in a new tab">
+                        <ActionIcon variant="subtle" aria-label="Open in Neuroglancer" onClick={openInNeuroglancer}>
+                            <IconExternalLink size={18}/>
+                        </ActionIcon>
+                    </Tooltip> : null}
+                {allowStateExport ?
+                    <Tooltip label="Copy the Neuroglancer state as JSON">
+                        <ActionIcon variant="subtle" aria-label="Copy Neuroglancer state" onClick={copyNeuroglancerState}>
+                            <IconCopy size={18}/>
                         </ActionIcon>
                     </Tooltip> : null}
             </Group>

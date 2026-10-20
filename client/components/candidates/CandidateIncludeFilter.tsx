@@ -14,7 +14,7 @@ export const CandidateIncludeFilter = observer(({candidateFilter}: { candidateFi
         <Group gap="sm" align="center">
             <Text size="sm">Include Additional</Text>
 
-            <MultiSelect w={300} clearable placeholder="None" aria-label="Include" data={options} value={value}
+            <MultiSelect w={300} clearable placeholder={value.length == 0 ? "None" : null} aria-label="Include" data={options} value={value}
                          onChange={(value) => candidateFilter.includedStatuses = value.map(v => parseInt(v))}/>
         </Group>
     );

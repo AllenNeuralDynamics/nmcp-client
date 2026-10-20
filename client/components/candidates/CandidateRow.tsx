@@ -4,6 +4,7 @@ import {IconBrowserShare} from "@tabler/icons-react";
 
 import {BracesKind, formatHortaLocation, formatKeywords, NeuronShape} from "../../models/neuron";
 import {formatAtlasStructure} from "../../models/atlasStructure";
+import {ReconstructionStatus, statusColor, statusNameOnly} from "../../models/reconstructionStatus";
 import {AnnotatorWithStatus} from "../common/AnnotatorWithStatus";
 import {successNotification} from "../common/NotificationHelper";
 import {NeuronVersionLink} from "../common/NeuronVersionLink";
@@ -30,11 +31,16 @@ export const CandidateRow = (props: ICandidateRowProps) => {
     const genotypeName = props.neuron.specimen.genotype?.name;
     const [genotype, genotypeAlign]: [string, "left" | "center"] = genotypeName ? [genotypeName, "left"] : ["-", "center"];
 
+    // Unlike Untraceable, these rows are not soft-deleted, so they arrive with the neuron's reconstructions rather than
+    // as a neuron-level flag.
+    const heldStatuses = [ReconstructionStatus.Duplicate, ReconstructionStatus.Incomplete].filter(s => props.neuron.reconstructions?.some(r => r?.status == s));
+
     return (
         <Table.Tr {...subProps} onClick={() => props.onSelected(props.neuron)}>
             <Table.Td>
                 <Group gap="xs" wrap="nowrap">
                     <NeuronVersionLink neuron={props.neuron} openAtlasTab/>
+                    {heldStatuses.map(s => <Badge key={s} size="xs" color={statusColor(s)} variant="light">{statusNameOnly(s)}</Badge>)}
                     {props.neuron.untraceable ? <Badge size="xs" color="gray" variant="light">Untraceable</Badge> : null}
                 </Group>
             </Table.Td>
