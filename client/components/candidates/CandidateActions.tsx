@@ -9,7 +9,6 @@ import {useUser} from "../../hooks/useUser";
 import {NeuronShape} from "../../models/neuron";
 import {IssueModal} from "./IssueModal";
 import {isUserReconstruction} from "../../models/reconstruction";
-import {CANDIDATE_NEURONS_QUERY} from "../../graphql/candidates";
 import {errorNotification} from "../common/NotificationHelper";
 import {ReconstructionActionButton} from "../common/ReconstructionAction";
 import {ReconstructionAction} from "../../models/reconstructionAction";
@@ -20,7 +19,11 @@ import {RequestAccessResponse} from "../../models/accessRequest";
 import {ActionPanel} from "../common/ActionPanel";
 import {MessageBox} from "../common/MessageBox";
 
-export const CandidateActions = ({neuron, showAnnotators}: { neuron: NeuronShape, showAnnotators: boolean }) => {
+export const CandidateActions = ({neuron, showAnnotators, onReconstructionStarted}: {
+    neuron: NeuronShape,
+    showAnnotators: boolean,
+    onReconstructionStarted?: (neuronId: string) => void
+}) => {
     const [isIssueModalVisible, setIsIssueModalVisible] = useState(false);
     const [accessMessage, setAccessMessage] = useState<string>(null);
 
@@ -29,7 +32,7 @@ export const CandidateActions = ({neuron, showAnnotators}: { neuron: NeuronShape
 
     const [startReconstruction, {loading}] = useMutation<StartReconstructionResponse, StartReconstructionArgs>(OPEN_RECONSTRUCTION_MUTATION,
         {
-            refetchQueries: [CANDIDATE_NEURONS_QUERY, RECONSTRUCTIONS_QUERY],
+            refetchQueries: [RECONSTRUCTIONS_QUERY],
             onError: (e) => errorNotification("Error starting reconstruction", e.message)
         });
 
@@ -66,7 +69,10 @@ export const CandidateActions = ({neuron, showAnnotators}: { neuron: NeuronShape
     const canAnnotate = !loading && !isUser;
 
     const annotateButton = canAnnotate ? (
-        <ReconstructionActionButton action={ReconstructionAction.Open} onClick={() => startReconstruction({variables: {neuronId: neuron.id}})}/>) : null;
+        <ReconstructionActionButton action={ReconstructionAction.Open} onClick={() => startReconstruction({
+            variables: {neuronId: neuron.id},
+            onCompleted: () => onReconstructionStarted?.(neuron.id)
+        })}/>) : null;
 
     const reportIssueButton = <ReconstructionActionButton action={ReconstructionAction.ReportIssue}
                                                           onClick={() => setIsIssueModalVisible(true)}/>

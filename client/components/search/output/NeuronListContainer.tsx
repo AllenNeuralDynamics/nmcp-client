@@ -16,7 +16,7 @@ export const NeuronListContainerWidth = "470px";
 
 const exportLimit = 10;
 
-export const NeuronListContainer = observer(({maxHeight}: { maxHeight: number }) => {
+export const NeuronListContainer = observer(() => {
     const appLayout = useAppLayout();
 
     const queryResponse = useQueryResponseViewModel();
@@ -95,8 +95,7 @@ export const NeuronListContainer = observer(({maxHeight}: { maxHeight: number })
     }
 
     return (
-        // h and mah are not in units of pixels, however the maxHeight prop is.
-        <Stack gap={0} w={NeuronListContainerWidth} style={{height: maxHeight, maxHeight: maxHeight}}>
+        <Stack gap={0} w={NeuronListContainerWidth}>
             {renderedHeader}
             <div style={{order: 1, flexGrow: 1, overflow: "auto"}}>
                 {content}

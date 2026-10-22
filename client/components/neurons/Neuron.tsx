@@ -24,6 +24,9 @@ import {NeuronDownloadMenu} from "./NeuronDownloadMenu";
 import {useSystemConfiguration} from "../../hooks/useSystemConfiguration";
 import {successNotification} from "../common/NotificationHelper";
 
+// Each level down to the active tab panel fills the remaining page height, so the Neuroglancer views can grow into it.
+const FillColumn: React.CSSProperties = {flexGrow: 1, display: "flex", flexDirection: "column"};
+
 const ExcludedStatuses = new Set([
     ReconstructionStatus.Archived,
     ReconstructionStatus.Discarded,
@@ -123,14 +126,14 @@ export const Neuron = () => {
     const qualityControlId = selectedReconstruction?.atlasReconstruction?.qualityControl?.id;
 
     return (
-        <Stack p={20} align="stretch">
+        <Stack p={20} align="stretch" style={{flexGrow: 1}}>
             {invalidVersion && (
                 <Alert color="orange" title="Version Not Found" withCloseButton
                        onClose={() => navigate(location.pathname, {replace: true, state: {}})}>
                     Reconstruction version &quot;{invalidVersion}&quot; was not found. Showing the default version.
                 </Alert>
             )}
-            <Card withBorder>
+            <Card withBorder style={{flexGrow: 1}}>
                 <Card.Section bg="segment">
                     <Group p={12} justify="space-between">
                         <Stack gap={0}>
@@ -207,8 +210,8 @@ export const Neuron = () => {
                         </Table>
                     )}
                 </Card.Section>
-                <Card.Section>
-                    <Tabs orientation="horizontal" value={activeTab} onChange={onChangeTab}>
+                <Card.Section style={FillColumn}>
+                    <Tabs orientation="horizontal" value={activeTab} onChange={onChangeTab} style={FillColumn}>
                         <Tabs.List>
                             <Tabs.Tab value="atlas" leftSection={<IconBinaryTreeFilled size={18} style={{transform: "rotate(-90deg)"}}/>}>
                                 Atlas-Space Reconstruction
@@ -227,21 +230,21 @@ export const Neuron = () => {
                             </Tabs.Tab>
                         </Tabs.List>
 
-                        <Tabs.Panel value="atlas" key={`atlas_${data.neuron.id}`}>
+                        <Tabs.Panel value="atlas" style={FillColumn} key={`atlas_${data.neuron.id}`}>
                             <NeuronAtlasSpaceView atlasId={data.neuron.specimen.atlasId}
                                                   reconstruction={selectedReconstruction}
                                                   soma={data.neuron.atlasSoma}/>
                         </Tabs.Panel>
-                        <Tabs.Panel value="specimen" key={`specimen_${data.neuron.id}`}>
+                        <Tabs.Panel value="specimen" style={FillColumn} key={`specimen_${data.neuron.id}`}>
                             <NeuronSpecimenSpaceView neuron={data.neuron} reconstruction={selectedReconstruction}/>
                         </Tabs.Panel>
-                        <Tabs.Panel value="quality" key={`quality_${data.neuron.id}`}>
+                        <Tabs.Panel value="quality" style={FillColumn} key={`quality_${data.neuron.id}`}>
                             <QualityMetrics qualityControlId={qualityControlId}/>
                         </Tabs.Panel>
-                        <Tabs.Panel value="metrics" key={`metrics_${data.neuron.id}`}>
+                        <Tabs.Panel value="metrics" style={FillColumn} key={`metrics_${data.neuron.id}`}>
                             <ReconstructionMetrics reconstructionId={selectedReconstruction?.atlasReconstruction?.id}/>
                         </Tabs.Panel>
-                        <Tabs.Panel value="history" key={`history_${data.neuron.id}`}>
+                        <Tabs.Panel value="history" style={FillColumn} key={`history_${data.neuron.id}`}>
                             <NeuronHistory neuronId={data.neuron.id}/>
                         </Tabs.Panel>
                     </Tabs>

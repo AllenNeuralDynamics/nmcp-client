@@ -1,8 +1,10 @@
-import {makeAutoObservable} from "mobx";
+import {comparer, makeAutoObservable, reaction, toJS} from "mobx";
+import {debounce} from "lodash-es";
 
 import {AtlasStructureShape} from "../models/atlasStructure";
 import {SomaFilterProperties} from "../models/neuron";
 import {ReconstructionStatus} from "../models/reconstructionStatus";
+import {CandidateQueryVariables} from "../graphql/candidates";
 
 export class OptionalFilter<T> {
     public isEnabled: boolean = false;
@@ -101,4 +103,60 @@ export class CandidateFilter {
 
         return input;
     }
+
+    // Plain copies, not the observable arrays, so a variables object recorded as applied can't change underneath the
+    // structural comparison that decides whether a later one differs.
+    public get queryVariables(): CandidateQueryVariables {
+        return toJS({
+            input: {
+                specimenIds: this.specimenIds,
+                atlasStructureIds: this.atlasStructureIds,
+                keywords: this.keywords,
+                genotype: this.genotypes,
+                somaProperties: this.somaFilter
+            },
+            includeInProgress: this.includeInProgress,
+            excludedReconstructionStatuses: this.excludedReconstructionStatuses
+        });
+    }
+}
+
+export type CandidateFilterWatch = {
+    refresh(): void;
+    dispose(): void;
+}
+
+// A trailing debounce rather than reaction's own delay: that delay schedules one run per window and never restarts, so
+// a drag longer than the window would reset both views repeatedly while still moving.
+export function watchQueryVariables(filter: CandidateFilter, apply: (variables: CandidateQueryVariables, filterChanged: boolean) => void, delayMs: number = 300): CandidateFilterWatch {
+    let lastApplied = filter.queryVariables;
+
+    const settle = debounce((variables: CandidateQueryVariables) => {
+        if (comparer.structural(variables, lastApplied)) {
+            return;
+        }
+
+        lastApplied = variables;
+
+        apply(variables, true);
+    }, delayMs);
+
+    const disposeReaction = reaction(() => filter.queryVariables, variables => settle(variables), {equals: comparer.structural});
+
+    return {
+        refresh() {
+            settle.cancel();
+
+            const variables = filter.queryVariables;
+            const filterChanged = !comparer.structural(variables, lastApplied);
+
+            lastApplied = variables;
+
+            apply(variables, filterChanged);
+        },
+        dispose() {
+            disposeReaction();
+            settle.cancel();
+        }
+    };
 }

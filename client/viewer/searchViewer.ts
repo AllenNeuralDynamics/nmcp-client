@@ -1,3 +1,5 @@
+import {debounce} from "lodash-es";
+
 import {AtlasViewer} from "./atlasViewer";
 import {LayerType, NeuroglancerLayerSource} from "./neuroglancerLayer";
 import {ccfMirrorTransform} from "./atlasLayer";
@@ -90,12 +92,28 @@ export class SearchViewer extends AtlasViewer {
     private readonly _modelMap = new Map<number, NeuronViewModel>();
     private readonly _somaModelMap = new Map<string, NeuronViewModel>();
 
+    private _neurons: NeuronViewModel[] = [];
+
+    private readonly _checkSegmentDrift = debounce(() => this.restoreSegmentsIfDrifted(), 250);
+    private _segmentDriftHandler: (() => void) | null = null;
+
     public constructor(elementId: string, atlasViewModel: AtlasViewModel, precomputedUrl: string, isDarkColorScheme: boolean = false) {
         super(elementId, atlasViewModel, isDarkColorScheme);
 
         this._precomputedUrl = precomputedUrl;
 
         this._configurations = DefaultReconstructionLayerConfiguration;
+
+        if (this.viewer) {
+            this._segmentDriftHandler = this.viewer.state.changed.add(this._checkSegmentDrift);
+        }
+    }
+
+    public unlink(): void {
+        this._segmentDriftHandler?.();
+        this._checkSegmentDrift.cancel();
+
+        super.unlink();
     }
 
     public set neuronSelectionListener(delegate: NeuronSelectionDelegate) {
@@ -116,6 +134,8 @@ export class SearchViewer extends AtlasViewer {
     }
 
     public updateReconstructions(neurons: NeuronViewModel[] = []) {
+        this._neurons = neurons;
+
         let state = this.currentState;
 
         state = this.updateSomas(neurons, state);
@@ -162,6 +182,28 @@ export class SearchViewer extends AtlasViewer {
         });
 
         return state;
+    }
+
+    // The view models decide which reconstructions are shown, but Neuroglancer's own input can change that directly (its
+    // default double-click "select" toggles the segment under the mouse).  Once such a change settles, put the view
+    // models' segments back.  Compared as sorted strings because Neuroglancer serializes ids as strings and marks a
+    // hidden segment with a leading "!".
+    private restoreSegmentsIfDrifted() {
+        const current = this.currentState;
+        const expected = this.updateReconstructionLayers(this._neurons, structuredClone(current));
+
+        const segmentsOf = (state: any, name: string) => {
+            const index = this.findLayer(name, state);
+
+            return index == null || index < 0 ? "" : (state.layers[index].segments ?? []).map(String).sort().join();
+        };
+
+        const drifted = this._configurations.some(c => [c.name, `${c.name} ${Mirror}`].some(name =>
+            segmentsOf(current, name) != segmentsOf(expected, name)));
+
+        if (drifted) {
+            this.updateReconstructions(this._neurons);
+        }
     }
 
     private updateReconstructionLayers(neurons: NeuronViewModel[], state: any): any {

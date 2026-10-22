@@ -42,7 +42,8 @@ export const SpecimenTomographyView = observer(({specimen}: { specimen: Specimen
 
     return (
         <Stack gap={0} style={{flexGrow: 1}}>
-            <NeuroglancerControls viewer={viewer} allowResetView={false}/>
+            {/* The controls set flexGrow for row layouts; the wrapper keeps them from taking a share of the height here. */}
+            <div><NeuroglancerControls viewer={viewer} allowResetView={false}/></div>
             <Divider orientation="horizontal"/>
             <div id="specimen-ng-container" className="ng-default-container" style={{flexGrow: 1, minHeight: "600px"}}/>
         </Stack>

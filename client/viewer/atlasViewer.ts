@@ -46,4 +46,32 @@ export class AtlasViewer extends NeuroglancerViewer {
 
         return state;
     }
+
+    // The live counterpart of includeAtlasStructures: changes the atlas layer's visible segments in place, without the
+    // state restore that rebuilds every layer.
+    protected showAtlasStructures(ids: number[], includeRoot: boolean = false): void {
+        if (!this.atlas) {
+            return;
+        }
+
+        const group = (this.viewer.layerManager.getLayerByName(AtlasLayerName)?.layer as any)?.displayState?.segmentationGroupState?.value;
+
+        if (!group) {
+            return;
+        }
+
+        const structureIds = new Set(ids);
+
+        if (includeRoot) {
+            structureIds.add(this.atlas.rootStructureId);
+        }
+
+        const segments = [...structureIds].map(id => BigInt(id));
+
+        group.selectedSegments.clear();
+        group.visibleSegments.clear();
+
+        group.selectedSegments.add(segments);
+        group.visibleSegments.add(segments);
+    }
 }

@@ -4,7 +4,7 @@ import {screen} from "@testing-library/react";
 import {Table} from "@mantine/core";
 
 import {renderWithProviders} from "../../test/render";
-import {CandidateRow} from "./CandidateRow";
+import {CandidateRow, CandidateRowHeight} from "./CandidateRow";
 import {NeuronShape} from "../../models/neuron";
 import {ReconstructionStatus} from "../../models/reconstructionStatus";
 
@@ -58,5 +58,25 @@ describe("CandidateRow", () => {
         expect(screen.getAllByText("Duplicate")).toHaveLength(1);
         expect(screen.getAllByText("Incomplete")).toHaveLength(1);
         expect(screen.getByText("Untraceable")).toBeTruthy();
+    });
+
+    it("renders empty atlas soma cells for a candidate without one", () => {
+        renderRow({...neuronWith([]), atlasSoma: null});
+
+        const cells = screen.getAllByRole("cell");
+
+        expect(cells.slice(5, 8).map(cell => cell.textContent)).toEqual(["", "", ""]);
+    });
+
+    it("keeps a stored origin soma visible", () => {
+        renderRow({...neuronWith([]), atlasSoma: {x: 0, y: 0, z: 0}});
+
+        expect(screen.getAllByRole("cell").slice(5, 8).map(cell => cell.textContent)).toEqual(["0.0", "0.0", "0.0"]);
+    });
+
+    it("renders at the fixed row height", () => {
+        renderRow(neuronWith([]));
+
+        expect(screen.getByRole("row")).toHaveStyle({height: `${CandidateRowHeight}px`});
     });
 });

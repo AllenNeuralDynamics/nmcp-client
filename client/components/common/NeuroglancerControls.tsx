@@ -10,10 +10,11 @@ import {formatViewerState, standaloneViewerUrl} from "../../viewer/neuroglancerS
 import {useAppLayout} from "../../hooks/useAppLayout";
 import {errorNotification, successNotification} from "./NotificationHelper";
 
-export const NeuroglancerControls = observer(({viewer, allowResetView, allowStateExport = false}: {
+export const NeuroglancerControls = observer(({viewer, allowResetView, allowStateExport = false, children}: {
     viewer: NeuroglancerViewer,
     allowResetView: boolean,
-    allowStateExport?: boolean
+    allowStateExport?: boolean,
+    children?: React.ReactNode
 }) => {
     const appLayout = useAppLayout();
 
@@ -100,7 +101,10 @@ export const NeuroglancerControls = observer(({viewer, allowResetView, allowStat
                         </ActionIcon>
                     </Tooltip> : null}
             </Group>
-            <Text size="xs" c="dimmed">{text}</Text>
+            <Group>
+                <Text size="xs" c="dimmed">{text}</Text>
+                {children}
+            </Group>
         </Group>
     );
 });

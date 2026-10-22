@@ -1,9 +1,10 @@
 import * as React from "react";
 import {useEffect, useState} from "react";
 import {useLazyQuery} from "@apollo/client";
+import {autorun} from "mobx";
 import {observer} from "mobx-react-lite";
 import {ActionIcon, Divider, Group, Stack, Text, useComputedColorScheme} from "@mantine/core";
-import {IconChevronLeft, IconChevronRight} from "@tabler/icons-react";
+import {IconChevronRight} from "@tabler/icons-react";
 
 import {NEAREST_NODE_QUERY, NearestNodeQueryResponse, NearestNodeQueryVariables} from "../../../graphql/search";
 import {useAppLayout} from "../../../hooks/useAppLayout";
@@ -17,8 +18,9 @@ import {NeuronViewModel} from "../../../viewmodel/neuronViewModel";
 import {SearchViewer} from "../../../viewer/searchViewer";
 import {NeuroglancerControls} from "../../common/NeuroglancerControls";
 import {ViewerSelection} from "./ViewerSelection";
+import {AtlasContainerOpener} from "./atlas/AtlasContainer";
 
-export const SearchView = observer(({height}: { height: number }) => {
+export const SearchView = observer(() => {
     const [viewer, setViewer] = useState<SearchViewer>(null);
 
     const [selectedNeuron, setSelectedNeuron] = useState<NeuronViewModel | null>(null);
@@ -72,11 +74,15 @@ export const SearchView = observer(({height}: { height: number }) => {
         }
     }, [atlasViewModel?.displayedStructures]);
 
-    if (viewer) {
-        const known = queryViewModel.neuronViewModels.filter(n => n.isSelected);
+    // Each update resets and restores the whole Neuroglancer state, so it must follow the neuron view models rather than
+    // every render.  The autorun tracks exactly the observables the update reads.
+    useEffect(() => {
+        if (!viewer) {
+            return;
+        }
 
-        viewer.updateReconstructions(known);
-    }
+        return autorun(() => viewer.updateReconstructions(queryViewModel.neuronViewModels.filter(n => n.isSelected)));
+    }, [viewer, queryViewModel]);
 
     const renderNeuronOpen = () => {
         if (appLayout.neuronDrawerState == DrawerState.Hidden) {
@@ -97,16 +103,7 @@ export const SearchView = observer(({height}: { height: number }) => {
     const renderAtlasStructureOpen = () => {
         // Without an atlas there is no drawer to open, and docking would hide this control.
         if (appLayout.atlasStructureDrawerState == DrawerState.Hidden && atlasViewModel) {
-            return (
-                <Group p={8} gap={0} justify="end" align="center">
-                    <Divider orientation="vertical"/>
-                    <ActionIcon variant="subtle"
-                                onClick={() => appLayout.setAtlasStructureDrawerState(DrawerState.Dock)}>
-                        <IconChevronLeft size={22}/>
-                    </ActionIcon>
-                    <Text>Atlas Structures</Text>
-                </Group>
-            );
+            return <AtlasContainerOpener/>;
         } else {
             return <Group p={0} gap={0}><Divider orientation="vertical"/></Group>;
         }
@@ -141,10 +138,9 @@ export const SearchView = observer(({height}: { height: number }) => {
                 <NeuroglancerControls viewer={viewer} allowResetView={true}/>
                 {renderAtlasStructureOpen()}
             </Group>
-            <Stack style={{height: height, position: "relative"}}>
+            <Stack style={{flexGrow: 1, minHeight: 0, position: "relative"}}>
                 <ViewerSelection node={soma ?? data?.nearestNode?.node ?? null} neuron={selectedNeuron}/>
-                <div id="neuroglancer-container" className="ng-default-container"
-                     style={{minHeight: 0, height: height}}/>
+                <div id="neuroglancer-container" className="ng-default-container" style={{flexGrow: 1, minHeight: 0}}/>
             </Stack>
         </Stack>
     );

@@ -1,7 +1,7 @@
 import * as React from "react";
 import {observer} from "mobx-react-lite";
 import {Accordion, ActionIcon, Divider, Group, SimpleGrid, Stack, Text} from "@mantine/core";
-import {IconChevronRight} from "@tabler/icons-react";
+import {IconChevronLeft, IconChevronRight} from "@tabler/icons-react";
 
 import {useAppLayout} from "../../../../hooks/useAppLayout";
 import {DrawerState} from "../../../../viewmodel/appLayout";
@@ -13,7 +13,7 @@ import {AtlasViewModel} from "../../../../viewmodel/atlasViewModel";
 const TreeAccordionKey = "tree";
 const HistoryAccordionKey = "history";
 
-export const AtlasContainer = observer(({maxHeight, atlasViewModel}: { maxHeight: number, atlasViewModel: AtlasViewModel }) => {
+export const AtlasContainer = observer(({atlasViewModel}: { atlasViewModel: AtlasViewModel }) => {
     const appLayout = useAppLayout();
 
     const renderedHeader = (
@@ -42,7 +42,7 @@ export const AtlasContainer = observer(({maxHeight, atlasViewModel}: { maxHeight
     }
 
     return (
-        <Stack gap={0} w={NeuronListContainerWidth} style={{height: maxHeight, maxHeight: maxHeight, order: 2}}>
+        <Stack gap={0} w={NeuronListContainerWidth}>
             {renderedHeader}
             <Accordion multiple={true} defaultValue={defaultValue} onChange={onAccordionChange} style={{overflow: "auto"}}>
                 <Accordion.Item value={HistoryAccordionKey}>
@@ -61,5 +61,19 @@ export const AtlasContainer = observer(({maxHeight, atlasViewModel}: { maxHeight
                 </Accordion.Item>
             </Accordion>
         </Stack>
+    );
+});
+
+export const AtlasContainerOpener = observer(() => {
+    const appLayout = useAppLayout();
+
+    return (
+        <Group p={8} gap={0} justify="end" align="center">
+            <Divider orientation="vertical"/>
+            <ActionIcon variant="subtle" onClick={() => appLayout.setAtlasStructureDrawerState(DrawerState.Dock)}>
+                <IconChevronLeft size={22}/>
+            </ActionIcon>
+            <Text>Atlas Structures</Text>
+        </Group>
     );
 });

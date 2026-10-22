@@ -26,7 +26,7 @@ export const QueryFilterContainer = observer(() => {
                          onRemoveFilter={(id: string) => uiPredicates.removePredicate(id)}/>));
 
     return (
-        <Accordion multiple={false} transitionDuration={0} chevronPosition="left" chevronIconSize={22} value={appLayout.isQueryExpanded ? "query" : null}
+        <Accordion multiple={false} chevronPosition="left" chevronIconSize={22} value={appLayout.isQueryExpanded ? "query" : null}
                    onChange={v => appLayout.isQueryExpanded = v != null}>
             <Accordion.Item value="query">
                 <Accordion.Control bg="section" styles={{label: {padding: 0}}}>
@@ -34,7 +34,7 @@ export const QueryFilterContainer = observer(() => {
                 </Accordion.Control>
                 <Accordion.Panel styles={{content: {padding: 0}}}>
                     <Stack p={12} mah={240} style={{overflow: "auto"}}>
-                        {appLayout.isQueryExpanded ? renderPredicates() : null}
+                        {renderPredicates()}
                     </Stack>
                 </Accordion.Panel>
             </Accordion.Item>

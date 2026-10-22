@@ -30,7 +30,7 @@ async function openExportMenu(count: number, constants: DataConstants = makeExpe
 
     const {container} = renderWithProviders(
         <QueryResponseViewModelContext.Provider value={response}>
-            <NeuronListContainer maxHeight={600}/>
+            <NeuronListContainer/>
         </QueryResponseViewModelContext.Provider>,
         {constants}
     );

@@ -3,17 +3,20 @@ import {useEffect, useRef, useState} from "react";
 import {useLazyQuery} from "@apollo/client";
 import {observer} from "mobx-react-lite";
 import {Divider, Group, Stack, useComputedColorScheme} from "@mantine/core";
-import {useResizeObserver} from "@mantine/hooks";
 
 import {NEAREST_NODE_QUERY, NearestNodeQueryResponse, NearestNodeQueryVariables} from "../../graphql/search";
+import {useAppLayout} from "../../hooks/useAppLayout";
 import {useConstants} from "../../hooks/useConstants";
 import {useSystemConfiguration} from "../../hooks/useSystemConfiguration";
 import {selectSomaLocation, SomaLocation} from "../../models/neuron";
 import {Reconstruction} from "../../models/reconstruction";
 import {AtlasSpaceViewer} from "../../viewer/atlasSpaceViewer";
 import {AtlasViewModel} from "../../viewmodel/atlasViewModel";
+import {DrawerState} from "../../viewmodel/appLayout";
 import {NeuroglancerControls} from "../common/NeuroglancerControls";
-import {AtlasContainer} from "../search/output/atlas/AtlasContainer";
+import {AtlasContainer, AtlasContainerOpener} from "../search/output/atlas/AtlasContainer";
+import {NeuronListContainerWidth} from "../search/output/NeuronListContainer";
+import {SideDrawer} from "../search/output/SideDrawer";
 import {AtlasViewerSelection} from "./AtlasViewerSelection";
 
 type NeuronAtlasSpaceViewProps = {
@@ -35,9 +38,9 @@ export const NeuronAtlasSpaceView = observer(({atlasId, reconstruction, soma}: N
 
     const [getNearest, {data}] = useLazyQuery<NearestNodeQueryResponse, NearestNodeQueryVariables>(NEAREST_NODE_QUERY);
 
-    const [ref, rect] = useResizeObserver();
+    const appLayout = useAppLayout();
 
-    const height = Math.round(rect.height);
+    const atlasDrawerOpened = appLayout.atlasStructureDrawerState == DrawerState.Dock;
 
     const reconstructionRef = useRef(reconstruction);
     reconstructionRef.current = reconstruction;
@@ -107,14 +110,24 @@ export const NeuronAtlasSpaceView = observer(({atlasId, reconstruction, soma}: N
     };
 
     return (
-        <Group ref={ref} gap={0} align="stretch" style={{flexGrow: 1, flexShrink: 0, flexBasis: 0, minHeight: 0}} preventGrowOverflow={false}>
+        <Group gap={0} align="stretch" style={{flexGrow: 1}} preventGrowOverflow={false}>
             <Stack gap={0} style={{flexGrow: 1}}>
-                <NeuroglancerControls viewer={viewer} allowResetView={true}/>
+                <Group gap={0} wrap="nowrap" bg="section">
+                    <NeuroglancerControls viewer={viewer} allowResetView={true}/>
+                    {atlasDrawerOpened ? null : <AtlasContainerOpener/>}
+                </Group>
                 <Divider orientation="horizontal"/><AtlasViewerSelection atlas={atlasViewModel.atlas} node={data?.nearestNode?.node ?? null} onClick={(id) => {atlasViewModel.toggle(id)}}/>
                 <div id="neuron-atlas-ng-container" className="ng-default-container" style={{flexGrow: 1, minHeight: "600px"}}/>
             </Stack>
-            <Divider orientation="vertical"/>
-            <AtlasContainer atlasViewModel={atlasViewModel} maxHeight={height}/>
+            {atlasDrawerOpened ? <Divider orientation="vertical"/> : null}
+            <SideDrawer opened={atlasDrawerOpened} width={NeuronListContainerWidth} side="right" order={0}>
+                {/* Out of flow so the structure tree cannot make the page taller; it scrolls within the viewer's height. */}
+                <div style={{position: "relative", flexGrow: 1}}>
+                    <div style={{position: "absolute", inset: 0, display: "flex"}}>
+                        <AtlasContainer atlasViewModel={atlasViewModel}/>
+                    </div>
+                </div>
+            </SideDrawer>
         </Group>
     )
 });
