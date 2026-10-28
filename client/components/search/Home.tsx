@@ -123,7 +123,7 @@ export const Home = observer(() => {
     }
 
     return (
-        <Stack justify="stretch" gap={0} style={{flexGrow: 1}}>
+        <Stack justify="stretch" gap={0} style={{flexGrow: 1, minHeight: 0}}>
             <QueryPage/>
             <Footer/>
         </Stack>

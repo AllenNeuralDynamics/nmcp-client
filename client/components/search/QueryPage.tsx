@@ -7,7 +7,7 @@ import {MainView} from "./output/MainView";
 
 export const QueryPage = observer(() => {
     return (
-        <Stack gap={0} style={{flexGrow: 1}}>
+        <Stack gap={0} style={{flexGrow: 1, minHeight: 0}}>
             <QueryFilterContainer/>
             <MainView/>
         </Stack>
