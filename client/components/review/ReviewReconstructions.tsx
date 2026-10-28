@@ -16,8 +16,8 @@ import {UserPermissions} from "../../graphql/user";
 import {NeuronTagFilter} from "../common/filters/NeuronTagFilter";
 import {hasPermission} from "../../models/user";
 import {availableReviewEntries, reviewStatusFilters} from "./reviewAccess";
-import {RECONSTRUCTIONS_QUERY, ReconstructionQueryArgs, ReconstructionsResponse} from "../../graphql/reconstruction";
-import {Reconstruction} from "../../models/reconstruction";
+import {ANNOTATIONS_QUERY, AnnotationQueryArgs, AnnotationsResponse} from "../../graphql/annotation";
+import {Annotation} from "../../models/annotation";
 import {ReviewActions} from "./ReviewActions";
 import {Navigate} from "react-router-dom";
 
@@ -50,7 +50,7 @@ export const ReviewReconstructions = observer(() => {
 
     const tag = tagFilter.isEnabled ? [tagFilter.contents] : [];
 
-    const {data, loading, error, previousData} = useQuery<ReconstructionsResponse, ReconstructionQueryArgs>(RECONSTRUCTIONS_QUERY, {
+    const {data, loading, error, previousData} = useQuery<AnnotationsResponse, AnnotationQueryArgs>(ANNOTATIONS_QUERY, {
         variables: {queryArgs: {offset: offset, limit: limit, specimenIds: sampleIds, statusFilters, keywords: tag}},
         pollInterval: 10000
     });
@@ -63,12 +63,12 @@ export const ReviewReconstructions = observer(() => {
         </div>)
     }
 
-    const reconstructionCache = (loading && previousData ? previousData.reconstructions.reconstructions : data?.reconstructions.reconstructions) || [];
-    const totalCount = (loading && previousData ? previousData.reconstructions.total : data?.reconstructions.total) || 0;
+    const reconstructionCache = (loading && previousData ? previousData.annotations.annotations : data?.annotations.annotations) || [];
+    const totalCount = (loading && previousData ? previousData.annotations.total : data?.annotations.total) || 0;
 
-    const selection: Reconstruction = selectedId ? (reconstructionCache.find(r => r.id === selectedId) ?? null) : null;
+    const selection: Annotation = selectedId ? (reconstructionCache.find(r => r.id === selectedId) ?? null) : null;
 
-    const onRowClick = (reconstruction: Reconstruction) => {
+    const onRowClick = (reconstruction: Annotation) => {
         setSelectedId(reconstruction?.id ?? null);
     }
 

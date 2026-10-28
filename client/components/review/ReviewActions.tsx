@@ -6,24 +6,24 @@ import {useClipboard} from "@mantine/hooks";
 import {IconGitMerge} from "@tabler/icons-react";
 
 import {
-    APPROVE_RECONSTRUCTION_MUTATION,
-    ApproveReconstructionArgs,
-    ApproveReconstructionResponse,
-    DISCARD_RECONSTRUCTION_MUTATION,
-    DiscardReconstructionResponse,
-    ReconstructionStatusModifierArgs,
-    REJECT_RECONSTRUCTION_MUTATION,
-    RejectReconstructionResponse,
+    APPROVE_ANNOTATION_MUTATION,
+    ApproveAnnotationArgs,
+    ApproveAnnotationResponse,
+    DISCARD_ANNOTATION_MUTATION,
+    DiscardAnnotationResponse,
+    AnnotationStatusModifierArgs,
+    REJECT_ANNOTATION_MUTATION,
+    RejectAnnotationResponse,
     RESET_RECONSTRUCTION_PIPELINE_MUTATION,
     ResetReconstructionPipelineResponse,
-    RECONSTRUCTIONS_QUERY, PublishReconstructionResponse, PublishReconstructionVariables, PUBLISH_RECONSTRUCTION_MUTATION
-} from "../../graphql/reconstruction";
-import {Reconstruction} from "../../models/reconstruction";
+    ANNOTATIONS_QUERY, PublishAnnotationResponse, PublishAnnotationVariables, PUBLISH_ANNOTATION_MUTATION
+} from "../../graphql/annotation";
+import {Annotation} from "../../models/annotation";
 import {errorNotification} from "../common/NotificationHelper";
 import {ReconstructionAction} from "../../models/reconstructionAction";
 import {gateFor} from "../../models/reconstructionGates";
 import {ReconstructionActionButton} from "../common/ReconstructionAction";
-import {ReconstructionStatus} from "../../models/reconstructionStatus";
+import {AnnotationStatus} from "../../models/annotationStatus";
 import {atlasStatusName} from "../../models/atlasReconstructionStatus";
 import {useAppLayout} from "../../hooks/useAppLayout";
 import {useUser} from "../../hooks/useUser";
@@ -33,7 +33,7 @@ import {ResetPipelineConfirmationModal} from "./ResetPipelineConfirmationModal";
 
 // Every hook stays above the no-selection return: the Review tab mounts this bar before a row is chosen and then
 // re-renders the same instance with the selection.
-export const ReviewActions = ({reconstruction}: { reconstruction: Reconstruction }) => {
+export const ReviewActions = ({reconstruction}: { reconstruction: Annotation }) => {
     const clipboard = useClipboard();
     const appLayout = useAppLayout();
     const user = useUser();
@@ -42,21 +42,21 @@ export const ReviewActions = ({reconstruction}: { reconstruction: Reconstruction
     const [isArchiveModelOpen, setIsArchiveModelOpen] = useState<boolean>(false);
     const [isResetModalOpen, setIsResetModalOpen] = useState<boolean>(false);
 
-    const [rejectAnnotation] = useMutation<RejectReconstructionResponse, ReconstructionStatusModifierArgs>(REJECT_RECONSTRUCTION_MUTATION,
+    const [rejectAnnotation] = useMutation<RejectAnnotationResponse, AnnotationStatusModifierArgs>(REJECT_ANNOTATION_MUTATION,
         {
-            refetchQueries: [RECONSTRUCTIONS_QUERY],
+            refetchQueries: [ANNOTATIONS_QUERY],
             onError: (e) => errorNotification("Error Rescinding Reconstruction", e.message)
         });
 
-    const [approveAnnotation] = useMutation<ApproveReconstructionResponse, ApproveReconstructionArgs>(APPROVE_RECONSTRUCTION_MUTATION,
+    const [approveAnnotation] = useMutation<ApproveAnnotationResponse, ApproveAnnotationArgs>(APPROVE_ANNOTATION_MUTATION,
         {
-            refetchQueries: [RECONSTRUCTIONS_QUERY],
+            refetchQueries: [ANNOTATIONS_QUERY],
             onError: (e) => errorNotification("Error Approving Reconstruction", e.message)
         });
 
-    const [publishReconstruction] = useMutation<PublishReconstructionResponse, PublishReconstructionVariables>(PUBLISH_RECONSTRUCTION_MUTATION,
+    const [publishReconstruction] = useMutation<PublishAnnotationResponse, PublishAnnotationVariables>(PUBLISH_ANNOTATION_MUTATION,
         {
-            refetchQueries: [RECONSTRUCTIONS_QUERY],
+            refetchQueries: [ANNOTATIONS_QUERY],
             onError: (e) => {
                 if (e.graphQLErrors?.length > 0) {
                     if (e.graphQLErrors[0].extensions?.code == 1001) {
@@ -69,15 +69,15 @@ export const ReviewActions = ({reconstruction}: { reconstruction: Reconstruction
             }
         });
 
-    const [discardReconstruction] = useMutation<DiscardReconstructionResponse, ReconstructionStatusModifierArgs>(DISCARD_RECONSTRUCTION_MUTATION,
+    const [discardReconstruction] = useMutation<DiscardAnnotationResponse, AnnotationStatusModifierArgs>(DISCARD_ANNOTATION_MUTATION,
         {
-            refetchQueries: [RECONSTRUCTIONS_QUERY],
+            refetchQueries: [ANNOTATIONS_QUERY],
             onError: (e) => errorNotification("Error Discarding Reconstruction", e.message)
         });
 
-    const [resetPipeline] = useMutation<ResetReconstructionPipelineResponse, ReconstructionStatusModifierArgs>(RESET_RECONSTRUCTION_PIPELINE_MUTATION,
+    const [resetPipeline] = useMutation<ResetReconstructionPipelineResponse, AnnotationStatusModifierArgs>(RESET_RECONSTRUCTION_PIPELINE_MUTATION,
         {
-            refetchQueries: [RECONSTRUCTIONS_QUERY],
+            refetchQueries: [ANNOTATIONS_QUERY],
             onError: (e) => errorNotification("Error Replaying Pipeline", e.message)
         });
 
@@ -94,7 +94,7 @@ export const ReviewActions = ({reconstruction}: { reconstruction: Reconstruction
         return <NoSelection/>;
     }
 
-    const variables = {variables: {reconstructionId: reconstruction.id}};
+    const variables = {variables: {annotationId: reconstruction.id}};
 
     const gate = (action: ReconstructionAction) => gateFor(action, {
         area: "review",
@@ -111,7 +111,7 @@ export const ReviewActions = ({reconstruction}: { reconstruction: Reconstruction
         return g.visible ? <ReconstructionActionButton key={action} action={action} disabled={!g.enabled} onClick={onClick}>{label}</ReconstructionActionButton> : null;
     };
 
-    const approve = (targetStatus: ReconstructionStatus) => approveAnnotation({variables: {reconstructionId: reconstruction.id, targetStatus}});
+    const approve = (targetStatus: AnnotationStatus) => approveAnnotation({variables: {annotationId: reconstruction.id, targetStatus}});
 
     // Both approvals share the plain "Approve" label, so a user who holds both permissions needs them told apart.
     const showsBothApprovals = gate(ReconstructionAction.ApprovePeer).visible && gate(ReconstructionAction.ApprovePublish).visible;
@@ -127,9 +127,9 @@ export const ReviewActions = ({reconstruction}: { reconstruction: Reconstruction
             actionButton(ReconstructionAction.ResetPipeline, () => setIsResetModalOpen(true))
         ],
         [
-            actionButton(ReconstructionAction.ApprovePeer, () => approve(ReconstructionStatus.PublishReview), showsBothApprovals ? "Approve (Peer)" : undefined),
-            actionButton(ReconstructionAction.ApprovePublish, () => approve(ReconstructionStatus.Approved), showsBothApprovals ? "Approve (Publish)" : undefined),
-            actionButton(ReconstructionAction.Publish, () => publishReconstruction({variables: {reconstructionId: reconstruction.id, replaceExisting: false}}))
+            actionButton(ReconstructionAction.ApprovePeer, () => approve(AnnotationStatus.PublishReview), showsBothApprovals ? "Approve (Peer)" : undefined),
+            actionButton(ReconstructionAction.ApprovePublish, () => approve(AnnotationStatus.Approved), showsBothApprovals ? "Approve (Publish)" : undefined),
+            actionButton(ReconstructionAction.Publish, () => publishReconstruction({variables: {annotationId: reconstruction.id, replaceExisting: false}}))
         ]
     ].map(g => g.filter(b => b != null)).filter(g => g.length > 0);
 
@@ -137,7 +137,7 @@ export const ReviewActions = ({reconstruction}: { reconstruction: Reconstruction
         if (replaceExisting) {
             await publishReconstruction({
                 variables: {
-                    reconstructionId: reconstruction.id,
+                    annotationId: reconstruction.id,
                     replaceExisting: true
                 }
             });

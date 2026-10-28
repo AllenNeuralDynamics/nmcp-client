@@ -4,14 +4,14 @@ import {Table, Group} from "@mantine/core";
 
 import {formatNeuron} from "../../../models/neuron";
 import {formatAtlasStructure} from "../../../models/atlasStructure";
-import {Reconstruction} from "../../../models/reconstruction";
+import {Annotation} from "../../../models/annotation";
 import {ReconstructionStatusLabel} from "../../common/ReconstructionStatus";
 
 type PublishedTableProps = {
-    reconstructions: Reconstruction[];
+    reconstructions: Annotation[];
     selectedId: string;
 
-    onRowClick(reconstruction: Reconstruction): void;
+    onRowClick(reconstruction: Annotation): void;
 }
 
 export const PublishedTable = ({reconstructions, selectedId, onRowClick}: PublishedTableProps) => {
@@ -32,7 +32,7 @@ export const PublishedTable = ({reconstructions, selectedId, onRowClick}: Publis
                 </Table.Tr>
             </Table.Thead>
             <Table.Tbody bg="table">
-                {reconstructions.map((reconstruction: Reconstruction) => (
+                {reconstructions.map((reconstruction: Annotation) => (
                     <PublishedRow key={reconstruction.id} reconstruction={reconstruction} isSelected={reconstruction.id === selectedId}
                                   onClick={() => onRowClick(reconstruction)}/>
                 ))}
@@ -42,7 +42,7 @@ export const PublishedTable = ({reconstructions, selectedId, onRowClick}: Publis
 }
 
 type PublishedRowProps = {
-    reconstruction: Reconstruction;
+    reconstruction: Annotation;
     isSelected: boolean;
 
     onClick(): void;

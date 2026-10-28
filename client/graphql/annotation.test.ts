@@ -1,6 +1,6 @@
 import {describe, expect, it} from "vitest";
 
-import {REQUEST_SEARCH_INDEXING_MUTATION, RETRY_PHASE_MUTATIONS} from "./reconstruction";
+import {REQUEST_SEARCH_INDEXING_MUTATION, RETRY_PHASE_MUTATIONS} from "./annotation";
 import {AtlasReconstructionStatus, PhaseFailureStatuses} from "../models/atlasReconstructionStatus";
 
 describe("RETRY_PHASE_MUTATIONS", () => {

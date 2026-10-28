@@ -7,7 +7,7 @@ import {errorNotification} from "../components/common/NotificationHelper";
 
 vi.mock("../components/common/NotificationHelper");
 
-const variables: CandidateQueryVariables = {input: {specimenIds: ["s1"]}, includeInProgress: false, excludedReconstructionStatuses: undefined};
+const variables: CandidateQueryVariables = {input: {specimenIds: ["s1"]}, includeInProgress: false, excludedAnnotationStatuses: undefined};
 
 type Deferred = {
     resolve(chunk: CandidateNeuronLocations): void;

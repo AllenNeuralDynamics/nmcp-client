@@ -7,10 +7,10 @@ import {renderWithProviders} from "../../../test/render";
 import {makeReconstruction, makeUser} from "../../../test/fixtures";
 import {PublishedActions} from "./PublishedActions";
 import {actionName, ReconstructionAction} from "../../../models/reconstructionAction";
-import {ReconstructionStatus} from "../../../models/reconstructionStatus";
+import {AnnotationStatus} from "../../../models/annotationStatus";
 import {AtlasReconstructionStatus} from "../../../models/atlasReconstructionStatus";
 import {UserPermissions} from "../../../graphql/user";
-import {REQUEST_SEARCH_INDEXING_MUTATION} from "../../../graphql/reconstruction";
+import {REQUEST_SEARCH_INDEXING_MUTATION} from "../../../graphql/annotation";
 
 vi.mock("../../common/NotificationHelper");
 
@@ -28,7 +28,7 @@ describe("PublishedActions", () => {
     });
 
     it("publishable filter, a ReadyToPublish row selected: Publish All renders, Retry Phase disabled", () => {
-        const row = makeReconstruction({status: ReconstructionStatus.ReadyToPublish, childStatus: AtlasReconstructionStatus.ReadyToPublish});
+        const row = makeReconstruction({status: AnnotationStatus.ReadyToPublish, childStatus: AtlasReconstructionStatus.ReadyToPublish});
 
         renderWithProviders(<PublishedActions reconstructions={[row]} totalCount={1} statusFilter="publishable" selected={row}/>, {user: admin});
 
@@ -37,7 +37,7 @@ describe("PublishedActions", () => {
     });
 
     it("publish-failed filter, a PublishFailed row selected: Retry Phase sends requestSearchIndexing", async () => {
-        const row = makeReconstruction({id: "rec-5", status: ReconstructionStatus.PublishFailed, childStatus: AtlasReconstructionStatus.FailedSearchIndexing});
+        const row = makeReconstruction({id: "rec-5", status: AnnotationStatus.PublishFailed, childStatus: AtlasReconstructionStatus.FailedSearchIndexing});
 
         const result = vi.fn(() => ({
             data: {
@@ -56,7 +56,7 @@ describe("PublishedActions", () => {
 
         renderWithProviders(<PublishedActions reconstructions={[row]} totalCount={1} statusFilter="publish-failed" selected={row}/>, {
             user: admin,
-            mocks: [{request: {query: REQUEST_SEARCH_INDEXING_MUTATION, variables: {reconstructionId: "rec-5"}}, result}]
+            mocks: [{request: {query: REQUEST_SEARCH_INDEXING_MUTATION, variables: {annotationId: "rec-5"}}, result}]
         });
 
         expect(retry()).toBeEnabled();
@@ -67,7 +67,7 @@ describe("PublishedActions", () => {
     });
 
     it("finalizing filter, a failed pipeline row selected: Retry Phase disabled, the Review tab's to retry", () => {
-        const row = makeReconstruction({status: ReconstructionStatus.WaitingForAtlasReconstruction, childStatus: AtlasReconstructionStatus.FailedPrecomputed});
+        const row = makeReconstruction({status: AnnotationStatus.WaitingForAtlasReconstruction, childStatus: AtlasReconstructionStatus.FailedPrecomputed});
 
         renderWithProviders(<PublishedActions reconstructions={[row]} totalCount={1} statusFilter="finalizing" selected={row}/>, {user: admin});
 

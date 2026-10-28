@@ -8,18 +8,18 @@ import {renderWithProviders} from "../../test/render";
 import {makeReconstruction, makeUser} from "../../test/fixtures";
 import {ReconstructionActions} from "./ReconstructionActions";
 import {actionName, actionTooltip, ReconstructionAction} from "../../models/reconstructionAction";
-import {ReconstructionStatus} from "../../models/reconstructionStatus";
+import {AnnotationStatus} from "../../models/annotationStatus";
 import {UserPermissions} from "../../graphql/user";
 import {
-    DISCARD_RECONSTRUCTION_MUTATION,
+    DISCARD_ANNOTATION_MUTATION,
     MARK_DUPLICATE_MUTATION,
     MARK_INCOMPLETE_MUTATION,
     MARK_UNTRACEABLE_MUTATION,
-    PAUSE_RECONSTRUCTION_MUTATION,
-    RESUME_RECONSTRUCTION_MUTATION
-} from "../../graphql/reconstruction";
+    PAUSE_ANNOTATION_MUTATION,
+    RESUME_ANNOTATION_MUTATION
+} from "../../graphql/annotation";
 
-const S = ReconstructionStatus;
+const S = AnnotationStatus;
 
 const owner = makeUser(UserPermissions.AnnotateAll, "owner");
 
@@ -32,11 +32,11 @@ const holdActions = [ReconstructionAction.Hold, ReconstructionAction.MarkIncompl
 const terminalActions = [ReconstructionAction.Discard, ReconstructionAction.MarkUntraceable];
 const closeActions = [...holdActions, ...terminalActions];
 
-function reconstructionAt(status: ReconstructionStatus, id = "rec-9") {
+function reconstructionAt(status: AnnotationStatus, id = "rec-9") {
     return makeReconstruction({id, status, annotatorId: owner.id});
 }
 
-function renderBar(status: ReconstructionStatus, options: { user?: ReturnType<typeof makeUser>, mocks?: any[], showRequestReviewDialog?: () => void } = {}) {
+function renderBar(status: AnnotationStatus, options: { user?: ReturnType<typeof makeUser>, mocks?: any[], showRequestReviewDialog?: () => void } = {}) {
     const user = options.user ?? owner;
 
     return renderWithProviders(<ReconstructionActions reconstruction={reconstructionAt(status)} userId={user.id}
@@ -68,7 +68,7 @@ async function chooseCloseItem(action: ReconstructionAction) {
 function mock(query: DocumentNode, data: object) {
     const result = vi.fn(() => ({data}));
 
-    return {mock: {request: {query, variables: {reconstructionId: "rec-9"}}, result}, result};
+    return {mock: {request: {query, variables: {annotationId: "rec-9"}}, result}, result};
 }
 
 describe("ReconstructionActions rendering", () => {
@@ -207,14 +207,14 @@ describe("ReconstructionActions rendering", () => {
 });
 
 describe("ReconstructionActions Close items", () => {
-    const reconstruction = {__typename: "Reconstruction", id: "rec-9"};
+    const reconstruction = {__typename: "Annotation", id: "rec-9"};
 
     it.each([
-        [ReconstructionAction.Hold, PAUSE_RECONSTRUCTION_MUTATION, {pauseReconstruction: {...reconstruction, status: S.OnHold}}, "Hold Reconstruction?"],
-        [ReconstructionAction.MarkIncomplete, MARK_INCOMPLETE_MUTATION, {markReconstructionIncomplete: {...reconstruction, status: S.Incomplete}}, "Mark Reconstruction Incomplete?"],
-        [ReconstructionAction.MarkDuplicate, MARK_DUPLICATE_MUTATION, {markReconstructionDuplicate: {...reconstruction, status: S.Duplicate}}, "Mark Reconstruction as a Duplicate?"],
-        [ReconstructionAction.Discard, DISCARD_RECONSTRUCTION_MUTATION, {discardReconstruction: reconstruction}, "Discard Reconstruction?"],
-        [ReconstructionAction.MarkUntraceable, MARK_UNTRACEABLE_MUTATION, {markReconstructionUntraceable: {...reconstruction, status: S.Untraceable}}, "Mark Neuron Untraceable?"]
+        [ReconstructionAction.Hold, PAUSE_ANNOTATION_MUTATION, {pauseAnnotation: {...reconstruction, status: S.OnHold}}, "Hold Reconstruction?"],
+        [ReconstructionAction.MarkIncomplete, MARK_INCOMPLETE_MUTATION, {markAnnotationIncomplete: {...reconstruction, status: S.Incomplete}}, "Mark Reconstruction Incomplete?"],
+        [ReconstructionAction.MarkDuplicate, MARK_DUPLICATE_MUTATION, {markAnnotationDuplicate: {...reconstruction, status: S.Duplicate}}, "Mark Reconstruction as a Duplicate?"],
+        [ReconstructionAction.Discard, DISCARD_ANNOTATION_MUTATION, {discardAnnotation: reconstruction}, "Discard Reconstruction?"],
+        [ReconstructionAction.MarkUntraceable, MARK_UNTRACEABLE_MUTATION, {markAnnotationUntraceable: {...reconstruction, status: S.Untraceable}}, "Mark Neuron Untraceable?"]
     ])("%s confirms, then sends its mutation", async (action, query, data, title) => {
         const {mock: m, result} = mock(query, data);
 
@@ -236,7 +236,7 @@ describe("ReconstructionActions Close items", () => {
     });
 
     it("Cancel closes the confirmation without sending anything", async () => {
-        const {mock: m, result} = mock(DISCARD_RECONSTRUCTION_MUTATION, {discardReconstruction: reconstruction});
+        const {mock: m, result} = mock(DISCARD_ANNOTATION_MUTATION, {discardAnnotation: reconstruction});
 
         renderBar(S.InProgress, {mocks: [m]});
 
@@ -251,8 +251,8 @@ describe("ReconstructionActions Close items", () => {
 });
 
 describe("ReconstructionActions Reopen and Request Review", () => {
-    it("Reopen sends resumeReconstruction without a confirmation", async () => {
-        const {mock: m, result} = mock(RESUME_RECONSTRUCTION_MUTATION, {resumeReconstruction: {__typename: "Reconstruction", id: "rec-9", status: S.InProgress}});
+    it("Reopen sends resumeAnnotation without a confirmation", async () => {
+        const {mock: m, result} = mock(RESUME_ANNOTATION_MUTATION, {resumeAnnotation: {__typename: "Annotation", id: "rec-9", status: S.InProgress}});
 
         renderBar(S.Incomplete, {mocks: [m]});
 
@@ -289,7 +289,7 @@ describe("ReconstructionActions confirmation lifecycle", () => {
         ["no selection", null],
         ["another reconstruction", reconstructionAt(S.InProgress, "rec-10")]
     ])("a confirmation does not return after the selection moves to %s and back", async (_, intermediate) => {
-        const {mock: m, result} = mock(DISCARD_RECONSTRUCTION_MUTATION, {discardReconstruction: {__typename: "Reconstruction", id: "rec-9"}});
+        const {mock: m, result} = mock(DISCARD_ANNOTATION_MUTATION, {discardAnnotation: {__typename: "Annotation", id: "rec-9"}});
 
         const {rerender} = renderWithProviders(<ReconstructionActions reconstruction={reconstructionAt(S.InProgress)} {...props}/>, {user: owner, mocks: [m]});
 
@@ -308,7 +308,7 @@ describe("ReconstructionActions confirmation lifecycle", () => {
     });
 
     it("a confirmation survives a poll replacing the reconstruction", async () => {
-        const {mock: m, result} = mock(DISCARD_RECONSTRUCTION_MUTATION, {discardReconstruction: {__typename: "Reconstruction", id: "rec-9"}});
+        const {mock: m, result} = mock(DISCARD_ANNOTATION_MUTATION, {discardAnnotation: {__typename: "Annotation", id: "rec-9"}});
 
         const {rerender} = renderWithProviders(<ReconstructionActions reconstruction={reconstructionAt(S.InProgress)} {...props}/>, {user: owner, mocks: [m]});
 

@@ -7,9 +7,9 @@ import {renderWithProviders} from "../../test/render";
 import {makeConstants, makeExperimentalConstants, makeReconstruction} from "../../test/fixtures";
 import {NeuronDownloadMenu} from "./NeuronDownloadMenu";
 import {ExportFormat, ReconstructionSpace} from "../../models/neuron";
-import {Reconstruction} from "../../models/reconstruction";
+import {Annotation} from "../../models/annotation";
 import {DataConstants} from "../../models/constants";
-import {ReconstructionStatus} from "../../models/reconstructionStatus";
+import {AnnotationStatus} from "../../models/annotationStatus";
 import {requestExport} from "../../services/exportService";
 import {errorNotification, infoNotification} from "../common/NotificationHelper";
 
@@ -21,13 +21,13 @@ const ATLAS_SWC = "Atlas-Space SWC";
 const SPECIMEN_PARQUET = "Specimen-Space Parquet";
 const ATLAS_PARQUET = "Atlas-Space Parquet";
 
-const specimenOnly = makeReconstruction({status: ReconstructionStatus.Published});
+const specimenOnly = makeReconstruction({status: AnnotationStatus.Published});
 
-const bothSpaces: Reconstruction = {...specimenOnly, specimenNodeCounts: specimenOnly.atlasReconstruction.nodeCounts};
+const bothSpaces: Annotation = {...specimenOnly, specimenSpaceReconstruction: {nodeCounts: specimenOnly.atlasReconstruction.nodeCounts} as Annotation["specimenSpaceReconstruction"]};
 
-const atlasUnavailable: Reconstruction = {...bothSpaces, atlasReconstruction: null};
+const atlasUnavailable: Annotation = {...bothSpaces, atlasReconstruction: null};
 
-async function openMenu(reconstruction?: Reconstruction, constants: DataConstants = makeExperimentalConstants()) {
+async function openMenu(reconstruction?: Annotation, constants: DataConstants = makeExperimentalConstants()) {
     renderWithProviders(<NeuronDownloadMenu reconstruction={reconstruction}/>, {constants});
 
     await userEvent.click(screen.getByRole("button", {name: "Download"}));

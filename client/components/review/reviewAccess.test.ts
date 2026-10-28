@@ -1,10 +1,10 @@
 import {describe, expect, it} from "vitest";
 
 import {allowedReviewStatuses, availableReviewEntries, ReviewStatusEntries, reviewStatusFilters} from "./reviewAccess";
-import {ReconstructionStatus} from "../../models/reconstructionStatus";
+import {AnnotationStatus} from "../../models/annotationStatus";
 import {AbandonableFailureStatuses, AutomaticPhaseInProgressStatuses} from "../../models/atlasReconstructionStatus";
 
-const S = ReconstructionStatus;
+const S = AnnotationStatus;
 
 // The lists ReviewReconstructions.tsx held before this table replaced them; this is the only record of them.
 const fullAllowedStatus = [S.PublishReview, S.Approved, S.WaitingForAtlasReconstruction, S.ReadyToPublish];
@@ -17,7 +17,7 @@ const peerOnly = {peer: true, publish: false};
 
 const values = (entries: { value: string }[]) => entries.map(e => e.value);
 
-const sorted = (statuses: ReconstructionStatus[]) => [...statuses].sort((a, b) => a - b);
+const sorted = (statuses: AnnotationStatus[]) => [...statuses].sort((a, b) => a - b);
 
 describe("availableReviewEntries", () => {
     it("publish-only access gets the seven publish entries", () => {

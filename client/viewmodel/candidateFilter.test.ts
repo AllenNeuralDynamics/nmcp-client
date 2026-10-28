@@ -1,7 +1,7 @@
 import {afterEach, beforeEach, describe, expect, it, vi} from "vitest";
 
 import {CandidateExcludedStatuses, CandidateFilter, watchQueryVariables} from "./candidateFilter";
-import {ReconstructionStatus} from "../models/reconstructionStatus";
+import {AnnotationStatus} from "../models/annotationStatus";
 import {makeConstants} from "../test/fixtures";
 
 const isocortex = makeConstants().findAtlasStructure("atlas-ccf-315");
@@ -25,9 +25,9 @@ describe("CandidateFilter selected atlas", () => {
 });
 
 describe("CandidateFilter include selection", () => {
-    const S = ReconstructionStatus;
+    const S = AnnotationStatus;
 
-    const rows: [string, ReconstructionStatus[], boolean, ReconstructionStatus[]][] = [
+    const rows: [string, AnnotationStatus[], boolean, AnnotationStatus[]][] = [
         ["nothing", [], false, undefined],
         ["In Progress", [S.InProgress], true, undefined],
         ["Duplicate", [S.Duplicate], false, [S.Incomplete, S.Untraceable]],
@@ -43,7 +43,7 @@ describe("CandidateFilter include selection", () => {
         filter.includedStatuses = selected;
 
         expect(filter.includeInProgress).toBe(includeInProgress);
-        expect(filter.excludedReconstructionStatuses).toEqual(excluded);
+        expect(filter.excludedAnnotationStatuses).toEqual(excluded);
     });
 
     it("counts any selection as filtering, not only In Progress", () => {
@@ -66,7 +66,7 @@ describe("CandidateFilter query variables", () => {
         expect(filter.queryVariables).toEqual({
             input: {specimenIds: [], atlasStructureIds: [], keywords: [], genotype: [], somaProperties: filter.somaFilter},
             includeInProgress: false,
-            excludedReconstructionStatuses: undefined
+            excludedAnnotationStatuses: undefined
         });
     });
 
@@ -81,7 +81,7 @@ describe("CandidateFilter query variables", () => {
         filter.tagFilter.contents = "tag";
         filter.genotypeFilter.isEnabled = true;
         filter.genotypeFilter.contents = ["Gt"];
-        filter.includedStatuses = [ReconstructionStatus.InProgress, ReconstructionStatus.Duplicate];
+        filter.includedStatuses = [AnnotationStatus.InProgress, AnnotationStatus.Duplicate];
         filter.limitVolume = true;
 
         const variables = filter.queryVariables;
@@ -92,7 +92,7 @@ describe("CandidateFilter query variables", () => {
         expect(variables.input.genotype).toEqual(["Gt"]);
         expect(variables.input.somaProperties).toEqual({limitBrightness: false, brightnessRange: [0, 5000], limitVolume: true, volumeRange: [0, 100000]});
         expect(variables.includeInProgress).toBe(true);
-        expect(variables.excludedReconstructionStatuses).toEqual([ReconstructionStatus.Incomplete, ReconstructionStatus.Untraceable]);
+        expect(variables.excludedAnnotationStatuses).toEqual([AnnotationStatus.Incomplete, AnnotationStatus.Untraceable]);
     });
 });
 

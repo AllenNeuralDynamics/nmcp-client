@@ -3,7 +3,7 @@ import {useState} from "react";
 import {Button, Group} from "@mantine/core";
 import {IconBook} from "@tabler/icons-react";
 
-import {Reconstruction} from "../../../models/reconstruction";
+import {Annotation} from "../../../models/annotation";
 import {ReconstructionAction} from "../../../models/reconstructionAction";
 import {gateFor} from "../../../models/reconstructionGates";
 import {ReconstructionActionButton} from "../../common/ReconstructionAction";
@@ -13,10 +13,10 @@ import {PublishAllModal} from "./PublishAllModal";
 import {StatusFilterType} from "./usePublishedQueueState";
 
 type PublishedActionsProps = {
-    reconstructions: Reconstruction[];
+    reconstructions: Annotation[];
     totalCount: number;
     statusFilter: StatusFilterType;
-    selected: Reconstruction;
+    selected: Annotation;
 }
 
 export const PublishedActions = ({reconstructions, totalCount, statusFilter, selected}: PublishedActionsProps) => {

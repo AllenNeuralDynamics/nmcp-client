@@ -9,7 +9,7 @@ import {useAppLayout} from "../../hooks/useAppLayout";
 import {useConstants} from "../../hooks/useConstants";
 import {useSystemConfiguration} from "../../hooks/useSystemConfiguration";
 import {selectSomaLocation, SomaLocation} from "../../models/neuron";
-import {Reconstruction} from "../../models/reconstruction";
+import {Annotation} from "../../models/annotation";
 import {AtlasSpaceViewer} from "../../viewer/atlasSpaceViewer";
 import {AtlasViewModel} from "../../viewmodel/atlasViewModel";
 import {DrawerState} from "../../viewmodel/appLayout";
@@ -21,7 +21,7 @@ import {AtlasViewerSelection} from "./AtlasViewerSelection";
 
 type NeuronAtlasSpaceViewProps = {
     atlasId: string;
-    reconstruction?: Reconstruction;
+    reconstruction?: Annotation;
     soma?: SomaLocation;
 };
 

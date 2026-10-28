@@ -61,15 +61,15 @@ export type QualityControlDetailResponse = {
     qualityControl: QualityControl;
 }
 
-export const REASSESS_QUALITY_CONTROL_MUTATION = gql`mutation ReassessQualityControl($reconstructionId: String!) {
-    requestQualityControlReassessment(reconstructionId: $reconstructionId) {
+export const REASSESS_QUALITY_CONTROL_MUTATION = gql`mutation ReassessQualityControl($annotationId: String!) {
+    requestQualityControlReassessment(annotationId: $annotationId) {
         id
         status
     }
 }`;
 
 export type ReassessQualityControlVariables = {
-    reconstructionId: string;
+    annotationId: string;
 }
 
 export type ReassessQualityControlResponse = {

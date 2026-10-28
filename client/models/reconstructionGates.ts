@@ -1,4 +1,4 @@
-import {ReconstructionStatus} from "./reconstructionStatus";
+import {AnnotationStatus} from "./annotationStatus";
 import {AbandonableFailureStatuses, AtlasReconstructionStatus, PhaseFailureStatuses} from "./atlasReconstructionStatus";
 import {ReconstructionAction} from "./reconstructionAction";
 import {UserPermissions} from "../graphql/user";
@@ -13,7 +13,7 @@ import {UserPermissions} from "../graphql/user";
 export type Gate = { visible: boolean; enabled: boolean };
 
 export type GateContext = {
-    status: ReconstructionStatus;
+    status: AnnotationStatus;
     childStatus?: AtlasReconstructionStatus;
     permissions: number;
     annotatorId?: string;
@@ -22,59 +22,59 @@ export type GateContext = {
 };
 
 // Source-status constants, copied member for member from ../nmcp-api/src/models/reconstruction.ts.
-const UntraceableSourceStatuses: ReconstructionStatus[] = [
-    ReconstructionStatus.InProgress,
-    ReconstructionStatus.OnHold,
-    ReconstructionStatus.Incomplete,
-    ReconstructionStatus.Duplicate,
-    ReconstructionStatus.Rejected
+const UntraceableSourceStatuses: AnnotationStatus[] = [
+    AnnotationStatus.InProgress,
+    AnnotationStatus.OnHold,
+    AnnotationStatus.Incomplete,
+    AnnotationStatus.Duplicate,
+    AnnotationStatus.Rejected
 ];
 
-const ReviewRequestSourceStatuses: ReconstructionStatus[] = [
-    ReconstructionStatus.InProgress,
-    ReconstructionStatus.Rejected
+const ReviewRequestSourceStatuses: AnnotationStatus[] = [
+    AnnotationStatus.InProgress,
+    AnnotationStatus.Rejected
 ];
 
-const PausableSourceStatuses: ReconstructionStatus[] = [
-    ReconstructionStatus.InProgress,
-    ReconstructionStatus.Rejected
+const PausableSourceStatuses: AnnotationStatus[] = [
+    AnnotationStatus.InProgress,
+    AnnotationStatus.Rejected
 ];
 
-const ResumableSourceStatuses: ReconstructionStatus[] = [
-    ReconstructionStatus.OnHold,
-    ReconstructionStatus.Incomplete,
-    ReconstructionStatus.Duplicate
+const ResumableSourceStatuses: AnnotationStatus[] = [
+    AnnotationStatus.OnHold,
+    AnnotationStatus.Incomplete,
+    AnnotationStatus.Duplicate
 ];
 
-const DiscardableSourceStatuses: ReconstructionStatus[] = [
-    ReconstructionStatus.InProgress,
-    ReconstructionStatus.OnHold,
-    ReconstructionStatus.Incomplete,
-    ReconstructionStatus.Duplicate,
-    ReconstructionStatus.Rejected
+const DiscardableSourceStatuses: AnnotationStatus[] = [
+    AnnotationStatus.InProgress,
+    AnnotationStatus.OnHold,
+    AnnotationStatus.Incomplete,
+    AnnotationStatus.Duplicate,
+    AnnotationStatus.Rejected
 ];
 
-const AdminDiscardableSourceStatuses: ReconstructionStatus[] = [
-    ReconstructionStatus.PeerReview,
-    ReconstructionStatus.TeamReview,
-    ReconstructionStatus.PublishReview
+const AdminDiscardableSourceStatuses: AnnotationStatus[] = [
+    AnnotationStatus.PeerReview,
+    AnnotationStatus.TeamReview,
+    AnnotationStatus.PublishReview
 ];
 
-const RejectableSourceStatuses: ReconstructionStatus[] = [
-    ReconstructionStatus.PeerReview,
-    ReconstructionStatus.TeamReview,
-    ReconstructionStatus.PublishReview,
-    ReconstructionStatus.ReadyToPublish
+const RejectableSourceStatuses: AnnotationStatus[] = [
+    AnnotationStatus.PeerReview,
+    AnnotationStatus.TeamReview,
+    AnnotationStatus.PublishReview,
+    AnnotationStatus.ReadyToPublish
 ];
 
 // Not mirrored from the API.  The Reconstructions page closes a reconstruction only while it is still with its
 // annotator, whatever the API would accept once it has gone to review, the pipeline or publishing.
-const AnnotatorHeldStatuses: ReconstructionStatus[] = [
-    ReconstructionStatus.InProgress,
-    ReconstructionStatus.OnHold,
-    ReconstructionStatus.Incomplete,
-    ReconstructionStatus.Duplicate,
-    ReconstructionStatus.Rejected
+const AnnotatorHeldStatuses: AnnotationStatus[] = [
+    AnnotationStatus.InProgress,
+    AnnotationStatus.OnHold,
+    AnnotationStatus.Incomplete,
+    AnnotationStatus.Duplicate,
+    AnnotationStatus.Rejected
 ];
 
 const hidden: Gate = {visible: false, enabled: false};
@@ -97,17 +97,17 @@ function canOperatePipeline(ctx: GateContext): boolean {
 
 // Always the pair: a child at an abandonable failure under any other parent is not abandonable.
 function isAbandonableFailure(ctx: GateContext): boolean {
-    return ctx.status == ReconstructionStatus.ReadyToPublish
-        || (ctx.status == ReconstructionStatus.WaitingForAtlasReconstruction && AbandonableFailureStatuses.includes(ctx.childStatus));
+    return ctx.status == AnnotationStatus.ReadyToPublish
+        || (ctx.status == AnnotationStatus.WaitingForAtlasReconstruction && AbandonableFailureStatuses.includes(ctx.childStatus));
 }
 
 function isPublishFailedPair(ctx: GateContext): boolean {
-    return ctx.status == ReconstructionStatus.PublishFailed && ctx.childStatus == AtlasReconstructionStatus.FailedSearchIndexing;
+    return ctx.status == AnnotationStatus.PublishFailed && ctx.childStatus == AtlasReconstructionStatus.FailedSearchIndexing;
 }
 
 function isRejectable(ctx: GateContext): boolean {
     return RejectableSourceStatuses.includes(ctx.status)
-        || (ctx.status == ReconstructionStatus.WaitingForAtlasReconstruction && AbandonableFailureStatuses.includes(ctx.childStatus))
+        || (ctx.status == AnnotationStatus.WaitingForAtlasReconstruction && AbandonableFailureStatuses.includes(ctx.childStatus))
         || isPublishFailedPair(ctx);
 }
 
@@ -116,27 +116,27 @@ function canReject(ctx: GateContext): boolean {
         return true;
     }
 
-    if (ctx.status == ReconstructionStatus.PeerReview) {
+    if (ctx.status == AnnotationStatus.PeerReview) {
         return has(ctx.permissions, UserPermissions.PeerReview);
     }
 
-    if (ctx.status == ReconstructionStatus.PublishReview || isAbandonableFailure(ctx) || isPublishFailedPair(ctx)) {
+    if (ctx.status == AnnotationStatus.PublishReview || isAbandonableFailure(ctx) || isPublishFailedPair(ctx)) {
         return has(ctx.permissions, UserPermissions.PublishReview);
     }
 
     return false;
 }
 
-function canApprove(ctx: GateContext, targetStatus: ReconstructionStatus): boolean {
+function canApprove(ctx: GateContext, targetStatus: AnnotationStatus): boolean {
     if (isAdmin(ctx)) {
         return true;
     }
 
-    if (ctx.status == ReconstructionStatus.PeerReview) {
+    if (ctx.status == AnnotationStatus.PeerReview) {
         return has(ctx.permissions, UserPermissions.PeerReview);
     }
 
-    if (targetStatus == ReconstructionStatus.Approved) {
+    if (targetStatus == AnnotationStatus.Approved) {
         return has(ctx.permissions, UserPermissions.PublishReview);
     }
 
@@ -204,16 +204,16 @@ export function gateFor(action: ReconstructionAction, ctx: GateContext): Gate {
             // who also sees ApprovePublish gets this one only while it is actually an option.
             return {
                 visible: (isAdmin(ctx) || has(ctx.permissions, UserPermissions.PeerReview))
-                    && (!gateFor(ReconstructionAction.ApprovePublish, ctx).visible || ctx.status == ReconstructionStatus.PeerReview),
-                enabled: ctx.status == ReconstructionStatus.PeerReview && canApprove(ctx, ReconstructionStatus.PublishReview)
+                    && (!gateFor(ReconstructionAction.ApprovePublish, ctx).visible || ctx.status == AnnotationStatus.PeerReview),
+                enabled: ctx.status == AnnotationStatus.PeerReview && canApprove(ctx, AnnotationStatus.PublishReview)
             };
         case ReconstructionAction.ApprovePublish:
             return {
                 visible: isAdmin(ctx) || has(ctx.permissions, UserPermissions.PublishReview),
-                enabled: ctx.status == ReconstructionStatus.PublishReview && ctx.childStatus == AtlasReconstructionStatus.ReadyToProcess && canApprove(ctx, ReconstructionStatus.Approved)
+                enabled: ctx.status == AnnotationStatus.PublishReview && ctx.childStatus == AtlasReconstructionStatus.ReadyToProcess && canApprove(ctx, AnnotationStatus.Approved)
             };
         case ReconstructionAction.Publish:
-            return {visible: canPublish(ctx), enabled: ctx.status == ReconstructionStatus.ReadyToPublish};
+            return {visible: canPublish(ctx), enabled: ctx.status == AnnotationStatus.ReadyToPublish};
         case ReconstructionAction.RetryPhase:
             // The Published page retries only the one status it surfaces; a pipeline failure listed there stays the
             // Review tab's to retry.

@@ -7,9 +7,9 @@ import {Select, Group, Text, Card, Divider, SimpleGrid, Tooltip, ComboboxLikeRen
 import {PaginationHeader} from "../../common/PaginationHeader";
 import {PublishedTable} from "./PublishedTable";
 import {GraphQLErrorAlert} from "../../common/GraphQLErrorAlert";
-import {ReconstructionStatus} from "../../../models/reconstructionStatus";
-import {RECONSTRUCTIONS_QUERY, ReconstructionQueryArgs, ReconstructionsResponse} from "../../../graphql/reconstruction";
-import {Reconstruction} from "../../../models/reconstruction";
+import {AnnotationStatus} from "../../../models/annotationStatus";
+import {ANNOTATIONS_QUERY, AnnotationQueryArgs, AnnotationsResponse} from "../../../graphql/annotation";
+import {Annotation} from "../../../models/annotation";
 import {useUser} from "../../../hooks/useUser";
 import {UserPermissions} from "../../../graphql/user";
 import {AppLoading} from "../../app/AppLoading";
@@ -27,15 +27,15 @@ const statusOptions = [
 const getStatusFilters = (filterType: StatusFilterType): number[] => {
     switch (filterType) {
         case "published":
-            return [ReconstructionStatus.Published];
+            return [AnnotationStatus.Published];
         case "in-progress":
-            return [ReconstructionStatus.Publishing];
+            return [AnnotationStatus.Publishing];
         case "publishable":
-            return [ReconstructionStatus.ReadyToPublish];
+            return [AnnotationStatus.ReadyToPublish];
         case "finalizing":
-            return [ReconstructionStatus.WaitingForAtlasReconstruction];
+            return [AnnotationStatus.WaitingForAtlasReconstruction];
         case "publish-failed":
-            return [ReconstructionStatus.PublishFailed];
+            return [AnnotationStatus.PublishFailed];
         default:
             return [];
     }
@@ -78,8 +78,8 @@ export const Published = observer(() => {
 
     const filters = getStatusFilters(statusFilter);
 
-    const {data, previousData, loading, error} = useQuery<ReconstructionsResponse, ReconstructionQueryArgs>(
-        RECONSTRUCTIONS_QUERY,
+    const {data, previousData, loading, error} = useQuery<AnnotationsResponse, AnnotationQueryArgs>(
+        ANNOTATIONS_QUERY,
         {
             variables: {
                 queryArgs: {
@@ -107,8 +107,8 @@ export const Published = observer(() => {
 
     let source = loading ? previousData : data;
 
-    const reconstructions: Reconstruction[] = source.reconstructions.reconstructions ?? [];
-    const totalCount = source.reconstructions.total ?? 0;
+    const reconstructions: Annotation[] = source.annotations.annotations ?? [];
+    const totalCount = source.annotations.total ?? 0;
 
     const selected = reconstructions.find(r => r.id === selectedId) ?? null;
 

@@ -3,7 +3,7 @@ import {debounce} from "lodash-es";
 
 import {AtlasStructureShape} from "../models/atlasStructure";
 import {SomaFilterProperties} from "../models/neuron";
-import {ReconstructionStatus} from "../models/reconstructionStatus";
+import {AnnotationStatus} from "../models/annotationStatus";
 import {CandidateQueryVariables} from "../graphql/candidates";
 
 export class OptionalFilter<T> {
@@ -19,19 +19,19 @@ export class OptionalFilter<T> {
 }
 
 // Mirrors CandidateExcludedStatuses in ../nmcp-api/src/models/reconstruction.ts, the API's default for
-// excludedReconstructionStatuses; it must hold the same members.
-export const CandidateExcludedStatuses: ReconstructionStatus[] = [
-    ReconstructionStatus.Duplicate,
-    ReconstructionStatus.Incomplete,
-    ReconstructionStatus.Untraceable
+// excludedAnnotationStatuses; it must hold the same members.
+export const CandidateExcludedStatuses: AnnotationStatus[] = [
+    AnnotationStatus.Duplicate,
+    AnnotationStatus.Incomplete,
+    AnnotationStatus.Untraceable
 ];
 
-export const CandidateIncludeOptions: ReconstructionStatus[] = [ReconstructionStatus.InProgress, ...CandidateExcludedStatuses];
+export const CandidateIncludeOptions: AnnotationStatus[] = [AnnotationStatus.InProgress, ...CandidateExcludedStatuses];
 
 export class CandidateFilter {
     public atlasId: string = null;
 
-    public includedStatuses: ReconstructionStatus[] = [];
+    public includedStatuses: AnnotationStatus[] = [];
 
     public samplesFilter: OptionalFilter<string[]> = new OptionalFilter([]);
     public atlasStructureFilter: OptionalFilter<AtlasStructureShape[]> = new OptionalFilter([]);
@@ -63,12 +63,12 @@ export class CandidateFilter {
     }
 
     public get includeInProgress(): boolean {
-        return this.includedStatuses.includes(ReconstructionStatus.InProgress);
+        return this.includedStatuses.includes(AnnotationStatus.InProgress);
     }
 
     // Undefined rather than the full list when none is included, so the request omits the argument and the API's
     // default applies.
-    public get excludedReconstructionStatuses(): ReconstructionStatus[] {
+    public get excludedAnnotationStatuses(): AnnotationStatus[] {
         if (!CandidateExcludedStatuses.some(s => this.includedStatuses.includes(s))) {
             return undefined;
         }
@@ -116,7 +116,7 @@ export class CandidateFilter {
                 somaProperties: this.somaFilter
             },
             includeInProgress: this.includeInProgress,
-            excludedReconstructionStatuses: this.excludedReconstructionStatuses
+            excludedAnnotationStatuses: this.excludedAnnotationStatuses
         });
     }
 }

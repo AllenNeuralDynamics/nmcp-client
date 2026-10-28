@@ -30,12 +30,12 @@ describe.each([
     ["CANDIDATE_NEURON_LOCATIONS_QUERY", CANDIDATE_NEURON_LOCATIONS_QUERY, "candidateNeuronLocations"],
     ["CANDIDATE_NEURON_OFFSET_QUERY", CANDIDATE_NEURON_OFFSET_QUERY, "candidateNeuronOffset"]
 ])("%s", (_, document, field) => {
-    it("declares excludedReconstructionStatuses as [Int!]", () => {
-        expect(declaredType(document, "excludedReconstructionStatuses")).toBe("[Int!]");
+    it("declares excludedAnnotationStatuses as [Int!]", () => {
+        expect(declaredType(document, "excludedAnnotationStatuses")).toBe("[Int!]");
     });
 
     it("passes the filter variables to the field", () => {
-        expect(passedVariable(document, field, "excludedReconstructionStatuses")).toBe("excludedReconstructionStatuses");
+        expect(passedVariable(document, field, "excludedAnnotationStatuses")).toBe("excludedAnnotationStatuses");
         expect(passedVariable(document, field, "includeInProgress")).toBe("includeInProgress");
         expect(passedVariable(document, field, "input")).toBe("input");
     });

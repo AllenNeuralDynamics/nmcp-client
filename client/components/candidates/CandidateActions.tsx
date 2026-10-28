@@ -8,11 +8,11 @@ import {IconGitMerge} from "@tabler/icons-react";
 import {useUser} from "../../hooks/useUser";
 import {NeuronShape} from "../../models/neuron";
 import {IssueModal} from "./IssueModal";
-import {isUserReconstruction} from "../../models/reconstruction";
+import {isUserAnnotation} from "../../models/annotation";
 import {errorNotification} from "../common/NotificationHelper";
 import {ReconstructionActionButton} from "../common/ReconstructionAction";
 import {ReconstructionAction} from "../../models/reconstructionAction";
-import {OPEN_RECONSTRUCTION_MUTATION, RECONSTRUCTIONS_QUERY, StartReconstructionArgs, StartReconstructionResponse} from "../../graphql/reconstruction";
+import {OPEN_ANNOTATION_MUTATION, ANNOTATIONS_QUERY, OpenAnnotationArgs, OpenAnnotationResponse} from "../../graphql/annotation";
 import {ReconstructionStatusLabel} from "../common/ReconstructionStatus";
 import {RequestAccess} from "./RequestAccess";
 import {RequestAccessResponse} from "../../models/accessRequest";
@@ -30,9 +30,9 @@ export const CandidateActions = ({neuron, showAnnotators, onReconstructionStarte
     const user = useUser();
     const isAuthenticated = useIsAuthenticated();
 
-    const [startReconstruction, {loading}] = useMutation<StartReconstructionResponse, StartReconstructionArgs>(OPEN_RECONSTRUCTION_MUTATION,
+    const [startReconstruction, {loading}] = useMutation<OpenAnnotationResponse, OpenAnnotationArgs>(OPEN_ANNOTATION_MUTATION,
         {
-            refetchQueries: [RECONSTRUCTIONS_QUERY],
+            refetchQueries: [ANNOTATIONS_QUERY],
             onError: (e) => errorNotification("Error starting reconstruction", e.message)
         });
 
@@ -64,7 +64,7 @@ export const CandidateActions = ({neuron, showAnnotators, onReconstructionStarte
         } actions={isAuthenticated ? null : <RequestAccess onResponse={onRequestAccessResponse}/>} modal={modal}/>
     }
 
-    const isUser = isUserReconstruction(user.id, neuron.reconstructions);
+    const isUser = isUserAnnotation(user.id, neuron.annotations);
 
     const canAnnotate = !loading && !isUser;
 
@@ -85,7 +85,7 @@ export const CandidateActions = ({neuron, showAnnotators, onReconstructionStarte
 
     const iconColor = isUser ? "var(--mantine-color-blue-4)" : "var(--mantine-color-green-4)";
 
-    const status = showAnnotators ? <ReconstructionStatusLabel reconstructions={neuron.reconstructions}/> : null;
+    const status = showAnnotators ? <ReconstructionStatusLabel reconstructions={neuron.annotations}/> : null;
 
     return (
         <ActionPanel title={neuron.label?.trim() || "(no label)"} status={status} id={neuron.id} message={`Specimen ${neuron.specimen.label}`}

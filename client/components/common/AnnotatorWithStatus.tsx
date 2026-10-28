@@ -2,15 +2,15 @@ import * as React from "react";
 import {Group, Text} from "@mantine/core";
 
 import {formatUser} from "../../models/user";
-import {Reconstruction} from "../../models/reconstruction";
+import {Annotation} from "../../models/annotation";
 import {ReconstructionStatusLabel} from "./ReconstructionStatus";
-import {ReconstructionStatus} from "../../models/reconstructionStatus";
+import {AnnotationStatus} from "../../models/annotationStatus";
 
 const NoAnnotator = <Text size="sm" c="dimmed">None</Text>;
 
-export const AnnotatorWithStatus = ({reconstructions}: { reconstructions: Reconstruction | Reconstruction[] }) => {
+export const AnnotatorWithStatus = ({reconstructions}: { reconstructions: Annotation | Annotation[] }) => {
     let name: string;
-    let status: ReconstructionStatus | ReconstructionStatus[];
+    let status: AnnotationStatus | AnnotationStatus[];
 
     if (Array.isArray(reconstructions)) {
         const visible = reconstructions.filter(a => a);

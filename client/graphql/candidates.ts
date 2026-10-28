@@ -1,9 +1,9 @@
 import gql from "graphql-tag";
 
 import {NeuronShape, SomaFilterProperties} from "../models/neuron";
-import {ReconstructionStatus} from "../models/reconstructionStatus";
+import {AnnotationStatus} from "../models/annotationStatus";
 import {NEURON_BASE_FIELDS_FRAGMENT, NEURON_RELATIONSHIP_FIELDS_FRAGMENT} from "./neuron";
-import {ReconstructionFieldsFragment} from "./reconstruction";
+import {AnnotationFieldsFragment} from "./annotation";
 
 
 export const NeuronFieldsFragment = gql`fragment NeuronFields on Neuron {
@@ -13,25 +13,25 @@ export const NeuronFieldsFragment = gql`fragment NeuronFields on Neuron {
 ${NEURON_BASE_FIELDS_FRAGMENT}
 ${NEURON_RELATIONSHIP_FIELDS_FRAGMENT}`;
 
-export const CANDIDATE_NEURONS_QUERY = gql`query CandidateNeuronsQuery ($input: NeuronQueryInput, $includeInProgress: Boolean, $excludedReconstructionStatuses: [Int!]) {
-    candidateNeurons(input: $input, includeInProgress: $includeInProgress, excludedReconstructionStatuses: $excludedReconstructionStatuses) {
+export const CANDIDATE_NEURONS_QUERY = gql`query CandidateNeuronsQuery ($input: NeuronQueryInput, $includeInProgress: Boolean, $excludedAnnotationStatuses: [Int!]) {
+    candidateNeurons(input: $input, includeInProgress: $includeInProgress, excludedAnnotationStatuses: $excludedAnnotationStatuses) {
         totalCount
         offset
         items {
             ...NeuronFields
             untraceable
-            reconstructions {
-                ...ReconstructionFieldsFragment
+            annotations {
+                ...AnnotationFieldsFragment
             }
         }
     }
 }
 ${NeuronFieldsFragment}
-${ReconstructionFieldsFragment}
+${AnnotationFieldsFragment}
 `;
 
-export const CANDIDATE_NEURON_LOCATIONS_QUERY = gql`query CandidateNeuronLocationsQuery ($input: NeuronQueryInput, $includeInProgress: Boolean, $excludedReconstructionStatuses: [Int!], $after: String) {
-    candidateNeuronLocations(input: $input, includeInProgress: $includeInProgress, excludedReconstructionStatuses: $excludedReconstructionStatuses, after: $after) {
+export const CANDIDATE_NEURON_LOCATIONS_QUERY = gql`query CandidateNeuronLocationsQuery ($input: NeuronQueryInput, $includeInProgress: Boolean, $excludedAnnotationStatuses: [Int!], $after: String) {
+    candidateNeuronLocations(input: $input, includeInProgress: $includeInProgress, excludedAnnotationStatuses: $excludedAnnotationStatuses, after: $after) {
         ids
         locations
         nextCursor
@@ -39,8 +39,8 @@ export const CANDIDATE_NEURON_LOCATIONS_QUERY = gql`query CandidateNeuronLocatio
     }
 }`;
 
-export const CANDIDATE_NEURON_OFFSET_QUERY = gql`query CandidateNeuronOffsetQuery ($id: String!, $input: NeuronQueryInput, $includeInProgress: Boolean, $excludedReconstructionStatuses: [Int!]) {
-    candidateNeuronOffset(id: $id, input: $input, includeInProgress: $includeInProgress, excludedReconstructionStatuses: $excludedReconstructionStatuses)
+export const CANDIDATE_NEURON_OFFSET_QUERY = gql`query CandidateNeuronOffsetQuery ($id: String!, $input: NeuronQueryInput, $includeInProgress: Boolean, $excludedAnnotationStatuses: [Int!]) {
+    candidateNeuronOffset(id: $id, input: $input, includeInProgress: $includeInProgress, excludedAnnotationStatuses: $excludedAnnotationStatuses)
 }`;
 
 export type CandidateFilterInput = {
@@ -54,7 +54,7 @@ export type CandidateFilterInput = {
 export type CandidateQueryVariables = {
     input: CandidateFilterInput;
     includeInProgress: boolean;
-    excludedReconstructionStatuses?: ReconstructionStatus[];
+    excludedAnnotationStatuses?: AnnotationStatus[];
 }
 
 export type CandidateNeuronsQueryVariables = Omit<CandidateQueryVariables, "input"> & {

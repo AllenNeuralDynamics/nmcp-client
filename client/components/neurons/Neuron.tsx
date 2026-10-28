@@ -9,8 +9,8 @@ import {IconBinaryTree, IconBinaryTreeFilled, IconChartBar, IconVersions} from "
 import dayjs from "dayjs";
 
 import {NEURON_VERSIONS_QUERY, NeuronVersionsQueryResponse, NeuronVersionsQueryVariables} from "../../graphql/neuron";
-import {Reconstruction} from "../../models/reconstruction";
-import {ReconstructionStatus} from "../../models/reconstructionStatus";
+import {Annotation} from "../../models/annotation";
+import {AnnotationStatus} from "../../models/annotationStatus";
 import {GraphQLErrorAlert} from "../common/GraphQLErrorAlert";
 import {AppLoading} from "../app/AppLoading";
 import {useAppLayout} from "../../hooks/useAppLayout";
@@ -28,12 +28,12 @@ import {successNotification} from "../common/NotificationHelper";
 const FillColumn: React.CSSProperties = {flexGrow: 1, display: "flex", flexDirection: "column"};
 
 const ExcludedStatuses = new Set([
-    ReconstructionStatus.Archived,
-    ReconstructionStatus.Discarded,
-    ReconstructionStatus.OnHold,
+    AnnotationStatus.Archived,
+    AnnotationStatus.Discarded,
+    AnnotationStatus.OnHold,
 ]);
 
-function selectReconstruction(reconstructions: Reconstruction[], versionId: string): Reconstruction | null {
+function selectReconstruction(reconstructions: Annotation[], versionId: string): Annotation | null {
     if (!reconstructions || reconstructions.length === 0) {
         return null;
     }
@@ -42,7 +42,7 @@ function selectReconstruction(reconstructions: Reconstruction[], versionId: stri
         return reconstructions.find(r => r.id === versionId) ?? null;
     }
 
-    const published = reconstructions.find(r => r.status === ReconstructionStatus.Published);
+    const published = reconstructions.find(r => r.status === AnnotationStatus.Published);
 
     if (published) {
         return published;
@@ -81,11 +81,11 @@ export const Neuron = () => {
         });
 
     const selectedReconstruction = useMemo(() => {
-        if (!data?.neuron?.reconstructions) {
+        if (!data?.neuron?.annotations) {
             return null;
         }
-        return selectReconstruction(data.neuron.reconstructions, versionId);
-    }, [data?.neuron?.reconstructions, versionId]);
+        return selectReconstruction(data.neuron.annotations, versionId);
+    }, [data?.neuron?.annotations, versionId]);
 
     const invalidVersion = (location.state as any)?.invalidVersion as string | undefined;
 
@@ -113,7 +113,7 @@ export const Neuron = () => {
         return <AppLoading message="Loading Neuron..."/>;
     }
 
-    if (versionId && versionId !== "latest" && !selectedReconstruction && data.neuron.reconstructions) {
+    if (versionId && versionId !== "latest" && !selectedReconstruction && data.neuron.annotations) {
         return <Navigate to={`/neuron/${neuronId}`} replace state={{invalidVersion: versionId}}/>;
     }
 

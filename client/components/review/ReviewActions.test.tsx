@@ -7,10 +7,10 @@ import {renderWithProviders} from "../../test/render";
 import {makeReconstruction, makeUser} from "../../test/fixtures";
 import {ReviewActions} from "./ReviewActions";
 import {actionName, ReconstructionAction} from "../../models/reconstructionAction";
-import {ReconstructionStatus} from "../../models/reconstructionStatus";
+import {AnnotationStatus} from "../../models/annotationStatus";
 import {AtlasReconstructionStatus} from "../../models/atlasReconstructionStatus";
 import {UserPermissions} from "../../graphql/user";
-import {REQUEST_PRECOMPUTED_REGENERATION_MUTATION} from "../../graphql/reconstruction";
+import {REQUEST_PRECOMPUTED_REGENERATION_MUTATION} from "../../graphql/annotation";
 import {errorNotification} from "../common/NotificationHelper";
 import {User} from "../../models/user";
 
@@ -21,14 +21,14 @@ const publisher = makeUser(UserPermissions.PublishReview, "publisher");
 const both = makeUser(UserPermissions.ReviewAll, "both");
 const admin = makeUser(UserPermissions.Admin, "admin");
 
-const S = ReconstructionStatus;
+const S = AnnotationStatus;
 const A = AtlasReconstructionStatus;
 
 function button(action: ReconstructionAction) {
     return screen.queryByRole("button", {name: actionName(action)});
 }
 
-function renderBar(user: User, status: ReconstructionStatus, childStatus: AtlasReconstructionStatus = A.Initialized) {
+function renderBar(user: User, status: AnnotationStatus, childStatus: AtlasReconstructionStatus = A.Initialized) {
     return renderWithProviders(<ReviewActions reconstruction={makeReconstruction({status, childStatus, annotatorId: "annotator"})}/>, {user});
 }
 
@@ -154,7 +154,7 @@ describe("ReviewActions retry", () => {
 
         renderWithProviders(<ReviewActions reconstruction={reconstruction}/>, {
             user: publisher,
-            mocks: [{request: {query: REQUEST_PRECOMPUTED_REGENERATION_MUTATION, variables: {reconstructionId: "rec-7"}}, result}]
+            mocks: [{request: {query: REQUEST_PRECOMPUTED_REGENERATION_MUTATION, variables: {annotationId: "rec-7"}}, result}]
         });
 
         await userEvent.click(button(ReconstructionAction.RetryPhase));

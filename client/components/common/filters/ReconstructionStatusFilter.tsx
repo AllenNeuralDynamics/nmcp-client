@@ -3,17 +3,17 @@ import {observer} from "mobx-react-lite";
 import {Group, MultiSelect, Switch} from "@mantine/core";
 
 import {OptionalFilter} from "../../../viewmodel/candidateFilter";
-import {ReconstructionStatus, statusName} from "../../../models/reconstructionStatus";
+import {AnnotationStatus, statusName} from "../../../models/annotationStatus";
 
-function createOptions(allowed: ReconstructionStatus[]): { label: string, value: string }[] {
+function createOptions(allowed: AnnotationStatus[]): { label: string, value: string }[] {
     return allowed.map(a => {
         return {label: statusName(a), value: a.toString()}
     });
 }
 
 type ReconstructionStatusFilterProps = {
-    filter: OptionalFilter<ReconstructionStatus[]>,
-    allowedValues: ReconstructionStatus[],
+    filter: OptionalFilter<AnnotationStatus[]>,
+    allowedValues: AnnotationStatus[],
     w?: number
 }
 

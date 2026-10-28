@@ -3,7 +3,7 @@ import gql from "graphql-tag";
 import {NeuronShape} from "../models/neuron";
 import {SearchPredicate} from "../models/searchPredicate";
 import {AtlasNode} from "../models/atlasNode";
-import {NodeCountsFieldsFragment} from "./reconstruction";
+import {NodeCountsFieldsFragment} from "./annotation";
 
 export const SEARCH_NEURONS_QUERY = gql`query SearchNeurons($context: SearchContext) {
     searchNeurons(context: $context) {

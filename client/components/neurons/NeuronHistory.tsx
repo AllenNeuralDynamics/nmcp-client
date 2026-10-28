@@ -11,14 +11,16 @@ import {
     VersionHistoryBranch,
     VersionHistoryEvent
 } from "../../graphql/neuron";
-import {ReconstructionStatus, statusColor, statusNameOnly} from "../../models/reconstructionStatus";
+import {AnnotationStatus, statusColor, statusNameOnly} from "../../models/annotationStatus";
 import {GraphQLErrorAlert} from "../common/GraphQLErrorAlert";
 import {AppLoading} from "../app/AppLoading";
 
 const objectPrefixes: [string, string][] = [
     ["AtlasReconstruction", "Atlas Reconstruction"],
+    ["SpecimenSpaceReconstruction", "Specimen Space Reconstruction"],
     ["SpecimenPrecomputed", "Specimen Precomputed"],
     ["QualityControl", "Quality Control"],
+    ["Annotation", "Reconstruction"],
     ["Reconstruction", "Reconstruction"],
     ["Precomputed", "Precomputed"],
     ["Candidates", "Candidates"],
@@ -84,19 +86,19 @@ function isSystemEvent(event: VersionHistoryEvent): boolean {
 }
 
 function branchLabel(branch: VersionHistoryBranch): string {
-    const shortId = branch.reconstructionId.slice(-6);
-    const status = statusNameOnly(branch.status as ReconstructionStatus);
+    const shortId = branch.annotationId.slice(-6);
+    const status = statusNameOnly(branch.status as AnnotationStatus);
     return `Reconstruction ${shortId} (${status})`;
 }
 
 function branchSortOrder(branch: VersionHistoryBranch): number {
-    if (branch.status === ReconstructionStatus.Published) return 0;
-    if (branch.status === ReconstructionStatus.Archived) return 2;
+    if (branch.status === AnnotationStatus.Published) return 0;
+    if (branch.status === AnnotationStatus.Archived) return 2;
     return 1;
 }
 
 function selectDefaultBranch(branches: VersionHistoryBranch[]): number {
-    const publishedIndex = branches.findIndex(b => b.status === ReconstructionStatus.Published);
+    const publishedIndex = branches.findIndex(b => b.status === AnnotationStatus.Published);
     if (publishedIndex >= 0) {
         return publishedIndex;
     }
@@ -105,7 +107,7 @@ function selectDefaultBranch(branches: VersionHistoryBranch[]): number {
     let bestDate = "";
 
     for (let i = 0; i < branches.length; i++) {
-        if (branches[i].status === ReconstructionStatus.Archived) {
+        if (branches[i].status === AnnotationStatus.Archived) {
             continue;
         }
         const events = branches[i].events;
@@ -257,14 +259,14 @@ export const NeuronHistory = ({neuronId}: { neuronId: string }) => {
     const hasMultiple = branches.length > 1;
 
     const activeIndex = selectedValue != null
-        ? branches.findIndex(b => b.reconstructionId === selectedValue)
+        ? branches.findIndex(b => b.annotationId === selectedValue)
         : defaultIndex;
     const activeBranch = branches[activeIndex >= 0 ? activeIndex : 0];
 
     const selectData = hasMultiple
         ? branches
             .map(branch => ({
-                value: branch.reconstructionId,
+                value: branch.annotationId,
                 label: branchLabel(branch),
                 _sort: branchSortOrder(branch)
             }))
@@ -314,7 +316,7 @@ export const NeuronHistory = ({neuronId}: { neuronId: string }) => {
                                 {hasMultiple ? (
                                     <Select
                                         data={selectData}
-                                        value={activeBranch.reconstructionId}
+                                        value={activeBranch.annotationId}
                                         onChange={setSelectedValue}
                                         allowDeselect={false}
                                         w={280}
@@ -322,8 +324,8 @@ export const NeuronHistory = ({neuronId}: { neuronId: string }) => {
                                 ) : (
                                     <Text fw={500}>Reconstruction</Text>
                                 )}
-                                <Badge variant="light" color={statusColor(activeBranch.status as ReconstructionStatus)}>
-                                    {statusNameOnly(activeBranch.status as ReconstructionStatus)}
+                                <Badge variant="light" color={statusColor(activeBranch.status as AnnotationStatus)}>
+                                    {statusNameOnly(activeBranch.status as AnnotationStatus)}
                                 </Badge>
                             </Group>
                             {filteredBranchEvents.length > 0 ? (

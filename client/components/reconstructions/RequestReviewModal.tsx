@@ -4,14 +4,14 @@ import {useMutation} from "@apollo/client";
 import {observer} from "mobx-react-lite";
 import {Badge, Button, Group, Modal, NumberInput, Stack, Textarea} from "@mantine/core";
 
-import {ReconstructionStatus} from "../../models/reconstructionStatus";
+import {AnnotationStatus} from "../../models/annotationStatus";
 import {ReconstructionMetadata} from "../../viewmodel/reconstructionMetadata";
-import {RECONSTRUCTIONS_QUERY, REQUEST_REVIEW_MUTATION, RequestReviewArgs, RequestReviewResponse} from "../../graphql/reconstruction";
+import {ANNOTATIONS_QUERY, REQUEST_REVIEW_MUTATION, RequestReviewArgs, RequestReviewResponse} from "../../graphql/annotation";
 
 export type CompleteReconstructionDialogProps = {
     id: string;
     show: boolean;
-    requestedStatus: ReconstructionStatus;
+    requestedStatus: AnnotationStatus;
     onClose(): void;
 }
 
@@ -20,13 +20,13 @@ export const RequestReviewModal = observer((props: CompleteReconstructionDialogP
 
     const [requestReview] = useMutation<RequestReviewResponse, RequestReviewArgs>(REQUEST_REVIEW_MUTATION,
         {
-            refetchQueries: [RECONSTRUCTIONS_QUERY],
+            refetchQueries: [ANNOTATIONS_QUERY],
             onError: (e) => console.log(e)
         });
 
     const onRequestReview = async () => {
         const variables: RequestReviewArgs = {
-            reconstructionId: props.id,
+            annotationId: props.id,
             targetStatus: props.requestedStatus,
             duration: metadata.duration,
             notes: metadata.notes
@@ -37,7 +37,7 @@ export const RequestReviewModal = observer((props: CompleteReconstructionDialogP
         props.onClose();
     }
 
-    const review = props.requestedStatus == ReconstructionStatus.PeerReview ? "Peer Review" : "Publish Review";
+    const review = props.requestedStatus == AnnotationStatus.PeerReview ? "Peer Review" : "Publish Review";
 
     return (
         <Modal.Root centered size="lg"  opened={props.show} onClose={props.onClose}>

@@ -7,21 +7,21 @@ import {renderWithProviders} from "../../../test/render";
 import {makeReconstruction} from "../../../test/fixtures";
 import {PublishAllModal} from "./PublishAllModal";
 import {publishAllOutcome} from "./publishAllOutcome";
-import {ReconstructionStatus} from "../../../models/reconstructionStatus";
+import {AnnotationStatus} from "../../../models/annotationStatus";
 import {AtlasReconstructionStatus} from "../../../models/atlasReconstructionStatus";
-import {PUBLISH_ALL_RECONSTRUCTION_MUTATION} from "../../../graphql/reconstruction";
+import {PUBLISH_ALL_ANNOTATION_MUTATION} from "../../../graphql/annotation";
 import {successNotification} from "../../common/NotificationHelper";
 
 vi.mock("../../common/NotificationHelper");
 
 describe("PublishAllModal", () => {
     it("locks the choice while pending and reports a Shown request as Shown", async () => {
-        const shown = ["rec-1", "rec-2"].map(id => makeReconstruction({id, status: ReconstructionStatus.ReadyToPublish}));
+        const shown = ["rec-1", "rec-2"].map(id => makeReconstruction({id, status: AnnotationStatus.ReadyToPublish}));
 
         const published = shown.map(r => ({
-            __typename: "Reconstruction",
+            __typename: "Annotation",
             id: r.id,
-            status: ReconstructionStatus.Publishing,
+            status: AnnotationStatus.Publishing,
             atlasReconstruction: {__typename: "AtlasReconstruction", id: `atlas-${r.id}`, status: AtlasReconstructionStatus.PendingSearchIndexing}
         }));
 
@@ -29,7 +29,7 @@ describe("PublishAllModal", () => {
 
         renderWithProviders(<PublishAllModal open={true} reconstructions={shown} totalCount={10} onClose={onClose}/>, {
             mocks: [{
-                request: {query: PUBLISH_ALL_RECONSTRUCTION_MUTATION, variables: {reconstructionIds: ["rec-1", "rec-2"]}},
+                request: {query: PUBLISH_ALL_ANNOTATION_MUTATION, variables: {annotationIds: ["rec-1", "rec-2"]}},
                 result: {data: {publishAll: published}},
                 delay: 100
             }]

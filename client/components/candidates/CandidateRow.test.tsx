@@ -6,15 +6,15 @@ import {Table} from "@mantine/core";
 import {renderWithProviders} from "../../test/render";
 import {CandidateRow, CandidateRowHeight} from "./CandidateRow";
 import {NeuronShape} from "../../models/neuron";
-import {ReconstructionStatus} from "../../models/reconstructionStatus";
+import {AnnotationStatus} from "../../models/annotationStatus";
 
-function neuronWith(statuses: ReconstructionStatus[], untraceable = false): NeuronShape {
+function neuronWith(statuses: AnnotationStatus[], untraceable = false): NeuronShape {
     return {
         id: "n1",
         label: "N001",
         specimen: {id: "s1", label: "S1"} as any,
         atlasSoma: {x: 1, y: 2, z: 3},
-        reconstructions: statuses.map((status, i) => ({id: `r${i}`, status}) as any),
+        annotations: statuses.map((status, i) => ({id: `r${i}`, status}) as any),
         untraceable
     };
 }
@@ -31,7 +31,7 @@ function renderRow(neuron: NeuronShape) {
 
 describe("CandidateRow", () => {
     it("shows no status badge for a candidate with no held reconstruction", () => {
-        renderRow(neuronWith([ReconstructionStatus.InProgress]));
+        renderRow(neuronWith([AnnotationStatus.InProgress]));
 
         expect(screen.queryByText("Duplicate")).toBeNull();
         expect(screen.queryByText("Incomplete")).toBeNull();
@@ -39,21 +39,21 @@ describe("CandidateRow", () => {
     });
 
     it("badges a Duplicate reconstruction", () => {
-        renderRow(neuronWith([ReconstructionStatus.Duplicate]));
+        renderRow(neuronWith([AnnotationStatus.Duplicate]));
 
         expect(screen.getByText("Duplicate")).toBeTruthy();
         expect(screen.queryByText("Incomplete")).toBeNull();
     });
 
     it("badges an Incomplete reconstruction", () => {
-        renderRow(neuronWith([ReconstructionStatus.Incomplete]));
+        renderRow(neuronWith([AnnotationStatus.Incomplete]));
 
         expect(screen.getByText("Incomplete")).toBeTruthy();
         expect(screen.queryByText("Duplicate")).toBeNull();
     });
 
     it("badges each held status once, alongside Untraceable", () => {
-        renderRow(neuronWith([ReconstructionStatus.Incomplete, ReconstructionStatus.Duplicate, ReconstructionStatus.Incomplete], true));
+        renderRow(neuronWith([AnnotationStatus.Incomplete, AnnotationStatus.Duplicate, AnnotationStatus.Incomplete], true));
 
         expect(screen.getAllByText("Duplicate")).toHaveLength(1);
         expect(screen.getAllByText("Incomplete")).toHaveLength(1);

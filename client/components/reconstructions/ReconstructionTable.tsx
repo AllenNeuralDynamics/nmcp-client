@@ -2,7 +2,7 @@ import * as React from "react";
 import {Group, Table, Tooltip} from "@mantine/core";
 import {IconCopy} from "@tabler/icons-react";
 
-import {Reconstruction} from "../../models/reconstruction";
+import {Annotation} from "../../models/annotation";
 import {formatAtlasStructure} from "../../models/atlasStructure";
 import {formatUser} from "../../models/user";
 import {ReconstructionStatusLabel} from "../common/ReconstructionStatus";
@@ -11,10 +11,10 @@ import {SpecimenLink} from "../common/SpecimenLink";
 import {successNotification} from "../common/NotificationHelper";
 
 type ReconstructionTableProps = {
-    reconstructions: Reconstruction[];
+    reconstructions: Annotation[];
     selectedId: string;
 
-    onSelected: (reconstruction: Reconstruction) => void;
+    onSelected: (reconstruction: Annotation) => void;
 }
 export const ReconstructionTable = ({reconstructions, selectedId, onSelected}: ReconstructionTableProps) => {
     const rows = reconstructions.map(r => {
@@ -49,16 +49,16 @@ export const ReconstructionTable = ({reconstructions, selectedId, onSelected}: R
 };
 
 type ReconstructionRowProps = {
-    reconstruction: Reconstruction;
+    reconstruction: Annotation;
     isSelected: boolean;
 
-    onSelected: (reconstruction: Reconstruction) => void;
+    onSelected: (reconstruction: Annotation) => void;
 }
 
 export const ReconstructionRow = (props: ReconstructionRowProps) => {
     const subProps = props.isSelected ? {bg: "table-selection"} : {};
 
-    const nodeCounts = props.reconstruction.atlasReconstruction.nodeCounts ?? props.reconstruction.specimenNodeCounts;
+    const nodeCounts = props.reconstruction.atlasReconstruction.nodeCounts ?? props.reconstruction.specimenSpaceReconstruction?.nodeCounts;
 
     const fragmentsUrl = props.reconstruction.neuron.specimen.referenceDataset?.segmentationUrl;
 

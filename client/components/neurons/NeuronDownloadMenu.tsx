@@ -4,19 +4,19 @@ import {IconChevronDown, IconDownload} from "@tabler/icons-react";
 
 import {requestExport} from "../../services/exportService";
 import {ExportFormat, ReconstructionSpace} from "../../models/neuron";
-import {Reconstruction} from "../../models/reconstruction";
+import {Annotation} from "../../models/annotation";
 import {useEnableExperimentalFeatures} from "../../hooks/useEnableExperimentalFeatures";
 import {errorNotification, infoNotification} from "../common/NotificationHelper";
 
 type NeuronDownloadMenuProps = {
-    reconstruction?: Reconstruction;
+    reconstruction?: Annotation;
 }
 
 export const NeuronDownloadMenu = ({reconstruction}: NeuronDownloadMenuProps) => {
     const enableExperimentalFeatures = useEnableExperimentalFeatures();
 
     // A null node-counts column means node data was never stored, matching the API's own availability test.
-    const hasSpecimen = reconstruction?.specimenNodeCounts != null;
+    const hasSpecimen = reconstruction?.specimenSpaceReconstruction?.nodeCounts != null;
     const hasAtlas = reconstruction?.atlasReconstruction?.nodeCounts != null;
 
     async function download(id: string, format: ExportFormat, space: ReconstructionSpace) {

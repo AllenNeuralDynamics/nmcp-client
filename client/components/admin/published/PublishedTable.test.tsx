@@ -6,11 +6,11 @@ import userEvent from "@testing-library/user-event";
 import {renderWithProviders} from "../../../test/render";
 import {makeReconstruction} from "../../../test/fixtures";
 import {PublishedTable} from "./PublishedTable";
-import {ReconstructionStatus} from "../../../models/reconstructionStatus";
+import {AnnotationStatus} from "../../../models/annotationStatus";
 
 const rows = [
-    makeReconstruction({id: "rec-1", status: ReconstructionStatus.Published}),
-    makeReconstruction({id: "rec-2", status: ReconstructionStatus.Published})
+    makeReconstruction({id: "rec-1", status: AnnotationStatus.Published}),
+    makeReconstruction({id: "rec-2", status: AnnotationStatus.Published})
 ];
 
 const rowOf = (label: string) => screen.getByText(label).closest("tr");

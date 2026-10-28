@@ -230,11 +230,11 @@ export const NeuronRow = (props: NeuronRowProps) => {
                                           onChange={(s) => setTimeout(() => updateAtlasStructure(s), 200)}/>
                 </Table.Td>
                 <Table.Td style={{width: "180px"}}>
-                    {props.neuron.reconstructionCount == 0 ?
+                    {props.neuron.annotationCount == 0 ?
                         <Button leftSection={<IconTrash size={18}/>} variant="light" color="red" children="remove"
                                 onClick={() => props.onDelete(props.neuron)}/> :
                         <Badge p={8} variant="light">
-                            {`${props.neuron.reconstructionCount} reconstruction${props.neuron.reconstructionCount != 1 ? "s" : ""}`}
+                            {`${props.neuron.annotationCount} reconstruction${props.neuron.annotationCount != 1 ? "s" : ""}`}
                         </Badge>
                     }
                 </Table.Td>

@@ -1,6 +1,6 @@
 import {User} from "./user";
 import {Precomputed} from "./precomputed";
-import {NodeCounts} from "./reconstruction";
+import {NodeCounts} from "./annotation";
 import {QualityControl} from "./qualityControl";
 import {AtlasNode} from "./atlasNode";
 

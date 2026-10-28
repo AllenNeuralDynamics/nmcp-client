@@ -1,6 +1,6 @@
 import {makeAutoObservable} from "mobx";
 
-import {Reconstruction} from "../models/reconstruction";
+import {Annotation} from "../models/annotation";
 
 export class ReconstructionMetadata {
     public duration: number = 0;
@@ -13,7 +13,7 @@ export class ReconstructionMetadata {
     private readonly initStartedAt: Date;
     private readonly initCompletedAt: Date;
 
-    public constructor(reconstruction: Reconstruction = null) {
+    public constructor(reconstruction: Annotation = null) {
         if (reconstruction) {
             this.duration = this.initDuration = reconstruction.durationHours;
             this.notes = this.initNotes = reconstruction.notes ?? "";

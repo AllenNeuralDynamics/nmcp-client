@@ -5,13 +5,13 @@ import {Divider, Stack, useComputedColorScheme} from "@mantine/core";
 
 import {SpecimenSpaceViewer} from "../../viewer/specimenSpaceViewer";
 import {NeuronShape, selectSomaLocation} from "../../models/neuron";
-import {Reconstruction} from "../../models/reconstruction";
+import {Annotation} from "../../models/annotation";
 import {NeuroglancerControls} from "../common/NeuroglancerControls";
 import {useSystemConfiguration} from "../../hooks/useSystemConfiguration";
 
 type NeuronSpecimenSpaceViewProps = {
     neuron: NeuronShape;
-    reconstruction?: Reconstruction;
+    reconstruction?: Annotation;
 };
 
 export const NeuronSpecimenSpaceView = observer(({neuron, reconstruction}: NeuronSpecimenSpaceViewProps) => {
@@ -21,7 +21,7 @@ export const NeuronSpecimenSpaceView = observer(({neuron, reconstruction}: Neuro
 
     const [viewer, setViewer] = useState<SpecimenSpaceViewer>(null);
 
-    const somaLocation = selectSomaLocation(neuron?.specimenSoma, reconstruction?.soma);
+    const somaLocation = selectSomaLocation(neuron?.specimenSoma, reconstruction?.specimenSpaceReconstruction?.soma);
 
     // specimen space is voxels = microns / 10
     const somaPoint = somaLocation ? {x: somaLocation.x / 10, y: somaLocation.y / 10, z: somaLocation.z / 10} : null;
@@ -35,7 +35,7 @@ export const NeuronSpecimenSpaceView = observer(({neuron, reconstruction}: Neuro
             v.setTomography(neuron.specimen.label, neuron.specimen.tomography);
         }
 
-        const skeletonId = reconstruction?.precomputed?.skeletonId;
+        const skeletonId = reconstruction?.specimenSpaceReconstruction?.precomputed?.skeletonId;
         v.setNeuronSkeletonId(skeletonId ? [skeletonId] : null);
 
         v.setSomaFocus(somaPoint);
@@ -53,7 +53,7 @@ export const NeuronSpecimenSpaceView = observer(({neuron, reconstruction}: Neuro
                 viewer.setTomography(neuron.specimen.label, neuron.specimen.tomography);
             }
 
-            const skeletonId = reconstruction?.precomputed?.skeletonId;
+            const skeletonId = reconstruction?.specimenSpaceReconstruction?.precomputed?.skeletonId;
             viewer.setNeuronSkeletonId(skeletonId ? [skeletonId] : null);
         }
     }, [neuron, reconstruction]);

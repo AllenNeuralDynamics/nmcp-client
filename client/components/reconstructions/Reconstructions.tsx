@@ -11,11 +11,11 @@ import {RequestReviewModal} from "./RequestReviewModal";
 import {ReconstructionActions} from "./ReconstructionActions";
 import {OptionalFilter} from "../../viewmodel/candidateFilter";
 import {GraphQLErrorAlert} from "../common/GraphQLErrorAlert";
-import {Reconstruction} from "../../models/reconstruction";
-import {RECONSTRUCTIONS_QUERY, ReconstructionQueryArgs, ReconstructionsResponse} from "../../graphql/reconstruction";
+import {Annotation} from "../../models/annotation";
+import {ANNOTATIONS_QUERY, AnnotationQueryArgs, AnnotationsResponse} from "../../graphql/annotation";
 import {ReconstructionFilters} from "./ReconstructionFilters";
 import {ReconstructionTable} from "./ReconstructionTable";
-import {ReconstructionStatus} from "../../models/reconstructionStatus";
+import {AnnotationStatus} from "../../models/annotationStatus";
 import {UserPermissions} from "../../graphql/user";
 import {hasPermission} from "../../models/user";
 import {Navigate} from "react-router-dom";
@@ -45,13 +45,13 @@ export const Reconstructions = observer(() => {
     const [isCompleteDialogVisible, setIsCompleteDialogVisible] = useState(false);
 
     const [reviewRequestId, setReviewRequestId] = useState("");
-    const [reviewRequestStatus, setReviewRequestStatus] = useState<ReconstructionStatus | null>(null);
+    const [reviewRequestStatus, setReviewRequestStatus] = useState<AnnotationStatus | null>(null);
 
     const status: number[] = statusFilter.isEnabled ? statusFilter.contents : []
 
     const sampleIds = specimenFilter.isEnabled ? specimenFilter.contents : [];
 
-    const {data, error, previousData} = useQuery<ReconstructionsResponse, ReconstructionQueryArgs>(RECONSTRUCTIONS_QUERY, {
+    const {data, error, previousData} = useQuery<AnnotationsResponse, AnnotationQueryArgs>(ANNOTATIONS_QUERY, {
         variables: {queryArgs: {offset: offset, limit: limit, userOnly: userOnly, status: status, specimenIds: sampleIds}},
         pollInterval: 10000
     });
@@ -60,16 +60,16 @@ export const Reconstructions = observer(() => {
         return <GraphQLErrorAlert title="Candidate Data Could Not Be Loaded" error={error}/>;
     }
 
-    let reconstructionCache: Reconstruction[];
+    let reconstructionCache: Annotation[];
     let totalCount: number;
 
-    if (data?.reconstructions.reconstructions) {
-        reconstructionCache = data.reconstructions.reconstructions;
-        totalCount = data.reconstructions.total;
+    if (data?.annotations.annotations) {
+        reconstructionCache = data.annotations.annotations;
+        totalCount = data.annotations.total;
     } else {
         if (previousData) {
-            reconstructionCache = previousData.reconstructions.reconstructions;
-            totalCount = previousData.reconstructions.total;
+            reconstructionCache = previousData.annotations.annotations;
+            totalCount = previousData.annotations.total;
         } else {
             return <Center><Loader type="dots"/></Center>;
         }
@@ -79,7 +79,7 @@ export const Reconstructions = observer(() => {
         preferences.ReconstructionNeuronsUserOnly = userOnly;
         setUserOnly(userOnly)
     }
-    const onSelected = (reconstruction: Reconstruction) => {
+    const onSelected = (reconstruction: Annotation) => {
         if ((reconstruction?.id ?? null) != selection) {
             setSelection(reconstruction?.id ?? null);
         }
@@ -126,7 +126,7 @@ export const Reconstructions = observer(() => {
                 </Card.Section>
                 <Card.Section bg="segment">
                     <ReconstructionActions reconstruction={selectedReconstruction} userId={user.id}
-                                           showRequestReviewDialog={(id: string, status: ReconstructionStatus) => {
+                                           showRequestReviewDialog={(id: string, status: AnnotationStatus) => {
                                                setReviewRequestId(id);
                                                setReviewRequestStatus(status);
                                                setIsCompleteDialogVisible(true);

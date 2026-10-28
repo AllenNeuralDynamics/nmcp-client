@@ -5,12 +5,12 @@ import {Button, Group, Popover, Select, Stack, Text} from "@mantine/core";
 import {IconVersions} from "@tabler/icons-react";
 
 import {
-    OPEN_RECONSTRUCTION_REVISION_MUTATION,
-    OpenReconstructionRevisionResponse,
-    OpenReconstructionRevisionVariables,
-    RECONSTRUCTIONS_QUERY,
-} from "../../graphql/reconstruction";
-import {ReconstructionRevisionKind} from "../../models/reconstruction";
+    OPEN_ANNOTATION_REVISION_MUTATION,
+    OpenAnnotationRevisionResponse,
+    OpenAnnotationRevisionVariables,
+    ANNOTATIONS_QUERY,
+} from "../../graphql/annotation";
+import {ReconstructionRevisionKind} from "../../models/annotation";
 import {actionColor, actionName, ReconstructionAction} from "../../models/reconstructionAction";
 import {errorNotification} from "../common/NotificationHelper";
 
@@ -35,9 +35,9 @@ export const CreateRevisionPopover = ({id}: { id: string }) => {
 
     const [revisionKind, setRevisionKind] = useState<string | null>(null);
 
-    const [openReconstructionRevision] = useMutation<OpenReconstructionRevisionResponse, OpenReconstructionRevisionVariables>(OPEN_RECONSTRUCTION_REVISION_MUTATION,
+    const [openAnnotationRevision] = useMutation<OpenAnnotationRevisionResponse, OpenAnnotationRevisionVariables>(OPEN_ANNOTATION_REVISION_MUTATION,
         {
-            refetchQueries: [RECONSTRUCTIONS_QUERY],
+            refetchQueries: [ANNOTATIONS_QUERY],
             onError: (e) => console.log(e)
         });
 
@@ -48,9 +48,9 @@ export const CreateRevisionPopover = ({id}: { id: string }) => {
 
     const openRevision = async () => {
         setInProgress(true);
-        const response = await openReconstructionRevision({variables: {reconstructionId: id, revisionKind: mapRevisionKind(revisionKind)}});
+        const response = await openAnnotationRevision({variables: {annotationId: id, revisionKind: mapRevisionKind(revisionKind)}});
         if (response?.data) {
-            if (!response.data.openReconstructionRevision) {
+            if (!response.data.openAnnotationRevision) {
                 errorNotification("Revision not Opened", "The revision could not be opened.  You may have an existing open reconstruction for this neuron.")
             }
         }

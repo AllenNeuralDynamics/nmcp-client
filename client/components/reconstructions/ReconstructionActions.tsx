@@ -5,24 +5,24 @@ import {Badge, Button, Group, Menu, Stack, Text} from "@mantine/core";
 import {useClipboard} from "@mantine/hooks";
 import {IconChevronDown, IconFolderX, IconGitMerge} from "@tabler/icons-react";
 
-import {Reconstruction} from "../../models/reconstruction";
+import {Annotation} from "../../models/annotation";
 import {
-    DISCARD_RECONSTRUCTION_MUTATION,
-    DiscardReconstructionResponse,
+    DISCARD_ANNOTATION_MUTATION,
+    DiscardAnnotationResponse,
     MARK_DUPLICATE_MUTATION,
     MARK_INCOMPLETE_MUTATION,
     MARK_UNTRACEABLE_MUTATION,
     MarkDuplicateResponse,
     MarkIncompleteResponse,
     MarkUntraceableResponse,
-    PAUSE_RECONSTRUCTION_MUTATION,
-    PauseReconstructionResponse,
-    ReconstructionStatusModifierArgs,
-    RESUME_RECONSTRUCTION_MUTATION,
-    ResumeReconstructionResponse,
-    RECONSTRUCTIONS_QUERY
-} from "../../graphql/reconstruction";
-import {ReconstructionStatus} from "../../models/reconstructionStatus";
+    PAUSE_ANNOTATION_MUTATION,
+    PauseAnnotationResponse,
+    AnnotationStatusModifierArgs,
+    RESUME_ANNOTATION_MUTATION,
+    ResumeAnnotationResponse,
+    ANNOTATIONS_QUERY
+} from "../../graphql/annotation";
+import {AnnotationStatus} from "../../models/annotationStatus";
 import {actionColor, actionName, actionTooltip, ReconstructionAction} from "../../models/reconstructionAction";
 import {gateFor} from "../../models/reconstructionGates";
 import {actionIcon, ReconstructionActionButton} from "../common/ReconstructionAction";
@@ -34,10 +34,10 @@ import {useUser} from "../../hooks/useUser";
 import {CreateRevisionPopover} from "./CreateRevisionPopover";
 
 export type ReconstructionPanelProps = {
-    reconstruction: Reconstruction;
+    reconstruction: Annotation;
     userId: string;
 
-    showRequestReviewDialog(id: string, status: ReconstructionStatus): void;
+    showRequestReviewDialog(id: string, status: AnnotationStatus): void;
 }
 
 type CloseItem = {
@@ -55,12 +55,12 @@ type PendingClose = {
 type ReviewItem = {
     action: ReconstructionAction;
     label: string;
-    target: ReconstructionStatus;
+    target: AnnotationStatus;
 };
 
 const reviewItems: ReviewItem[] = [
-    {action: ReconstructionAction.RequestPeerReview, label: "Peer Review...", target: ReconstructionStatus.PeerReview},
-    {action: ReconstructionAction.RequestPublishReview, label: "Publish Review...", target: ReconstructionStatus.PublishReview}
+    {action: ReconstructionAction.RequestPeerReview, label: "Peer Review...", target: AnnotationStatus.PeerReview},
+    {action: ReconstructionAction.RequestPublishReview, label: "Publish Review...", target: AnnotationStatus.PublishReview}
 ];
 
 export const ReconstructionActions = (props: ReconstructionPanelProps) => {
@@ -68,39 +68,39 @@ export const ReconstructionActions = (props: ReconstructionPanelProps) => {
     const appLayout = useAppLayout();
     const user = useUser();
 
-    const [pauseReconstruction] = useMutation<PauseReconstructionResponse, ReconstructionStatusModifierArgs>(PAUSE_RECONSTRUCTION_MUTATION,
+    const [pauseReconstruction] = useMutation<PauseAnnotationResponse, AnnotationStatusModifierArgs>(PAUSE_ANNOTATION_MUTATION,
         {
-            refetchQueries: [RECONSTRUCTIONS_QUERY],
+            refetchQueries: [ANNOTATIONS_QUERY],
             onError: (e) => errorNotification("Error Holding Reconstruction", e.message)
         });
 
-    const [markIncomplete] = useMutation<MarkIncompleteResponse, ReconstructionStatusModifierArgs>(MARK_INCOMPLETE_MUTATION,
+    const [markIncomplete] = useMutation<MarkIncompleteResponse, AnnotationStatusModifierArgs>(MARK_INCOMPLETE_MUTATION,
         {
-            refetchQueries: [RECONSTRUCTIONS_QUERY],
+            refetchQueries: [ANNOTATIONS_QUERY],
             onError: (e) => errorNotification("Error Marking Reconstruction Incomplete", e.message)
         });
 
-    const [markDuplicate] = useMutation<MarkDuplicateResponse, ReconstructionStatusModifierArgs>(MARK_DUPLICATE_MUTATION,
+    const [markDuplicate] = useMutation<MarkDuplicateResponse, AnnotationStatusModifierArgs>(MARK_DUPLICATE_MUTATION,
         {
-            refetchQueries: [RECONSTRUCTIONS_QUERY],
+            refetchQueries: [ANNOTATIONS_QUERY],
             onError: (e) => errorNotification("Error Marking Reconstruction as a Duplicate", e.message)
         });
 
-    const [resumeReconstruction] = useMutation<ResumeReconstructionResponse, ReconstructionStatusModifierArgs>(RESUME_RECONSTRUCTION_MUTATION,
+    const [resumeReconstruction] = useMutation<ResumeAnnotationResponse, AnnotationStatusModifierArgs>(RESUME_ANNOTATION_MUTATION,
         {
-            refetchQueries: [RECONSTRUCTIONS_QUERY],
+            refetchQueries: [ANNOTATIONS_QUERY],
             onError: (e) => errorNotification("Error Reopening Reconstruction", e.message)
         });
 
-    const [discardReconstruction] = useMutation<DiscardReconstructionResponse, ReconstructionStatusModifierArgs>(DISCARD_RECONSTRUCTION_MUTATION,
+    const [discardReconstruction] = useMutation<DiscardAnnotationResponse, AnnotationStatusModifierArgs>(DISCARD_ANNOTATION_MUTATION,
         {
-            refetchQueries: [RECONSTRUCTIONS_QUERY],
+            refetchQueries: [ANNOTATIONS_QUERY],
             onError: (e) => errorNotification("Error Discarding Reconstruction", e.message)
         });
 
-    const [markUntraceable] = useMutation<MarkUntraceableResponse, ReconstructionStatusModifierArgs>(MARK_UNTRACEABLE_MUTATION,
+    const [markUntraceable] = useMutation<MarkUntraceableResponse, AnnotationStatusModifierArgs>(MARK_UNTRACEABLE_MUTATION,
         {
-            refetchQueries: [RECONSTRUCTIONS_QUERY],
+            refetchQueries: [ANNOTATIONS_QUERY],
             onError: (e) => errorNotification("Error Marking Reconstruction Untraceable", e.message)
         });
 
@@ -117,7 +117,7 @@ export const ReconstructionActions = (props: ReconstructionPanelProps) => {
 
     const reconstruction = props.reconstruction;
 
-    const variables = {variables: {reconstructionId: reconstruction.id}};
+    const variables = {variables: {annotationId: reconstruction.id}};
 
     const gate = (action: ReconstructionAction) => gateFor(action, {
         area: "annotator",
@@ -136,15 +136,15 @@ export const ReconstructionActions = (props: ReconstructionPanelProps) => {
 
     const closeGroups: CloseItem[][] = [
         [
-            {action: ReconstructionAction.Hold, title: "Hold Reconstruction?", close: id => pauseReconstruction({variables: {reconstructionId: id}})}
+            {action: ReconstructionAction.Hold, title: "Hold Reconstruction?", close: id => pauseReconstruction({variables: {annotationId: id}})}
         ],
         [
-            {action: ReconstructionAction.Discard, title: "Discard Reconstruction?", close: id => discardReconstruction({variables: {reconstructionId: id}})}
+            {action: ReconstructionAction.Discard, title: "Discard Reconstruction?", close: id => discardReconstruction({variables: {annotationId: id}})}
         ],
         [
-            {action: ReconstructionAction.MarkIncomplete, title: "Mark Reconstruction Incomplete?", close: id => markIncomplete({variables: {reconstructionId: id}})},
-            {action: ReconstructionAction.MarkDuplicate, title: "Mark Reconstruction as a Duplicate?", close: id => markDuplicate({variables: {reconstructionId: id}})},
-            {action: ReconstructionAction.MarkUntraceable, title: "Mark Neuron Untraceable?", close: id => markUntraceable({variables: {reconstructionId: id}})}
+            {action: ReconstructionAction.MarkIncomplete, title: "Mark Reconstruction Incomplete?", close: id => markIncomplete({variables: {annotationId: id}})},
+            {action: ReconstructionAction.MarkDuplicate, title: "Mark Reconstruction as a Duplicate?", close: id => markDuplicate({variables: {annotationId: id}})},
+            {action: ReconstructionAction.MarkUntraceable, title: "Mark Neuron Untraceable?", close: id => markUntraceable({variables: {annotationId: id}})}
         ]
     ];
 
@@ -213,7 +213,7 @@ export const ReconstructionActions = (props: ReconstructionPanelProps) => {
                     confirmText={actionName(pendingItem.action)} onCancel={() => setPendingClose(null)} onConfirm={onConfirmClose}/>
     ) : null;
 
-    const revisePopover = reconstruction.status == ReconstructionStatus.Published ? <CreateRevisionPopover id={reconstruction.id}/> : null;
+    const revisePopover = reconstruction.status == AnnotationStatus.Published ? <CreateRevisionPopover id={reconstruction.id}/> : null;
 
     const actions = <Group justify="flex-end">
         {closeMenu}

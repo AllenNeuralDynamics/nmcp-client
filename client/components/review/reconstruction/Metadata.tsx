@@ -7,16 +7,16 @@ import {IconCalendar} from "@tabler/icons-react";
 import dayjs from "dayjs";
 
 import {ReconstructionMetadata} from "../../../viewmodel/reconstructionMetadata";
-import {Reconstruction} from "../../../models/reconstruction";
-import {UPDATE_RECONSTRUCTION_MUTATION, UpdateReconstructionResponse, UpdateReconstructionVariables} from "../../../graphql/reconstruction";
+import {Annotation} from "../../../models/annotation";
+import {UPDATE_ANNOTATION_MUTATION, UpdateAnnotationResponse, UpdateAnnotationVariables} from "../../../graphql/annotation";
 import {errorNotification} from "../../common/NotificationHelper";
 
-export const Metadata = observer(({reconstruction}: { reconstruction: Reconstruction }) => {
+export const Metadata = observer(({reconstruction}: { reconstruction: Annotation }) => {
     const [metadata, setMetadata] = useState(new ReconstructionMetadata(reconstruction));
 
-    const [updateReconstruction] = useMutation<UpdateReconstructionResponse, UpdateReconstructionVariables>(UPDATE_RECONSTRUCTION_MUTATION,
+    const [updateReconstruction] = useMutation<UpdateAnnotationResponse, UpdateAnnotationVariables>(UPDATE_ANNOTATION_MUTATION,
         {
-            variables: {reconstructionId: reconstruction.id, ...metadata.modifiedJSON()},
+            variables: {annotationId: reconstruction.id, ...metadata.modifiedJSON()},
             onError: (e) => errorNotification("Failed to Update Reconstruction", e.message),
             onCompleted: (data) => {setMetadata(new ReconstructionMetadata(reconstruction))}
         });

@@ -3,8 +3,8 @@ import {useMutation, useQuery} from "@apollo/client";
 import {Badge, Button, Flex, Group, Loader, Stack, Text} from "@mantine/core";
 import {IconRefresh} from "@tabler/icons-react";
 
-import {Reconstruction} from "../../../models/reconstruction";
-import {ReconstructionStatus} from "../../../models/reconstructionStatus";
+import {Annotation} from "../../../models/annotation";
+import {AnnotationStatus} from "../../../models/annotationStatus";
 import {qualityControlColor, QualityControlStatus, qualityControlStatus} from "../../../models/qualityControlStatus";
 import {
     QUALITY_CONTROL_DETAIL_QUERY,
@@ -14,11 +14,11 @@ import {
     ReassessQualityControlResponse,
     ReassessQualityControlVariables
 } from "../../../graphql/qualityControl";
-import {RECONSTRUCTIONS_QUERY} from "../../../graphql/reconstruction";
+import {ANNOTATIONS_QUERY} from "../../../graphql/annotation";
 import {QualityControlOutputSection} from "../../common/QualityControlOutputSection";
 
 export type QualityCheckProps = {
-    reconstruction: Reconstruction;
+    reconstruction: Annotation;
     isActive: boolean;
 }
 
@@ -31,8 +31,8 @@ export const QualityCheck = ({reconstruction, isActive}: QualityCheckProps) => {
     });
 
     const [reassess, {loading: reassessing}] = useMutation<ReassessQualityControlResponse, ReassessQualityControlVariables>(REASSESS_QUALITY_CONTROL_MUTATION, {
-        variables: {reconstructionId: reconstruction.id},
-        refetchQueries: [RECONSTRUCTIONS_QUERY],
+        variables: {annotationId: reconstruction.id},
+        refetchQueries: [ANNOTATIONS_QUERY],
         onCompleted: () => refetch()
     });
 
@@ -48,7 +48,7 @@ export const QualityCheck = ({reconstruction, isActive}: QualityCheckProps) => {
     const qcStatus = qc?.status;
 
     const isPending = qcStatus === QualityControlStatus.Pending || qcStatus === QualityControlStatus.InProgress;
-    const isTerminal = reconstruction.status === ReconstructionStatus.Published || reconstruction.status === ReconstructionStatus.Archived;
+    const isTerminal = reconstruction.status === AnnotationStatus.Published || reconstruction.status === AnnotationStatus.Archived;
 
     return (
         <Stack p={12} gap="md">

@@ -1,10 +1,9 @@
 import {User} from "./user";
 import {AtlasReconstruction} from "./atlasReconstruction";
-import {ReconstructionStatus} from "./reconstructionStatus";
+import {AnnotationStatus} from "./annotationStatus";
 import {NeuronShape} from "./neuron";
-import {Precomputed} from "./precomputed";
 import {AtlasReconstructionStatus} from "./atlasReconstructionStatus";
-import {SpecimenNode} from "./specimenNode";
+import {SpecimenSpaceReconstruction} from "./specimenSpaceReconstruction";
 
 export type NodeCount = {
     total: number;
@@ -31,13 +30,9 @@ export type PhaseFailure = {
     failedAt?: Date;
 }
 
-export type Reconstruction = {
+export type Annotation = {
     id: string;
-    sourceUrl: string;
-    status: ReconstructionStatus;
-    specimenNodeCounts: NodeCounts;
-    specimenLengthMillimeters: number;
-    soma?: SpecimenNode;
+    status: AnnotationStatus;
     durationHours: number;
     notes: string;
     startedAt: Date;
@@ -46,7 +41,7 @@ export type Reconstruction = {
     annotator: User;
     reviewer: User;
     neuron: NeuronShape;
-    precomputed: Precomputed;
+    specimenSpaceReconstruction: SpecimenSpaceReconstruction;
     atlasReconstruction: AtlasReconstruction;
     // Null unless the child sits at one of the PhaseFailureStatuses.
     phaseFailure?: PhaseFailure;
@@ -55,10 +50,10 @@ export type Reconstruction = {
     updatedAt: Date;
 }
 
-export function isUserReconstruction(userId: string, reconstructions: Reconstruction[]) {
-    if (!reconstructions || reconstructions.length == 0) {
+export function isUserAnnotation(userId: string, annotations: Annotation[]) {
+    if (!annotations || annotations.length == 0) {
         return false;
     }
 
-    return reconstructions.some(a => a.annotatorId == userId);
+    return annotations.some(a => a.annotatorId == userId);
 }

@@ -9,9 +9,9 @@ import {errorNotification} from "../components/common/NotificationHelper";
 
 vi.mock("../components/common/NotificationHelper");
 
-const variables: CandidateQueryVariables = {input: {specimenIds: ["s1"]}, includeInProgress: false, excludedReconstructionStatuses: undefined};
+const variables: CandidateQueryVariables = {input: {specimenIds: ["s1"]}, includeInProgress: false, excludedAnnotationStatuses: undefined};
 
-const otherVariables: CandidateQueryVariables = {input: {specimenIds: ["s2"]}, includeInProgress: false, excludedReconstructionStatuses: undefined};
+const otherVariables: CandidateQueryVariables = {input: {specimenIds: ["s2"]}, includeInProgress: false, excludedAnnotationStatuses: undefined};
 
 type Call = {
     options: any;

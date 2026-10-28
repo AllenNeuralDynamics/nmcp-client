@@ -1,7 +1,7 @@
 import {AtlasStructureShape} from "./atlasStructure";
 import {isNullOrUndefined} from "../util/nodeUtil";
 import {SpecimenShape} from "./specimen";
-import {Reconstruction} from "./reconstruction";
+import {Annotation} from "./annotation";
 import {AtlasReconstruction} from "./atlasReconstruction";
 
 // Values are sent to the export service as raw numbers and must match its ExportFormat enum.
@@ -87,8 +87,8 @@ export type NeuronShape = {
     atlasStructure?: AtlasStructureShape;
     somaProperties?: SomaProperties;
     metadata?: NeuronMetadata;
-    reconstructions?: Reconstruction[];
-    reconstructionCount?: number;
+    annotations?: Annotation[];
+    annotationCount?: number;
     published?: AtlasReconstruction;
     untraceable?: boolean;
     createdAt?: number;

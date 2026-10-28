@@ -1,18 +1,18 @@
 import * as React from "react";
 import {Button, Group, Modal, Stack, Text} from "@mantine/core";
 
-import {ReconstructionStatus} from "../../models/reconstructionStatus";
+import {AnnotationStatus} from "../../models/annotationStatus";
 import {actionColor, actionName, ReconstructionAction} from "../../models/reconstructionAction";
 
 type ResetPipelineConfirmationModalProps = {
     show: boolean;
-    sourceStatus: ReconstructionStatus;
+    sourceStatus: AnnotationStatus;
 
     onClose(confirmed: boolean): void;
 }
 
 export const ResetPipelineConfirmationModal = (props: ResetPipelineConfirmationModalProps) => {
-    const fromReady = props.sourceStatus == ReconstructionStatus.ReadyToPublish;
+    const fromReady = props.sourceStatus == AnnotationStatus.ReadyToPublish;
 
     const message = fromReady ?
         "This reconstruction completed every automated phase and is ready to publish.  Replaying the pipeline discards that run, and it cannot be recovered by any other action." :

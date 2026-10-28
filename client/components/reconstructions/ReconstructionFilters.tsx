@@ -4,9 +4,9 @@ import {Divider, Group, Switch} from "@mantine/core";
 import {SpecimenFilter} from "../common/filters/SpecimenFilter";
 import {ReconstructionStatusFilter} from "../common/filters/ReconstructionStatusFilter";
 import {OptionalFilter} from "../../viewmodel/candidateFilter";
-import {filterableReconstructionStatuses} from "../../models/reconstructionStatus";
+import {filterableAnnotationStatuses} from "../../models/annotationStatus";
 
-const statusFilterOptions = filterableReconstructionStatuses();
+const statusFilterOptions = filterableAnnotationStatuses();
 
 export function ReconstructionFilters(props: {
     checked: boolean,

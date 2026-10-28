@@ -1,4 +1,4 @@
-import {PublishAllLimit} from "../../../graphql/reconstruction";
+import {PublishAllLimit} from "../../../graphql/annotation";
 
 export type PublishAllMode = "shown" | "all";
 

@@ -1,6 +1,6 @@
 import {User} from "../models/user";
-import {PhaseFailure, Reconstruction} from "../models/reconstruction";
-import {ReconstructionStatus} from "../models/reconstructionStatus";
+import {PhaseFailure, Annotation} from "../models/annotation";
+import {AnnotationStatus} from "../models/annotationStatus";
 import {AtlasReconstructionStatus} from "../models/atlasReconstructionStatus";
 import {AtlasKFamilyId, AtlasKindId, AtlasKindShape} from "../models/atlasKind";
 import {AtlasStructureShape} from "../models/atlasStructure";
@@ -22,13 +22,13 @@ export function makeUser(permissions: number, id: string = "user-1"): User {
 
 type ReconstructionFixture = {
     id?: string;
-    status: ReconstructionStatus;
+    status: AnnotationStatus;
     childStatus?: AtlasReconstructionStatus;
     annotatorId?: string;
     phaseFailure?: PhaseFailure | null;
 };
 
-export function makeReconstruction({id = "rec-1", status, childStatus = AtlasReconstructionStatus.Initialized, annotatorId = "user-1", phaseFailure = null}: ReconstructionFixture): Reconstruction {
+export function makeReconstruction({id = "rec-1", status, childStatus = AtlasReconstructionStatus.Initialized, annotatorId = "user-1", phaseFailure = null}: ReconstructionFixture): Annotation {
     const nodeCount = {total: 10, soma: 1, path: 5, branch: 2, end: 2};
 
     return {
@@ -49,7 +49,7 @@ export function makeReconstruction({id = "rec-1", status, childStatus = AtlasRec
             status: childStatus,
             nodeCounts: {axon: nodeCount, dendrite: nodeCount}
         }
-    } as unknown as Reconstruction;
+    } as unknown as Annotation;
 }
 
 export const MouseKind: AtlasKindShape = {

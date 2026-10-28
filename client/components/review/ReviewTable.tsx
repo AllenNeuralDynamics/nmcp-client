@@ -4,25 +4,25 @@ import {UseColorSchemeValue} from "@mantine/hooks";
 import {IconAlertTriangle} from "@tabler/icons-react";
 
 import {formatAtlasStructure} from "../../models/atlasStructure";
-import {NodeCounts, Reconstruction} from "../../models/reconstruction";
+import {NodeCounts, Annotation} from "../../models/annotation";
 import {User} from "../../models/user";
 import {NeuronVersionLink} from "../common/NeuronVersionLink";
 import {SpecimenLink} from "../common/SpecimenLink";
 import {ReconstructionStatusLabel} from "../common/ReconstructionStatus";
 
 export type ReviewTableProps = {
-    reconstructions: Reconstruction[]
+    reconstructions: Annotation[]
     totalCount: number;
     offset: number;
     limit: number;
     isFiltered: boolean;
-    selected: Reconstruction;
+    selected: Annotation;
 
-    onRowClick(id: Reconstruction): void;
+    onRowClick(id: Annotation): void;
 }
 
 export const ReviewTable = (props: ReviewTableProps) => {
-    const rows = props.reconstructions.map((r: Reconstruction) => {
+    const rows = props.reconstructions.map((r: Annotation) => {
         return <ReviewRow reconstruction={r} isSelected={r == props.selected} onRowClick={props.onRowClick}/>
     });
     return (
@@ -62,9 +62,9 @@ export const ReviewTable = (props: ReviewTableProps) => {
 
 type ReviewRowProps = {
     isSelected: boolean;
-    reconstruction: Reconstruction;
+    reconstruction: Annotation;
 
-    onRowClick(id: Reconstruction): void;
+    onRowClick(id: Annotation): void;
 }
 
 const ReviewRow = (props: ReviewRowProps) => {
@@ -83,7 +83,7 @@ const ReviewRow = (props: ReviewRowProps) => {
         <Table.Tr key={props.reconstruction.id} {...rowProps} onClick={() => props.onRowClick(props.reconstruction)}>
             <Table.Td><NeuronVersionLink neuron={props.reconstruction.neuron}/></Table.Td>
             <Table.Td><SpecimenLink specimen={props.reconstruction.neuron.specimen}/></Table.Td>
-            {...cellsForNodeCounts(props.reconstruction.specimenNodeCounts, scheme)}
+            {...cellsForNodeCounts(props.reconstruction.specimenSpaceReconstruction?.nodeCounts, scheme)}
             <Table.Td><Text size="sm" lineClamp={1}>{formatAtlasStructure(props.reconstruction.neuron?.atlasStructure, "(unspecified)")}</Text></Table.Td>
             <Table.Td ta="end">{props.reconstruction.neuron.atlasSoma.x.toFixed(1)}</Table.Td>
             <Table.Td ta="end">{props.reconstruction.neuron.atlasSoma.y.toFixed(1)}</Table.Td>

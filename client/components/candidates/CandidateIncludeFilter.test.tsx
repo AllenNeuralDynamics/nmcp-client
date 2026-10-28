@@ -6,7 +6,7 @@ import userEvent from "@testing-library/user-event";
 import {renderWithProviders} from "../../test/render";
 import {CandidateIncludeFilter} from "./CandidateIncludeFilter";
 import {CandidateFilter} from "../../viewmodel/candidateFilter";
-import {ReconstructionStatus} from "../../models/reconstructionStatus";
+import {AnnotationStatus} from "../../models/annotationStatus";
 
 describe("CandidateIncludeFilter", () => {
     it("offers In Progress, Duplicate, Incomplete and Untraceable in that order", async () => {
@@ -28,14 +28,14 @@ describe("CandidateIncludeFilter", () => {
         await userEvent.click(await screen.findByRole("option", {name: "Duplicate"}));
         await userEvent.click(await screen.findByRole("option", {name: "In Progress"}));
 
-        expect(filter.includedStatuses).toEqual([ReconstructionStatus.Duplicate, ReconstructionStatus.InProgress]);
+        expect(filter.includedStatuses).toEqual([AnnotationStatus.Duplicate, AnnotationStatus.InProgress]);
         expect(filter.includeInProgress).toBe(true);
-        expect(filter.excludedReconstructionStatuses).toEqual([ReconstructionStatus.Incomplete, ReconstructionStatus.Untraceable]);
+        expect(filter.excludedAnnotationStatuses).toEqual([AnnotationStatus.Incomplete, AnnotationStatus.Untraceable]);
     });
 
     it("shows a pill for each stored selection", () => {
         const filter = new CandidateFilter();
-        filter.includedStatuses = [ReconstructionStatus.Untraceable];
+        filter.includedStatuses = [AnnotationStatus.Untraceable];
 
         const {container} = renderWithProviders(<CandidateIncludeFilter candidateFilter={filter}/>);
 

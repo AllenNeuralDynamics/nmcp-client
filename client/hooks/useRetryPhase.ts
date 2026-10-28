@@ -1,13 +1,13 @@
 import {useApolloClient} from "@apollo/client";
 
-import {Reconstruction} from "../models/reconstruction";
-import {RECONSTRUCTIONS_QUERY, RETRY_PHASE_MUTATIONS} from "../graphql/reconstruction";
+import {Annotation} from "../models/annotation";
+import {ANNOTATIONS_QUERY, RETRY_PHASE_MUTATIONS} from "../graphql/annotation";
 import {errorNotification} from "../components/common/NotificationHelper";
 
-export function useRetryPhase(): (reconstruction: Reconstruction) => Promise<void> {
+export function useRetryPhase(): (reconstruction: Annotation) => Promise<void> {
     const client = useApolloClient();
 
-    return async (reconstruction: Reconstruction) => {
+    return async (reconstruction: Annotation) => {
         const mutation = RETRY_PHASE_MUTATIONS[reconstruction.atlasReconstruction?.status];
 
         // The button is only enabled when an entry exists.
@@ -16,7 +16,7 @@ export function useRetryPhase(): (reconstruction: Reconstruction) => Promise<voi
         }
 
         try {
-            await client.mutate({mutation, variables: {reconstructionId: reconstruction.id}, refetchQueries: [RECONSTRUCTIONS_QUERY]});
+            await client.mutate({mutation, variables: {annotationId: reconstruction.id}, refetchQueries: [ANNOTATIONS_QUERY]});
         } catch (e) {
             errorNotification("Error Retrying Phase", e);
         }

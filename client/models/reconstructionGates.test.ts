@@ -2,12 +2,12 @@ import {describe, expect, it} from "vitest";
 
 import {Gate, GateContext, gateFor} from "./reconstructionGates";
 import {ReconstructionAction} from "./reconstructionAction";
-import {ReconstructionStatus} from "./reconstructionStatus";
+import {AnnotationStatus} from "./annotationStatus";
 import {AbandonableFailureStatuses, AtlasReconstructionStatus, AutomaticPhaseInProgressStatuses, PhaseFailureStatuses} from "./atlasReconstructionStatus";
 import {UserPermissions} from "../graphql/user";
 import {makeUser} from "../test/fixtures";
 
-const S = ReconstructionStatus;
+const S = AnnotationStatus;
 const A = AtlasReconstructionStatus;
 
 const OWNER_ID = "owner";
@@ -26,9 +26,9 @@ const roles = {
 type Role = keyof typeof roles;
 type Area = GateContext["area"];
 
-type Row = [Area, Role, ReconstructionStatus, AtlasReconstructionStatus, boolean, boolean];
+type Row = [Area, Role, AnnotationStatus, AtlasReconstructionStatus, boolean, boolean];
 
-function ctx(area: Area, role: Role, status: ReconstructionStatus, childStatus: AtlasReconstructionStatus): GateContext {
+function ctx(area: Area, role: Role, status: AnnotationStatus, childStatus: AtlasReconstructionStatus): GateContext {
     const user = roles[role];
 
     return {area, status, childStatus, permissions: user.permissions, userId: user.id, annotatorId: OWNER_ID};
@@ -40,7 +40,7 @@ function check(action: ReconstructionAction, rows: Row[]) {
     });
 }
 
-const statuses = Object.values(ReconstructionStatus).filter((v): v is ReconstructionStatus => typeof v === "number" && v != S.Multiple);
+const statuses = Object.values(AnnotationStatus).filter((v): v is AnnotationStatus => typeof v === "number" && v != S.Multiple);
 
 describe("Discard", () => {
     check(ReconstructionAction.Discard, [
@@ -98,12 +98,12 @@ describe("ResetPipeline", () => {
 });
 
 describe("Reject", () => {
-    const rejectableByAdmin: [ReconstructionStatus, AtlasReconstructionStatus][] = [
+    const rejectableByAdmin: [AnnotationStatus, AtlasReconstructionStatus][] = [
         [S.PeerReview, A.Initialized],
         [S.TeamReview, A.Initialized],
         [S.PublishReview, A.ReadyToProcess],
         [S.ReadyToPublish, A.ReadyToPublish],
-        ...AbandonableFailureStatuses.map((child): [ReconstructionStatus, AtlasReconstructionStatus] => [S.WaitingForAtlasReconstruction, child]),
+        ...AbandonableFailureStatuses.map((child): [AnnotationStatus, AtlasReconstructionStatus] => [S.WaitingForAtlasReconstruction, child]),
         [S.PublishFailed, A.FailedSearchIndexing]
     ];
 
@@ -231,7 +231,7 @@ describe("Close actions on the Reconstructions page", () => {
     const held = [S.InProgress, S.OnHold, S.Incomplete, S.Duplicate, S.Rejected];
 
     // Children at which the API would let an admin or publish reviewer discard, so only the page's rule disables it.
-    const child = (status: ReconstructionStatus) => status == S.WaitingForAtlasReconstruction ? AbandonableFailureStatuses[0]
+    const child = (status: AnnotationStatus) => status == S.WaitingForAtlasReconstruction ? AbandonableFailureStatuses[0]
         : status == S.PublishFailed ? A.FailedSearchIndexing : A.ReadyToProcess;
 
     describe.each(closeActions)("action %s", action => {

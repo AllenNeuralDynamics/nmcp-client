@@ -1,10 +1,10 @@
 import * as React from "react";
 import {Divider, Flex} from "@mantine/core";
 
-import {Reconstruction} from "../../../models/reconstruction";
+import {Annotation} from "../../../models/annotation";
 import {Metadata} from "./Metadata";
 
-export const Status = ({reconstruction}: { reconstruction: Reconstruction }) => {
+export const Status = ({reconstruction}: { reconstruction: Annotation }) => {
     return (
         <Flex>
             <Metadata reconstruction={reconstruction}/>

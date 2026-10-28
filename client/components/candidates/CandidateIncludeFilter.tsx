@@ -3,7 +3,7 @@ import {observer} from "mobx-react-lite";
 import {Group, MultiSelect, Text} from "@mantine/core";
 
 import {CandidateFilter, CandidateIncludeOptions} from "../../viewmodel/candidateFilter";
-import {statusNameOnly} from "../../models/reconstructionStatus";
+import {statusNameOnly} from "../../models/annotationStatus";
 
 const options = CandidateIncludeOptions.map(s => ({label: statusNameOnly(s), value: s.toString()}));
 

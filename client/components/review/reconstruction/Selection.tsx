@@ -4,12 +4,12 @@ import {useLocalStorage} from "@mantine/hooks";
 import {IconBinaryTree, IconBinaryTreeFilled, IconChecklist, IconFileInfo} from "@tabler/icons-react";
 
 import {SpecimenSpace} from "./SpecimenSpace";
-import {Reconstruction} from "../../../models/reconstruction";
+import {Annotation} from "../../../models/annotation";
 import {AtlasSpace} from "./AtlasSpace";
 import {Status} from "./Status";
 import {QualityCheck} from "./QualityCheck";
 
-export const Selection = ({reconstruction}: {reconstruction: Reconstruction}) => {
+export const Selection = ({reconstruction}: {reconstruction: Annotation}) => {
     const [savedTab, setSavedTab] = useLocalStorage<string | null>({key: "review-tab", defaultValue: "status"});
 
     if (reconstruction == null) {

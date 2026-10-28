@@ -4,18 +4,18 @@ import {useMutation} from "@apollo/client";
 import {Button, Divider, Group, Modal, Radio, Stack, Text} from "@mantine/core";
 
 import {
-    PUBLISH_ALL_RECONSTRUCTION_MUTATION,
+    PUBLISH_ALL_ANNOTATION_MUTATION,
     PublishAllLimit,
-    PublishAllReconstructionResponse, PublishAllReconstructionVariables,
-    RECONSTRUCTIONS_QUERY
-} from "../../../graphql/reconstruction";
+    PublishAllAnnotationResponse, PublishAllAnnotationVariables,
+    ANNOTATIONS_QUERY
+} from "../../../graphql/annotation";
 import {errorNotification, infoNotification, successNotification} from "../../common/NotificationHelper";
-import {Reconstruction} from "../../../models/reconstruction";
+import {Annotation} from "../../../models/annotation";
 import {PublishAllMode, publishAllOutcome} from "./publishAllOutcome";
 
 type PublishAllModalProps = {
     open: boolean;
-    reconstructions: Reconstruction[];
+    reconstructions: Annotation[];
     totalCount: number;
 
     onClose(): void;
@@ -26,9 +26,9 @@ export const PublishAllModal = ({open, reconstructions, totalCount, onClose}: Pu
 
     // No hook-level onCompleted: Apollo falls back to the latest render's options, which would read the radio as it is
     // when the request finishes rather than as it was sent.  onPublish passes a per-call onCompleted instead.
-    const [publish, {loading}] = useMutation<PublishAllReconstructionResponse, PublishAllReconstructionVariables>(PUBLISH_ALL_RECONSTRUCTION_MUTATION,
+    const [publish, {loading}] = useMutation<PublishAllAnnotationResponse, PublishAllAnnotationVariables>(PUBLISH_ALL_ANNOTATION_MUTATION,
         {
-            refetchQueries: [RECONSTRUCTIONS_QUERY],
+            refetchQueries: [ANNOTATIONS_QUERY],
             onError: (e) => {
                 if (e.graphQLErrors?.[0]?.extensions?.code == 1007) {
                     errorNotification("Error Publishing Reconstructions", `At most ${PublishAllLimit} reconstructions can be published in one request.`);
@@ -86,12 +86,12 @@ export const PublishAllModal = ({open, reconstructions, totalCount, onClose}: Pu
     const onPublish = async () => {
         const mode: PublishAllMode = needChoice && publishAll == "all" ? "all" : "shown";
 
-        const reconstructionIds = mode == "all" ? ["ALL"] : reconstructions.map(r => r.id);
+        const annotationIds = mode == "all" ? ["ALL"] : reconstructions.map(r => r.id);
 
-        const requested = reconstructionIds.length;
+        const requested = annotationIds.length;
 
         await publish({
-            variables: {reconstructionIds},
+            variables: {annotationIds},
             onCompleted: data => report(mode, requested, data.publishAll.length)
         });
     }

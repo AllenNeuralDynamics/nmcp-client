@@ -68,27 +68,30 @@ export const NEURON_BASE_FIELDS_FRAGMENT = gql`fragment NeuronBaseFields on Neur
 }`;
 
 export const NEURON_VERSIONS_RELATIONSHIPS_FRAGMENT = gql`fragment NeuronVersionsRelationshipFields on Neuron {
-    reconstructions {
+    annotations {
         id
         status
         createdAt
-        specimenNodeCounts {
-            axon {
-                total
-            }
-            dendrite {
-                total
-            }
-        }
-        precomputed {
+        specimenSpaceReconstruction {
             id
-            skeletonId
-        }
-        soma {
-            id
-            x
-            y
-            z
+            nodeCounts {
+                axon {
+                    total
+                }
+                dendrite {
+                    total
+                }
+            }
+            precomputed {
+                id
+                skeletonId
+            }
+            soma {
+                id
+                x
+                y
+                z
+            }
         }
         atlasReconstruction {
             id
@@ -148,7 +151,7 @@ export const NEURONS_QUERY = gql`query NeuronsQuery($input: NeuronQueryInput) {
         items {
             ...NeuronBaseFields
             ...NeuronRelationshipFields
-            reconstructionCount
+            annotationCount
         }
     }
 }
@@ -329,7 +332,7 @@ export const NEURON_VERSION_HISTORY_QUERY = gql`query NeuronVersionHistory($neur
             ...VersionHistoryEventFields
         }
         branches {
-            reconstructionId
+            annotationId
             status
             startedAt
             events {
@@ -357,7 +360,7 @@ export type VersionHistoryEvent = {
 }
 
 export type VersionHistoryBranch = {
-    reconstructionId: string;
+    annotationId: string;
     status: number;
     startedAt: string;
     events: VersionHistoryEvent[];

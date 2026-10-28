@@ -4,7 +4,7 @@ import {IconBrowserShare} from "@tabler/icons-react";
 
 import {BracesKind, formatHortaLocation, formatKeywords, NeuronShape} from "../../models/neuron";
 import {formatAtlasStructure} from "../../models/atlasStructure";
-import {ReconstructionStatus, statusColor, statusNameOnly} from "../../models/reconstructionStatus";
+import {AnnotationStatus, statusColor, statusNameOnly} from "../../models/annotationStatus";
 import {AnnotatorWithStatus} from "../common/AnnotatorWithStatus";
 import {successNotification} from "../common/NotificationHelper";
 import {NeuronVersionLink} from "../common/NeuronVersionLink";
@@ -43,7 +43,7 @@ export const CandidateRow = (props: ICandidateRowProps) => {
 
     // Unlike Untraceable, these rows are not soft-deleted, so they arrive with the neuron's reconstructions rather than
     // as a neuron-level flag.
-    const heldStatuses = [ReconstructionStatus.Duplicate, ReconstructionStatus.Incomplete].filter(s => props.neuron.reconstructions?.some(r => r?.status == s));
+    const heldStatuses = [AnnotationStatus.Duplicate, AnnotationStatus.Incomplete].filter(s => props.neuron.annotations?.some(r => r?.status == s));
 
     const soma = props.neuron.atlasSoma;
 
@@ -68,7 +68,7 @@ export const CandidateRow = (props: ICandidateRowProps) => {
             }}/>{formatHortaLocation(props.neuron)}</Group></Table.Td>
             {props.showAnnotators ?
                 <Table.Td style={singleLine}>
-                    <AnnotatorWithStatus reconstructions={props.neuron.reconstructions}/>
+                    <AnnotatorWithStatus reconstructions={props.neuron.annotations}/>
                 </Table.Td>
                 : null}
         </Table.Tr>

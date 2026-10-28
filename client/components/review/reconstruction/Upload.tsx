@@ -5,8 +5,8 @@ import {Button, Divider, Flex, Group, Loader, Stack, Table, Text} from "@mantine
 import {Dropzone} from "@mantine/dropzone";
 import {IconFileCode, IconUpload, IconX} from "@tabler/icons-react";
 
-import {UPLOAD_SWC_MUTATION, UploadSwcResponse, UploadUnregisteredSwcVariables} from "../../../graphql/reconstruction";
-import {Reconstruction} from "../../../models/reconstruction";
+import {UPLOAD_SWC_MUTATION, UploadSwcResponse, UploadUnregisteredSwcVariables} from "../../../graphql/annotation";
+import {Annotation} from "../../../models/annotation";
 import {ReconstructionSpace} from "../../../models/reconstructionSpace";
 import {FilePreview} from "./FilePreview";
 import {errorNotification, successNotification} from "../../common/NotificationHelper";
@@ -17,7 +17,7 @@ const dropMessage = new Map<ReconstructionSpace, string>();
 dropMessage.set(ReconstructionSpace.Specimen, "Drop a specimen-space SWC reconstruction file, or click to browse for a file.");
 dropMessage.set(ReconstructionSpace.Atlas, "Drop an atlas-space SWC reconstruction file, or click to browse for a file.");
 
-export const Upload = observer(({reconstruction, space}: { reconstruction: Reconstruction, space: ReconstructionSpace }) => {
+export const Upload = observer(({reconstruction, space}: { reconstruction: Annotation, space: ReconstructionSpace }) => {
     const [nodeCount, setNodeCount] = useState<[number, number]>(null);
     const [file, setFile] = useState<File>(null);
 
@@ -25,7 +25,7 @@ export const Upload = observer(({reconstruction, space}: { reconstruction: Recon
         {
             variables: {
                 uploadArgs: {
-                    reconstructionId: reconstruction.id,
+                    annotationId: reconstruction.id,
                     reconstructionSpace: space,
                     file: file
                 }
@@ -106,7 +106,7 @@ export const Upload = observer(({reconstruction, space}: { reconstruction: Recon
         );
     }
 
-    const buttonText = space == ReconstructionSpace.Specimen ? (reconstruction.sourceUrl ? "Replace" : "Upload") : (reconstruction.atlasReconstruction.sourceUrl ? "Replace" : "Upload");
+    const buttonText = space == ReconstructionSpace.Specimen ? (reconstruction.specimenSpaceReconstruction?.sourceUrl ? "Replace" : "Upload") : (reconstruction.atlasReconstruction.sourceUrl ? "Replace" : "Upload");
 
     const elementName = `upload-${ReconstructionSpace[space].toLowerCase()}-space`;
 

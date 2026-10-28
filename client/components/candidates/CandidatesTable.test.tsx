@@ -9,7 +9,7 @@ import {CandidateRowHeight} from "./CandidateRow";
 import {NeuronShape} from "../../models/neuron";
 
 function neuronAt(offset: number): NeuronShape {
-    return {id: `n${offset}`, label: `N${offset}`, specimen: {id: "s1", label: "S1"} as any, atlasSoma: {x: 1, y: 2, z: 3}, reconstructions: []};
+    return {id: `n${offset}`, label: `N${offset}`, specimen: {id: "s1", label: "S1"} as any, atlasSoma: {x: 1, y: 2, z: 3}, annotations: []};
 }
 
 function renderTable(props: Partial<CandidatesTableProps> = {}) {

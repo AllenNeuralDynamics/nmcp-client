@@ -1,17 +1,17 @@
 import * as React from "react";
 import {Badge, Tooltip} from "@mantine/core";
 
-import {ReconstructionStatus, statusColor, statusName} from "../../models/reconstructionStatus";
-import {Reconstruction} from "../../models/reconstruction";
+import {AnnotationStatus, statusColor, statusName} from "../../models/annotationStatus";
+import {Annotation} from "../../models/annotation";
 
-export const ReconstructionStatusLabel = ({reconstructions}: { reconstructions: Reconstruction | Reconstruction[] }) => {
+export const ReconstructionStatusLabel = ({reconstructions}: { reconstructions: Annotation | Annotation[] }) => {
     if (reconstructions === null || reconstructions === undefined) {
         return null;
     }
 
-    let status = ReconstructionStatus.Multiple;
+    let status = AnnotationStatus.Multiple;
     let secondary = null;
-    let check: Reconstruction = null;
+    let check: Annotation = null;
 
     if (Array.isArray(reconstructions)) {
         if (reconstructions.length == 0) {
