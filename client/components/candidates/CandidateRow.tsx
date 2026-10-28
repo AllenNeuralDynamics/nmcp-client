@@ -51,7 +51,7 @@ export const CandidateRow = (props: ICandidateRowProps) => {
         <Table.Tr {...subProps} style={{height: CandidateRowHeight}} onClick={() => props.onSelected(props.neuron)}>
             <Table.Td style={singleLine}>
                 <Group gap="xs" wrap="nowrap">
-                    <NeuronVersionLink neuron={props.neuron} openAtlasTab/>
+                    <NeuronVersionLink neuron={props.neuron} openAtlasTab newTabLink/>
                     {heldStatuses.map(s => <Badge key={s} size="xs" color={statusColor(s)} variant="light">{statusNameOnly(s)}</Badge>)}
                     {props.neuron.untraceable ? <Badge size="xs" color="gray" variant="light">Untraceable</Badge> : null}
                 </Group>

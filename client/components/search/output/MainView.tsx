@@ -18,7 +18,7 @@ export const MainView = observer(() => {
     const atlasViewModel = searchAtlas.atlasViewModel;
 
     return (
-        <Group gap={0} align="stretch" style={{flexGrow: 1, flexShrink: 0, flexBasis: 0, minHeight: 0}} preventGrowOverflow={false}>
+        <Group gap={0} align="stretch" wrap="nowrap" style={{flexGrow: 1, flexShrink: 0, flexBasis: 0, minHeight: 0}} preventGrowOverflow={false}>
             <SideDrawer opened={appLayout.neuronDrawerState == DrawerState.Dock} width={NeuronListContainerWidth} side="left" order={0}>
                 <NeuronListContainer/>
             </SideDrawer>

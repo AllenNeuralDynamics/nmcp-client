@@ -16,7 +16,7 @@ import {AppLoading} from "../app/AppLoading";
 import {useAppLayout} from "../../hooks/useAppLayout";
 import {NeuronSpecimenSpaceView} from "./NeuronSpecimenSpaceView";
 import {NeuronAtlasSpaceView} from "./NeuronAtlasSpaceView";
-import {NeuronLinkState} from "../common/NeuronVersionLink";
+import {NeuronLinkState, OpenAtlasTabSearchParam} from "../common/NeuronVersionLink";
 import {NeuronHistory} from "./NeuronHistory";
 import {QualityMetrics} from "./QualityMetrics";
 import {ReconstructionMetrics} from "./ReconstructionMetrics";
@@ -89,7 +89,8 @@ export const Neuron = () => {
 
     const invalidVersion = (location.state as any)?.invalidVersion as string | undefined;
 
-    const openAtlasTab = (location.state as NeuronLinkState | null)?.openAtlasTab === true;
+    const openAtlasTab = (location.state as NeuronLinkState | null)?.openAtlasTab === true ||
+        new URLSearchParams(location.search).get(OpenAtlasTabSearchParam) == "true";
 
     useEffect(() => {
         if (openAtlasTab) {

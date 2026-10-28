@@ -1,6 +1,6 @@
 import * as React from "react";
-import {describe, expect, it} from "vitest";
-import {screen} from "@testing-library/react";
+import {describe, expect, it, vi} from "vitest";
+import {fireEvent, screen} from "@testing-library/react";
 import {Table} from "@mantine/core";
 
 import {renderWithProviders} from "../../test/render";
@@ -72,6 +72,49 @@ describe("CandidateRow", () => {
         renderRow({...neuronWith([]), atlasSoma: {x: 0, y: 0, z: 0}});
 
         expect(screen.getAllByRole("cell").slice(5, 8).map(cell => cell.textContent)).toEqual(["0.0", "0.0", "0.0"]);
+    });
+
+    it("links to the neuron page in a new tab, asking for the atlas tab in the URL", () => {
+        renderRow(neuronWith([]));
+
+        const link = screen.getByRole("link", {name: "Open N001 in a new tab"});
+
+        expect(link).toHaveAttribute("href", "/neuron/n1?openAtlasTab=true");
+        expect(link).toHaveAttribute("target", "_blank");
+        expect(link).toHaveAttribute("rel", "noopener noreferrer");
+    });
+
+    it("does not select the row when the new tab link is clicked", () => {
+        const onSelected = vi.fn();
+
+        renderWithProviders(
+            <Table>
+                <Table.Tbody>
+                    <CandidateRow key="row" neuron={neuronWith([])} showAnnotators={false} isSelected={false} onSelected={onSelected}/>
+                </Table.Tbody>
+            </Table>
+        );
+
+        const link = screen.getByRole("link", {name: "Open N001 in a new tab"});
+
+        // jsdom does not navigate, but a default action left in place would still be reported as unimplemented.
+        link.addEventListener("click", e => e.preventDefault());
+
+        fireEvent.click(link);
+
+        expect(onSelected).not.toHaveBeenCalled();
+
+        fireEvent.click(screen.getByRole("row"));
+
+        expect(onSelected).toHaveBeenCalledTimes(1);
+    });
+
+    it("shows the new tab tooltip only for the share icon", async () => {
+        renderRow(neuronWith([]));
+
+        fireEvent.mouseEnter(screen.getByRole("link", {name: "Open N001 in a new tab"}));
+
+        expect(await screen.findByRole("tooltip")).toHaveTextContent("Open N001 in a new tab");
     });
 
     it("renders at the fixed row height", () => {
