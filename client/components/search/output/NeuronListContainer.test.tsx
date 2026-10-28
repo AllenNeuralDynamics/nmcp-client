@@ -44,12 +44,12 @@ describe("NeuronListContainer export menu", () => {
         vi.clearAllMocks();
     });
 
-    it("lists SWC, JSON and Parquet", async () => {
+    it("lists SWC and Parquet", async () => {
         await openExportMenu(2);
 
         const items = within(screen.getByRole("menu")).getAllByRole("menuitem").map(i => i.textContent.trim());
 
-        expect(items).toEqual(["Export SWC", "Export JSON", "Export Parquet"]);
+        expect(items).toEqual(["Export SWC", "Export Parquet"]);
     });
 
     it("omits Parquet when experimental features are disabled", async () => {
@@ -57,7 +57,7 @@ describe("NeuronListContainer export menu", () => {
 
         const items = within(screen.getByRole("menu")).getAllByRole("menuitem").map(i => i.textContent.trim());
 
-        expect(items).toEqual(["Export SWC", "Export JSON"]);
+        expect(items).toEqual(["Export SWC"]);
     });
 
     it("exports the selected atlas reconstructions as Parquet", async () => {
@@ -69,10 +69,10 @@ describe("NeuronListContainer export menu", () => {
         expect(vi.mocked(requestExport)).toHaveBeenCalledWith(["atlas-1", "atlas-2"], ExportFormat.Parquet, ReconstructionSpace.Atlas);
     });
 
-    it("shows only the limit message over ten selected neurons", async () => {
-        await openExportMenu(11);
+    it("shows only the limit message over twenty-five selected neurons", async () => {
+        await openExportMenu(26);
 
-        expect(await screen.findByText("Export is limited to 10 selected neurons at one time")).toBeInTheDocument();
+        expect(await screen.findByText("Export is limited to 25 selected neurons at one time")).toBeInTheDocument();
         expect(screen.queryByRole("menuitem", {name: "Export Parquet"})).toBeNull();
     });
 });

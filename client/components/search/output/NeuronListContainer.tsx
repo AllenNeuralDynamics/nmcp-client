@@ -14,7 +14,7 @@ import {ExportFormat, ReconstructionSpace} from "../../../models/neuron";
 
 export const NeuronListContainerWidth = "470px";
 
-const exportLimit = 10;
+const exportLimit = 25;
 
 export const NeuronListContainer = observer(() => {
     const appLayout = useAppLayout();
@@ -47,9 +47,6 @@ export const NeuronListContainer = observer(() => {
             <Menu.Dropdown>
                 <Menu.Item onClick={() => exportNeurons(ids, ExportFormat.SWC)}>
                     Export SWC
-                </Menu.Item>
-                <Menu.Item onClick={() => exportNeurons(ids, ExportFormat.legacyJSON)}>
-                    Export JSON
                 </Menu.Item>
                 {enableExperimentalFeatures &&
                     <Menu.Item onClick={() => exportNeurons(ids, ExportFormat.Parquet)}>
