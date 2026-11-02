@@ -5,13 +5,13 @@ export type CandidatePoint = {
     point: Float32Array;
 }
 
-// Atlas microns to the viewer's 10 micron dimensions.
+// Atlas microns to the viewer's 0.1 micron dimensions.
 export function toViewerPoint(location: SomaLocation | null | undefined): Float32Array | null {
     if (!isSomaLocationSet(location)) {
         return null;
     }
 
-    return Float32Array.of(location.x / 10, location.y / 10, location.z / 10);
+    return Float32Array.of(location.x * 10, location.y * 10, location.z * 10);
 }
 
 // The location query delivers [x, y, z] tuples, while the soma check reads the object shape rows carry, so each tuple is

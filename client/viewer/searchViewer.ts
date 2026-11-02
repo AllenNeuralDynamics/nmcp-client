@@ -167,15 +167,15 @@ export class SearchViewer extends AtlasViewer {
                 type: "point",
                 id: soma.id,
                 point: [
-                    soma.x / 10,
-                    soma.y / 10,
-                    soma.z / 10
+                    soma.x * 10,
+                    soma.y * 10,
+                    soma.z * 10
                 ],
                 props: [n.baseColor, 3]
             };
 
             if (n.isMirrored && isMirrorFlipped) {
-                point.point[2] = -soma.z / 10 + 1140;
+                point.point[2] = -soma.z * 10 + 114000;
             }
 
             return point;

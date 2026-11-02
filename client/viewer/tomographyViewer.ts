@@ -1,22 +1,16 @@
 import {NeuroglancerViewer} from "./neuroglancerViewer";
 import {LayerType, NeuroglancerLayerSource} from "./neuroglancerLayer";
 import {Tomography, TomographyRange} from "../models/specimen";
+import {ViewerDimensions} from "./neuroglancerViewerState";
+
+const tomographyDimensions: ViewerDimensions = {
+    x: [0.00001, "m"],
+    y: [0.00001, "m"],
+    z: [0.00001, "m"]
+};
 
 const defaultTomographyViewerState = {
-    "dimensions": {
-        "x": [
-            0.00001,
-            "m"
-        ],
-        "y": [
-            0.00001,
-            "m"
-        ],
-        "z": [
-            0.00001,
-            "m"
-        ]
-    },
+    "dimensions": tomographyDimensions,
     "position": [
         2456.76953125,
         1115.9412841796875,
@@ -93,5 +87,9 @@ export class TomographyViewer extends NeuroglancerViewer {
         state.title = "Specimen";
 
         return state;
+    }
+
+    protected get defaultDimensions(): ViewerDimensions {
+        return tomographyDimensions;
     }
 }

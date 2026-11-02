@@ -5,8 +5,6 @@ const SamplePageLimit = "sample.page.limit";
 const NeuronPageOffset = "neuron.page.offset";
 const NeuronPageLimit = "neuron.page.limit";
 const LockedSampleId = "neuron.upload.locked.sample";
-const CandidateViewerState = "candidates.viewer.state.v5";
-const SearchViewerState = "search.viewer.state.v8";
 const ShouldAutoCollapseOnQuery = "viewer.shouldAutoCollapseOnQuery";
 const LastQuery = "viewer.lastQuery";
 const HideCursorInViewer = "viewer.hideCursorInViewer";
@@ -64,22 +62,6 @@ export class UserPreferences extends PreferencesManager {
 
     public set neuronCreateLockedSampleId(id: string) {
         this.saveLocalValue(LockedSampleId, id);
-    }
-
-    public get candidateViewerState(): object {
-        return this.loadLocalValue(CandidateViewerState, null);
-    }
-
-    public set candidateViewerState(state: object) {
-        this.saveLocalValue(CandidateViewerState, state);
-    }
-
-    public get searchViewerState(): object {
-        return this.loadLocalValue(SearchViewerState, null);
-    }
-
-    public set searchViewerState(state: object) {
-        this.saveLocalValue(SearchViewerState, state);
     }
 
     public get ShouldAutoCollapseOnQuery() {

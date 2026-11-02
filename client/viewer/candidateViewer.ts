@@ -67,24 +67,6 @@ export class CandidateViewer extends AtlasViewer implements CandidatePointSink {
         this._selectionListener = listener;
     }
 
-    // A saved state can predate these layer definitions, and an old per-point-property Candidates layer would reject
-    // the property-less points, so the saved copies are replaced with the current ones.
-    public updateState(state?: object | null) {
-        if (state) {
-            const current: any = {
-                ...state,
-                layers: ((state as any).layers ?? []).filter((layer: any) => layer.name !== CandidatesLayerName && layer.name !== SelectionLayerName)
-            };
-
-            this.ensureLayer(candidatesLayerSource, current);
-            this.ensureLayer(selectionLayerSource, current);
-
-            super.updateState(current);
-        } else {
-            super.updateState(state);
-        }
-    }
-
     public clearCandidates(): void {
         this.withAnnotations(CandidatesLayerName, source => source.clear());
     }

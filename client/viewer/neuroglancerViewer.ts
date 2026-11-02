@@ -5,7 +5,7 @@ import {disableWheel} from "neuroglancer/unstable/ui/disable_default_actions.js"
 import {registerEventListener} from "neuroglancer/unstable/util/disposable.js";
 import {Viewer} from "neuroglancer/unstable/viewer.js";
 
-import {immutableDefaultState, viewerBackgroundColor} from "./neuroglancerViewerState";
+import {immutableDefaultState, viewerBackgroundColor, ViewerDimensions, withDimensions} from "./neuroglancerViewerState";
 import {LayerType, NeuroglancerLayerSource} from "./neuroglancerLayer";
 
 export type StateListener = (obj: object) => void;
@@ -96,7 +96,7 @@ export class NeuroglancerViewer {
             }
             this.restoreState(this.defaultState);
         } else {
-            this.restoreState(state ?? this.defaultState);
+            this.restoreState(state ? withDimensions(state, this.defaultDimensions) : this.defaultState);
         }
 
         this._stateInitialized = true;
@@ -314,6 +314,10 @@ export class NeuroglancerViewer {
 
     protected get defaultState() {
         return this.updateStateForColorScheme({...immutableDefaultState});
+    }
+
+    protected get defaultDimensions(): ViewerDimensions {
+        return immutableDefaultState.dimensions;
     }
 
     private updateStateForColorScheme(state: any): any {

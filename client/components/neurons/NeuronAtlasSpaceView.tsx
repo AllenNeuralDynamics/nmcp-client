@@ -47,8 +47,8 @@ export const NeuronAtlasSpaceView = observer(({atlasId, reconstruction, soma}: N
 
     const somaLocation = selectSomaLocation(soma, reconstruction?.atlasReconstruction?.soma);
 
-    // atlas space is voxels = microns / 10
-    const somaPoint = somaLocation ? {x: somaLocation.x / 10, y: somaLocation.y / 10, z: somaLocation.z / 10} : null;
+    // viewer units are 0.1 microns
+    const somaPoint = somaLocation ? {x: somaLocation.x * 10, y: somaLocation.y * 10, z: somaLocation.z * 10} : null;
 
     useEffect(() => {
         const v = new AtlasSpaceViewer("neuron-atlas-ng-container", atlasViewModel, systemConfiguration.precomputedLocation, scheme == "dark");
@@ -103,7 +103,7 @@ export const NeuronAtlasSpaceView = observer(({atlasId, reconstruction, soma}: N
             await getNearest({
                 variables: {
                     id: atlasReconstructionId,
-                    location: [location[0] * 10, location[1] * 10, location[2] * 10]
+                    location: [location[0] / 10, location[1] / 10, location[2] / 10]
                 }
             });
         }

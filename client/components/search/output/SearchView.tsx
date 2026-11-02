@@ -116,7 +116,7 @@ export const SearchView = observer(() => {
             await getNearest({
                 variables: {
                     id: neuron.ReconstructionId,
-                    location: [location[0] * 10, location[1] * 10, location[2] * 10]
+                    location: [location[0] / 10, location[1] / 10, location[2] / 10]
                 }
             });
         }

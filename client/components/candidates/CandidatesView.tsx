@@ -5,7 +5,6 @@ import {ActionIcon, Box, Divider, Paper, Progress, Stack, Text, Tooltip, useComp
 import {IconPin, IconPinned} from "@tabler/icons-react";
 
 import {useAppLayout} from "../../hooks/useAppLayout";
-import {usePreferences} from "../../hooks/usePreferences";
 import {NeuronShape} from "../../models/neuron";
 import {CandidateViewer} from "../../viewer/candidateViewer";
 import {NeuroglancerControls} from "../common/NeuroglancerControls";
@@ -28,8 +27,6 @@ export const CandidatesView = observer((props: CandidatesViewProps) => {
     const onViewerSelectedRef = useRef(props.onViewerSelected);
     onViewerSelectedRef.current = props.onViewerSelected;
 
-    const preferences = usePreferences();
-
     const appLayout = useAppLayout();
 
     const pinned = appLayout.isCandidateViewerPinned;
@@ -41,7 +38,7 @@ export const CandidatesView = observer((props: CandidatesViewProps) => {
 
         v.selectionListener = (id: string) => onViewerSelectedRef.current(id);
 
-        v.updateState(preferences.candidateViewerState);
+        v.updateState();
 
         props.locationLoader.attach(v);
 
