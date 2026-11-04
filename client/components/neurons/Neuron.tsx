@@ -1,14 +1,20 @@
 import * as React from "react";
 import {useEffect, useMemo} from "react";
 import {Navigate, useLocation, useNavigate, useParams} from "react-router-dom";
-import {useQuery} from "@apollo/client";
-import {Alert, Anchor, Badge, Card, Divider, Group, Stack, Table, Tabs, Text} from "@mantine/core";
+import {ApolloError, useQuery} from "@apollo/client";
+import {Alert, Anchor, Badge, Card, Divider, Group, Stack, Tabs, Text} from "@mantine/core";
 import {useClipboard, useLocalStorage} from "@mantine/hooks";
 import {useIsAuthenticated} from "@azure/msal-react";
 import {IconBinaryTree, IconBinaryTreeFilled, IconChartBar, IconVersions} from "@tabler/icons-react";
 import dayjs from "dayjs";
 
-import {NEURON_VERSIONS_QUERY, NeuronVersionsQueryResponse, NeuronVersionsQueryVariables} from "../../graphql/neuron";
+import {
+    NEURON_PUBLIC_QUERY,
+    NEURON_VERSIONS_QUERY,
+    NeuronVersionsQueryResponse,
+    NeuronVersionsQueryVariables
+} from "../../graphql/neuron";
+import {NeuronShape} from "../../models/neuron";
 import {Annotation} from "../../models/annotation";
 import {AnnotationStatus} from "../../models/annotationStatus";
 import {GraphQLErrorAlert} from "../common/GraphQLErrorAlert";
@@ -55,6 +61,44 @@ function selectReconstruction(reconstructions: Annotation[], versionId: string):
     return eligible.length > 0 ? eligible[0] : null;
 }
 
+type NeuronPageData = {
+    neuron?: NeuronShape;
+    error?: ApolloError;
+}
+
+// Signed-out users never receive the annotation list, only the published annotation when there is one, and the page then
+// treats it as the only version.
+function useNeuronPageData(neuronId: string, isAuthenticated: boolean): NeuronPageData {
+    const options = {pollInterval: 10000, variables: {id: neuronId}};
+
+    const versions = useQuery<NeuronVersionsQueryResponse, NeuronVersionsQueryVariables>(NEURON_VERSIONS_QUERY, {
+        ...options,
+        skip: !isAuthenticated
+    });
+
+    const publicNeuron = useQuery<NeuronVersionsQueryResponse, NeuronVersionsQueryVariables>(NEURON_PUBLIC_QUERY, {
+        ...options,
+        skip: isAuthenticated
+    });
+
+    return useMemo(() => {
+        if (isAuthenticated) {
+            return {neuron: versions.data?.neuron, error: versions.error};
+        }
+
+        const neuron = publicNeuron.data?.neuron;
+
+        if (!neuron) {
+            return {error: publicNeuron.error};
+        }
+
+        return {
+            neuron: {...neuron, annotations: neuron.published ? [neuron.published] : []},
+            error: publicNeuron.error
+        };
+    }, [isAuthenticated, versions.data, versions.error, publicNeuron.data, publicNeuron.error]);
+}
+
 export const Neuron = () => {
     const {neuronId, versionId} = useParams();
 
@@ -74,11 +118,9 @@ export const Neuron = () => {
 
     const systemConfiguration = useSystemConfiguration();
 
-    const {error, data} = useQuery<NeuronVersionsQueryResponse, NeuronVersionsQueryVariables>(NEURON_VERSIONS_QUERY,
-        {
-            pollInterval: 10000,
-            variables: {id: neuronId}
-        });
+    const {neuron, error} = useNeuronPageData(neuronId, isAuthenticated);
+
+    const data = neuron ? {neuron} : null;
 
     const selectedReconstruction = useMemo(() => {
         if (!data?.neuron?.annotations) {
@@ -114,7 +156,8 @@ export const Neuron = () => {
     }
 
     if (versionId && versionId !== "latest" && !selectedReconstruction && data.neuron.annotations) {
-        return <Navigate to={`/neuron/${neuronId}`} replace state={{invalidVersion: versionId}}/>;
+        // A signed-out user's link to an unpublished version lands on the neuron itself, without confirming the version exists.
+        return <Navigate to={`/neuron/${neuronId}`} replace state={isAuthenticated ? {invalidVersion: versionId} : {}}/>;
     }
 
     const info = appLayout.showReferenceIds ? (
@@ -126,6 +169,11 @@ export const Neuron = () => {
 
     const qualityControlId = selectedReconstruction?.atlasReconstruction?.qualityControl?.id;
 
+    const showAnnotation = isAuthenticated || selectedReconstruction != null;
+
+    // History lists every version, so it is not offered to signed-out users even if it was the last tab used.
+    const currentTab = !isAuthenticated && activeTab == "history" ? "atlas" : activeTab;
+
     return (
         <Stack p={20} align="stretch" style={{flexGrow: 1}}>
             {invalidVersion && (
@@ -134,7 +182,7 @@ export const Neuron = () => {
                     Reconstruction version &quot;{invalidVersion}&quot; was not found. Showing the default version.
                 </Alert>
             )}
-            <Card withBorder style={{flexGrow: 1}}>
+            <Card withBorder style={showAnnotation ? {flexGrow: 1} : undefined}>
                 <Card.Section bg="segment">
                     <Group p={12} justify="space-between">
                         <Stack gap={0}>
@@ -173,7 +221,9 @@ export const Neuron = () => {
                         <Group gap={32} align="baseline">
                             <Group gap={8} align="baseline">
                                 <Text fw={500}>Open Dataset</Text>
-                                {!(isPublished && data.neuron.specimen.referenceDataset?.url) && <Text c="dimmed" size="sm">Not available.</Text>}
+                                {isPublished && data.neuron.specimen.referenceDataset?.url ?
+                                    <Anchor size="sm" href={data.neuron.specimen.referenceDataset.url} target="_blank">{data.neuron.specimen.referenceDataset.url}</Anchor> :
+                                    <Text c="dimmed" size="sm">Not available.</Text>}
                             </Group>
                             <Group gap={8} align="baseline">
                                 <Text fw={500}>Segmentation</Text>
@@ -182,74 +232,52 @@ export const Neuron = () => {
                                     <Text c="dimmed" size="sm">Not available.</Text>}
                             </Group>
                         </Group>
-                        <NeuronDownloadMenu reconstruction={selectedReconstruction}/>
+                        {showAnnotation ? <NeuronDownloadMenu reconstruction={selectedReconstruction}/> : null}
                     </Group>
-                    {isPublished && data.neuron.specimen.referenceDataset?.url && (
-                        <Table variant="vertical" withColumnBorders>
-                            <Table.Tr>
-                                <Table.Th colSpan={2} ta="left">Atlas Space</Table.Th>
-                            </Table.Tr>
-                            <Table.Tr>
-                                <Table.Th bg="table-header">SWC</Table.Th>
-                                <Table.Td><Anchor size="sm" href={`${data.neuron.specimen.referenceDataset.url}/ccf_space_reconstructions/swc/${data.neuron.label}-${data.neuron.specimen.label}.swc`} target="_blank">{`${data.neuron.label}-${data.neuron.specimen.label}.swc`}</Anchor></Table.Td>
-                            </Table.Tr>
-                            <Table.Tr>
-                                <Table.Th bg="table-header">JSON</Table.Th>
-                                <Table.Td><Anchor size="sm" href={`${data.neuron.specimen.referenceDataset.url}/ccf_space_reconstructions/json/${data.neuron.label}-${data.neuron.specimen.label}.json`} target="_blank">{`${data.neuron.label}-${data.neuron.specimen.label}.json`}</Anchor></Table.Td>
-                            </Table.Tr>
-                            <Table.Tr>
-                                <Table.Th colSpan={2} ta="left">Specimen Space</Table.Th>
-                            </Table.Tr>
-                            <Table.Tr>
-                                <Table.Th bg="table-header">SWC</Table.Th>
-                                <Table.Td><Anchor size="sm" href={`${data.neuron.specimen.referenceDataset.url}/specimen_space_reconstructions/swc/${data.neuron.label}-${data.neuron.specimen.label}.swc`} target="_blank">{`${data.neuron.label}-${data.neuron.specimen.label}.swc`}</Anchor></Table.Td>
-                            </Table.Tr>
-                            <Table.Tr>
-                                <Table.Th bg="table-header">JSON</Table.Th>
-                                <Table.Td><Anchor size="sm" href={`${data.neuron.specimen.referenceDataset.url}/specimen_space_reconstructions/json/${data.neuron.label}-${data.neuron.specimen.label}.json`} target="_blank">{`${data.neuron.label}-${data.neuron.specimen.label}.json`}</Anchor></Table.Td>
-                            </Table.Tr>
-                        </Table>
-                    )}
                 </Card.Section>
-                <Card.Section style={FillColumn}>
-                    <Tabs orientation="horizontal" value={activeTab} onChange={onChangeTab} style={FillColumn}>
-                        <Tabs.List>
-                            <Tabs.Tab value="atlas" leftSection={<IconBinaryTreeFilled size={18} style={{transform: "rotate(-90deg)"}}/>}>
-                                Atlas-Space Reconstruction
-                            </Tabs.Tab>
-                            <Tabs.Tab value="specimen" leftSection={<IconBinaryTree size={18} style={{transform: "rotate(-90deg)"}}/>}>
-                                Specimen-Space Reconstruction
-                            </Tabs.Tab>
-                            <Tabs.Tab value="quality" leftSection={<IconBinaryTree size={18} style={{transform: "rotate(-90deg)"}}/>}>
-                                Quality Control
-                            </Tabs.Tab>
-                            <Tabs.Tab value="metrics" leftSection={<IconChartBar size={18}/>}>
-                                Metrics
-                            </Tabs.Tab>
-                            <Tabs.Tab value="history" leftSection={<IconVersions size={18}/>}>
-                                History
-                            </Tabs.Tab>
-                        </Tabs.List>
+                {showAnnotation ? (
+                    <Card.Section style={FillColumn}>
+                        <Tabs orientation="horizontal" value={currentTab} onChange={onChangeTab} style={FillColumn}>
+                            <Tabs.List>
+                                <Tabs.Tab value="atlas" leftSection={<IconBinaryTreeFilled size={18} style={{transform: "rotate(-90deg)"}}/>}>
+                                    Atlas-Space Reconstruction
+                                </Tabs.Tab>
+                                <Tabs.Tab value="specimen" leftSection={<IconBinaryTree size={18} style={{transform: "rotate(-90deg)"}}/>}>
+                                    Specimen-Space Reconstruction
+                                </Tabs.Tab>
+                                <Tabs.Tab value="quality" leftSection={<IconBinaryTree size={18} style={{transform: "rotate(-90deg)"}}/>}>
+                                    Quality Control
+                                </Tabs.Tab>
+                                <Tabs.Tab value="metrics" leftSection={<IconChartBar size={18}/>}>
+                                    Metrics
+                                </Tabs.Tab>
+                                {isAuthenticated ?
+                                    <Tabs.Tab value="history" leftSection={<IconVersions size={18}/>}>
+                                        History
+                                    </Tabs.Tab> : null}
+                            </Tabs.List>
 
-                        <Tabs.Panel value="atlas" style={FillColumn} key={`atlas_${data.neuron.id}`}>
-                            <NeuronAtlasSpaceView atlasId={data.neuron.specimen.atlasId}
-                                                  reconstruction={selectedReconstruction}
-                                                  soma={data.neuron.atlasSoma}/>
-                        </Tabs.Panel>
-                        <Tabs.Panel value="specimen" style={FillColumn} key={`specimen_${data.neuron.id}`}>
-                            <NeuronSpecimenSpaceView neuron={data.neuron} reconstruction={selectedReconstruction}/>
-                        </Tabs.Panel>
-                        <Tabs.Panel value="quality" style={FillColumn} key={`quality_${data.neuron.id}`}>
-                            <QualityMetrics qualityControlId={qualityControlId}/>
-                        </Tabs.Panel>
-                        <Tabs.Panel value="metrics" style={FillColumn} key={`metrics_${data.neuron.id}`}>
-                            <ReconstructionMetrics reconstructionId={selectedReconstruction?.atlasReconstruction?.id}/>
-                        </Tabs.Panel>
-                        <Tabs.Panel value="history" style={FillColumn} key={`history_${data.neuron.id}`}>
-                            <NeuronHistory neuronId={data.neuron.id}/>
-                        </Tabs.Panel>
-                    </Tabs>
-                </Card.Section>
+                            <Tabs.Panel value="atlas" style={FillColumn} key={`atlas_${data.neuron.id}`}>
+                                <NeuronAtlasSpaceView atlasId={data.neuron.specimen.atlasId}
+                                                      reconstruction={selectedReconstruction}
+                                                      soma={data.neuron.atlasSoma}/>
+                            </Tabs.Panel>
+                            <Tabs.Panel value="specimen" style={FillColumn} key={`specimen_${data.neuron.id}`}>
+                                <NeuronSpecimenSpaceView neuron={data.neuron} reconstruction={selectedReconstruction}/>
+                            </Tabs.Panel>
+                            <Tabs.Panel value="quality" style={FillColumn} key={`quality_${data.neuron.id}`}>
+                                <QualityMetrics qualityControlId={qualityControlId}/>
+                            </Tabs.Panel>
+                            <Tabs.Panel value="metrics" style={FillColumn} key={`metrics_${data.neuron.id}`}>
+                                <ReconstructionMetrics reconstructionId={selectedReconstruction?.atlasReconstruction?.id}/>
+                            </Tabs.Panel>
+                            {isAuthenticated ?
+                                <Tabs.Panel value="history" style={FillColumn} key={`history_${data.neuron.id}`}>
+                                    <NeuronHistory neuronId={data.neuron.id}/>
+                                </Tabs.Panel> : null}
+                        </Tabs>
+                    </Card.Section>
+                ) : null}
             </Card>
         </Stack>
     );

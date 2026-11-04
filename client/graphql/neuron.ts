@@ -70,59 +70,64 @@ export const NEURON_BASE_FIELDS_FRAGMENT = gql`fragment NeuronBaseFields on Neur
     updatedAt
 }`;
 
-export const NEURON_VERSIONS_RELATIONSHIPS_FRAGMENT = gql`fragment NeuronVersionsRelationshipFields on Neuron {
-    annotations {
+export const NEURON_PAGE_ANNOTATION_FIELDS_FRAGMENT = gql`fragment NeuronPageAnnotationFields on Annotation {
+    id
+    status
+    createdAt
+    specimenSpaceReconstruction {
         id
-        status
-        createdAt
-        specimenSpaceReconstruction {
-            id
-            nodeCounts {
-                axon {
-                    total
-                }
-                dendrite {
-                    total
-                }
+        nodeCounts {
+            axon {
+                total
             }
-            precomputed {
-                id
-                skeletonId
-            }
-            soma {
-                id
-                x
-                y
-                z
+            dendrite {
+                total
             }
         }
-        atlasReconstruction {
+        precomputed {
             id
-            soma {
-                id
-                x
-                y
-                z
-            }
-            nodeCounts {
-                axon {
-                    total
-                }
-                dendrite {
-                    total
-                }
-            }
-            precomputed {
-                id
-                skeletonId
-            }
-            qualityControl {
-                id
-            }
-            createdAt
+            skeletonId
+        }
+        soma {
+            id
+            x
+            y
+            z
         }
     }
+    atlasReconstruction {
+        id
+        soma {
+            id
+            x
+            y
+            z
+        }
+        nodeCounts {
+            axon {
+                total
+            }
+            dendrite {
+                total
+            }
+        }
+        precomputed {
+            id
+            skeletonId
+        }
+        qualityControl {
+            id
+        }
+        createdAt
+    }
 }`;
+
+export const NEURON_VERSIONS_RELATIONSHIPS_FRAGMENT = gql`fragment NeuronVersionsRelationshipFields on Neuron {
+    annotations {
+        ...NeuronPageAnnotationFields
+    }
+}
+${NEURON_PAGE_ANNOTATION_FIELDS_FRAGMENT}`;
 
 export const NEURON_VERSIONS_QUERY = gql`query NeuronQuery($id: String!) {
     neuron(id: $id) {
@@ -143,6 +148,25 @@ export type NeuronVersionsQueryVariables = {
 export type NeuronVersionsQueryResponse = {
     neuron: NeuronShape;
 }
+
+///
+/// Neuron Public Query
+///
+
+// For signed-out users: the neuron with its parents, plus the published annotation, but never the full annotation list.
+export const NEURON_PUBLIC_QUERY = gql`query NeuronPublicQuery($id: String!) {
+    neuron(id: $id) {
+        ...NeuronBaseFields
+        ...NeuronRelationshipFields
+        published {
+            ...NeuronPageAnnotationFields
+        }
+    }
+}
+${NEURON_BASE_FIELDS_FRAGMENT}
+${NEURON_RELATIONSHIP_FIELDS_FRAGMENT}
+${NEURON_PAGE_ANNOTATION_FIELDS_FRAGMENT}
+`;
 
 ///
 /// Neurons Query

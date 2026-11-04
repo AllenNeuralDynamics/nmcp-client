@@ -1,5 +1,6 @@
 import * as React from "react";
-import {Route, Routes} from "react-router-dom";
+import {Navigate, Route, Routes} from "react-router-dom";
+import {useIsAuthenticated} from "@azure/msal-react";
 
 import {Home} from "../search/Home";
 import {Candidates} from "../candidates/Candidates";
@@ -10,14 +11,19 @@ import {Admin} from "../admin/Admin";
 import {Specimen} from "../specimens/Specimen";
 import {Neuron} from "../neurons/Neuron";
 
+// Replaces the history entry so a signed-out visit to a restricted route leaves no trace to navigate back to.
+const RequireAuthentication = ({children}: { children: React.ReactElement }) => {
+    return useIsAuthenticated() ? children : <Navigate to="/" replace/>;
+}
+
 export const AppRouter = () => {
     return (
         <Routes>
             <Route path="/candidates" element={<Candidates/>}/>
-            <Route path="/reconstructions" element={<Reconstructions/>}/>
-            <Route path="/specimens" element={<ManageNeurons/>}/>
-            <Route path="/review" element={<ReviewTab/>}/>
-            <Route path="/admin" element={<Admin/>}/>
+            <Route path="/reconstructions" element={<RequireAuthentication><Reconstructions/></RequireAuthentication>}/>
+            <Route path="/specimens" element={<RequireAuthentication><ManageNeurons/></RequireAuthentication>}/>
+            <Route path="/review" element={<RequireAuthentication><ReviewTab/></RequireAuthentication>}/>
+            <Route path="/admin" element={<RequireAuthentication><Admin/></RequireAuthentication>}/>
             <Route path="/neuron/:neuronId/:versionId?" element={<Neuron/>}/>
             <Route path="/specimen/:specimenId?" element={<Specimen/>}/>
             <Route path="/" element={<Home/>}/>
