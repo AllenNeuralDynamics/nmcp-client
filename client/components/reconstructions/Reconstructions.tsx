@@ -25,6 +25,9 @@ import {ReconstructionSpace} from "../../models/reconstructionSpace";
 
 const uploadUnavailableMessage = `Specimen-space uploads are available while the reconstruction is ${AnnotatorUploadSourceStatuses.map(statusNameOnly).join(" or ")}.`;
 
+// Temporarily hidden; flip back to true to restore the annotator upload panel below the table.
+const showAnnotatorUploadPanel = false;
+
 function noReconstructionsText(userOnly: boolean, haveFilters: boolean) {
     return userOnly || haveFilters ? "There are no reconstructions that match the filters" : "There are no reconstructions";
 }
@@ -162,7 +165,7 @@ export const Reconstructions = observer(() => {
                             <Text size="sm" ta="end">{`Page ${activePage} of ${pageCount}`}</Text>
                         </SimpleGrid>
                     </Card.Section> : null}
-                {uploadGate?.visible ?
+                {showAnnotatorUploadPanel && uploadGate?.visible ?
                     <Card.Section bg="segment">
                         <Divider orientation="horizontal"/>
                         <ReconstructionUpload key={selectedReconstruction.id} reconstruction={selectedReconstruction} space={ReconstructionSpace.Specimen}
