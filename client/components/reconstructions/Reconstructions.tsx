@@ -15,10 +15,15 @@ import {Annotation} from "../../models/annotation";
 import {ANNOTATIONS_QUERY, AnnotationQueryArgs, AnnotationsResponse} from "../../graphql/annotation";
 import {ReconstructionFilters} from "./ReconstructionFilters";
 import {ReconstructionTable} from "./ReconstructionTable";
-import {AnnotationStatus} from "../../models/annotationStatus";
+import {AnnotationStatus, statusNameOnly} from "../../models/annotationStatus";
 import {UserPermissions} from "../../graphql/user";
 import {hasPermission} from "../../models/user";
 import {Navigate} from "react-router-dom";
+import {ReconstructionUpload} from "../common/ReconstructionUpload";
+import {annotatorUploadGate, AnnotatorUploadSourceStatuses} from "../../models/reconstructionGates";
+import {ReconstructionSpace} from "../../models/reconstructionSpace";
+
+const uploadUnavailableMessage = `Specimen-space uploads are available while the reconstruction is ${AnnotatorUploadSourceStatuses.map(statusNameOnly).join(" or ")}.`;
 
 function noReconstructionsText(userOnly: boolean, haveFilters: boolean) {
     return userOnly || haveFilters ? "There are no reconstructions that match the filters" : "There are no reconstructions";
@@ -93,6 +98,15 @@ export const Reconstructions = observer(() => {
         }
     });
 
+    const uploadGate = selectedReconstruction ? annotatorUploadGate({
+        area: "annotator",
+        status: selectedReconstruction.status,
+        childStatus: selectedReconstruction.atlasReconstruction?.status,
+        permissions: user.permissions,
+        annotatorId: selectedReconstruction.annotatorId,
+        userId: user.id
+    }) : null;
+
     const completeDialog = isCompleteDialogVisible ? (
         <RequestReviewModal id={reviewRequestId} show={true} requestedStatus={reviewRequestStatus} onClose={() => setIsCompleteDialogVisible(false)}/>) : null;
 
@@ -147,6 +161,12 @@ export const Reconstructions = observer(() => {
                             </Text>
                             <Text size="sm" ta="end">{`Page ${activePage} of ${pageCount}`}</Text>
                         </SimpleGrid>
+                    </Card.Section> : null}
+                {uploadGate?.visible ?
+                    <Card.Section bg="segment">
+                        <Divider orientation="horizontal"/>
+                        <ReconstructionUpload key={selectedReconstruction.id} reconstruction={selectedReconstruction} space={ReconstructionSpace.Specimen}
+                                              disabled={!uploadGate.enabled} disabledMessage={uploadUnavailableMessage}/>
                     </Card.Section> : null}
             </Card>
         </Stack>

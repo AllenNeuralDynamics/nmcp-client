@@ -3,7 +3,7 @@ import {AbandonableFailureStatuses, AtlasReconstructionStatus, PhaseFailureStatu
 import {ReconstructionAction} from "./reconstructionAction";
 import {UserPermissions} from "../graphql/user";
 
-// Mirrors the API's authorization predicates (../nmcp-api/src/models/user.ts and reconstruction.ts) so that each
+// Mirrors the API's authorization predicates (../nmcp-api/src/models/user.ts and annotation.ts) so that each
 // control area shows what a role can do and enables only what the API would accept.  A permission the user can never
 // satisfy for this action on this reconstruction hides the button; a status that does not admit it disables it.
 //
@@ -21,7 +21,7 @@ export type GateContext = {
     area: "annotator" | "review" | "published";
 };
 
-// Source-status constants, copied member for member from ../nmcp-api/src/models/reconstruction.ts.
+// Source-status constants, copied member for member from ../nmcp-api/src/models/annotation.ts.
 const UntraceableSourceStatuses: AnnotationStatus[] = [
     AnnotationStatus.InProgress,
     AnnotationStatus.OnHold,
@@ -65,6 +65,12 @@ const RejectableSourceStatuses: AnnotationStatus[] = [
     AnnotationStatus.TeamReview,
     AnnotationStatus.PublishReview,
     AnnotationStatus.ReadyToPublish
+];
+
+// Mirrors the OwningAnnotator entries of UploadSourceStatuses (../nmcp-api/src/models/user.ts).
+export const AnnotatorUploadSourceStatuses: AnnotationStatus[] = [
+    AnnotationStatus.InProgress,
+    AnnotationStatus.Rejected
 ];
 
 // Not mirrored from the API.  The Reconstructions page closes a reconstruction only while it is still with its
@@ -228,4 +234,13 @@ export function gateFor(action: ReconstructionAction, ctx: GateContext): Gate {
         default:
             return hidden;
     }
+}
+
+// The specimen-space upload panel is not a ReconstructionAction button.  No admin bypass, unlike Discard: the API admits
+// only the reconstruction's own annotator at these statuses.
+export function annotatorUploadGate(ctx: GateContext): Gate {
+    return {
+        visible: ctx.area == "annotator" && isOwner(ctx),
+        enabled: isOwner(ctx) && AnnotatorUploadSourceStatuses.includes(ctx.status)
+    };
 }

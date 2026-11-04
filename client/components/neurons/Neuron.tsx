@@ -122,7 +122,7 @@ export const Neuron = () => {
 
     const isPublished = data.neuron.published != null;
 
-    const published = isPublished ? `Published ${dayjs(data.neuron.published.searchIndexedAt).format("YYYY-MM-DD")}` : "Unpublished";
+    const published = isPublished ? `Published ${dayjs(data.neuron.published.atlasReconstruction.searchIndexedAt).format("YYYY-MM-DD")}` : "Unpublished";
 
     const qualityControlId = selectedReconstruction?.atlasReconstruction?.qualityControl?.id;
 

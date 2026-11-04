@@ -2,8 +2,8 @@ import React from "react";
 
 import {Annotation} from "../../../models/annotation";
 import {ReconstructionSpace} from "../../../models/reconstructionSpace";
-import {Upload} from "./Upload";
+import {ReconstructionUpload} from "../../common/ReconstructionUpload";
 
 export const AtlasSpace = ({reconstruction}: { reconstruction: Annotation }) => {
-    return <Upload reconstruction={reconstruction} space={ReconstructionSpace.Atlas}/>;
+    return <ReconstructionUpload reconstruction={reconstruction} space={ReconstructionSpace.Atlas}/>;
 }

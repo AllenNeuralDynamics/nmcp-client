@@ -3,10 +3,10 @@ import {CSSProperties, useEffect, useState} from "react";
 import {useComputedColorScheme} from "@mantine/core";
 import {useResizeObserver} from "@mantine/hooks";
 
-import {SceneViewer} from "../../../viewer/preview/sceneViewer";
-import {viewerBackgroundDark, viewerBackgroundDarkString, viewerBackgroundLight, viewerBackgroundLightString} from "../../../index";
+import {SceneViewer} from "../../viewer/preview/sceneViewer";
+import {viewerBackgroundDark, viewerBackgroundDarkString, viewerBackgroundLight, viewerBackgroundLightString} from "../../index";
 
-type FilePreviewProps = {
+type ReconstructionFilePreviewProps = {
     style?: CSSProperties
     elementName: string;
     file: File;
@@ -17,7 +17,7 @@ type FilePreviewProps = {
     onLoaded(nodeCount: [number, number]): void;
 }
 
-export const FilePreview = (props: FilePreviewProps) => {
+export const ReconstructionFilePreview = (props: ReconstructionFilePreviewProps) => {
     const [sceneViewer, setSceneViewer] = useState<SceneViewer>(null);
 
     const [ref, rect] = useResizeObserver();

@@ -17,7 +17,7 @@ vi.mock("../../../services/exportService", () => ({requestExport: vi.fn(async ()
 vi.mock("../../common/NotificationHelper");
 
 function makeNeuron(index: number): NeuronShape {
-    return {id: `neuron-${index}`, label: `Neuron ${index}`, published: {id: `atlas-${index}`, soma: null, precomputed: {skeletonId: index}}} as unknown as NeuronShape;
+    return {id: `neuron-${index}`, label: `Neuron ${index}`, published: {id: `annotation-${index}`, atlasReconstruction: {id: `atlas-${index}`, soma: null, precomputed: {skeletonId: index}}}} as unknown as NeuronShape;
 }
 
 // Every view model update() creates starts out selected.

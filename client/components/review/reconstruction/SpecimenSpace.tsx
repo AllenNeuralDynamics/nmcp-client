@@ -2,8 +2,8 @@ import React from "react";
 
 import {Annotation} from "../../../models/annotation";
 import {ReconstructionSpace} from "../../../models/reconstructionSpace";
-import {Upload} from "./Upload";
+import {ReconstructionUpload} from "../../common/ReconstructionUpload";
 
 export const SpecimenSpace = ({reconstruction}: { reconstruction: Annotation }) => {
-    return <Upload reconstruction={reconstruction} space={ReconstructionSpace.Specimen}/>;
+    return <ReconstructionUpload reconstruction={reconstruction} space={ReconstructionSpace.Specimen}/>;
 }

@@ -8,7 +8,6 @@ export interface AtlasReconstruction {
     id: string;
     sourceUrl: string;
     status: number;
-    doi?: string;
     nodeCounts: NodeCounts;
     soma: AtlasNode;
     qualityControl: QualityControl;

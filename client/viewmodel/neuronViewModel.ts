@@ -39,10 +39,10 @@ export class NeuronViewModel {
 
         this.isMirrored = false;
 
-        this.soma = neuron.published.soma;
+        this.soma = neuron.published.atlasReconstruction.soma;
 
-        this.reconstructionId = this.neuron.published.id;
-        this.skeletonId = this.neuron.published.precomputed.skeletonId;
+        this.reconstructionId = this.neuron.published.atlasReconstruction.id;
+        this.skeletonId = this.neuron.published.atlasReconstruction.precomputed.skeletonId;
 
         makeObservable(this, {
             viewMode: observable,
