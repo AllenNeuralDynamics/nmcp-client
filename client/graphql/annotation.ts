@@ -63,6 +63,12 @@ export const AnnotationFieldsFragment = gql`fragment AnnotationFieldsFragment on
         nodeCounts {
             ...NodeCountsFields
         }
+        soma {
+            id
+            x
+            y
+            z
+        }
     }
     annotatorId
     annotator {

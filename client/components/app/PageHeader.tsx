@@ -75,7 +75,7 @@ export const PageHeader = () => {
 
     const userCanAdmin = user && hasPermission(user.permissions, UserPermissions.Admin);
 
-    const candidates = isAuthenticated ? "Find Candidate Neurons" : "Explore Candidate Neurons";
+    const candidates = "Find Candidate Neurons";
 
     const viewItem = isAuthenticated && userCanView ? <TextNavLink text="Reconstruct Neurons" to="/reconstructions"/> : null;
 
@@ -89,6 +89,7 @@ export const PageHeader = () => {
         <Group p={12} justify="space-between" bg="dark.8">
             <Group>
                 <HomeNavLink/>
+                <TextNavLink text={"Search Published Neurons"} to="/"/>
                 <TextNavLink text={candidates} to="/candidates"/>
                 {viewItem}
                 {reviewItem}

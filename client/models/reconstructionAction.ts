@@ -90,7 +90,7 @@ export const actionName = (status: ReconstructionAction): string => {
         case ReconstructionAction.RetryPhase:
             return "Retry Phase";
         case ReconstructionAction.ResetPipeline:
-            return "Replay Pipeline";
+            return "Replay Finalization";
         case ReconstructionAction.MarkIncomplete:
             return "Incomplete";
         case ReconstructionAction.MarkDuplicate:
