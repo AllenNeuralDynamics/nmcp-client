@@ -21,7 +21,7 @@ function makeNeuron(index: number): NeuronShape {
 }
 
 // Every view model update() creates starts out selected.
-async function openExportMenu(count: number, constants: DataConstants = makeExperimentalConstants()) {
+async function openExportMenu(count: number, constants: DataConstants = makeConstants()) {
     const response = new QueryResponseViewModel();
 
     const neurons = Array.from({length: count}, (_, i) => makeNeuron(i + 1));
@@ -52,12 +52,12 @@ describe("NeuronListContainer export menu", () => {
         expect(items).toEqual(["Export SWC", "Export Parquet"]);
     });
 
-    it("omits Parquet when experimental features are disabled", async () => {
-        await openExportMenu(2, makeConstants());
+    it("lists Parquet when experimental features are enabled", async () => {
+        await openExportMenu(2, makeExperimentalConstants());
 
         const items = within(screen.getByRole("menu")).getAllByRole("menuitem").map(i => i.textContent.trim());
 
-        expect(items).toEqual(["Export SWC"]);
+        expect(items).toEqual(["Export SWC", "Export Parquet"]);
     });
 
     it("exports the selected atlas reconstructions as Parquet", async () => {
