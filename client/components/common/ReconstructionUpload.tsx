@@ -1,15 +1,15 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {ApolloError, useMutation} from "@apollo/client";
 import {observer} from "mobx-react-lite";
 import {Button, Divider, Flex, Group, Loader, Stack, Table, Text} from "@mantine/core";
 import {Dropzone} from "@mantine/dropzone";
 import {IconFileCode, IconUpload, IconX} from "@tabler/icons-react";
 
-import {UPLOAD_SWC_MUTATION, UploadSwcResponse, UploadUnregisteredSwcVariables} from "../../../graphql/annotation";
-import {Annotation} from "../../../models/annotation";
-import {ReconstructionSpace} from "../../../models/reconstructionSpace";
-import {FilePreview} from "./FilePreview";
-import {errorNotification, successNotification} from "../../common/NotificationHelper";
+import {UPLOAD_SWC_MUTATION, UploadSwcResponse, UploadUnregisteredSwcVariables} from "../../graphql/annotation";
+import {Annotation} from "../../models/annotation";
+import {ReconstructionSpace} from "../../models/reconstructionSpace";
+import {ReconstructionFilePreview} from "./ReconstructionFilePreview";
+import {errorNotification, successNotification} from "./NotificationHelper";
 
 const previewHeight = 300;
 
@@ -17,9 +17,25 @@ const dropMessage = new Map<ReconstructionSpace, string>();
 dropMessage.set(ReconstructionSpace.Specimen, "Drop a specimen-space SWC reconstruction file, or click to browse for a file.");
 dropMessage.set(ReconstructionSpace.Atlas, "Drop an atlas-space SWC reconstruction file, or click to browse for a file.");
 
-export const Upload = observer(({reconstruction, space}: { reconstruction: Annotation, space: ReconstructionSpace }) => {
+type ReconstructionUploadProps = {
+    reconstruction: Annotation;
+    space: ReconstructionSpace;
+    disabled?: boolean;
+    disabledMessage?: string;
+}
+
+export const ReconstructionUpload = observer(({reconstruction, space, disabled, disabledMessage}: ReconstructionUploadProps) => {
     const [nodeCount, setNodeCount] = useState<[number, number]>(null);
     const [file, setFile] = useState<File>(null);
+
+    // Keyed on disabled, not on reconstruction: a poll replaces the reconstruction object every few seconds while the
+    // same one can move into review under a chosen file, which would otherwise be uploadable again once it returns.
+    useEffect(() => {
+        if (disabled) {
+            setFile(null);
+            setNodeCount(null);
+        }
+    }, [disabled]);
 
     const [uploadSwc, {loading: loadingSwc}] = useMutation<UploadSwcResponse, UploadUnregisteredSwcVariables>(UPLOAD_SWC_MUTATION,
         {
@@ -45,7 +61,7 @@ export const Upload = observer(({reconstruction, space}: { reconstruction: Annot
         if (error.graphQLErrors?.[0]?.extensions?.code == 1009) {
             errorNotification("Upload Not Allowed", error.graphQLErrors[0].message);
         } else if (error.cause && error.cause["statusCode"] == 401) {
-            errorNotification("Unauthorized", `You are not authorized to upload ${spaceName} reconstructions.`);
+            errorNotification("Unauthorized", `You are not authorized to upload the ${spaceName} reconstruction for ${reconstruction?.neuron.label}.`);
         } else {
             errorNotification("Reconstruction Failed", `The reconstruction could not be added to ${reconstruction?.neuron.label}`);
         }
@@ -54,13 +70,17 @@ export const Upload = observer(({reconstruction, space}: { reconstruction: Annot
     const performUpload = async (evt: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         evt.stopPropagation();
 
+        if (disabled) {
+            return;
+        }
+
         if (file.name.endsWith("swc")) {
             await uploadSwc();
         }
     }
 
     const updateFiles = (acceptedFiles: File[]) => {
-        if (!acceptedFiles?.length) {
+        if (disabled || !acceptedFiles?.length) {
             return;
         }
 
@@ -101,7 +121,7 @@ export const Upload = observer(({reconstruction, space}: { reconstruction: Annot
     } else {
         header = (
             <Text size="sm" c="dimmed">
-                {dropMessage.get(space)}
+                {disabled ? disabledMessage : dropMessage.get(space)}
             </Text>
         );
     }
@@ -112,16 +132,16 @@ export const Upload = observer(({reconstruction, space}: { reconstruction: Annot
 
     const haveFiles = file != null;
 
-    const disabled = loadingSwc || !haveFiles;
+    const uploadDisabled = disabled || loadingSwc || !haveFiles;
 
-    const updateButton = <Button size="sm" disabled={disabled} onClick={performUpload}>{buttonText}</Button>;
+    const updateButton = <Button size="sm" disabled={uploadDisabled} onClick={performUpload}>{buttonText}</Button>;
 
     const updateMessage = loadingSwc ? <Group><Loader type="dots" size="sm"/></Group> : null;
 
     return (
         <Flex>
             <Stack gap={0} mih={previewHeight} w={400} justify="stretch">
-                <Dropzone style={{flexGrow: 1}} bd="0" radius={0} onDrop={updateFiles}>
+                <Dropzone style={{flexGrow: 1}} bd="0" radius={0} disabled={disabled} onDrop={updateFiles}>
                     <Stack h="100%" justify="center">
                         <Group align="center">
                             <Dropzone.Accept>
@@ -155,8 +175,8 @@ export const Upload = observer(({reconstruction, space}: { reconstruction: Annot
             </Stack>
             <Divider orientation="vertical"/>
             <div style={{flex: 1, border: "none", height: `${previewHeight}px`, minWidth: 100, margin: 0}}>
-                <FilePreview style={{height: `${previewHeight}px`, border: "none"}} elementName={elementName}
-                             file={file} onDrops={updateFiles} onInvalid={() => updateFiles(null)} onLoaded={setNodeCount}/>
+                <ReconstructionFilePreview style={{height: `${previewHeight}px`, border: "none"}} elementName={elementName}
+                                           file={file} onDrops={updateFiles} onInvalid={() => updateFiles(null)} onLoaded={setNodeCount}/>
             </div>
             <Divider orientation="vertical"/>
             <Stack w={400}>

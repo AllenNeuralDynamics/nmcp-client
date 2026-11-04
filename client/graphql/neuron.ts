@@ -35,10 +35,13 @@ export const NEURON_RELATIONSHIP_FIELDS_FRAGMENT = gql`fragment NeuronRelationsh
     }
     published {
         id
-        status
         doi
-        searchIndexedAt
-        updatedAt
+        atlasReconstruction {
+            id
+            status
+            searchIndexedAt
+            updatedAt
+        }
     }
 }`;
 

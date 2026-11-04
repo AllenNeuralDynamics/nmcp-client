@@ -25,21 +25,24 @@ export const SEARCH_NEURONS_QUERY = gql`query SearchNeurons($context: SearchCont
             }
             published {
                 id
-                status
-                soma {
+                atlasReconstruction {
                     id
-                    x
-                    y
-                    z
-                    nodeStructureId
-                    atlasStructureId
-                }
-                nodeCounts {
-                    ...NodeCountsFields
-                }
-                precomputed {
-                    id
-                    skeletonId
+                    status
+                    soma {
+                        id
+                        x
+                        y
+                        z
+                        nodeStructureId
+                        atlasStructureId
+                    }
+                    nodeCounts {
+                        ...NodeCountsFields
+                    }
+                    precomputed {
+                        id
+                        skeletonId
+                    }
                 }
             }
         }

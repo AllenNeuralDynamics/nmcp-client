@@ -1,6 +1,6 @@
 import {describe, expect, it} from "vitest";
 
-import {Gate, GateContext, gateFor} from "./reconstructionGates";
+import {annotatorUploadGate, AnnotatorUploadSourceStatuses, Gate, GateContext, gateFor} from "./reconstructionGates";
 import {ReconstructionAction} from "./reconstructionAction";
 import {AnnotationStatus} from "./annotationStatus";
 import {AbandonableFailureStatuses, AtlasReconstructionStatus, AutomaticPhaseInProgressStatuses, PhaseFailureStatuses} from "./atlasReconstructionStatus";
@@ -244,5 +244,33 @@ describe("Close actions on the Reconstructions page", () => {
     it("leaves the Review tab's Discard as the API allows it", () => {
         expect(gateFor(ReconstructionAction.Discard, ctx("review", "adminOwner", S.PeerReview, A.Initialized)).enabled).toBe(true);
         expect(gateFor(ReconstructionAction.Discard, ctx("review", "reviewerOwner", S.ReadyToPublish, A.ReadyToPublish)).enabled).toBe(true);
+    });
+});
+
+describe("annotatorUploadGate", () => {
+    const owners: Role[] = ["owner", "adminOwner", "reviewerOwner"];
+
+    for (const role of owners) {
+        it.each(statuses)(`${role} in the annotator area at status %s`, (status) => {
+            expect(annotatorUploadGate(ctx("annotator", role, status, A.Initialized)))
+                .toEqual<Gate>({visible: true, enabled: status == S.InProgress || status == S.Rejected});
+        });
+    }
+
+    const nonOwners: Role[] = ["nonOwner", "peer", "publish", "both", "admin"];
+
+    // The admin row is the no-bypass pin.
+    for (const role of nonOwners) {
+        it.each([S.InProgress, S.Rejected])(`${role} in the annotator area at status %s`, (status) => {
+            expect(annotatorUploadGate(ctx("annotator", role, status, A.Initialized))).toEqual<Gate>({visible: false, enabled: false});
+        });
+    }
+
+    it("is not shown outside the annotator area", () => {
+        expect(annotatorUploadGate(ctx("review", "owner", S.InProgress, A.Initialized))).toEqual<Gate>({visible: false, enabled: true});
+    });
+
+    it("mirrors the API's annotator upload statuses", () => {
+        expect(AnnotatorUploadSourceStatuses).toEqual([S.InProgress, S.Rejected]);
     });
 });

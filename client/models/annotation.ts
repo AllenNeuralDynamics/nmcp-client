@@ -33,6 +33,7 @@ export type PhaseFailure = {
 export type Annotation = {
     id: string;
     status: AnnotationStatus;
+    doi?: string;
     durationHours: number;
     notes: string;
     startedAt: Date;
