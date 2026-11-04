@@ -27,7 +27,7 @@ const bothSpaces: Annotation = {...specimenOnly, specimenSpaceReconstruction: {n
 
 const atlasUnavailable: Annotation = {...bothSpaces, atlasReconstruction: null};
 
-async function openMenu(reconstruction?: Annotation, constants: DataConstants = makeExperimentalConstants()) {
+async function openMenu(reconstruction?: Annotation, constants: DataConstants = makeConstants()) {
     renderWithProviders(<NeuronDownloadMenu reconstruction={reconstruction}/>, {constants});
 
     await userEvent.click(screen.getByRole("button", {name: "Download"}));
@@ -46,12 +46,12 @@ describe("NeuronDownloadMenu", () => {
         expect(items).toEqual([SPECIMEN_SWC, ATLAS_SWC, SPECIMEN_PARQUET, ATLAS_PARQUET]);
     });
 
-    it("omits Parquet when experimental features are disabled", async () => {
-        await openMenu(bothSpaces, makeConstants());
+    it("lists Parquet when experimental features are enabled", async () => {
+        await openMenu(bothSpaces, makeExperimentalConstants());
 
         const items = within(screen.getByRole("menu")).getAllByRole("menuitem").map(i => i.textContent.trim());
 
-        expect(items).toEqual([SPECIMEN_SWC, ATLAS_SWC]);
+        expect(items).toEqual([SPECIMEN_SWC, ATLAS_SWC, SPECIMEN_PARQUET, ATLAS_PARQUET]);
     });
 
     it.each([
