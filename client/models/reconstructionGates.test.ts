@@ -266,6 +266,13 @@ describe("annotatorUploadGate", () => {
         });
     }
 
+    for (const role of owners) {
+        it.each(statuses)(`${role} with specimen-space data at status %s`, (status) => {
+            expect(annotatorUploadGate({...ctx("annotator", role, status, A.Initialized), hasSpecimenSpaceData: true}))
+                .toEqual<Gate>({visible: true, enabled: false});
+        });
+    }
+
     it("is not shown outside the annotator area", () => {
         expect(annotatorUploadGate(ctx("review", "owner", S.InProgress, A.Initialized))).toEqual<Gate>({visible: false, enabled: true});
     });

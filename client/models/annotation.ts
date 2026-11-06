@@ -4,6 +4,8 @@ import {AnnotationStatus} from "./annotationStatus";
 import {NeuronShape} from "./neuron";
 import {AtlasReconstructionStatus} from "./atlasReconstructionStatus";
 import {SpecimenSpaceReconstruction} from "./specimenSpaceReconstruction";
+import {RawReconstruction} from "./rawReconstruction";
+import {RawReconstructionUpload} from "./rawReconstructionUpload";
 
 export type NodeCount = {
     total: number;
@@ -44,6 +46,9 @@ export type Annotation = {
     neuron: NeuronShape;
     specimenSpaceReconstruction: SpecimenSpaceReconstruction;
     atlasReconstruction: AtlasReconstruction;
+    // Only present where the query asks for them (includeRaw).
+    rawReconstruction?: RawReconstruction;
+    latestRawReconstructionUpload?: RawReconstructionUpload;
     // Null unless the child sits at one of the PhaseFailureStatuses.
     phaseFailure?: PhaseFailure;
     publishedAt: Date;

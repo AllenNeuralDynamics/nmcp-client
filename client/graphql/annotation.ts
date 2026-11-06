@@ -3,6 +3,7 @@ import {DocumentNode} from "graphql";
 
 import {Annotation, ReconstructionRevisionKind} from "../models/annotation";
 import {ReconstructionSpace} from "../models/reconstructionSpace";
+import {RawReconstructionUpload} from "../models/rawReconstructionUpload";
 import {NEURON_BASE_FIELDS_FRAGMENT, NEURON_RELATIONSHIP_FIELDS_FRAGMENT} from "./neuron";
 import {AnnotationStatus} from "../models/annotationStatus";
 import {AtlasReconstructionStatus} from "../models/atlasReconstructionStatus";
@@ -98,14 +99,39 @@ ${NodeCountsFieldsFragment}
 ${AtlasReconstructionFieldsFragment}
 `;
 
+// The raw fields resolve per row, so only the Reconstructions page asks for them.  A refetch by document keeps each
+// query's own variables.
 export const ANNOTATIONS_QUERY = gql`
-    query Annotations($queryArgs: AnnotationQueryArgs!) {
+    query Annotations($queryArgs: AnnotationQueryArgs!, $includeRaw: Boolean = false) {
         annotations(queryArgs: $queryArgs) {
             total
             offset
             annotations {
                 ...AnnotationFieldsFragment
                 ...AnnotationRelationshipsFragment
+                rawReconstruction @include(if: $includeRaw) {
+                    id
+                    notes
+                    uploadedAt
+                    nodeCounts {
+                        ...NodeCountsFields
+                    }
+                }
+                latestRawReconstructionUpload @include(if: $includeRaw) {
+                    id
+                    attemptNumber
+                    status
+                    sourceFilename
+                    format
+                    failureMessage
+                    createdAt
+                    updatedAt
+                    user {
+                        id
+                        firstName
+                        lastName
+                    }
+                }
             }
         }
     }
@@ -137,6 +163,7 @@ export type AnnotationQueryArgs = {
         specimenIds?: string[];
         keywords?: string[];
     }
+    includeRaw?: boolean;
 }
 
 //
@@ -505,4 +532,29 @@ export type UploadUnregisteredSwcVariables = {
 
 export type UploadSwcResponse = {
     uploadJsonData: Annotation;
+}
+
+export const UPLOAD_RAW_SWC_MUTATION = gql`
+    mutation UploadRawSwcData($uploadArgs: RawReconstructionUploadArgs!) {
+        uploadRawSwcData(uploadArgs: $uploadArgs) {
+            id
+            annotationId
+            attemptNumber
+            status
+            sourceFilename
+            failureMessage
+        }
+    }
+`;
+
+export type UploadRawSwcVariables = {
+    uploadArgs: {
+        annotationId: string;
+        notes?: string;
+        file: File;
+    }
+}
+
+export type UploadRawSwcResponse = {
+    uploadRawSwcData: RawReconstructionUpload;
 }

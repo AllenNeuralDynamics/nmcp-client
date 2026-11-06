@@ -22,11 +22,11 @@ import {Navigate} from "react-router-dom";
 import {ReconstructionUpload} from "../common/ReconstructionUpload";
 import {annotatorUploadGate, AnnotatorUploadSourceStatuses} from "../../models/reconstructionGates";
 import {ReconstructionSpace} from "../../models/reconstructionSpace";
+import {RawReconstructionDetails} from "./RawReconstructionDetails";
 
-const uploadUnavailableMessage = `Specimen-space uploads are available while the reconstruction is ${AnnotatorUploadSourceStatuses.map(statusNameOnly).join(" or ")}.`;
+const uploadStatusMessage = `Raw reconstruction uploads are available while the reconstruction is ${AnnotatorUploadSourceStatuses.map(statusNameOnly).join(" or ")}.`;
 
-// Temporarily hidden; flip back to true to restore the annotator upload panel below the table.
-const showAnnotatorUploadPanel = false;
+const uploadSpecimenSpaceMessage = "A raw reconstruction cannot be uploaded once the specimen-space reconstruction has been uploaded.";
 
 function noReconstructionsText(userOnly: boolean, haveFilters: boolean) {
     return userOnly || haveFilters ? "There are no reconstructions that match the filters" : "There are no reconstructions";
@@ -60,7 +60,7 @@ export const Reconstructions = observer(() => {
     const sampleIds = specimenFilter.isEnabled ? specimenFilter.contents : [];
 
     const {data, error, previousData} = useQuery<AnnotationsResponse, AnnotationQueryArgs>(ANNOTATIONS_QUERY, {
-        variables: {queryArgs: {offset: offset, limit: limit, userOnly: userOnly, status: status, specimenIds: sampleIds}},
+        variables: {queryArgs: {offset: offset, limit: limit, userOnly: userOnly, status: status, specimenIds: sampleIds}, includeRaw: true},
         pollInterval: 10000
     });
 
@@ -101,14 +101,20 @@ export const Reconstructions = observer(() => {
         }
     });
 
+    const hasSpecimenSpaceData = selectedReconstruction?.specimenSpaceReconstruction?.nodeCounts != null;
+
     const uploadGate = selectedReconstruction ? annotatorUploadGate({
         area: "annotator",
         status: selectedReconstruction.status,
         childStatus: selectedReconstruction.atlasReconstruction?.status,
         permissions: user.permissions,
         annotatorId: selectedReconstruction.annotatorId,
-        userId: user.id
+        userId: user.id,
+        hasSpecimenSpaceData
     }) : null;
+
+    // The specimen-space reason wins: returning to an upload status would not lift it.
+    const uploadUnavailableMessage = hasSpecimenSpaceData ? uploadSpecimenSpaceMessage : uploadStatusMessage;
 
     const completeDialog = isCompleteDialogVisible ? (
         <RequestReviewModal id={reviewRequestId} show={true} requestedStatus={reviewRequestStatus} onClose={() => setIsCompleteDialogVisible(false)}/>) : null;
@@ -165,11 +171,12 @@ export const Reconstructions = observer(() => {
                             <Text size="sm" ta="end">{`Page ${activePage} of ${pageCount}`}</Text>
                         </SimpleGrid>
                     </Card.Section> : null}
-                {showAnnotatorUploadPanel && uploadGate?.visible ?
+                {uploadGate?.visible ?
                     <Card.Section bg="segment">
                         <Divider orientation="horizontal"/>
-                        <ReconstructionUpload key={selectedReconstruction.id} reconstruction={selectedReconstruction} space={ReconstructionSpace.Specimen}
-                                              disabled={!uploadGate.enabled} disabledMessage={uploadUnavailableMessage}/>
+                        <ReconstructionUpload key={selectedReconstruction.id} reconstruction={selectedReconstruction} space={ReconstructionSpace.Specimen} raw
+                                              disabled={!uploadGate.enabled} disabledMessage={uploadUnavailableMessage}
+                                              details={<RawReconstructionDetails reconstruction={selectedReconstruction}/>}/>
                     </Card.Section> : null}
             </Card>
         </Stack>

@@ -6,10 +6,12 @@ import userEvent from "@testing-library/user-event";
 import {renderWithProviders} from "../../test/render";
 import {makeReconstruction} from "../../test/fixtures";
 import {ReconstructionUpload} from "./ReconstructionUpload";
-import {errorNotification} from "./NotificationHelper";
+import {errorNotification, successNotification} from "./NotificationHelper";
 import {AnnotationStatus} from "../../models/annotationStatus";
 import {ReconstructionSpace} from "../../models/reconstructionSpace";
-import {UPLOAD_SWC_MUTATION} from "../../graphql/annotation";
+import {UPLOAD_RAW_SWC_MUTATION, UPLOAD_SWC_MUTATION} from "../../graphql/annotation";
+import {RawReconstructionUploadStatus} from "../../models/rawReconstructionUpload";
+import {GraphQLError} from "graphql";
 
 // The preview hosts a three.js viewer and imports client/index.tsx.
 vi.mock("./ReconstructionFilePreview", () => ({ReconstructionFilePreview: () => null}));
@@ -95,5 +97,80 @@ describe("ReconstructionUpload", () => {
 
         await waitFor(() => expect(errorNotification).toHaveBeenCalledWith("Unauthorized",
             "You are not authorized to upload the specimen-space reconstruction for Neuron rec-1."));
+    });
+});
+
+describe("ReconstructionUpload (raw)", () => {
+    const rawElement = <ReconstructionUpload reconstruction={reconstruction} space={ReconstructionSpace.Specimen} raw/>;
+
+    it("offers to replace an existing raw reconstruction", async () => {
+        const withRaw = {...reconstruction, rawReconstruction: {id: "raw-1"}};
+
+        const {container} = renderWithProviders(<ReconstructionUpload reconstruction={withRaw} space={ReconstructionSpace.Specimen} raw/>);
+
+        await userEvent.upload(fileInput(container), swcFile());
+
+        expect(await screen.findByRole("button", {name: "Replace"})).toBeEnabled();
+    });
+
+    function attempt(status: RawReconstructionUploadStatus, failureMessage: string = null) {
+        return {
+            __typename: "RawReconstructionUpload",
+            id: "attempt-1",
+            annotationId: reconstruction.id,
+            attemptNumber: 1,
+            status,
+            sourceFilename: "neuron.swc",
+            failureMessage
+        };
+    }
+
+    async function upload(mocks: any[]) {
+        vi.mocked(successNotification).mockClear();
+        vi.mocked(errorNotification).mockClear();
+
+        const {container} = renderWithProviders(rawElement, {mocks});
+
+        expect(screen.getAllByText("Drop a raw specimen-space SWC reconstruction file, or click to browse for a file.").length).toBeGreaterThan(0);
+
+        await userEvent.upload(fileInput(container), swcFile());
+
+        await userEvent.click(await screen.findByRole("button", {name: "Upload"}));
+    }
+
+    it("notifies success when the attempt is accepted", async () => {
+        await upload([{
+            request: {query: UPLOAD_RAW_SWC_MUTATION},
+            variableMatcher: () => true,
+            result: {data: {uploadRawSwcData: attempt(RawReconstructionUploadStatus.Accepted)}}
+        }]);
+
+        await waitFor(() => expect(successNotification).toHaveBeenCalledWith("Raw Reconstruction Uploaded",
+            "The raw reconstruction for Neuron rec-1 was accepted."));
+        expect(errorNotification).not.toHaveBeenCalled();
+    });
+
+    it("notifies failure when the returned attempt is not accepted", async () => {
+        await upload([{
+            request: {query: UPLOAD_RAW_SWC_MUTATION},
+            variableMatcher: () => true,
+            result: {data: {uploadRawSwcData: attempt(RawReconstructionUploadStatus.FailedUpload, "A soma was not found in the uploaded file.")}}
+        }]);
+
+        await waitFor(() => expect(errorNotification).toHaveBeenCalledWith("Raw Reconstruction Upload Failed",
+            "A soma was not found in the uploaded file."));
+        expect(successNotification).not.toHaveBeenCalled();
+    });
+
+    it("notifies failure with the API's reason when the upload errors", async () => {
+        await upload([{
+            request: {query: UPLOAD_RAW_SWC_MUTATION},
+            variableMatcher: () => true,
+            result: {errors: [new GraphQLError("A soma was not found in the uploaded file.")]}
+        }]);
+
+        await waitFor(() => expect(errorNotification).toHaveBeenCalledWith("Raw Reconstruction Upload Failed",
+            "The raw reconstruction for Neuron rec-1 was not accepted: A soma was not found in the uploaded file."));
+        expect(successNotification).not.toHaveBeenCalled();
     });
 });

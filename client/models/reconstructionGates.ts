@@ -19,6 +19,8 @@ export type GateContext = {
     annotatorId?: string;
     userId?: string;
     area: "annotator" | "review" | "published";
+    // Whether the refined specimen-space reconstruction holds uploaded data.  Read only by annotatorUploadGate.
+    hasSpecimenSpaceData?: boolean;
 };
 
 // Source-status constants, copied member for member from ../nmcp-api/src/models/annotation.ts.
@@ -67,7 +69,7 @@ const RejectableSourceStatuses: AnnotationStatus[] = [
     AnnotationStatus.ReadyToPublish
 ];
 
-// Mirrors the OwningAnnotator entries of UploadSourceStatuses (../nmcp-api/src/models/user.ts).
+// Mirrors RawUploadSourceStatuses (../nmcp-api/src/models/rawReconstructionUpload.ts).
 export const AnnotatorUploadSourceStatuses: AnnotationStatus[] = [
     AnnotationStatus.InProgress,
     AnnotationStatus.Rejected
@@ -236,11 +238,12 @@ export function gateFor(action: ReconstructionAction, ctx: GateContext): Gate {
     }
 }
 
-// The specimen-space upload panel is not a ReconstructionAction button.  No admin bypass, unlike Discard: the API admits
-// only the reconstruction's own annotator at these statuses.
+// The raw specimen-space upload panel is not a ReconstructionAction button.  The API also admits reviewers and admins,
+// but the annotator page offers it only to the reconstruction's own annotator, with no admin bypass.
+// Once the refined reconstruction has data the API refuses a raw upload (code 1010), whatever the status.
 export function annotatorUploadGate(ctx: GateContext): Gate {
     return {
         visible: ctx.area == "annotator" && isOwner(ctx),
-        enabled: isOwner(ctx) && AnnotatorUploadSourceStatuses.includes(ctx.status)
+        enabled: isOwner(ctx) && AnnotatorUploadSourceStatuses.includes(ctx.status) && !ctx.hasSpecimenSpaceData
     };
 }
