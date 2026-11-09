@@ -20,6 +20,8 @@ const objectPrefixes: [string, string][] = [
     ["AtlasReconstruction", "Atlas Reconstruction"],
     ["SpecimenSpaceReconstruction", "Specimen Space Reconstruction"],
     ["SpecimenPrecomputed", "Specimen Precomputed"],
+    ["AtlasQualityControl", "Quality Control"],
+    // Event rows written before nmcp-api renamed the kinds still store the old QualityControl* names.
     ["QualityControl", "Quality Control"],
     ["Annotation", "Reconstruction"],
     ["Reconstruction", "Reconstruction"],
@@ -50,7 +52,7 @@ const pastTenseMap: Record<string, string> = {
 
 const systemInternalName = "System Internal";
 
-function formatEventName(name: string): string {
+export function formatEventName(name: string): string {
     let prefix = "";
     let action = name;
 

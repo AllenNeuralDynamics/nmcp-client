@@ -4,13 +4,17 @@ import {NeuronShape} from "../models/neuron";
 import {getViewMode, NEURON_VIEW_MODE_ALL, NeuronViewMode} from "./neuronViewMode";
 import {AtlasNode} from "../models/atlasNode";
 
+// Fields still at the value a neuron enters the results with are left out (see NeuronViewModel.serialize).
 export type NeuronViewModelState = {
     neuronId: string;
     baseColor: string;
-    viewModeId: string;
-    isSelected: boolean;
-    isMirrored: boolean;
+    viewModeId?: string;
+    isSelected?: boolean;
+    isMirrored?: boolean;
 }
+
+const DefaultIsSelected = true;
+const DefaultIsMirrored = false;
 
 export class NeuronViewModel {
     neuron: NeuronShape = null;
@@ -33,11 +37,11 @@ export class NeuronViewModel {
 
         this.viewMode = NEURON_VIEW_MODE_ALL;
 
-        this.isSelected = false;
+        this.isSelected = DefaultIsSelected;
 
         this.baseColor = color || "#000000";
 
-        this.isMirrored = false;
+        this.isMirrored = DefaultIsMirrored;
 
         this.soma = neuron.published.atlasReconstruction.soma;
 
@@ -69,14 +73,27 @@ export class NeuronViewModel {
         return this.skeletonId;
     }
 
+    // The base color is always kept: it comes from the order neurons first appeared in this session's results, which a
+    // restoring page does not share.
     public serialize(): NeuronViewModelState {
-        return {
+        const state: NeuronViewModelState = {
             neuronId: this.neuron.id,
-            baseColor: this.baseColor,
-            viewModeId: this.viewMode.id,
-            isSelected: this.isSelected,
-            isMirrored: this.isMirrored
+            baseColor: this.baseColor
+        };
+
+        if (this.viewMode.id != NEURON_VIEW_MODE_ALL.id) {
+            state.viewModeId = this.viewMode.id;
         }
+
+        if (this.isSelected != DefaultIsSelected) {
+            state.isSelected = this.isSelected;
+        }
+
+        if (this.isMirrored != DefaultIsMirrored) {
+            state.isMirrored = this.isMirrored;
+        }
+
+        return state;
     }
 
     public deserialize(state: NeuronViewModelState): void {
@@ -84,9 +101,9 @@ export class NeuronViewModel {
             return;
         }
 
-        this.baseColor = state.baseColor;
-        this.viewMode = getViewMode(state.viewModeId);
-        this.isSelected  = state.isSelected;
-        this.isMirrored = state.isMirrored;
+        this.baseColor = state.baseColor ?? this.baseColor;
+        this.viewMode = (state.viewModeId ? getViewMode(state.viewModeId) : null) ?? NEURON_VIEW_MODE_ALL;
+        this.isSelected = state.isSelected ?? DefaultIsSelected;
+        this.isMirrored = state.isMirrored ?? DefaultIsMirrored;
     }
 }

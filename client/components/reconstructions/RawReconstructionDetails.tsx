@@ -1,9 +1,9 @@
 import * as React from "react";
-import {Badge, Group, Stack, Table, Text} from "@mantine/core";
+import {Anchor, Badge, Group, Stack, Table, Text} from "@mantine/core";
 import dayjs from "dayjs";
 
 import {Annotation} from "../../models/annotation";
-import {RawReconstructionUploadStatus, rawUploadStatusColor, rawUploadStatusName} from "../../models/rawReconstructionUpload";
+import {isFailedRawUploadStatus, isTerminalRawUploadStatus, rawUploadStatusColor, rawUploadStatusName} from "../../models/rawReconstructionUpload";
 import {formatUser} from "../../models/user";
 
 const headerWidth = 130;
@@ -44,7 +44,7 @@ function RawReconstructionSection({reconstruction}: { reconstruction: Annotation
 function LatestUploadSection({reconstruction}: { reconstruction: Annotation }) {
     const attempt = reconstruction.latestRawReconstructionUpload;
 
-    const failed = attempt?.status == RawReconstructionUploadStatus.FailedUpload || attempt?.status == RawReconstructionUploadStatus.FailedQualityControl;
+    const failed = attempt != null && isFailedRawUploadStatus(attempt.status);
 
     return (
         <Stack gap="xs">
@@ -59,8 +59,12 @@ function LatestUploadSection({reconstruction}: { reconstruction: Annotation }) {
                         <Row label="File">{attempt.sourceFilename}</Row>
                         <Row label="Uploaded By">{formatUser(attempt.user)}</Row>
                         <Row label="Started">{formatTime(attempt.createdAt)}</Row>
-                        {attempt.status != RawReconstructionUploadStatus.Uploading ? <Row label="Finished">{formatTime(attempt.updatedAt)}</Row> : null}
+                        {isTerminalRawUploadStatus(attempt.status) ? <Row label="Finished">{formatTime(attempt.updatedAt)}</Row> : null}
                         {failed && attempt.failureMessage ? <Row label="Reason"><Text size="sm" c="red">{attempt.failureMessage}</Text></Row> : null}
+                        {attempt.qualityControlUrl ?
+                            <Row label="QC Report">
+                                <Anchor size="sm" href={attempt.qualityControlUrl} target="_blank" rel="noopener noreferrer">Open in metadata portal</Anchor>
+                            </Row> : null}
                     </Table.Tbody>
                 </Table> :
                 <Text size="sm" c="dimmed">No raw reconstruction uploads have been attempted.</Text>}

@@ -1,6 +1,6 @@
 import * as React from "react";
 import {Badge, Group, Skeleton, Table} from "@mantine/core";
-import {IconBrowserShare} from "@tabler/icons-react";
+import {IconCopy} from "@tabler/icons-react";
 
 import {BracesKind, formatHortaLocation, formatKeywords, NeuronShape} from "../../models/neuron";
 import {formatAtlasStructure} from "../../models/atlasStructure";
@@ -63,7 +63,7 @@ export const CandidateRow = (props: ICandidateRowProps) => {
             <Table.Td style={singleLine}>{soma?.x.toFixed(1)}</Table.Td>
             <Table.Td style={singleLine}>{soma?.y.toFixed(1)}</Table.Td>
             <Table.Td style={singleLine}>{soma?.z.toFixed(1)}</Table.Td>
-            <Table.Td style={singleLine}><Group gap="sm" align="center" wrap="nowrap"><IconBrowserShare size={12} onClick={async () => {
+            <Table.Td style={singleLine}><Group gap="sm" align="center" wrap="nowrap"><IconCopy size={12} onClick={async () => {
                 await onCopyHorta()
             }}/>{formatHortaLocation(props.neuron)}</Group></Table.Td>
             {props.showAnnotators ?

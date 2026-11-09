@@ -14,7 +14,7 @@ import {ReconstructionActionButton} from "../common/ReconstructionAction";
 import {ReconstructionAction} from "../../models/reconstructionAction";
 import {OPEN_ANNOTATION_MUTATION, ANNOTATIONS_QUERY, OpenAnnotationArgs, OpenAnnotationResponse} from "../../graphql/annotation";
 import {ReconstructionStatusLabel} from "../common/ReconstructionStatus";
-import {RequestAccess} from "./RequestAccess";
+import {RequestAccess, requestAccessResponseMessage} from "../common/RequestAccess";
 import {RequestAccessResponse} from "../../models/accessRequest";
 import {ActionPanel} from "../common/ActionPanel";
 import {MessageBox} from "../common/MessageBox";
@@ -37,21 +37,7 @@ export const CandidateActions = ({neuron, showAnnotators, onReconstructionStarte
         });
 
     const onRequestAccessResponse = (response: RequestAccessResponse) => {
-        let message = "The request for access has been received.  A member of the Neuron Morphology Community Portal team will be in contact."
-
-        switch (response) {
-            case RequestAccessResponse.Throttled:
-                message = "There have been too many requests from your location in a short period of time.  Please try again later."
-                break;
-            case RequestAccessResponse.DuplicateApproved:
-            case RequestAccessResponse.DuplicateDenied:
-            case RequestAccessResponse.DuplicateOpen:
-                message = "Access has already be requested for this email address.  If you have not yet received a response, a member of the Neuron Morphology" +
-                    "Community Portal team will be in contact as soon as your request can be processed."
-                break;
-        }
-
-        setAccessMessage(message);
+        setAccessMessage(requestAccessResponseMessage(response));
     }
 
     const modal = isIssueModalVisible ? <IssueModal show={isIssueModalVisible} neuron={neuron} onClose={() => setIsIssueModalVisible(false)}/> : (

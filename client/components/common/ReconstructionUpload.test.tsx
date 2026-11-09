@@ -6,7 +6,7 @@ import userEvent from "@testing-library/user-event";
 import {renderWithProviders} from "../../test/render";
 import {makeReconstruction} from "../../test/fixtures";
 import {ReconstructionUpload} from "./ReconstructionUpload";
-import {errorNotification, successNotification} from "./NotificationHelper";
+import {errorNotification, infoNotification, successNotification} from "./NotificationHelper";
 import {AnnotationStatus} from "../../models/annotationStatus";
 import {ReconstructionSpace} from "../../models/reconstructionSpace";
 import {UPLOAD_RAW_SWC_MUTATION, UPLOAD_SWC_MUTATION} from "../../graphql/annotation";
@@ -101,7 +101,9 @@ describe("ReconstructionUpload", () => {
 });
 
 describe("ReconstructionUpload (raw)", () => {
-    const rawElement = <ReconstructionUpload reconstruction={reconstruction} space={ReconstructionSpace.Specimen} raw/>;
+    const submitted = vi.fn();
+
+    const rawElement = <ReconstructionUpload reconstruction={reconstruction} space={ReconstructionSpace.Specimen} raw onRawUploadSubmitted={submitted}/>;
 
     it("offers to replace an existing raw reconstruction", async () => {
         const withRaw = {...reconstruction, rawReconstruction: {id: "raw-1"}};
@@ -128,6 +130,8 @@ describe("ReconstructionUpload (raw)", () => {
     async function upload(mocks: any[]) {
         vi.mocked(successNotification).mockClear();
         vi.mocked(errorNotification).mockClear();
+        vi.mocked(infoNotification).mockClear();
+        submitted.mockClear();
 
         const {container} = renderWithProviders(rawElement, {mocks});
 
@@ -138,39 +142,69 @@ describe("ReconstructionUpload (raw)", () => {
         await userEvent.click(await screen.findByRole("button", {name: "Upload"}));
     }
 
-    it("notifies success when the attempt is accepted", async () => {
+    function failWith(message: string, code?: number) {
+        return [{
+            request: {query: UPLOAD_RAW_SWC_MUTATION},
+            variableMatcher: () => true,
+            result: {errors: [new GraphQLError(message, code ? {extensions: {code}} : undefined)]}
+        }];
+    }
+
+    it("announces the hand-off when the attempt is pending QC", async () => {
+        const pending = attempt(RawReconstructionUploadStatus.PendingQualityControl);
+
         await upload([{
             request: {query: UPLOAD_RAW_SWC_MUTATION},
             variableMatcher: () => true,
-            result: {data: {uploadRawSwcData: attempt(RawReconstructionUploadStatus.Accepted)}}
+            result: {data: {uploadRawSwcData: pending}}
         }]);
 
-        await waitFor(() => expect(successNotification).toHaveBeenCalledWith("Raw Reconstruction Uploaded",
-            "The raw reconstruction for Neuron rec-1 was accepted."));
+        await waitFor(() => expect(infoNotification).toHaveBeenCalledWith("Raw Reconstruction Received",
+            "The raw reconstruction for Neuron rec-1 was received and is in quality control."));
+        expect(submitted).toHaveBeenCalledWith(expect.objectContaining({id: "attempt-1", status: RawReconstructionUploadStatus.PendingQualityControl}));
+        expect(successNotification).not.toHaveBeenCalled();
         expect(errorNotification).not.toHaveBeenCalled();
+        await waitFor(() => expect(screen.queryByText("neuron.swc")).toBeNull());
     });
 
-    it("notifies failure when the returned attempt is not accepted", async () => {
+    it("leaves a returned failure to the page", async () => {
         await upload([{
             request: {query: UPLOAD_RAW_SWC_MUTATION},
             variableMatcher: () => true,
             result: {data: {uploadRawSwcData: attempt(RawReconstructionUploadStatus.FailedUpload, "A soma was not found in the uploaded file.")}}
         }]);
 
-        await waitFor(() => expect(errorNotification).toHaveBeenCalledWith("Raw Reconstruction Upload Failed",
-            "A soma was not found in the uploaded file."));
+        await waitFor(() => expect(submitted).toHaveBeenCalledWith(expect.objectContaining({status: RawReconstructionUploadStatus.FailedUpload})));
+        expect(infoNotification).not.toHaveBeenCalled();
         expect(successNotification).not.toHaveBeenCalled();
+        expect(errorNotification).not.toHaveBeenCalled();
+        expect(screen.getAllByText("neuron.swc").length).toBeGreaterThan(0);
     });
 
     it("notifies failure with the API's reason when the upload errors", async () => {
-        await upload([{
-            request: {query: UPLOAD_RAW_SWC_MUTATION},
-            variableMatcher: () => true,
-            result: {errors: [new GraphQLError("A soma was not found in the uploaded file.")]}
-        }]);
+        await upload(failWith("A soma was not found in the uploaded file."));
 
         await waitFor(() => expect(errorNotification).toHaveBeenCalledWith("Raw Reconstruction Upload Failed",
             "The raw reconstruction for Neuron rec-1 was not accepted: A soma was not found in the uploaded file."));
         expect(successNotification).not.toHaveBeenCalled();
+        expect(submitted).not.toHaveBeenCalled();
+    });
+
+    it("explains an upload already in progress", async () => {
+        const message = "A raw reconstruction upload for this annotation is still in quality control. Try again once it finishes.";
+
+        await upload(failWith(message, 1011));
+
+        await waitFor(() => expect(errorNotification).toHaveBeenCalledWith("Upload In Progress", message));
+        expect(submitted).not.toHaveBeenCalled();
+    });
+
+    it("explains a reconstruction service issue", async () => {
+        const message = "There is an issue with the reconstruction services. Please try again later.";
+
+        await upload(failWith(message, 1012));
+
+        await waitFor(() => expect(errorNotification).toHaveBeenCalledWith("Reconstruction Services Unavailable", message));
+        expect(submitted).not.toHaveBeenCalled();
     });
 });

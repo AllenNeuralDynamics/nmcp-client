@@ -16,9 +16,15 @@ import {
 } from "../../graphql/annotation";
 import {Annotation} from "../../models/annotation";
 import {ReconstructionSpace} from "../../models/reconstructionSpace";
-import {RawReconstructionUploadStatus} from "../../models/rawReconstructionUpload";
+import {
+    isFailedRawUploadStatus,
+    isRawUploadPending,
+    RawReconstructionUpload,
+    RawUploadInProgressCode,
+    RawUploadServiceIssueCode
+} from "../../models/rawReconstructionUpload";
 import {ReconstructionFilePreview} from "./ReconstructionFilePreview";
-import {errorNotification, successNotification} from "./NotificationHelper";
+import {errorNotification, infoNotification, successNotification} from "./NotificationHelper";
 
 const previewHeight = 300;
 
@@ -35,11 +41,13 @@ type ReconstructionUploadProps = {
     raw?: boolean;
     disabled?: boolean;
     disabledMessage?: string;
-    // Fills the column beside the preview.
+    // Fills a column ahead of the upload and preview columns.
     details?: React.ReactNode;
+    // Receives every attempt a raw upload returns; the page reports its outcome once quality control finishes.
+    onRawUploadSubmitted?: (attempt: RawReconstructionUpload) => void;
 }
 
-export const ReconstructionUpload = observer(({reconstruction, space, raw, disabled, disabledMessage, details}: ReconstructionUploadProps) => {
+export const ReconstructionUpload = observer(({reconstruction, space, raw, disabled, disabledMessage, details, onRawUploadSubmitted}: ReconstructionUploadProps) => {
     const client = useApolloClient();
 
     const [nodeCount, setNodeCount] = useState<[number, number]>(null);
@@ -71,8 +79,9 @@ export const ReconstructionUpload = observer(({reconstruction, space, raw, disab
             onError: (error) => onUploadError(error)
         });
 
-    // A raw upload is parsed and stored before the API answers, so it can run long and can fail after the transfer
-    // succeeds.  The API throws on failure, but the outcome is still confirmed from the returned attempt's status.
+    // A raw upload answers once the file is parsed and handed to quality control, with the attempt pending; its outcome
+    // lands on the attempt later and the page reports it.  A failure before the hand-off is thrown, and may still have
+    // recorded an attempt.
     const [uploadRawSwc, {loading: loadingRawSwc}] = useMutation<UploadRawSwcResponse, UploadRawSwcVariables>(UPLOAD_RAW_SWC_MUTATION,
         {
             variables: {
@@ -95,19 +104,31 @@ export const ReconstructionUpload = observer(({reconstruction, space, raw, disab
     const onRawUploadComplete = (data: UploadRawSwcResponse) => {
         const attempt = data?.uploadRawSwcData;
 
-        if (attempt?.status == RawReconstructionUploadStatus.Accepted) {
-            successNotification("Raw Reconstruction Uploaded", `The raw reconstruction for ${neuronLabel} was accepted.`);
+        if (!attempt) {
+            errorNotification("Raw Reconstruction Upload Failed", `The raw reconstruction for ${neuronLabel} was not accepted.`);
+            return;
+        }
+
+        onRawUploadSubmitted?.(attempt);
+
+        if (isRawUploadPending(attempt)) {
+            infoNotification("Raw Reconstruction Received", `The raw reconstruction for ${neuronLabel} was received and is in quality control.`);
+        }
+
+        if (!isFailedRawUploadStatus(attempt.status)) {
             setFile(null);
-        } else {
-            errorNotification("Raw Reconstruction Upload Failed", attempt?.failureMessage || `The raw reconstruction for ${neuronLabel} was not accepted.`);
         }
     }
 
     const onUploadError = (error: ApolloError) => {
         const code = error.graphQLErrors?.[0]?.extensions?.code;
 
-        if (code == 1009 || code == 1010) {
+        if (code == 1009) {
             errorNotification("Upload Not Allowed", error.graphQLErrors[0].message);
+        } else if (code == RawUploadInProgressCode) {
+            errorNotification("Upload In Progress", error.graphQLErrors[0].message);
+        } else if (code == RawUploadServiceIssueCode) {
+            errorNotification("Reconstruction Services Unavailable", error.graphQLErrors[0].message);
         } else if (error.cause && error.cause["statusCode"] == 401) {
             errorNotification("Unauthorized", `You are not authorized to upload the ${spaceName} reconstruction for ${neuronLabel}.`);
         } else if (raw) {
@@ -199,6 +220,13 @@ export const ReconstructionUpload = observer(({reconstruction, space, raw, disab
 
     return (
         <Flex>
+            {details ?
+                <>
+                    <Stack w={400} gap={0}>
+                        {details}
+                    </Stack>
+                    <Divider orientation="vertical"/>
+                </> : null}
             <Stack gap={0} mih={previewHeight} w={400} justify="stretch">
                 <Dropzone style={{flexGrow: 1}} bd="0" radius={0} disabled={disabled || loading} onDrop={updateFiles}>
                     <Stack h="100%" justify="center">
@@ -233,14 +261,12 @@ export const ReconstructionUpload = observer(({reconstruction, space, raw, disab
                 </Group>
             </Stack>
             <Divider orientation="vertical"/>
-            <div style={{flex: 1, border: "none", height: `${previewHeight}px`, minWidth: 100, margin: 0}}>
-                <ReconstructionFilePreview style={{height: `${previewHeight}px`, border: "none"}} elementName={elementName}
+            {/* The row stretches this to its tallest column.  The preview is absolutely positioned so that its canvas,
+                sized to the previous height, cannot hold the row open once the other columns shrink again. */}
+            <div style={{flex: 1, position: "relative", border: "none", minHeight: `${previewHeight}px`, minWidth: 100, margin: 0}}>
+                <ReconstructionFilePreview style={{position: "absolute", inset: 0, border: "none"}} elementName={elementName}
                                            file={file} onDrops={updateFiles} onInvalid={() => updateFiles(null)} onLoaded={setNodeCount}/>
             </div>
-            <Divider orientation="vertical"/>
-            <Stack w={400} gap={0}>
-                {details}
-            </Stack>
         </Flex>
     );
 });

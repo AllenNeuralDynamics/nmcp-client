@@ -17,6 +17,7 @@ export enum UserPermissions {
     EditAll = Edit,
     PublishReview = 0x100,
     PeerReview = 0x200,
+    TeamReview = 0x400,
     // Any review permutations through 0x8000
     ReviewAll = PeerReview | PublishReview,
     Admin = 0x1000,

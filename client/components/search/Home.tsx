@@ -13,6 +13,7 @@ import {Footer} from "./Footer";
 import {QueryResponseState} from "../../viewmodel/queryResponseViewModel";
 import {useAppLayout} from "../../hooks/useAppLayout";
 import {warningNotification} from "../common/NotificationHelper";
+import {consumeShareFragment, startShareLinkSync} from "../../util/shareLinkSync";
 
 export const Home = observer(() => {
     const client = useApolloClient();
@@ -25,85 +26,85 @@ export const Home = observer(() => {
 
     const searchViewerRef = useSearchViewer();
 
+    // The URL is written only once the restore has finished, so it never records a half-restored page over the link
+    // that is being restored.
     useEffect(() => {
-        initializeQueryFilters();
+        let stopSync: (() => void) | null = null;
+        let unmounted = false;
+
+        initializeQueryFilters().finally(() => {
+            if (!unmounted) {
+                stopSync = startShareLinkSync({uiQuery, queryResponse: queryResponseViewModel, appLayout, searchViewerRef});
+            }
+        });
+
+        return () => {
+            unmounted = true;
+            stopSync?.();
+        };
     }, []);
 
-    useEffect(() => {
-        resetContent();
-    }, [uiQuery.resetCount]);
-
-    function parseUrlQuery(): { haveQuery: boolean, responseState: QueryResponseState | null, viewerState: object | null, unresolvedStructures: number } {
-        const urlParams = new URLSearchParams(window.location.search);
-        const queryParam = urlParams.get("q");
-        const ngParam = window.location.hash;
-
+    function parseShareLink(): { haveQuery: boolean, responseState: QueryResponseState | null, viewerState: object | null, unresolvedStructures: number } {
         let haveQuery: boolean = false
         let responseState: QueryResponseState | null = null;
         let viewerState: object | null = null;
         let unresolvedStructures = 0;
 
-        if (queryParam) {
-            try {
-                const decodedQuery = JSON.parse(atob(queryParam));
+        try {
+            const share = consumeShareFragment();
 
-                if (decodedQuery?.timestamp) {
-                    console.log(`shared query from ${new Date(decodedQuery?.timestamp).toLocaleString()}, version ${decodedQuery?.version} decoded.`);
+            if (share) {
+                if (share.timestamp) {
+                    console.log(`shared query from ${new Date(share.timestamp).toLocaleString()}, version ${share.version} decoded.`);
                 } else {
-                    console.warn(`unexpected query parameter format`);
+                    console.warn(`unexpected share link format`);
                 }
 
-                if (decodedQuery?.query) {
-                    unresolvedStructures = uiQuery.deserialize(decodedQuery.query);
+                if (share.query) {
+                    unresolvedStructures = uiQuery.deserialize(share.query);
                 }
 
-                if (decodedQuery?.response) {
-                    responseState = decodedQuery.response;
+                if (share.response) {
+                    responseState = share.response;
                 }
 
-                if (decodedQuery?.layout) {
-                    appLayout.deserialize(decodedQuery.layout);
+                if (share.layout) {
+                    appLayout.deserialize(share.layout);
                 }
+
+                viewerState = share.viewer ?? null;
 
                 haveQuery = true;
-            } catch (e) {
-                console.warn("Invalid URL query parameter:", e);
             }
+        } catch (e) {
+            console.warn("Invalid share link:", e);
         }
-
-        if (ngParam) {
-            try {
-                viewerState = JSON.parse(atob(ngParam.slice(2)));
-            } catch (e) {
-                console.warn("Invalid Neuroglancer query parameter:", e);
-            }
-        }
-
-        window.history.replaceState({}, document.title, "/");
 
         return {haveQuery, responseState, viewerState, unresolvedStructures};
     }
 
-    function initializeQueryFilters() {
-        const {haveQuery, responseState, viewerState, unresolvedStructures} = parseUrlQuery();
+    async function initializeQueryFilters() {
+        const {haveQuery, responseState, viewerState, unresolvedStructures} = parseShareLink();
 
         if (haveQuery && unresolvedStructures > 0) {
             // The shared response and viewer states describe results of the original query, which this
             // reconstructed query is not, and earlier results must not stand in for it either.
             queryResponseViewModel.reset();
             warnPartialRestore(unresolvedStructures);
-        } else if (haveQuery) {
-            setTimeout(async () => {
-                await uiQuery.execute(queryResponseViewModel, client, responseState);
-                if (viewerState) {
-                    searchViewerRef.applyState(viewerState);
-                }
-            }, 100);
-        } else {
+        } else if (haveQuery && responseState) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+
+            await uiQuery.execute(queryResponseViewModel, client, responseState);
+
             if (viewerState) {
                 searchViewerRef.applyState(viewerState);
             }
-
+        } else if (haveQuery) {
+            // The page the link came from had not run its query, so neither does this one.
+            if (viewerState) {
+                searchViewerRef.applyState(viewerState);
+            }
+        } else {
             const unresolved = uiQuery.deserializePredicates(UserPreferences.Instance.LastQuery);
 
             if (unresolved > 0) {
@@ -114,12 +115,6 @@ export const Home = observer(() => {
 
     function warnPartialRestore(count: number) {
         warningNotification("Query Partially Restored", `${count} atlas structure${count === 1 ? "" : "s"} in the saved query could not be identified. The query was reconstructed with the structures that could be, and has not been run.`);
-    }
-
-    function resetContent() {
-        const url = new URL(window.location.href);
-        url.searchParams.delete("q");
-        window.history.replaceState({}, "", url.toString());
     }
 
     return (

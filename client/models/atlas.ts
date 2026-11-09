@@ -15,6 +15,10 @@ export type AtlasShape = {
     updatedAt?: number;
 }
 
+export type StructureTextMatchOptions = {
+    splitWords?: boolean;
+}
+
 export class Atlas {
     private _shape: AtlasShape = null;
     private _atlasKind: AtlasKindShape = null;
@@ -119,7 +123,10 @@ export class Atlas {
         return current ?? undefined;
     }
 
-    public structureMatchesText(value: string, option: string | AtlasStructureShape) {
+    // By default the typed text matches only as a whole phrase, whitespace included, so "granular layer" does not match a
+    // structure named just "granular" or "layer".  splitWords also accepts a structure whose name contains any one of
+    // the typed words.
+    public structureMatchesText(value: string, option: string | AtlasStructureShape, {splitWords = false}: StructureTextMatchOptions = {}) {
         if (!value || !option) {
             return true;
         }
@@ -146,13 +153,17 @@ export class Atlas {
             return true;
         }
 
+        if (!splitWords) {
+            return false;
+        }
+
         const parts = filterValue.split(/\s+/);
 
         if (parts.length < 2) {
             return false;
         }
 
-        const itemParts = structure.name.split(/\s+/);
+        const itemParts = structure.name.toLowerCase().split(/\s+/);
 
         return parts.some(p => {
             return itemParts.some(i => i === p);

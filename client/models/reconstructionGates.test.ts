@@ -1,6 +1,15 @@
 import {describe, expect, it} from "vitest";
 
-import {annotatorUploadGate, AnnotatorUploadSourceStatuses, Gate, GateContext, gateFor} from "./reconstructionGates";
+import {
+    annotatorUploadGate,
+    Gate,
+    GateContext,
+    gateFor,
+    PreReviewRawUploadSourceStatuses,
+    qualityControlReassessmentGate,
+    rawUploadAllowed,
+    SpecimenUploadSourceStatuses
+} from "./reconstructionGates";
 import {ReconstructionAction} from "./reconstructionAction";
 import {AnnotationStatus} from "./annotationStatus";
 import {AbandonableFailureStatuses, AtlasReconstructionStatus, AutomaticPhaseInProgressStatuses, PhaseFailureStatuses} from "./atlasReconstructionStatus";
@@ -250,12 +259,32 @@ describe("Close actions on the Reconstructions page", () => {
 describe("annotatorUploadGate", () => {
     const owners: Role[] = ["owner", "adminOwner", "reviewerOwner"];
 
+    const enabledStatuses: Record<string, AnnotationStatus[]> = {
+        owner: [S.InProgress, S.Rejected],
+        adminOwner: [S.InProgress, S.Rejected, S.PeerReview, S.TeamReview, S.PublishReview],
+        reviewerOwner: [S.InProgress, S.Rejected, S.PeerReview, S.PublishReview]
+    };
+
     for (const role of owners) {
         it.each(statuses)(`${role} in the annotator area at status %s`, (status) => {
             expect(annotatorUploadGate(ctx("annotator", role, status, A.Initialized)))
-                .toEqual<Gate>({visible: true, enabled: status == S.InProgress || status == S.Rejected});
+                .toEqual<Gate>({visible: true, enabled: enabledStatuses[role].includes(status)});
         });
     }
+
+    it.each([
+        [UserPermissions.PeerReview, S.PeerReview],
+        [UserPermissions.TeamReview, S.TeamReview],
+        [UserPermissions.PublishReview, S.PublishReview]
+    ])("needs review bit %s at status %s", (bit, status) => {
+        const reviewStatuses = [S.PeerReview, S.TeamReview, S.PublishReview];
+
+        for (const other of reviewStatuses) {
+            const gate = annotatorUploadGate({...ctx("annotator", "owner", other, A.Initialized), permissions: UserPermissions.AnnotateAll | bit});
+
+            expect(gate.enabled).toBe(other == status);
+        }
+    });
 
     const nonOwners: Role[] = ["nonOwner", "peer", "publish", "both", "admin"];
 
@@ -267,17 +296,52 @@ describe("annotatorUploadGate", () => {
     }
 
     for (const role of owners) {
-        it.each(statuses)(`${role} with specimen-space data at status %s`, (status) => {
-            expect(annotatorUploadGate({...ctx("annotator", role, status, A.Initialized), hasSpecimenSpaceData: true}))
+        it.each(statuses)(`${role} with a raw upload in quality control at status %s`, (status) => {
+            expect(annotatorUploadGate({...ctx("annotator", role, status, A.Initialized), hasPendingRawUpload: true}))
                 .toEqual<Gate>({visible: true, enabled: false});
         });
     }
+
+    it("stays enabled when no raw upload is in quality control", () => {
+        expect(annotatorUploadGate({...ctx("annotator", "owner", S.InProgress, A.Initialized), hasPendingRawUpload: false}))
+            .toEqual<Gate>({visible: true, enabled: true});
+    });
 
     it("is not shown outside the annotator area", () => {
         expect(annotatorUploadGate(ctx("review", "owner", S.InProgress, A.Initialized))).toEqual<Gate>({visible: false, enabled: true});
     });
 
-    it("mirrors the API's annotator upload statuses", () => {
-        expect(AnnotatorUploadSourceStatuses).toEqual([S.InProgress, S.Rejected]);
+    it("mirrors the API's raw upload statuses", () => {
+        expect(PreReviewRawUploadSourceStatuses).toEqual([S.InProgress, S.Rejected]);
+        expect([...SpecimenUploadSourceStatuses]).toEqual([
+            [S.PeerReview, UserPermissions.PeerReview],
+            [S.TeamReview, UserPermissions.TeamReview],
+            [S.PublishReview, UserPermissions.PublishReview]
+        ]);
+    });
+
+    it("allows a raw upload regardless of a pending attempt", () => {
+        expect(rawUploadAllowed({...ctx("annotator", "owner", S.InProgress, A.Initialized), hasPendingRawUpload: true})).toBe(true);
+        expect(rawUploadAllowed(ctx("annotator", "owner", S.PeerReview, A.Initialized))).toBe(false);
+    });
+});
+
+describe("qualityControlReassessmentGate", () => {
+    const otherChildren = Object.values(AtlasReconstructionStatus)
+        .filter((v): v is AtlasReconstructionStatus => typeof v === "number" && v != A.FailedQualityControl);
+
+    it.each(["publish", "both", "admin"] as Role[])("offers %s reassessment at FailedQualityControl", role => {
+        expect(qualityControlReassessmentGate(ctx("review", role, S.WaitingForAtlasReconstruction, A.FailedQualityControl)))
+            .toEqual<Gate>({visible: true, enabled: true});
+    });
+
+    it.each(["peer", "owner"] as Role[])("hides it from %s", role => {
+        expect(qualityControlReassessmentGate(ctx("review", role, S.WaitingForAtlasReconstruction, A.FailedQualityControl)))
+            .toEqual<Gate>({visible: false, enabled: false});
+    });
+
+    it.each(otherChildren)("hides it at child status %s", child => {
+        expect(qualityControlReassessmentGate(ctx("review", "admin", S.ReadyToPublish, child)))
+            .toEqual<Gate>({visible: false, enabled: false});
     });
 });

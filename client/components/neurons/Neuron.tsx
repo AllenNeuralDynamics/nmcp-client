@@ -225,9 +225,11 @@ export const Neuron = () => {
                         <Group gap={32} align="baseline">
                             <Group gap={8} align="baseline">
                                 <Text fw={500}>Open Dataset</Text>
-                                {isPublished && data.neuron.specimen.referenceDataset?.url ?
-                                    <Anchor size="sm" href={data.neuron.specimen.referenceDataset.url} target="_blank">{data.neuron.specimen.referenceDataset.url}</Anchor> :
-                                    <Text c="dimmed" size="sm">Not available.</Text>}
+                                {!data.neuron.specimen.referenceDataset?.url ?
+                                    <Text c="dimmed" size="sm">Persistent URL to S3 storage will be available once a scheduled snapshot occurs.</Text> :
+                                    isPublished ?
+                                        <Anchor size="sm" href={data.neuron.specimen.referenceDataset.url} target="_blank">{data.neuron.specimen.referenceDataset.url}</Anchor> :
+                                        <Text c="dimmed" size="sm">Not available.</Text>}
                             </Group>
                             <Group gap={8} align="baseline">
                                 <Text fw={500}>Segmentation</Text>

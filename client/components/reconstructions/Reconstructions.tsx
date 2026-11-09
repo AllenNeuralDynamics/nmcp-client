@@ -1,5 +1,5 @@
 import * as React from "react";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {useQuery} from "@apollo/client";
 import {observer} from "mobx-react-lite";
 import {Card, Center, Divider, Group, Loader, SimpleGrid, Stack, Text} from "@mantine/core";
@@ -13,23 +13,26 @@ import {GraphQLErrorAlert} from "../common/GraphQLErrorAlert";
 import {Annotation} from "../../models/annotation";
 import {ANNOTATIONS_QUERY, AnnotationQueryArgs, AnnotationsResponse} from "../../graphql/annotation";
 import {ReconstructionFilters} from "./ReconstructionFilters";
+import {ResetFiltersButton} from "../common/ResetFiltersButton";
 import {ReconstructionTable} from "./ReconstructionTable";
 import {AnnotationStatus, statusNameOnly} from "../../models/annotationStatus";
 import {UserPermissions} from "../../graphql/user";
 import {hasPermission} from "../../models/user";
 import {Navigate} from "react-router-dom";
 import {ReconstructionUpload} from "../common/ReconstructionUpload";
-import {annotatorUploadGate, AnnotatorUploadSourceStatuses} from "../../models/reconstructionGates";
+import {annotatorUploadGate, GateContext, PreReviewRawUploadSourceStatuses, rawUploadAllowed} from "../../models/reconstructionGates";
 import {ReconstructionSpace} from "../../models/reconstructionSpace";
 import {RawReconstructionDetails} from "./RawReconstructionDetails";
 import {usePageSettings} from "../../hooks/usePageSettings";
 import {useSettingsMirror} from "../../hooks/useSettingsMirror";
 import {useOffsetReset} from "../../hooks/useOffsetReset";
 import {ReconstructionsSettings} from "./reconstructionsSettings";
+import {isRawUploadPending} from "../../models/rawReconstructionUpload";
+import {rawUploadPollInterval, ReconstructionsPollInterval, useRawUploadNotifications} from "./useRawUploadNotifications";
 
-const uploadStatusMessage = `Raw reconstruction uploads are available while the reconstruction is ${AnnotatorUploadSourceStatuses.map(statusNameOnly).join(" or ")}.`;
+const uploadPendingMessage = "The latest raw reconstruction upload is still in quality control. Another can be uploaded once it finishes.";
 
-const uploadSpecimenSpaceMessage = "A raw reconstruction cannot be uploaded once the specimen-space reconstruction has been uploaded.";
+const uploadStatusMessage = `Raw reconstruction uploads are available while the reconstruction is ${PreReviewRawUploadSourceStatuses.map(statusNameOnly).join(" or ")}, or in a review where you can upload the specimen-space reconstruction.`;
 
 function noReconstructionsText(userOnly: boolean, haveFilters: boolean) {
     return userOnly || haveFilters ? "There are no reconstructions that match the filters" : "There are no reconstructions";
@@ -69,12 +72,20 @@ export const Reconstructions = observer(() => {
 
     const sampleIds = specimenFilter.isEnabled ? specimenFilter.contents : [];
 
+    const [pollInterval, setPollInterval] = useState(ReconstructionsPollInterval);
+
     const {data, error, previousData} = useQuery<AnnotationsResponse, AnnotationQueryArgs>(ANNOTATIONS_QUERY, {
         variables: {queryArgs: {offset: offset, limit: limit, userOnly: userOnly, status: status, specimenIds: sampleIds}, includeRaw: true},
-        pollInterval: 10000
+        pollInterval
     });
 
     useOffsetReset(offset, data?.annotations.total, () => setOffset(0));
+
+    const nextPollInterval = rawUploadPollInterval((data ?? previousData)?.annotations.annotations);
+
+    useEffect(() => setPollInterval(nextPollInterval), [nextPollInterval]);
+
+    const trackRawUpload = useRawUploadNotifications(data?.annotations.annotations);
 
     if (error) {
         return <GraphQLErrorAlert title="Candidate Data Could Not Be Loaded" error={error}/>;
@@ -119,20 +130,22 @@ export const Reconstructions = observer(() => {
         }
     });
 
-    const hasSpecimenSpaceData = selectedReconstruction?.specimenSpaceReconstruction?.nodeCounts != null;
+    const hasPendingRawUpload = isRawUploadPending(selectedReconstruction?.latestRawReconstructionUpload);
 
-    const uploadGate = selectedReconstruction ? annotatorUploadGate({
+    const uploadContext: GateContext = selectedReconstruction ? {
         area: "annotator",
         status: selectedReconstruction.status,
         childStatus: selectedReconstruction.atlasReconstruction?.status,
         permissions: user.permissions,
         annotatorId: selectedReconstruction.annotatorId,
         userId: user.id,
-        hasSpecimenSpaceData
-    }) : null;
+        hasPendingRawUpload
+    } : null;
 
-    // The specimen-space reason wins: returning to an upload status would not lift it.
-    const uploadUnavailableMessage = hasSpecimenSpaceData ? uploadSpecimenSpaceMessage : uploadStatusMessage;
+    const uploadGate = uploadContext ? annotatorUploadGate(uploadContext) : null;
+
+    // The pending reason shows only when the status allows uploads, since it lifts on its own.
+    const uploadUnavailableMessage = hasPendingRawUpload && uploadContext && rawUploadAllowed(uploadContext) ? uploadPendingMessage : uploadStatusMessage;
 
     const completeDialog = isCompleteDialogVisible ? (
         <RequestReviewModal id={reviewRequestId} show={true} requestedStatus={reviewRequestStatus} onClose={() => setIsCompleteDialogVisible(false)}/>) : null;
@@ -150,14 +163,15 @@ export const Reconstructions = observer(() => {
             {completeDialog}
             <Card withBorder>
                 <Card.Section bg="segment">
-                    <Group p={12}>
+                    <Group p={12} justify="space-between">
                         <Text size="lg" fw={500}>Reconstructions</Text>
+                        <ResetFiltersButton onReset={resetFilters}/>
                     </Group>
                     <Divider orientation="horizontal"/>
                 </Card.Section>
                 <Card.Section bg="segment">
                     <ReconstructionFilters checked={userOnly} onChange={evt => onUserOnlyChange(evt.currentTarget.checked)} filter={specimenFilter}
-                                           filter1={statusFilter} onReset={resetFilters}/>
+                                           filter1={statusFilter}/>
                     <Divider orientation="horizontal"/>
                 </Card.Section>
                 <Card.Section bg="segment">
@@ -193,7 +207,7 @@ export const Reconstructions = observer(() => {
                     <Card.Section bg="segment">
                         <Divider orientation="horizontal"/>
                         <ReconstructionUpload key={selectedReconstruction.id} reconstruction={selectedReconstruction} space={ReconstructionSpace.Specimen} raw
-                                              disabled={!uploadGate.enabled} disabledMessage={uploadUnavailableMessage}
+                                              disabled={!uploadGate.enabled} disabledMessage={uploadUnavailableMessage} onRawUploadSubmitted={trackRawUpload}
                                               details={<RawReconstructionDetails reconstruction={selectedReconstruction}/>}/>
                     </Card.Section> : null}
             </Card>

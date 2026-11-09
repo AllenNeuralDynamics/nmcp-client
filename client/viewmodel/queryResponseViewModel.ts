@@ -171,9 +171,6 @@ export class QueryResponseViewModel {
                 viewModel = new NeuronViewModel(neuron, color);
 
                 this._neuronViewModelMap.set(neuron.id, viewModel);
-
-                viewModel.viewMode = NEURON_VIEW_MODE_ALL;
-                viewModel.isSelected = true;
             }
 
             this.neuronViewModels.push(viewModel);

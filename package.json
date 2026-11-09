@@ -17,6 +17,7 @@
     "debug": "^4.0.1",
     "express": "^5.1.0",
     "express-http-proxy": "^2.1.2",
+    "fflate": "^0.8.3",
     "path-browserify": "^1.0.1",
     "webpack": "^5.89.0",
     "webpack-dev-server": "^5.2.2"

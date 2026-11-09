@@ -19,8 +19,8 @@ export type GateContext = {
     annotatorId?: string;
     userId?: string;
     area: "annotator" | "review" | "published";
-    // Whether the refined specimen-space reconstruction holds uploaded data.  Read only by annotatorUploadGate.
-    hasSpecimenSpaceData?: boolean;
+    // Whether the latest raw upload attempt is still in quality control.  Read only by annotatorUploadGate.
+    hasPendingRawUpload?: boolean;
 };
 
 // Source-status constants, copied member for member from ../nmcp-api/src/models/annotation.ts.
@@ -69,11 +69,19 @@ const RejectableSourceStatuses: AnnotationStatus[] = [
     AnnotationStatus.ReadyToPublish
 ];
 
-// Mirrors RawUploadSourceStatuses (../nmcp-api/src/models/rawReconstructionUpload.ts).
-export const AnnotatorUploadSourceStatuses: AnnotationStatus[] = [
+// Mirrors PreReviewRawUploadSourceStatuses (../nmcp-api/src/models/rawReconstructionUpload.ts).
+export const PreReviewRawUploadSourceStatuses: AnnotationStatus[] = [
     AnnotationStatus.InProgress,
     AnnotationStatus.Rejected
 ];
+
+// Mirrors the specimen-space entry of UploadSourceStatuses (../nmcp-api/src/models/user.ts): the review statuses at
+// which the refined reconstruction can be uploaded, each with the review bit it requires.
+export const SpecimenUploadSourceStatuses: ReadonlyMap<AnnotationStatus, UserPermissions> = new Map([
+    [AnnotationStatus.PeerReview, UserPermissions.PeerReview],
+    [AnnotationStatus.TeamReview, UserPermissions.TeamReview],
+    [AnnotationStatus.PublishReview, UserPermissions.PublishReview]
+]);
 
 // Not mirrored from the API.  The Reconstructions page closes a reconstruction only while it is still with its
 // annotator, whatever the API would accept once it has gone to review, the pipeline or publishing.
@@ -238,12 +246,34 @@ export function gateFor(action: ReconstructionAction, ctx: GateContext): Gate {
     }
 }
 
+// The Quality Control tab's "Assess Again" is not a ReconstructionAction button.  requestQualityControlReassessment
+// accepts only a child at FailedQualityControl, and unlike the action bar the button is hidden, not disabled, whenever
+// the API would refuse it.
+export function qualityControlReassessmentGate(ctx: GateContext): Gate {
+    const allowed = canOperatePipeline(ctx) && ctx.childStatus == AtlasReconstructionStatus.FailedQualityControl;
+
+    return {visible: allowed, enabled: allowed};
+}
+
+// Mirrors assertRawUploadAllowed (../nmcp-api/src/models/rawReconstructionUpload.ts) past its permission check: any
+// pre-review status, or a review status at which the user could upload the refined reconstruction.  It ignores whether
+// an attempt is in quality control.
+export function rawUploadAllowed(ctx: GateContext): boolean {
+    if (PreReviewRawUploadSourceStatuses.includes(ctx.status)) {
+        return true;
+    }
+
+    const requiredPermission = SpecimenUploadSourceStatuses.get(ctx.status);
+
+    return requiredPermission !== undefined && (isAdmin(ctx) || has(ctx.permissions, requiredPermission));
+}
+
 // The raw specimen-space upload panel is not a ReconstructionAction button.  The API also admits reviewers and admins,
-// but the annotator page offers it only to the reconstruction's own annotator, with no admin bypass.
-// Once the refined reconstruction has data the API refuses a raw upload (code 1010), whatever the status.
+// but the annotator page offers it only to the reconstruction's own annotator, with no admin bypass.  The panel also
+// stays disabled while the latest attempt is in quality control, stricter than the API's one-hour cutoff on 1011.
 export function annotatorUploadGate(ctx: GateContext): Gate {
     return {
         visible: ctx.area == "annotator" && isOwner(ctx),
-        enabled: isOwner(ctx) && AnnotatorUploadSourceStatuses.includes(ctx.status) && !ctx.hasSpecimenSpaceData
+        enabled: isOwner(ctx) && rawUploadAllowed(ctx) && !ctx.hasPendingRawUpload
     };
 }

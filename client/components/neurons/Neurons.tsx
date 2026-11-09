@@ -219,6 +219,7 @@ export const Neurons = observer(({settings, onSettingsChange}: NeuronsProps) => 
     const renderCreateNeuron = () => {
         return (
             <Group preventGrowOverflow={false}>
+                <ResetFiltersButton onReset={resetFilters}/>
                 <Group gap={0}>
                     <SpecimenSelect value={sampleId} lockable locked={isSampleLocked} onChange={onSampleChange}
                                     onLock={onLockSample}/>
@@ -298,9 +299,6 @@ export const Neurons = observer(({settings, onSettingsChange}: NeuronsProps) => 
                         <NeuronTagFilter key={filterGeneration} filter={candidateFilter.tagFilter}/>
                         <Divider orientation="vertical"/>
                         <NeuronStatusFilter filter={statusFilter}/>
-                        <Group ml="auto">
-                            <ResetFiltersButton onReset={resetFilters}/>
-                        </Group>
                     </Group>
                     <Divider orientation="horizontal"/>
                 </Card.Section>

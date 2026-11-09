@@ -71,4 +71,25 @@ describe("Atlas", () => {
         expect(atlas.structureMatchesText("neocortex", "atlas-ccf-315")).toBe(true);
         expect(atlas.structureMatchesText("grey", "atlas-ccf-315")).toBe(false);
     });
+
+    describe("multi-word text", () => {
+        const atlas = loadAtlas();
+        const structure = (name: string) => ({...atlas.findStructure(315), name, acronym: "X", aliases: []});
+
+        it("matches only the whole phrase, whitespace included, by default", () => {
+            expect(atlas.structureMatchesText("granular layer", structure("Cerebellum granular layer"))).toBe(true);
+            expect(atlas.structureMatchesText("granular layer", structure("Granular"))).toBe(false);
+            expect(atlas.structureMatchesText("granular layer", structure("Molecular layer"))).toBe(false);
+            expect(atlas.structureMatchesText("granular layer", structure("Granular cell layer"))).toBe(false);
+        });
+
+        it("also matches any one typed word, ignoring case, with splitWords", () => {
+            const options = {splitWords: true};
+
+            expect(atlas.structureMatchesText("granular layer", structure("Cerebellum granular layer"), options)).toBe(true);
+            expect(atlas.structureMatchesText("granular layer", structure("Granular"), options)).toBe(true);
+            expect(atlas.structureMatchesText("granular layer", structure("Molecular layer"), options)).toBe(true);
+            expect(atlas.structureMatchesText("granular layer", structure("Purkinje cells"), options)).toBe(false);
+        });
+    });
 });

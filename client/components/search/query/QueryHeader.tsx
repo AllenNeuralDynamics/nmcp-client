@@ -1,5 +1,4 @@
 import * as React from "react";
-import {useApolloClient} from "@apollo/client";
 import {observer} from "mobx-react-lite";
 import {Button, Divider, Group, Text} from "@mantine/core";
 import {IconPlus, IconRestore, IconSearch, IconShare3} from "@tabler/icons-react";
@@ -9,13 +8,18 @@ import {useQueryResponseViewModel} from "../../../hooks/useQueryResponseViewMode
 import {useUIQuery} from "../../../hooks/useUIQuery";
 import {useAppLayout} from "../../../hooks/useAppLayout";
 import {useSearchAtlas} from "../../../hooks/useSearchAtlas";
-import {usePreferences} from "../../../hooks/usePreferences";
 import {useSearchViewer} from "../../../hooks/useSearchViewer";
+import {usePerformQuery} from "../../../hooks/usePerformQuery";
 import {CollectionsSelect} from "../../common/CollectionsSelect";
+import {shareState, shareUrl} from "../../../util/shareLink";
+import {captureShareContent} from "../../../util/shareLinkSync";
+
+// Hidden while the address bar carries the share link.  It returns, presented differently, for result sets too large
+// for a browser to copy from the address bar intact (Safari cuts a copied URL at 4,096 characters).
+const IsShareButtonVisible = false;
 
 export const QueryHeader = observer(() => {
-    const client = useApolloClient();
-    const preferences = usePreferences();
+    const performQuery = usePerformQuery();
     const appLayout = useAppLayout();
     const queryResponse = useQueryResponseViewModel();
     const uiQuery = useUIQuery();
@@ -36,10 +40,7 @@ export const QueryHeader = observer(() => {
     const onPerformQuery = async (evt: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         evt.stopPropagation();
 
-        if (!appLayout.isQueryExpanded && !preferences.ShouldAutoCollapseOnQuery) {
-            appLayout.isQueryExpanded = true;
-        }
-        await uiQuery.execute(queryResponse, client);
+        await performQuery();
     };
 
     const onAddFilter = (evt: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
@@ -50,27 +51,16 @@ export const QueryHeader = observer(() => {
     const onShare = async (evt: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         evt.stopPropagation();
 
-        const queryData = {
-            timestamp: Date.now(),
-            version: 1,
-            query: uiQuery.serialize(),
-            response: queryResponse.serialize(),
-            layout: appLayout.serialize()
-        };
-
-        const encodedQuery = btoa(JSON.stringify(queryData));
         const baseUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname}`;
-        let shareUrl = `${baseUrl}?q=${encodedQuery}`;
 
-        const ngState = searchViewerRef.currentState;
+        // Captured now rather than read from the address bar, which trails a change by the sync delay.
+        const content = captureShareContent({uiQuery, queryResponse, appLayout, searchViewerRef});
 
-        if (ngState) {
-            shareUrl += `#!${btoa(JSON.stringify(ngState))}`;
-        }
+        const url = content ? shareUrl(baseUrl, shareState(content)) : window.location.href;
 
         if (navigator.clipboard && navigator.clipboard.writeText) {
             try {
-                await navigator.clipboard.writeText(shareUrl);
+                await navigator.clipboard.writeText(url);
             } catch (err) {
                 console.error("Failed to copy URL to clipboard:", err);
             }
@@ -125,9 +115,10 @@ export const QueryHeader = observer(() => {
         return (
             <Group>
                 {renderResetButton()}
-                <Button variant="light" leftSection={<IconShare3 size={18}/>} disabled={queryResponse.status === QueryStatus.Loading} onClick={onShare}>
-                    Share
-                </Button>
+                {IsShareButtonVisible ?
+                    <Button variant="light" leftSection={<IconShare3 size={18}/>} disabled={queryResponse.status === QueryStatus.Loading} onClick={onShare}>
+                        Share
+                    </Button> : null}
                 <Divider orientation="vertical"/>
                 <Button variant="light" leftSection={<IconPlus size={18}/>} disabled={queryResponse.status === QueryStatus.Loading} onClick={onAddFilter}>
                     Add Filter

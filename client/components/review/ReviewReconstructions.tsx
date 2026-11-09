@@ -109,7 +109,10 @@ export const ReviewReconstructions = observer(() => {
         <Stack m={20}>
             <Card withBorder>
                 <Card.Section bg="segment" p={12}>
-                    <Text size="xl" fw={500}>Reconstructions Submitted for Review</Text>
+                    <Group justify="space-between">
+                        <Text size="xl" fw={500}>Reconstructions Submitted for Review</Text>
+                        <ResetFiltersButton onReset={resetFilters}/>
+                    </Group>
                     <Divider orientation="horizontal"/>
                 </Card.Section>
                 <Card.Section bg="segment">
@@ -125,9 +128,6 @@ export const ReviewReconstructions = observer(() => {
                         <NeuronTagFilter key={filterGeneration} filter={tagFilter}/>
                         <Divider orientation="vertical"/>
                         {haveFull ? <ReviewStatusFilter w={300} filter={statusFilter} available={available}/> : null}
-                        <Group ml="auto">
-                            <ResetFiltersButton onReset={resetFilters}/>
-                        </Group>
                     </Group>
                     <Divider orientation="horizontal"/>
                 </Card.Section>

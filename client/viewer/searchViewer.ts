@@ -2,7 +2,7 @@ import {debounce} from "lodash-es";
 
 import {AtlasViewer} from "./atlasViewer";
 import {LayerType, NeuroglancerLayerSource} from "./neuroglancerLayer";
-import {ccfMirrorTransform} from "./atlasLayer";
+import {ccfMirrorTransform, withoutDefaultStructureColors} from "./atlasLayer";
 import {AtlasViewModel} from "../viewmodel/atlasViewModel";
 import {NeuronViewModel} from "../viewmodel/neuronViewModel";
 import {NEURON_VIEW_MODE_ALL, NEURON_VIEW_MODE_AXON, NEURON_VIEW_MODE_DENDRITE, NEURON_VIEW_MODE_SOMA, NeuronViewMode} from "../viewmodel/neuronViewMode";
@@ -64,6 +64,26 @@ const DefaultReconstructionLayerConfiguration: ReconstructionLayerConfiguration[
     }
 ]
 
+// Somas and reconstruction segments follow the neuron view models, which a share link carries on its own, so the
+// viewer state in a link leaves them out and updateState derives them again.  The atlas layer's segments are kept:
+// the viewer state is the only record of which structures were shown.
+export function withoutDerivedNeuronContent(state: any): any {
+    const shareable = structuredClone(state);
+
+    const reconstructionNames = DefaultReconstructionLayerConfiguration.flatMap(c => [c.name, `${c.name} ${Mirror}`]);
+
+    for (const layer of shareable?.layers ?? []) {
+        if (layer.name === SomaLayerName) {
+            delete layer.annotations;
+        } else if (reconstructionNames.includes(layer.name)) {
+            delete layer.segments;
+            delete layer.segmentColors;
+        }
+    }
+
+    return shareable;
+}
+
 const createReconstructionSource = (name: string, source: string, transform: object = null): NeuroglancerLayerSource => {
     return {
         name: name,
@@ -122,6 +142,19 @@ export class SearchViewer extends AtlasViewer {
 
     public set somaSelectionDelegate(delegate: SomaSelectionDelegate) {
         this._somaSelectionDelegate = delegate;
+    }
+
+    public get shareableState(): any {
+        return withoutDefaultStructureColors(withoutDerivedNeuronContent(this.currentState), this.atlas);
+    }
+
+    public updateState(state?: object | null) {
+        super.updateState(state);
+
+        // A supplied state may be a shared one, without somas or reconstruction segments.
+        if (state) {
+            this.updateReconstructions(this._neurons);
+        }
     }
 
     public updateAtlasStructures(structureIds: number[]) {
