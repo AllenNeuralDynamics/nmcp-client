@@ -2,7 +2,7 @@ import * as React from "react";
 import {observer} from "mobx-react-lite";
 import {Divider, Group, RangeSlider, Stack, Switch, Text} from "@mantine/core";
 
-import {CandidateFilter} from "../../viewmodel/candidateFilter";
+import {BrightnessBounds, CandidateFilter, VolumeBounds} from "../../viewmodel/candidateFilter";
 
 function createMarks(range: [number, number]) {
     return [
@@ -23,7 +23,7 @@ export const CandidateMetrics = observer(({candidateFilter}: { candidateFilter: 
                         onChange={(event) => {
                             candidateFilter.limitBrightness = event.currentTarget.checked;
                         }}/>
-                <RangeSlider miw={200} min={0} max={5000} disabled={!candidateFilter.limitBrightness} marks={createMarks([0, 5000])}
+                <RangeSlider miw={200} min={BrightnessBounds[0]} max={BrightnessBounds[1]} disabled={!candidateFilter.limitBrightness} marks={createMarks(BrightnessBounds)}
                              value={range} onChange={setRange} onChangeEnd={(r) => candidateFilter.brightnessRange = r}/>
                 <Divider orientation="vertical"/>
                 <Switch label="Volume"
@@ -31,8 +31,8 @@ export const CandidateMetrics = observer(({candidateFilter}: { candidateFilter: 
                         onChange={(event) => {
                             candidateFilter.limitVolume = event.currentTarget.checked;
                         }}/>
-                <RangeSlider miw={200} min={0} max={100000} disabled={!candidateFilter.limitVolume}
-                             marks={createMarks([0, 100000])}
+                <RangeSlider miw={200} min={VolumeBounds[0]} max={VolumeBounds[1]} disabled={!candidateFilter.limitVolume}
+                             marks={createMarks(VolumeBounds)}
                              value={candidateFilter.volumeRange} onChange={(r) => candidateFilter.volumeRange = r}/>
             </Group>
         </Stack>

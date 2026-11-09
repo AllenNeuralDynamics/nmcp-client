@@ -24,21 +24,28 @@ import {
 } from "../../../graphql/accessRequest";
 import {AccessRequest, AccessRequestStatus, accessRequestStatusColor, accessRequestStatusName} from "../../../models/accessRequest";
 import {formatUser} from "../../../models/user";
+import {AdminAccessRequestsSettings, AdminTabProps} from "../adminSettings";
+import {useSettingsMirror} from "../../../hooks/useSettingsMirror";
+import {useOffsetReset} from "../../../hooks/useOffsetReset";
 
-export const AccessRequests = observer(() => {
+export const AccessRequests = observer(({settings, onSettingsChange}: AdminTabProps<AdminAccessRequestsSettings>) => {
     const user = useUser();
 
     if ((user?.permissions & UserPermissions.Admin) == 0) {
         return <Navigate to="/" replace/>;
     }
 
-    const [offset, setOffset] = useState(0);
-    const [limit, setLimit] = useState(10);
+    const {offset, limit} = settings.pagination;
 
-    const [selectionId, setSelectionId] = useState<string>(null);
+    const selectionId = settings.selectedId;
 
-    // Unreviewed requests are the ones that require action, so they are what is shown until the user asks for something else.
-    const [statusFilter] = useState(new OptionalFilter<AccessRequestStatus[]>([AccessRequestStatus.Unreviewed], true));
+    const setOffset = (offset: number) => onSettingsChange(s => ({...s, pagination: {...s.pagination, offset}}));
+
+    const setSelectionId = (selectedId: string) => onSettingsChange(s => ({...s, selectedId}));
+
+    const [statusFilter] = useState(() => OptionalFilter.fromSettings(settings.filters.statuses));
+
+    useSettingsMirror(() => statusFilter.settings, statuses => onSettingsChange(s => ({...s, filters: {...s.filters, statuses}})));
 
     const status = statusFilter.isEnabled ? statusFilter.contents : [];
 
@@ -61,6 +68,8 @@ export const AccessRequests = observer(() => {
         },
         onError: (e) => errorNotification("Access Request", e.message)
     });
+
+    useOffsetReset(offset, data?.accessRequests?.totalCount, () => setOffset(0));
 
     if (error) {
         return <GraphQLErrorAlert title="Access Requests Could not be Loaded" error={error}/>;
@@ -89,11 +98,7 @@ export const AccessRequests = observer(() => {
 
     const onUpdateLimit = (value: number) => {
         if (value !== limit) {
-            if (offset < value) {
-                setOffset(0);
-            }
-
-            setLimit(value);
+            onSettingsChange(s => ({...s, pagination: {...s.pagination, limit: value}}));
         }
     };
 

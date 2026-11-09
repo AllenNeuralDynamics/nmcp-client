@@ -1,7 +1,6 @@
 import React, {useMemo, useState} from "react";
 import {useQuery} from "@apollo/client";
 import {Badge, Checkbox, Group, Select, SimpleGrid, Stack, Text, Timeline, Tooltip} from "@mantine/core";
-import {useLocalStorage} from "@mantine/hooks";
 import dayjs from "dayjs";
 
 import {
@@ -14,6 +13,8 @@ import {
 import {AnnotationStatus, statusColor, statusNameOnly} from "../../models/annotationStatus";
 import {GraphQLErrorAlert} from "../common/GraphQLErrorAlert";
 import {AppLoading} from "../app/AppLoading";
+import {SettingsChange} from "../../util/pageSettings";
+import {NeuronHistorySettings} from "./neuronSettings";
 
 const objectPrefixes: [string, string][] = [
     ["AtlasReconstruction", "Atlas Reconstruction"],
@@ -225,7 +226,14 @@ function EventDetails({event, showDetails, showSystemEvents}: { event: VersionHi
     );
 }
 
-export const NeuronHistory = ({neuronId}: { neuronId: string }) => {
+type NeuronHistoryProps = {
+    neuronId: string;
+    settings: NeuronHistorySettings;
+
+    onSettingsChange: SettingsChange<NeuronHistorySettings>;
+}
+
+export const NeuronHistory = ({neuronId, settings, onSettingsChange}: NeuronHistoryProps) => {
     const {error, data, loading} = useQuery<NeuronVersionHistoryResponse, NeuronVersionHistoryVariables>(
         NEURON_VERSION_HISTORY_QUERY, {variables: {neuronId}}
     );
@@ -238,14 +246,11 @@ export const NeuronHistory = ({neuronId}: { neuronId: string }) => {
     }, [data?.neuronVersionHistory?.branches]);
 
     const [selectedValue, setSelectedValue] = useState<string | null>(null);
-    const [showSystemEvents, setShowSystemEvents] = useLocalStorage<boolean>({
-        key: "nmcp-history-show-system-events",
-        defaultValue: false
-    });
-    const [showDetails, setShowDetails] = useLocalStorage<boolean>({
-        key: "nmcp-history-show-details",
-        defaultValue: false
-    });
+    const {showSystemEvents, showDetails} = settings;
+
+    const setShowSystemEvents = (showSystemEvents: boolean) => onSettingsChange(s => ({...s, showSystemEvents}));
+
+    const setShowDetails = (showDetails: boolean) => onSettingsChange(s => ({...s, showDetails}));
 
     if (error) {
         return <GraphQLErrorAlert title="History Could not be Loaded" error={error}/>;

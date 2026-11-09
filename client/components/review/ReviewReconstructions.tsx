@@ -3,7 +3,6 @@ import {useState} from "react";
 import {useQuery} from "@apollo/client";
 import {observer} from "mobx-react-lite";
 import {Card, Center, Divider, Group, SimpleGrid, Stack, Switch, Text} from "@mantine/core";
-import {useLocalStorage} from "@mantine/hooks";
 
 import {ReviewTable} from "./ReviewTable";
 import {Selection} from "./reconstruction/Selection";
@@ -20,6 +19,11 @@ import {ANNOTATIONS_QUERY, AnnotationQueryArgs, AnnotationsResponse} from "../..
 import {Annotation} from "../../models/annotation";
 import {ReviewActions} from "./ReviewActions";
 import {Navigate} from "react-router-dom";
+import {usePageSettings} from "../../hooks/usePageSettings";
+import {useSettingsMirror} from "../../hooks/useSettingsMirror";
+import {useOffsetReset} from "../../hooks/useOffsetReset";
+import {ResetFiltersButton} from "../common/ResetFiltersButton";
+import {ReviewSettings} from "./reviewSettings";
 
 export const ReviewReconstructions = observer(() => {
     const user = useUser();
@@ -31,16 +35,27 @@ export const ReviewReconstructions = observer(() => {
         return <Navigate to="/" replace={true}/>;
     }
 
-    const [offset, setOffset] = useState(0);
-    const [limit, setLimit] = useState(10);
+    const [settings, update] = usePageSettings(ReviewSettings);
 
-    const [approvalOnly, setApprovalOnly] = useState(false);
+    const {offset, limit} = settings.pagination;
 
-    const [specimenFilter] = useState(new OptionalFilter<string[]>([]));
-    const [statusFilter] = useState(new OptionalFilter<string[]>([]));
-    const [tagFilter] = useState(new OptionalFilter<string>(""));
+    const selectedId = settings.selectedId;
 
-    const [selectedId, setSelectedId] = useLocalStorage<string>({key: "review-reconstruction-id", defaultValue: null});
+    // A stored Approval Only applies only for a user who can see the switch, and is kept for when they can.
+    const approvalOnly = haveFull && settings.filters.approvalOnly;
+
+    const [specimenFilter] = useState(() => OptionalFilter.fromSettings(settings.filters.specimens));
+    const [statusFilter] = useState(() => OptionalFilter.fromSettings(settings.filters.statuses));
+    const [tagFilter] = useState(() => OptionalFilter.fromSettings(settings.filters.keywords));
+
+    const [filterGeneration, setFilterGeneration] = useState(0);
+
+    useSettingsMirror(() => ({specimens: specimenFilter.settings, keywords: tagFilter.settings, statuses: statusFilter.settings}),
+        mirrored => update(s => ({...s, filters: {...s.filters, ...mirrored}})));
+
+    const setOffset = (offset: number) => update(s => ({...s, pagination: {...s.pagination, offset}}));
+
+    const setLimit = (limit: number) => update(s => ({...s, pagination: {...s.pagination, limit}}));
 
     const available = availableReviewEntries({peer: havePeer, publish: haveFull}, approvalOnly);
 
@@ -54,6 +69,8 @@ export const ReviewReconstructions = observer(() => {
         variables: {queryArgs: {offset: offset, limit: limit, specimenIds: sampleIds, statusFilters, keywords: tag}},
         pollInterval: 10000
     });
+
+    useOffsetReset(offset, data?.annotations.total, () => setOffset(0));
 
     if (error) {
         return (<div>
@@ -69,7 +86,15 @@ export const ReviewReconstructions = observer(() => {
     const selection: Annotation = selectedId ? (reconstructionCache.find(r => r.id === selectedId) ?? null) : null;
 
     const onRowClick = (reconstruction: Annotation) => {
-        setSelectedId(reconstruction?.id ?? null);
+        update(s => ({...s, selectedId: reconstruction?.id ?? null}));
+    }
+
+    const resetFilters = () => {
+        specimenFilter.apply(ReviewSettings.defaults.filters.specimens);
+        tagFilter.apply(ReviewSettings.defaults.filters.keywords);
+        statusFilter.apply(ReviewSettings.defaults.filters.statuses);
+        update(s => ({...s, filters: {...s.filters, approvalOnly: false}, pagination: {...s.pagination, offset: 0}}));
+        setFilterGeneration(g => g + 1);
     }
 
     const pageCount = Math.max(Math.ceil(totalCount / limit), 1);
@@ -90,12 +115,19 @@ export const ReviewReconstructions = observer(() => {
                 <Card.Section bg="segment">
                     <Group justify="start" p={12}>
                         {haveFull ?
-                            <Switch label="Approval Only" checked={approvalOnly} onChange={(evt) => setApprovalOnly(evt.currentTarget.checked)}/> : null}
+                            <Switch label="Approval Only" checked={settings.filters.approvalOnly}
+                                    onChange={(evt) => {
+                                        const checked = evt.currentTarget.checked;
+                                        update(s => ({...s, filters: {...s.filters, approvalOnly: checked}}));
+                                    }}/> : null}
                         <SpecimenFilter w={300} filter={specimenFilter}/>
                         <Divider orientation="vertical"/>
-                        <NeuronTagFilter filter={tagFilter}/>
+                        <NeuronTagFilter key={filterGeneration} filter={tagFilter}/>
                         <Divider orientation="vertical"/>
                         {haveFull ? <ReviewStatusFilter w={300} filter={statusFilter} available={available}/> : null}
+                        <Group ml="auto">
+                            <ResetFiltersButton onReset={resetFilters}/>
+                        </Group>
                     </Group>
                     <Divider orientation="horizontal"/>
                 </Card.Section>
@@ -129,7 +161,7 @@ export const ReviewReconstructions = observer(() => {
                 {selection ?
                     <Card.Section bg="segment">
                         <Divider orientation="horizontal"/>
-                        <Selection reconstruction={selection}/>
+                        <Selection reconstruction={selection} tab={settings.detailTab} onTabChange={tab => update(s => ({...s, detailTab: tab}))}/>
                     </Card.Section>
                     : null
                 }

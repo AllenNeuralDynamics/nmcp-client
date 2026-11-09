@@ -1,15 +1,8 @@
 import {PreferencesManager} from "./preferencesManager";
 
-const SamplePageOffset = "sample.page.offset";
-const SamplePageLimit = "sample.page.limit";
-const NeuronPageOffset = "neuron.page.offset";
-const NeuronPageLimit = "neuron.page.limit";
-const LockedSampleId = "neuron.upload.locked.sample";
 const ShouldAutoCollapseOnQuery = "viewer.shouldAutoCollapseOnQuery";
 const LastQuery = "viewer.lastQuery";
 const HideCursorInViewer = "viewer.hideCursorInViewer";
-const AdminPageTab = "admin.tab";
-const ReconstructionNeuronsUserOnly = "reconstruct.neurons.userOnly";
 
 const AppLayoutState = "app.layout";
 
@@ -22,46 +15,6 @@ export class UserPreferences extends PreferencesManager {
         }
 
         return this._instance;
-    }
-
-    public get samplePageOffset(): number {
-        return this.loadLocalValue(SamplePageOffset, 0);
-    }
-
-    public set samplePageOffset(offset: number) {
-        this.saveLocalValue(SamplePageOffset, offset);
-    }
-
-    public get samplePageLimit(): number {
-        return this.loadLocalValue(SamplePageLimit, 10);
-    }
-
-    public set samplePageLimit(offset: number) {
-        this.saveLocalValue(SamplePageLimit, offset);
-    }
-
-    public get neuronPageOffset(): number {
-        return this.loadLocalValue(NeuronPageOffset, 0);
-    }
-
-    public set neuronPageOffset(offset: number) {
-        this.saveLocalValue(NeuronPageOffset, offset);
-    }
-
-    public get neuronPageLimit(): number {
-        return this.loadLocalValue(NeuronPageLimit, 10);
-    }
-
-    public set neuronPageLimit(offset: number) {
-        this.saveLocalValue(NeuronPageLimit, offset);
-    }
-
-    public get neuronCreateLockedSampleId(): string {
-        return this.loadLocalValue(LockedSampleId, "");
-    }
-
-    public set neuronCreateLockedSampleId(id: string) {
-        this.saveLocalValue(LockedSampleId, id);
     }
 
     public get ShouldAutoCollapseOnQuery() {
@@ -82,22 +35,6 @@ export class UserPreferences extends PreferencesManager {
 
     public get HideCursorInViewer(): boolean {
         return this.loadLocalValue(HideCursorInViewer, false);
-    }
-
-    public get AdminPageTab(): string {
-        return this.loadLocalValue(AdminPageTab, "users");
-    }
-
-    public set AdminPageTab(n: string) {
-        this.saveLocalValue(AdminPageTab, n);
-    }
-
-    public get ReconstructionNeuronsUserOnly(): boolean {
-        return this.loadLocalValue(ReconstructionNeuronsUserOnly, false);
-    }
-
-    public set ReconstructionNeuronsUserOnly(b: boolean) {
-        this.saveLocalValue(ReconstructionNeuronsUserOnly, b);
     }
 
     public get AppLayoutState(): object {

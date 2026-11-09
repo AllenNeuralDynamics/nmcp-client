@@ -28,8 +28,6 @@ export class AppLayout {
 
     public showReferenceIds: boolean = false;
 
-    public isCandidateViewerPinned: boolean = true;
-
     public constructor() {
         const layout = UserPreferences.Instance.AppLayoutState as any;
 
@@ -45,8 +43,6 @@ export class AppLayout {
             this.neuroglancerDimensionsVisible = layout.neuroglancerDimensionsVisible ?? false;
 
             this.showReferenceIds = layout.showReferenceIds ?? false;
-
-            this.isCandidateViewerPinned = layout.isCandidateViewerPinned ?? true;
         }
 
         this.updateNeuroglancerControlsVisible(this.neuroglancerControlsVisible);
@@ -85,10 +81,6 @@ export class AppLayout {
         const visible = !this.neuroglancerDimensionsVisible;
         this.updateNeuroglancerDimensionsVisible(visible);
         this.neuroglancerDimensionsVisible = visible;
-    }
-
-    public toggleCandidateViewerPinned() {
-        this.isCandidateViewerPinned = !this.isCandidateViewerPinned;
     }
 
     public serialize(): AppLayoutState {

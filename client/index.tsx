@@ -12,6 +12,7 @@ import {AuthenticationResult, EventMessage, EventType, PublicClientApplication} 
 
 import {msalConfig} from "./authConfig";
 import {ApolloApp} from "./components/app/ApolloApp";
+import {removeRetiredSettings} from "./util/pageSettings";
 
 require("file-loader?name=index.html!../index.html");
 
@@ -129,6 +130,8 @@ try {
 } catch (err) {
     console.log(err);
 }
+
+removeRetiredSettings();
 
 const rootEl = document.getElementById("root");
 

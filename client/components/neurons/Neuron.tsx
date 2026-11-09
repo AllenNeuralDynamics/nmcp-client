@@ -3,7 +3,7 @@ import {useEffect, useMemo} from "react";
 import {Navigate, useLocation, useNavigate, useParams} from "react-router-dom";
 import {ApolloError, useQuery} from "@apollo/client";
 import {Alert, Anchor, Badge, Card, Divider, Group, Stack, Tabs, Text} from "@mantine/core";
-import {useClipboard, useLocalStorage} from "@mantine/hooks";
+import {useClipboard} from "@mantine/hooks";
 import {useIsAuthenticated} from "@azure/msal-react";
 import {IconBinaryTree, IconBinaryTreeFilled, IconChartBar, IconVersions} from "@tabler/icons-react";
 import dayjs from "dayjs";
@@ -29,6 +29,9 @@ import {ReconstructionMetrics} from "./ReconstructionMetrics";
 import {NeuronDownloadMenu} from "./NeuronDownloadMenu";
 import {useSystemConfiguration} from "../../hooks/useSystemConfiguration";
 import {successNotification} from "../common/NotificationHelper";
+import {usePageSettings} from "../../hooks/usePageSettings";
+import {sectionOf} from "../../util/pageSettings";
+import {NeuronSettings} from "./neuronSettings";
 
 // Each level down to the active tab panel fills the remaining page height, so the Neuroglancer views can grow into it.
 const FillColumn: React.CSSProperties = {flexGrow: 1, display: "flex", flexDirection: "column"};
@@ -109,10 +112,11 @@ export const Neuron = () => {
 
     const appLayout = useAppLayout();
 
-    const [activeTab, setActiveTab] = useLocalStorage<string>({
-        key: "nmcp-neuron-active-tab",
-        defaultValue: "atlas"
-    });
+    const [settings, update] = usePageSettings(NeuronSettings);
+
+    const activeTab = settings.tab;
+
+    const setActiveTab = (tab: string) => update(s => ({...s, tab}));
 
     const isAuthenticated = useIsAuthenticated();
 
@@ -273,7 +277,7 @@ export const Neuron = () => {
                             </Tabs.Panel>
                             {isAuthenticated ?
                                 <Tabs.Panel value="history" style={FillColumn} key={`history_${data.neuron.id}`}>
-                                    <NeuronHistory neuronId={data.neuron.id}/>
+                                    <NeuronHistory neuronId={data.neuron.id} settings={settings.history} onSettingsChange={sectionOf(update, "history")}/>
                                 </Tabs.Panel> : null}
                         </Tabs>
                     </Card.Section>

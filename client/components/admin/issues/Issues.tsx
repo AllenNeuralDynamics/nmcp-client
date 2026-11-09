@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React from "react";
 import {Navigate} from "react-router-dom";
 import {useQuery} from "@apollo/client";
 import {Card, Center, Divider, Group, Table, Text} from "@mantine/core";
@@ -12,15 +12,18 @@ import {UserPermissions} from "../../../graphql/user";
 import {useUser} from "../../../hooks/useUser";
 import {IssueActions} from "./IssueActions";
 import {AppLoading} from "../../app/AppLoading";
+import {AdminSelectionSettings, AdminTabProps} from "../adminSettings";
 
-export const Issues = () => {
+export const Issues = ({settings, onSettingsChange}: AdminTabProps<AdminSelectionSettings>) => {
     const user = useUser();
 
     if ((user?.permissions & UserPermissions.Admin) == 0) {
         return <Navigate to="/" replace/>;
     }
 
-    const [selectionId, setSelectionId] = useState<string>(null);
+    const selectionId = settings.selectedId;
+
+    const setSelectionId = (selectedId: string) => onSettingsChange(s => ({...s, selectedId}));
 
     const {data, previousData, loading, error} = useQuery<IssueQueryResponse>(OPEN_ISSUES_QUERY, {
         pollInterval: 10000

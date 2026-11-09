@@ -38,6 +38,9 @@ export class CandidateTableViewModel {
     public totalCount: number | null = null;
     public version = 0;
     public selectedId: string | null = null;
+    // The row the user wants, which only user selections change; selectedId is the row currently shown, which the
+    // model clears when a reset, lookup or removal leaves it out of the candidates.
+    public desiredId: string | null = null;
     public selectedNeuron: NeuronShape | null = null;
     public loadError: ApolloError | null = null;
 
@@ -56,6 +59,7 @@ export class CandidateTableViewModel {
             totalCount: observable,
             version: observable,
             selectedId: observable,
+            desiredId: observable,
             selectedNeuron: observable.ref,
             loadError: observable.ref,
             reset: action,
@@ -106,6 +110,8 @@ export class CandidateTableViewModel {
             this.selectedId = neuron.id;
             this.selectedNeuron = neuron;
         }
+
+        this.desiredId = this.selectedId;
     }
 
     public async selectFromViewer(id: string): Promise<number | null> {
@@ -114,6 +120,7 @@ export class CandidateTableViewModel {
         const buffered = this.buffer.indexOf(id);
 
         runInAction(() => {
+            this.desiredId = id;
             this.selectedId = id;
             this.selectedNeuron = buffered === undefined ? null : this.buffer.get(buffered);
         });
@@ -136,6 +143,16 @@ export class CandidateTableViewModel {
         runInAction(() => this.selectedNeuron = this.buffer.get(result.offset) ?? this.selectedNeuron);
 
         return result.offset;
+    }
+
+    // Brings back the desired row when nothing is shown, as after a reset that returns it to the candidates; resolves its
+    // offset so the caller can scroll to it.
+    public reselectDesired(): Promise<number | null> {
+        if (this.desiredId === null || this.selectedId !== null) {
+            return Promise.resolve(null);
+        }
+
+        return this.selectFromViewer(this.desiredId);
     }
 
     // Resolves true when the neuron was removed, so the caller can drop its viewer point.  Only a null offset justifies

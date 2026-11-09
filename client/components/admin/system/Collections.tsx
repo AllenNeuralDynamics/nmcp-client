@@ -11,11 +11,14 @@ import {GraphQLErrorAlert} from "../../common/GraphQLErrorAlert";
 import {useUser} from "../../../hooks/useUser";
 import {UserPermissions} from "../../../graphql/user";
 import {AppLoading} from "../../app/AppLoading";
+import {AdminSelectionSettings, AdminTabProps} from "../adminSettings";
 
-export const Collections = () => {
+export const Collections = ({settings, onSettingsChange}: AdminTabProps<AdminSelectionSettings>) => {
     const user = useUser();
 
-    const [selectedId, setSelectedId] = useState<string>(null);
+    const selectedId = settings.selectedId;
+
+    const setSelectedId = (selectedId: string) => onSettingsChange(s => ({...s, selectedId}));
 
     const [adding, setAdding] = useState(false);
 

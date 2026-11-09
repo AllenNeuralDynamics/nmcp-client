@@ -1,6 +1,5 @@
 import * as React from "react";
 import {Tabs} from "@mantine/core";
-import {useLocalStorage} from "@mantine/hooks";
 import {IconBinaryTree, IconBinaryTreeFilled, IconChecklist, IconFileInfo} from "@tabler/icons-react";
 
 import {SpecimenSpace} from "./SpecimenSpace";
@@ -9,9 +8,14 @@ import {AtlasSpace} from "./AtlasSpace";
 import {Status} from "./Status";
 import {QualityCheck} from "./QualityCheck";
 
-export const Selection = ({reconstruction}: {reconstruction: Annotation}) => {
-    const [savedTab, setSavedTab] = useLocalStorage<string | null>({key: "review-tab", defaultValue: "status"});
+type SelectionProps = {
+    reconstruction: Annotation;
+    tab: string;
 
+    onTabChange(tab: string): void;
+}
+
+export const Selection = ({reconstruction, tab: savedTab, onTabChange}: SelectionProps) => {
     if (reconstruction == null) {
         return null
     }
@@ -19,12 +23,8 @@ export const Selection = ({reconstruction}: {reconstruction: Annotation}) => {
     const hasQualityControl = !!reconstruction.atlasReconstruction?.qualityControl;
     const activeTab = (!hasQualityControl && savedTab === "quality") ? "status" : savedTab;
 
-    const onChangeTab = (tab: string) => {
-        setSavedTab(tab);
-    }
-
     return (
-        <Tabs value={activeTab} onChange={onChangeTab}>
+        <Tabs value={activeTab} onChange={tab => tab && onTabChange(tab)}>
             <Tabs.List>
                 <Tabs.Tab value="status" leftSection={<IconFileInfo size={18}/>}>
                     Summary

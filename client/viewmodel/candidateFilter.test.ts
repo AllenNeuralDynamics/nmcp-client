@@ -1,6 +1,17 @@
 import {afterEach, beforeEach, describe, expect, it, vi} from "vitest";
 
-import {CandidateExcludedStatuses, CandidateFilter, watchQueryVariables} from "./candidateFilter";
+import {
+    BrightnessBounds,
+    CandidateExcludedStatuses,
+    CandidateFilter,
+    CandidateFilterSettings,
+    DefaultCandidateFilterSettings,
+    OptionalFilter,
+    retainKnownIds,
+    sanitizeCandidateFilterSettings,
+    sanitizeRangeFilter,
+    watchQueryVariables
+} from "./candidateFilter";
 import {AnnotationStatus} from "../models/annotationStatus";
 import {makeConstants} from "../test/fixtures";
 
@@ -187,5 +198,93 @@ describe("watchQueryVariables", () => {
         expect(apply).toHaveBeenCalledTimes(1);
 
         watch.dispose();
+    });
+});
+
+describe("CandidateFilter settings", () => {
+    const constants = makeConstants();
+    const find = (id: string) => constants.findAtlasStructure(id);
+
+    const stored: CandidateFilterSettings = {
+        includedStatuses: [AnnotationStatus.Duplicate],
+        specimens: {enabled: true, contents: ["s1"]},
+        atlasStructures: {enabled: true, contents: ["atlas-ccf-315"]},
+        keywords: {enabled: true, contents: "tag"},
+        genotypes: {enabled: false, contents: ["Gt"]},
+        brightness: {enabled: true, min: 10, max: 20},
+        volume: {enabled: false, min: 0, max: 500}
+    };
+
+    it("starts from the default settings", () => {
+        expect(new CandidateFilter("atlas-ccf").settings).toEqual(DefaultCandidateFilterSettings);
+    });
+
+    it("round-trips applied settings, with structures as ids and ranges as objects", () => {
+        const filter = new CandidateFilter("atlas-ccf");
+
+        filter.applySettings(stored, find);
+
+        expect(filter.settings).toEqual(stored);
+        expect(filter.atlasStructureFilter.contents).toEqual([isocortex]);
+        expect(filter.queryVariables.input.specimenIds).toEqual(["s1"]);
+        expect(filter.somaFilter).toMatchObject({limitBrightness: true, brightnessRange: [10, 20]});
+    });
+
+    it("drops structure ids the constants don't know", () => {
+        const filter = new CandidateFilter("atlas-ccf");
+
+        filter.applySettings({...stored, atlasStructures: {enabled: true, contents: ["atlas-ccf-315", "missing"]}}, find);
+
+        expect(filter.settings.atlasStructures.contents).toEqual(["atlas-ccf-315"]);
+    });
+
+    it("returns to an unfiltered state when the defaults are applied", () => {
+        const filter = new CandidateFilter("atlas-ccf");
+
+        filter.applySettings(stored, find);
+        expect(filter.anyEnabled).toBe(true);
+
+        filter.applySettings(DefaultCandidateFilterSettings, find);
+        expect(filter.anyEnabled).toBe(false);
+        expect(filter.settings).toEqual(DefaultCandidateFilterSettings);
+    });
+
+    it("sanitizes statuses and ranges", () => {
+        const sanitized = sanitizeCandidateFilterSettings({
+            ...stored,
+            includedStatuses: [AnnotationStatus.InProgress, AnnotationStatus.Published],
+            brightness: {enabled: true, min: 30, max: 20},
+            volume: {enabled: true, min: 0, max: 200000}
+        });
+
+        expect(sanitized.includedStatuses).toEqual([AnnotationStatus.InProgress]);
+        expect(sanitized.brightness).toEqual({enabled: true, min: 0, max: 5000});
+        expect(sanitized.volume).toEqual({enabled: true, min: 0, max: 100000});
+        expect(sanitizeRangeFilter(stored.brightness, BrightnessBounds)).toBe(stored.brightness);
+    });
+});
+
+describe("OptionalFilter settings", () => {
+    it("builds from, reports and applies settings", () => {
+        const filter = OptionalFilter.fromSettings({enabled: true, contents: ["a"]});
+
+        expect(filter.settings).toEqual({enabled: true, contents: ["a"]});
+
+        filter.apply({enabled: false, contents: ["b"]});
+
+        expect(filter.isEnabled).toBe(false);
+        expect(filter.contents).toEqual(["b"]);
+    });
+
+    it("retains only known ids, leaving the list alone when all are known", () => {
+        const filter = OptionalFilter.fromSettings({enabled: true, contents: ["a", "b"]});
+
+        const before = filter.contents;
+
+        retainKnownIds(filter, new Set(["a", "b", "c"]));
+        expect(filter.contents).toBe(before);
+
+        retainKnownIds(filter, new Set(["b"]));
+        expect(filter.contents).toEqual(["b"]);
     });
 });

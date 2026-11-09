@@ -1,10 +1,9 @@
 import * as React from "react";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {useMutation, useQuery} from "@apollo/client";
 import {Button, Card, Center, Divider, Group, Loader, SimpleGrid, Table, Text} from "@mantine/core";
 import {IconPlus} from "@tabler/icons-react";
 
-import {usePreferences} from "../../hooks/usePreferences";
 import {SpecimenShape} from "../../models/specimen";
 import {SpecimenRow} from "./SpecimenRow";
 import {
@@ -22,25 +21,36 @@ import {CollectionSelect} from "../common/CollectionSelect";
 import {AtlasSelect} from "../common/AtlasSelect";
 import {useConstants} from "../../hooks/useConstants";
 import {COLLECTIONS_QUERY, CollectionsResponse} from "../../graphql/collection";
+import {SettingsChange} from "../../util/pageSettings";
+import {useOffsetReset} from "../../hooks/useOffsetReset";
+import {AddSpecimensSpecimensSettings} from "../neurons/addSpecimensSettings";
 
 type SpecimensTableState = {
-    offset?: number;
-    limit?: number;
     requestedSampleForDelete?: SpecimenShape;
     isInjectionDialogShown?: boolean;
     manageInjectionsSample?: SpecimenShape;
 }
 
-export const SpecimensTable = () => {
-    const preferences = usePreferences();
+type SpecimensTableProps = {
+    settings: AddSpecimensSpecimensSettings;
+
+    onSettingsChange: SettingsChange<AddSpecimensSpecimensSettings>;
+}
+
+export const SpecimensTable = ({settings, onSettingsChange}: SpecimensTableProps) => {
     const constants = useConstants();
 
-    const [collectionId, setCollectionId] = useState<string>(null);
-    const [atlasId, setAtlasId] = useState<string>(null);
+    const {atlasId, collectionId} = settings.create;
+
+    const {offset: storedOffset, limit} = settings.pagination;
+
+    const setAtlasId = (atlasId: string) => onSettingsChange(s => ({...s, create: {...s.create, atlasId}}));
+
+    const setCollectionId = (collectionId: string) => onSettingsChange(s => ({...s, create: {...s.create, collectionId}}));
+
+    const setOffset = (offset: number) => onSettingsChange(s => ({...s, pagination: {...s.pagination, offset}}));
 
     const [state, setState] = useState<SpecimensTableState>({
-        offset: preferences.samplePageOffset,
-        limit: preferences.samplePageLimit,
         requestedSampleForDelete: null,
         isInjectionDialogShown: false,
         manageInjectionsSample: null
@@ -64,6 +74,25 @@ export const SpecimensTable = () => {
             onError: (error) => toastDeleteError(error)
         });
 
+    const collections = collectionsData?.collections;
+
+    const knownAtlas = atlasId != null && constants.getAtlas(atlasId) != null;
+
+    const knownCollection = collectionId != null && (!collections || collections.some(c => c.id === collectionId));
+
+    useEffect(() => {
+        if (atlasId != null && !knownAtlas) {
+            setAtlasId(null);
+        }
+    }, [atlasId]);
+
+    useEffect(() => {
+        if (collectionId != null && collections && !knownCollection) {
+            setCollectionId(null);
+        }
+    }, [collectionId, collections]);
+
+    useOffsetReset(storedOffset, data ? data.specimens.items.length : undefined, () => setOffset(0));
 
     if (error) {
         return <GraphQLErrorAlert title="Specimen Data Could Not Be Loaded" error={error}/>;
@@ -84,36 +113,25 @@ export const SpecimensTable = () => {
         totalCount = previousData.specimens.totalCount;
     }
 
-    let selectedCollectionId = collectionId;
+    let selectedCollectionId = knownCollection ? collectionId : null;
 
-    if (collectionId == null && collectionsData?.collections?.length > 0) {
-        selectedCollectionId = collectionsData.collections[0].id;
+    if (selectedCollectionId == null && collections?.length > 0) {
+        selectedCollectionId = collections[0].id;
     }
 
-    const selectedAtlasId = atlasId ?? constants.DefaultAtlas?.id ?? null;
+    const selectedAtlasId = knownAtlas ? atlasId : constants.DefaultAtlas?.id ?? null;
 
     const onUpdateOffsetForPage = (page: number) => {
-        const offset = state.limit * (page - 1);
+        const offset = limit * (page - 1);
 
-        if (offset !== state.offset) {
-            setState({...state, offset});
-
-            preferences.samplePageOffset = offset;
+        if (offset !== storedOffset) {
+            setOffset(offset);
         }
     }
 
-    const onUpdateLimit = (limit: number) => {
-        if (limit !== state.limit) {
-            let offset = state.offset;
-
-            if (offset < limit) {
-                offset = 0;
-            }
-
-            setState({...state, offset, limit});
-
-            preferences.samplePageOffset = offset;
-            preferences.samplePageLimit = limit;
+    const onUpdateLimit = (value: number) => {
+        if (value !== limit) {
+            onSettingsChange(s => ({...s, pagination: {...s.pagination, limit: value}}));
         }
     }
 
@@ -161,19 +179,18 @@ export const SpecimensTable = () => {
         setState({...state, requestedSampleForDelete: sample})
     };
 
-    const lastPageOffset = Math.max(0, (Math.ceil(specimens.length / state.limit) - 1) * state.limit);
+    // Past the end shows the first page at once, while useOffsetReset stores it.
+    const offset = storedOffset < specimens.length ? storedOffset : 0;
 
-    const actualOffset = Math.min(state.offset, lastPageOffset);
+    const specimenSubset = specimens.slice(offset, offset + limit);
 
-    const specimenSubset = specimens.slice(actualOffset, actualOffset + state.limit);
+    const pageCount = Math.ceil(totalCount / limit);
 
-    const pageCount = Math.ceil(totalCount / state.limit);
+    const activePage = Math.min(pageCount, (Math.floor(offset / limit) + 1));
 
-    const activePage = Math.min(pageCount, (Math.floor(actualOffset / state.limit) + 1));
+    const start = offset + 1;
 
-    const start = actualOffset + 1;
-
-    const end = Math.min(actualOffset + state.limit, totalCount);
+    const end = Math.min(offset + limit, totalCount);
 
     const rows = specimenSubset.map(s => {
         return <SpecimenRow key={s.id} specimen={s} requestDelete={setSampleForDelete} manageInjections={onRequestManageInjections}/>
@@ -222,7 +239,7 @@ export const SpecimensTable = () => {
                     <Divider orientation="horizontal"/>
                 </Card.Section>
                 <Card.Section bg="table-header">
-                    <PaginationHeader total={pageCount} value={activePage} limit={state.limit} itemCount={totalCount}
+                    <PaginationHeader total={pageCount} value={activePage} limit={limit} itemCount={totalCount}
                                       onLimitChange={limit => onUpdateLimit(limit)}
                                       onChange={page => onUpdateOffsetForPage(page)}/>
                 </Card.Section>

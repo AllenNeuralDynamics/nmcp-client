@@ -5,7 +5,7 @@ import {observer} from "mobx-react-lite";
 import {ActionIcon, Box, Card, Center, Collapse, Divider, Group, Loader, Slider, Stack, Text, Tooltip} from "@mantine/core";
 import {IconChevronDown, IconChevronUp, IconRefresh} from "@tabler/icons-react";
 
-import {CandidateFilter, CandidateFilterWatch, watchQueryVariables} from "../../viewmodel/candidateFilter";
+import {CandidateFilter, CandidateFilterWatch, DefaultCandidateFilterSettings, watchQueryVariables} from "../../viewmodel/candidateFilter";
 import {CandidateTableViewModel} from "../../viewmodel/candidateTableViewModel";
 import {CandidateLocationLoader} from "../../viewmodel/candidateLocationLoader";
 import {CandidatesTable, CandidatesTableHandle} from "./CandidatesTable";
@@ -15,9 +15,13 @@ import {CandidateFilters} from "./CandidateFilters";
 import {CandidateMetrics} from "./CandidateMetrics";
 import {usePendingTableScroll} from "./usePendingTableScroll";
 import {GraphQLErrorAlert} from "../common/GraphQLErrorAlert";
-import {useAppLayout} from "../../hooks/useAppLayout";
 import {useConstants} from "../../hooks/useConstants";
 import {AtlasViewModel} from "../../viewmodel/atlasViewModel";
+import {usePageSettings} from "../../hooks/usePageSettings";
+import {useSettingsMirror} from "../../hooks/useSettingsMirror";
+import {sectionOf} from "../../util/pageSettings";
+import {CandidatesSettings} from "./candidatesSettings";
+import {ResetFiltersButton} from "../common/ResetFiltersButton";
 
 const MinRowCountForSlider = 10;
 
@@ -28,24 +32,41 @@ function noCandidatesText(isFiltered: boolean) {
 }
 
 export const Candidates = observer(() => {
+    const [settings, update] = usePageSettings(CandidatesSettings);
+    const updateLayout = sectionOf(update, "layout");
+
     const client = useApolloClient();
     const constants = useConstants();
-    const appLayout = useAppLayout();
 
-    const pinned = appLayout.isCandidateViewerPinned;
-    const [filtersExpanded, setFiltersExpanded] = useState(true);
-    const [tableExpanded, setTableExpanded] = useState(true);
+    const findStructure = (id: string) => constants.findAtlasStructure(id);
 
-    const [candidateFilter] = useState(() => new CandidateFilter(constants.DefaultAtlas?.id ?? null));
-    const [tableViewModel] = useState(() => new CandidateTableViewModel(client));
+    const {filtersExpanded, tableExpanded, visibleRowCount, viewerPinned: pinned} = settings.layout;
+
+    const [candidateFilter] = useState(() => {
+        const filter = new CandidateFilter(constants.DefaultAtlas?.id ?? null);
+
+        filter.applySettings(settings.filters, findStructure);
+
+        return filter;
+    });
+
+    const [tableViewModel] = useState(() => {
+        const model = new CandidateTableViewModel(client);
+
+        model.desiredId = settings.selectedId;
+
+        return model;
+    });
+
     const [locationLoader] = useState(() => new CandidateLocationLoader(client));
 
     const tableRef = useRef<CandidatesTableHandle>(null);
     const filterWatchRef = useRef<CandidateFilterWatch>(null);
 
-    const [visibleRowCount, setVisibleRowCount] = useState(10);
-    const [sliderValue, setSliderValue] = useState(10);
-    const [visibleRange, setVisibleRange] = useState<[number, number]>([0, 9]);
+    const [sliderValue, setSliderValue] = useState(visibleRowCount);
+    const [visibleRange, setVisibleRange] = useState<[number, number]>([0, visibleRowCount - 1]);
+
+    const [filterGeneration, setFilterGeneration] = useState(0);
 
     const atlasViewModel = useMemo(() => {
         const atlas = constants.getAtlas(candidateFilter.atlasId);
@@ -61,6 +82,8 @@ export const Candidates = observer(() => {
 
             tableViewModel.reset(variables, filterChanged);
 
+            void reselectDesired();
+
             void locationLoader.start(variables);
         });
 
@@ -74,6 +97,10 @@ export const Candidates = observer(() => {
             locationLoader.cancel();
         }
     }, []);
+
+    useSettingsMirror(() => candidateFilter.settings, filters => update(s => ({...s, filters})));
+
+    useSettingsMirror(() => tableViewModel.desiredId, selectedId => update(s => ({...s, selectedId})));
 
     const {totalCount, loadError, selectedId, selectedNeuron, version} = tableViewModel;
 
@@ -95,6 +122,22 @@ export const Candidates = observer(() => {
         if (offset !== null) {
             requestScroll(id, offset);
         }
+    };
+
+    // Every reset retries the row the user wants, which also restores the stored selection on the first one.
+    const reselectDesired = async () => {
+        const id = tableViewModel.desiredId;
+
+        const offset = await tableViewModel.reselectDesired();
+
+        if (offset !== null) {
+            requestScroll(id, offset);
+        }
+    };
+
+    const resetFilters = () => {
+        candidateFilter.applySettings(DefaultCandidateFilterSettings, findStructure);
+        setFilterGeneration(g => g + 1);
     };
 
     const onReconstructionStarted = async (id: string) => {
@@ -133,6 +176,7 @@ export const Candidates = observer(() => {
                         <Group p={12} justify="space-between">
                             <Text size="lg" fw={500}>Candidate Neurons</Text>
                             <Group gap={4}>
+                                <ResetFiltersButton onReset={resetFilters}/>
                                 <Tooltip label="Reload the candidates and soma locations">
                                     <ActionIcon variant="subtle" aria-label="Refresh candidates" onClick={refresh}>
                                         <IconRefresh size={18}/>
@@ -140,7 +184,7 @@ export const Candidates = observer(() => {
                                 </Tooltip>
                                 <Tooltip label={filtersExpanded ? "Hide the filters" : "Show the filters"}>
                                     <ActionIcon variant="subtle" aria-label={filtersExpanded ? "Hide filters" : "Show filters"}
-                                                aria-expanded={filtersExpanded} onClick={() => setFiltersExpanded(!filtersExpanded)}>
+                                                aria-expanded={filtersExpanded} onClick={() => updateLayout(l => ({...l, filtersExpanded: !l.filtersExpanded}))}>
                                         {filtersExpanded ? <IconChevronUp size={18}/> : <IconChevronDown size={18}/>}
                                     </ActionIcon>
                                 </Tooltip>
@@ -150,18 +194,18 @@ export const Candidates = observer(() => {
                     </Card.Section>
                     <Collapse in={filtersExpanded}>
                         <Card.Section bg="segment">
-                            <CandidateFilters candidateFilter={candidateFilter}/>
+                            <CandidateFilters key={filterGeneration} candidateFilter={candidateFilter}/>
                             <Divider orientation="horizontal"/>
                         </Card.Section>
                         <Card.Section bg="segment">
-                            <CandidateMetrics candidateFilter={candidateFilter}/>
+                            <CandidateMetrics key={filterGeneration} candidateFilter={candidateFilter}/>
                             <Divider orientation="horizontal"/>
                         </Card.Section>
                         {!loadError && totalCount >= MinRowCountForSlider ?
                             <Card.Section>
                                 <Group p={12} align="center">
                                     <Slider miw={300} mb={14} min={10} max={50} step={5} value={sliderValue} marks={rowCountMarks}
-                                            onChange={setSliderValue} onChangeEnd={setVisibleRowCount}/>
+                                            onChange={setSliderValue} onChangeEnd={value => updateLayout(l => ({...l, visibleRowCount: value}))}/>
                                 </Group>
                                 <Divider orientation="horizontal"/>
                             </Card.Section> : null}
@@ -177,7 +221,7 @@ export const Candidates = observer(() => {
                                 </Box>
                                 <Tooltip label={tableExpanded ? "Hide the table" : "Show the table"}>
                                     <ActionIcon variant="subtle" aria-label={tableExpanded ? "Hide table" : "Show table"}
-                                                aria-expanded={tableExpanded} onClick={() => setTableExpanded(!tableExpanded)}>
+                                                aria-expanded={tableExpanded} onClick={() => updateLayout(l => ({...l, tableExpanded: !l.tableExpanded}))}>
                                         {tableExpanded ? <IconChevronUp size={18}/> : <IconChevronDown size={18}/>}
                                     </ActionIcon>
                                 </Tooltip>
@@ -202,7 +246,8 @@ export const Candidates = observer(() => {
                 </Box>
                 <Card.Section style={{flexGrow: 1, display: "flex", flexDirection: "column"}}>
                     <CandidatesView atlasViewModel={atlasViewModel} locationLoader={locationLoader} selectedId={selectedId}
-                                    selectedNeuron={selectedNeuron} onViewerSelected={onViewerSelected}/>
+                                    selectedNeuron={selectedNeuron} onViewerSelected={onViewerSelected} pinned={pinned}
+                                    onTogglePinned={() => updateLayout(l => ({...l, viewerPinned: !l.viewerPinned}))}/>
                 </Card.Section>
             </Card>
         </Stack>

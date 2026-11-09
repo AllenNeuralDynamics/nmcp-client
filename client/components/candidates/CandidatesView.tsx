@@ -4,7 +4,6 @@ import {observer} from "mobx-react-lite";
 import {ActionIcon, Box, Divider, Paper, Progress, Stack, Text, Tooltip, useComputedColorScheme} from "@mantine/core";
 import {IconPin, IconPinned} from "@tabler/icons-react";
 
-import {useAppLayout} from "../../hooks/useAppLayout";
 import {NeuronShape} from "../../models/neuron";
 import {CandidateViewer} from "../../viewer/candidateViewer";
 import {NeuroglancerControls} from "../common/NeuroglancerControls";
@@ -16,8 +15,11 @@ export interface CandidatesViewProps {
     locationLoader: CandidateLocationLoader;
     selectedId: string | null;
     selectedNeuron: NeuronShape | null;
+    pinned: boolean;
 
     onViewerSelected(id: string): void;
+
+    onTogglePinned(): void;
 }
 
 export const CandidatesView = observer((props: CandidatesViewProps) => {
@@ -27,9 +29,7 @@ export const CandidatesView = observer((props: CandidatesViewProps) => {
     const onViewerSelectedRef = useRef(props.onViewerSelected);
     onViewerSelectedRef.current = props.onViewerSelected;
 
-    const appLayout = useAppLayout();
-
-    const pinned = appLayout.isCandidateViewerPinned;
+    const pinned = props.pinned;
 
     const scheme = useComputedColorScheme();
 
@@ -73,7 +73,7 @@ export const CandidatesView = observer((props: CandidatesViewProps) => {
                 <NeuroglancerControls viewer={viewer} allowResetView={true} allowStateExport={false}>
                     <Tooltip label={pinned ? "Unpin the viewer so it scrolls with the page" : "Pin the viewer to the bottom of the page"}>
                         <ActionIcon variant={pinned ? "light" : "subtle"} aria-label={pinned ? "Unpin viewer" : "Pin viewer"}
-                                    aria-pressed={pinned} onClick={() => appLayout.toggleCandidateViewerPinned()}>
+                                    aria-pressed={pinned} onClick={props.onTogglePinned}>
                             {pinned ? <IconPinned size={18}/> : <IconPin size={18}/>}
                         </ActionIcon>
                     </Tooltip>

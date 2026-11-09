@@ -1,10 +1,16 @@
+import {useState} from "react";
 import {describe, expect, it} from "vitest";
 import {act, renderHook} from "@testing-library/react";
 
 import {usePublishedQueueState} from "./usePublishedQueueState";
+import {AdminSettings} from "../adminSettings";
 
 function selected() {
-    const hook = renderHook(() => usePublishedQueueState());
+    const hook = renderHook(() => {
+        const [settings, setSettings] = useState(AdminSettings.defaults.publishing);
+
+        return usePublishedQueueState(settings, setSettings);
+    });
 
     act(() => hook.result.current.setSelectedId("rec-1"));
 
@@ -35,6 +41,26 @@ describe("usePublishedQueueState", () => {
 
         act(() => result.current.setLimit(25));
 
+        expect(result.current.selectedId).toBeNull();
+    });
+
+    it("stores the status it changes to", () => {
+        const {result} = selected();
+
+        act(() => result.current.setStatusFilter("publish-failed"));
+
+        expect(result.current.statusFilter).toBe("publish-failed");
+    });
+
+    it("keeps the offset when the page size changes", () => {
+        const {result} = selected();
+
+        act(() => result.current.setOffset(10));
+        act(() => result.current.setSelectedId("rec-1"));
+        act(() => result.current.setLimit(25));
+
+        expect(result.current.offset).toBe(10);
+        expect(result.current.limit).toBe(25);
         expect(result.current.selectedId).toBeNull();
     });
 

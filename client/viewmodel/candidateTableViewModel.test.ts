@@ -695,3 +695,99 @@ describe("CandidateTableViewModel", () => {
         });
     });
 });
+
+describe("CandidateTableViewModel desired selection", () => {
+    beforeEach(() => {
+        vi.useFakeTimers();
+        vi.clearAllMocks();
+    });
+
+    afterEach(() => {
+        vi.useRealTimers();
+    });
+
+    it("follows row and viewer selections, and a row toggled off", async () => {
+        const {model} = await loaded(120);
+
+        model.selectRow(model.rowAt(5));
+        expect(model.desiredId).toBe("n5");
+
+        model.selectRow(model.rowAt(5));
+        expect(model.desiredId).toBeNull();
+
+        await model.selectFromViewer("n7");
+        expect(model.desiredId).toBe("n7");
+    });
+
+    it("survives a reset that excludes the row and comes back when a later reset returns it", async () => {
+        const {server, model} = await loaded(120);
+
+        model.selectRow(model.rowAt(5));
+        server.offsetOf = () => null;
+
+        model.reset(otherVariables, true);
+        await server.serve();
+
+        expect(model.selectedId).toBeNull();
+        expect(model.desiredId).toBe("n5");
+
+        server.offsetOf = null;
+
+        model.reset(variables, true);
+        const reselected = model.reselectDesired();
+        await server.serve();
+
+        expect(await reselected).toBe(5);
+        expect(model.selectedId).toBe("n5");
+        expect(model.selectedNeuron.id).toBe("n5");
+    });
+
+    it("survives a failed viewer lookup", async () => {
+        const {server, model} = await loaded(1000);
+
+        server.failOffsetQuery = true;
+
+        const selection = model.selectFromViewer("n700");
+        await server.serve();
+
+        expect(await selection).toBeNull();
+        expect(model.selectedId).toBeNull();
+        expect(model.desiredId).toBe("n700");
+    });
+
+    it("survives a started reconstruction removing the selected neuron", async () => {
+        const {model} = await loaded(120);
+
+        model.selectRow(model.rowAt(5));
+
+        expect(await model.handleReconstructionStarted("n5", false)).toBe(true);
+
+        expect(model.selectedId).toBeNull();
+        expect(model.desiredId).toBe("n5");
+    });
+
+    it("does nothing when nothing is desired or a row is already shown", async () => {
+        const {server, model} = await loaded(120);
+
+        expect(await model.reselectDesired()).toBeNull();
+
+        model.selectRow(model.rowAt(5));
+
+        expect(await model.reselectDesired()).toBeNull();
+        expect(server.offsetCalls()).toHaveLength(0);
+    });
+
+    it("restores a desired id assigned right after construction", async () => {
+        const server = new FakeServer(1000);
+        const model = new CandidateTableViewModel(server.client);
+
+        model.desiredId = "n700";
+
+        model.reset(variables, true);
+        const restored = model.reselectDesired();
+        await server.serve();
+
+        expect(await restored).toBe(700);
+        expect(model.selectedId).toBe("n700");
+    });
+});

@@ -1,4 +1,4 @@
-import React, {useCallback, useState} from "react";
+import React, {useCallback} from "react";
 import {Navigate} from "react-router-dom";
 import {useMutation, useQuery} from "@apollo/client";
 
@@ -18,25 +18,27 @@ import {useUser} from "../../../hooks/useUser";
 import {AppLoading} from "../../app/AppLoading";
 import {PermissionsCheckBox} from "./PermissionsCheckBox";
 import {Badge, Card, Center, Divider, Group, SimpleGrid, Switch, Table, Text} from "@mantine/core";
+import {AdminTabProps, AdminUsersSettings} from "../adminSettings";
+import {useOffsetReset} from "../../../hooks/useOffsetReset";
 
 
-export const Users = () => {
+export const Users = ({settings, onSettingsChange}: AdminTabProps<AdminUsersSettings>) => {
     const user = useUser();
 
     if ((user?.permissions & UserPermissions.Admin) == 0) {
         return <Navigate to="/" replace/>;
     }
 
-    const [state, setState] = useState({
-        offset: 0,
-        limit: 10,
-        includeImported: false
-    });
+    const state = {...settings.pagination, includeImported: settings.filters.includeImported};
+
+    const setOffset = (offset: number) => onSettingsChange(s => ({...s, pagination: {...s.pagination, offset}}));
 
     const {loading, error, data, previousData} = useQuery<UsersQueryResponse, UserQueryVariables>(USERS_QUERY, {
         variables: {input: {offset: state.offset, limit: state.limit, includeImported: state.includeImported}},
         pollInterval: 10000
     });
+
+    useOffsetReset(state.offset, data?.users.totalCount, () => setOffset(0));
 
     if (error) {
         return <GraphQLErrorAlert title="Users Could not be Loaded" error={error}/>;
@@ -55,19 +57,13 @@ export const Users = () => {
         const offset = state.limit * (page - 1);
 
         if (offset !== state.offset) {
-            setState({...state, offset});
+            setOffset(offset);
         }
     };
 
     const onUpdateLimit = (limit: number) => {
         if (limit !== state.limit) {
-            let offset = state.offset;
-
-            if (offset < limit) {
-                offset = 0;
-            }
-
-            setState({...state, offset, limit});
+            onSettingsChange(s => ({...s, pagination: {...s.pagination, limit}}));
         }
     };
 
@@ -90,7 +86,10 @@ export const Users = () => {
             <Card.Section bg="segment">
                 <Group p={8}>
                     <Switch label="Include imported" checked={state.includeImported}
-                            onChange={evt => setState({...state, includeImported: evt.currentTarget.checked})}/>
+                            onChange={evt => {
+                                const includeImported = evt.currentTarget.checked;
+                                onSettingsChange(s => ({...s, filters: {...s.filters, includeImported}}));
+                            }}/>
                 </Group>
             </Card.Section>
             <Card.Section bg="segment">

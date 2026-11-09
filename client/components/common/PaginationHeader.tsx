@@ -22,6 +22,16 @@ export function PaginationHeader(props: PaginationHeaderProps) {
     const [isValidPageJump, setIsValidPageJump] = React.useState<boolean>(isValidJumpText(props.value.toFixed(0), props.total));
     const [limit, setLimit] = React.useState<number>(props.limit);
 
+    // The local limit follows the slider while it is dragged; both copies follow the props when the page changes them.
+    React.useEffect(() => setLimit(props.limit), [props.limit]);
+
+    React.useEffect(() => {
+        const text = props.value.toFixed(0);
+
+        setPageJumpText(text);
+        setIsValidPageJump(isValidJumpText(text, props.total));
+    }, [props.value]);
+
     const setActivePage = (page: number) => {
         props.onChange(page);
     };

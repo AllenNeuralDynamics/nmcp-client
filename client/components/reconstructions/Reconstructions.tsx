@@ -4,7 +4,6 @@ import {useQuery} from "@apollo/client";
 import {observer} from "mobx-react-lite";
 import {Card, Center, Divider, Group, Loader, SimpleGrid, Stack, Text} from "@mantine/core";
 
-import {usePreferences} from "../../hooks/usePreferences";
 import {useUser} from "../../hooks/useUser";
 import {PaginationHeader} from "../common/PaginationHeader";
 import {RequestReviewModal} from "./RequestReviewModal";
@@ -23,6 +22,10 @@ import {ReconstructionUpload} from "../common/ReconstructionUpload";
 import {annotatorUploadGate, AnnotatorUploadSourceStatuses} from "../../models/reconstructionGates";
 import {ReconstructionSpace} from "../../models/reconstructionSpace";
 import {RawReconstructionDetails} from "./RawReconstructionDetails";
+import {usePageSettings} from "../../hooks/usePageSettings";
+import {useSettingsMirror} from "../../hooks/useSettingsMirror";
+import {useOffsetReset} from "../../hooks/useOffsetReset";
+import {ReconstructionsSettings} from "./reconstructionsSettings";
 
 const uploadStatusMessage = `Raw reconstruction uploads are available while the reconstruction is ${AnnotatorUploadSourceStatuses.map(statusNameOnly).join(" or ")}.`;
 
@@ -33,22 +36,29 @@ function noReconstructionsText(userOnly: boolean, haveFilters: boolean) {
 }
 
 export const Reconstructions = observer(() => {
-    const preferences = usePreferences();
     const user = useUser();
 
     if (!user || !hasPermission(user.permissions, UserPermissions.AnnotateAll)) {
         return <Navigate to="/" replace/>;
     }
 
-    const [offset, setOffset] = useState(0);
-    const [limit, setLimit] = useState(10);
+    const [settings, update] = usePageSettings(ReconstructionsSettings);
 
-    const [userOnly, setUserOnly] = useState(preferences.ReconstructionNeuronsUserOnly);
+    const {offset, limit} = settings.pagination;
 
-    const [specimenFilter] = useState(new OptionalFilter<string[]>([]));
-    const [statusFilter] = useState(new OptionalFilter<number[]>([]));
+    const userOnly = settings.filters.userOnly;
 
-    const [selection, setSelection] = useState<string>(null);
+    const selection = settings.selectedId;
+
+    const [specimenFilter] = useState(() => OptionalFilter.fromSettings(settings.filters.specimens));
+    const [statusFilter] = useState(() => OptionalFilter.fromSettings(settings.filters.statuses));
+
+    useSettingsMirror(() => ({specimens: specimenFilter.settings, statuses: statusFilter.settings}),
+        mirrored => update(s => ({...s, filters: {...s.filters, ...mirrored}})));
+
+    const setOffset = (offset: number) => update(s => ({...s, pagination: {...s.pagination, offset}}));
+
+    const setLimit = (limit: number) => update(s => ({...s, pagination: {...s.pagination, limit}}));
 
     const [isCompleteDialogVisible, setIsCompleteDialogVisible] = useState(false);
 
@@ -63,6 +73,8 @@ export const Reconstructions = observer(() => {
         variables: {queryArgs: {offset: offset, limit: limit, userOnly: userOnly, status: status, specimenIds: sampleIds}, includeRaw: true},
         pollInterval: 10000
     });
+
+    useOffsetReset(offset, data?.annotations.total, () => setOffset(0));
 
     if (error) {
         return <GraphQLErrorAlert title="Candidate Data Could Not Be Loaded" error={error}/>;
@@ -84,13 +96,19 @@ export const Reconstructions = observer(() => {
     }
 
     const onUserOnlyChange = (userOnly: boolean) => {
-        preferences.ReconstructionNeuronsUserOnly = userOnly;
-        setUserOnly(userOnly)
+        update(s => ({...s, filters: {...s.filters, userOnly}}));
     }
+
     const onSelected = (reconstruction: Annotation) => {
         if ((reconstruction?.id ?? null) != selection) {
-            setSelection(reconstruction?.id ?? null);
+            update(s => ({...s, selectedId: reconstruction?.id ?? null}));
         }
+    }
+
+    const resetFilters = () => {
+        specimenFilter.apply(ReconstructionsSettings.defaults.filters.specimens);
+        statusFilter.apply(ReconstructionsSettings.defaults.filters.statuses);
+        update(s => ({...s, filters: {...s.filters, userOnly: false}, pagination: {...s.pagination, offset: 0}}));
     }
 
     let selectedReconstruction = null;
@@ -139,7 +157,7 @@ export const Reconstructions = observer(() => {
                 </Card.Section>
                 <Card.Section bg="segment">
                     <ReconstructionFilters checked={userOnly} onChange={evt => onUserOnlyChange(evt.currentTarget.checked)} filter={specimenFilter}
-                                           filter1={statusFilter}/>
+                                           filter1={statusFilter} onReset={resetFilters}/>
                     <Divider orientation="horizontal"/>
                 </Card.Section>
                 <Card.Section bg="segment">

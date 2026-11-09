@@ -21,47 +21,74 @@ import {
 import {SpecimenShape} from "../../models/specimen";
 import {NeuronsTable} from "./NeuronsTable";
 import {formatNeuron, NeuronShape, NeuronStatus} from "../../models/neuron";
-import {UserPreferences} from "../../util/userPreferences";
 import {ImportSomasModal} from "./soma/ImportSomasModal";
 import {SpecimenFilter} from "../common/filters/SpecimenFilter";
 import {AtlasStructureMultiSelectFilter} from "../common/filters/AtlasStructureMultiSelectFilter";
 import {NeuronTagFilter} from "../common/filters/NeuronTagFilter";
-import {CandidateFilter, OptionalFilter} from "../../viewmodel/candidateFilter";
+import {CandidateFilter, DefaultCandidateFilterSettings, OptionalFilter} from "../../viewmodel/candidateFilter";
 import {CandidateMetrics} from "../candidates/CandidateMetrics";
 import {SpecimenSelect} from "../common/SpecimenSelect";
 import {SPECIMENS_QUERY, SpecimensQueryResponse} from "../../graphql/specimen";
 import {GraphQLErrorAlert} from "../common/GraphQLErrorAlert";
-import {usePreferences} from "../../hooks/usePreferences";
 import {useConstants} from "../../hooks/useConstants";
 import {MessageBox} from "../common/MessageBox";
 import {BulkUpdateModal} from "./BulkUpdateModal";
 import {NeuronStatusFilter} from "../common/filters/NeuronStatusFilter";
+import {SettingsChange} from "../../util/pageSettings";
+import {useSettingsMirror} from "../../hooks/useSettingsMirror";
+import {useOffsetReset} from "../../hooks/useOffsetReset";
+import {ResetFiltersButton} from "../common/ResetFiltersButton";
+import {AddSpecimensNeuronsSettings, AddSpecimensSettings} from "./addSpecimensSettings";
 
 interface INeuronsState {
-    offset: number;
-    limit: number;
     requestedNeuronForDelete: NeuronShape;
     isUploadSomaPropertiesOpen: boolean;
 }
 
-export const Neurons = observer(() => {
-    const preferences = usePreferences();
+type NeuronsProps = {
+    settings: AddSpecimensNeuronsSettings;
 
+    onSettingsChange: SettingsChange<AddSpecimensNeuronsSettings>;
+}
+
+export const Neurons = observer(({settings, onSettingsChange}: NeuronsProps) => {
     const [sampleId, setSampleId] = useState<string>(null);
     const [isSampleLocked, setIsSampleLocked] = useState<boolean>(false);
 
     const constants = useConstants();
 
-    const [candidateFilter] = useState(() => new CandidateFilter(constants.DefaultAtlas?.id ?? null));
-    const [statusFilter] = useState(new OptionalFilter<NeuronStatus>(NeuronStatus.Unpublished));
+    const findStructure = (id: string) => constants.findAtlasStructure(id);
+
+    const [candidateFilter] = useState(() => {
+        const filter = new CandidateFilter(constants.DefaultAtlas?.id ?? null);
+
+        const {status, ...candidateFields} = settings.filters;
+
+        filter.applySettings({...DefaultCandidateFilterSettings, ...candidateFields}, findStructure);
+
+        return filter;
+    });
+
+    const [statusFilter] = useState(() => OptionalFilter.fromSettings<NeuronStatus>(settings.filters.status));
+
+    const [filterGeneration, setFilterGeneration] = useState(0);
+
     const [showBulkUpdate, setShowBulkUpdate] = useState(false);
 
     const [state, setState] = useState<INeuronsState>({
-        offset: UserPreferences.Instance.neuronPageOffset,
-        limit: UserPreferences.Instance.neuronPageLimit,
         requestedNeuronForDelete: null,
         isUploadSomaPropertiesOpen: false
     });
+
+    const {offset, limit} = settings.pagination;
+
+    const setOffset = (offset: number) => onSettingsChange(s => ({...s, pagination: {...s.pagination, offset}}));
+
+    useSettingsMirror(() => {
+        const {specimens, atlasStructures, keywords, brightness, volume} = candidateFilter.settings;
+
+        return {specimens, atlasStructures, keywords, brightness, volume, status: statusFilter.settings};
+    }, filters => onSettingsChange(s => ({...s, filters})));
 
     const [deleteNeuron] = useMutation<DeleteNeuronMutationResponse, DeleteNeuronVariables>(DELETE_NEURON_MUTATION,
         {
@@ -83,8 +110,8 @@ export const Neurons = observer(() => {
             pollInterval: 10000,
             variables: {
                 input: {
-                    offset: state.offset,
-                    limit: state.limit,
+                    offset,
+                    limit,
                     specimenIds: candidateFilter.specimenIds,
                     atlasStructureIds: candidateFilter.atlasStructureIds,
                     keywords: candidateFilter.keywords,
@@ -96,7 +123,8 @@ export const Neurons = observer(() => {
 
     useEffect(() => {
         if (specimenData.data) {
-            let possibleSpecimen = preferences.neuronCreateLockedSampleId;
+            // A stale lock unlocks the choice here but stays stored, as it always has.
+            let possibleSpecimen = settings.lockedSpecimenId;
             let possibleLock = possibleSpecimen != null;
 
             const s = specimenData.data.specimens.items;
@@ -120,6 +148,8 @@ export const Neurons = observer(() => {
             setIsSampleLocked(false);
         }
     }, [specimenData.data]);
+
+    useOffsetReset(offset, data?.neurons.totalCount, () => setOffset(0));
 
     if (specimenData.error || error) {
         return <GraphQLErrorAlert title={`${error ? "Neuron" : "Specimen"} Data Could not be Loaded`} error={specimenData.error || error}/>;
@@ -151,28 +181,24 @@ export const Neurons = observer(() => {
     }
 
     const onUpdateOffsetForPage = (page: number) => {
-        const offset = state.limit * (page - 1);
+        const pageOffset = limit * (page - 1);
 
-        if (offset !== state.offset) {
-            setState({...state, offset});
-
-            UserPreferences.Instance.neuronPageOffset = offset;
+        if (pageOffset !== offset) {
+            setOffset(pageOffset);
         }
     };
 
-    const onUpdateLimit = (limit: number) => {
-        if (limit !== state.limit) {
-            let offset = state.offset;
-
-            if (offset < limit) {
-                offset = 0;
-            }
-
-            setState({...state, offset, limit});
-
-            UserPreferences.Instance.neuronPageOffset = offset;
-            UserPreferences.Instance.neuronPageLimit = limit;
+    const onUpdateLimit = (value: number) => {
+        if (value !== limit) {
+            onSettingsChange(s => ({...s, pagination: {...s.pagination, limit: value}}));
         }
+    };
+
+    const resetFilters = () => {
+        candidateFilter.applySettings(DefaultCandidateFilterSettings, findStructure);
+        statusFilter.apply(AddSpecimensSettings.defaults.neurons.filters.status);
+        setOffset(0);
+        setFilterGeneration(g => g + 1);
     };
 
     const onSampleChange = (sampleId: string) => {
@@ -181,7 +207,7 @@ export const Neurons = observer(() => {
 
     const onLockSample = (b: boolean) => {
         setIsSampleLocked(b);
-        UserPreferences.Instance.neuronCreateLockedSampleId = b ? sampleId : "";
+        onSettingsChange(s => ({...s, lockedSpecimenId: b ? sampleId : null}));
     }
 
     const uploadSomaProperties = () => {
@@ -236,12 +262,12 @@ export const Neurons = observer(() => {
         );
     }
 
-    const pageCount = Math.ceil(totalCount / state.limit);
+    const pageCount = Math.ceil(totalCount / limit);
 
-    const activePage = state.offset ? (Math.floor(state.offset / state.limit) + 1) : 1;
+    const activePage = offset ? (Math.floor(offset / limit) + 1) : 1;
 
-    const start = state.offset + 1;
-    const end = Math.min(state.offset + state.limit, totalCount);
+    const start = offset + 1;
+    const end = Math.min(offset + limit, totalCount);
 
     return (
         <div>
@@ -269,18 +295,21 @@ export const Neurons = observer(() => {
                         <Divider orientation="vertical"/>
                         <AtlasStructureMultiSelectFilter w={300} atlasId={candidateFilter.atlasId} filter={candidateFilter.atlasStructureFilter}/>
                         <Divider orientation="vertical"/>
-                        <NeuronTagFilter filter={candidateFilter.tagFilter}/>
+                        <NeuronTagFilter key={filterGeneration} filter={candidateFilter.tagFilter}/>
                         <Divider orientation="vertical"/>
                         <NeuronStatusFilter filter={statusFilter}/>
+                        <Group ml="auto">
+                            <ResetFiltersButton onReset={resetFilters}/>
+                        </Group>
                     </Group>
                     <Divider orientation="horizontal"/>
                 </Card.Section>
                 <Card.Section bg="segment">
-                    <CandidateMetrics candidateFilter={candidateFilter}/>
+                    <CandidateMetrics key={filterGeneration} candidateFilter={candidateFilter}/>
                     <Divider orientation="horizontal"/>
                 </Card.Section>
                 <Card.Section>
-                    <PaginationHeader total={pageCount} value={activePage} limit={state.limit} itemCount={totalCount} onLimitChange={onUpdateLimit}
+                    <PaginationHeader total={pageCount} value={activePage} limit={limit} itemCount={totalCount} onLimitChange={onUpdateLimit}
                                       onChange={onUpdateOffsetForPage}/>
                     <Divider orientation="horizontal"/>
                 </Card.Section>

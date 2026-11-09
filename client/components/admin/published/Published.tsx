@@ -15,6 +15,8 @@ import {UserPermissions} from "../../../graphql/user";
 import {AppLoading} from "../../app/AppLoading";
 import {PublishedActions} from "./PublishedActions";
 import {StatusFilterType, usePublishedQueueState} from "./usePublishedQueueState";
+import {AdminPublishingSettings, AdminTabProps} from "../adminSettings";
+import {useOffsetReset} from "../../../hooks/useOffsetReset";
 
 const statusOptions = [
     {value: "published", label: "Published"},
@@ -67,14 +69,14 @@ function SelectItemWithTooltip(renderOptionInput: ComboboxLikeRenderOptionInput<
     );
 }
 
-export const Published = observer(() => {
+export const Published = observer(({settings, onSettingsChange}: AdminTabProps<AdminPublishingSettings>) => {
     const user = useUser();
 
     if ((user?.permissions & UserPermissions.Admin) == 0) {
         return <Navigate to="/" replace/>;
     }
 
-    const {statusFilter, setStatusFilter, offset, setOffset, limit, setLimit, selectedId, setSelectedId} = usePublishedQueueState();
+    const {statusFilter, setStatusFilter, offset, setOffset, limit, setLimit, selectedId, setSelectedId} = usePublishedQueueState(settings, onSettingsChange);
 
     const filters = getStatusFilters(statusFilter);
 
@@ -92,6 +94,9 @@ export const Published = observer(() => {
             pollInterval: 10000
         }
     );
+
+    // setOffset also clears the selection, which is this tab's rule for any page change.
+    useOffsetReset(offset, data?.annotations.total, () => setOffset(0));
 
     const handleStatusChange = async (value: string | null) => {
         setStatusFilter(value as StatusFilterType);

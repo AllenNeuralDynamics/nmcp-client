@@ -6,7 +6,7 @@ import {OptionalFilter} from "../../../viewmodel/candidateFilter";
 import {AccessRequestStatus, accessRequestStatusName} from "../../../models/accessRequest";
 
 // Pending is omitted while nothing in the workflow puts a request into that state.
-const defaultAllowedValues = [AccessRequestStatus.Unreviewed, AccessRequestStatus.Accepted, AccessRequestStatus.Denied];
+export const AccessRequestStatusFilterOptions = [AccessRequestStatus.Unreviewed, AccessRequestStatus.Accepted, AccessRequestStatus.Denied];
 
 function createOptions(allowed: AccessRequestStatus[]): { label: string, value: string }[] {
     return allowed.map(a => {
@@ -20,7 +20,7 @@ type AccessRequestStatusFilterProps = {
     w?: number
 }
 
-export const AccessRequestStatusFilter = observer(({filter, allowedValues = defaultAllowedValues, w = null}: AccessRequestStatusFilterProps) => {
+export const AccessRequestStatusFilter = observer(({filter, allowedValues = AccessRequestStatusFilterOptions, w = null}: AccessRequestStatusFilterProps) => {
     const props = w ? {w: w} : {miw: 200};
 
     const options = createOptions(allowedValues);

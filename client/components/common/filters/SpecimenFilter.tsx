@@ -1,14 +1,21 @@
 import * as React from "react";
+import {useEffect} from "react";
 import {useQuery} from "@apollo/client";
 import {observer} from "mobx-react-lite";
 import {Group, MultiSelect, Switch} from "@mantine/core";
 
 import {SPECIMENS_QUERY, SpecimensQueryResponse} from "../../../graphql/specimen";
-import {OptionalFilter} from "../../../viewmodel/candidateFilter";
+import {OptionalFilter, retainKnownIds} from "../../../viewmodel/candidateFilter";
 import {LoadingSpecimens, sortedSpecimenOptions} from "../SpecimenSelect";
 
 export const SpecimenFilter = observer(({filter, w = null}: { filter: OptionalFilter<string[]>, w?: number }) => {
     const {loading, error, data} = useQuery<SpecimensQueryResponse>(SPECIMENS_QUERY, {fetchPolicy: "cache-first"});
+
+    useEffect(() => {
+        if (!loading && !error && data) {
+            retainKnownIds(filter, new Set(data.specimens.items.map(s => s.id)));
+        }
+    }, [data]);
 
     if (loading) {
         return <LoadingSpecimens/>;

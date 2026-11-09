@@ -1,10 +1,22 @@
-import {comparer, makeAutoObservable, reaction, toJS} from "mobx";
+import {comparer, makeAutoObservable, reaction, runInAction, toJS} from "mobx";
 import {debounce} from "lodash-es";
 
 import {AtlasStructureShape} from "../models/atlasStructure";
 import {SomaFilterProperties} from "../models/neuron";
 import {AnnotationStatus} from "../models/annotationStatus";
 import {CandidateQueryVariables} from "../graphql/candidates";
+import {numberList, stringList} from "../util/pageSettings";
+
+export type OptionalFilterSettings<T> = {
+    enabled: boolean;
+    contents: T;
+}
+
+export type RangeFilterSettings = {
+    enabled: boolean;
+    min: number;
+    max: number;
+}
 
 export class OptionalFilter<T> {
     public isEnabled: boolean = false;
@@ -16,6 +28,62 @@ export class OptionalFilter<T> {
 
         makeAutoObservable(this);
     }
+
+    public static fromSettings<T>(settings: OptionalFilterSettings<T>): OptionalFilter<T> {
+        return new OptionalFilter(settings.contents, settings.enabled);
+    }
+
+    public get settings(): OptionalFilterSettings<T> {
+        return {enabled: this.isEnabled, contents: toJS(this.contents)};
+    }
+
+    public apply(settings: OptionalFilterSettings<T>) {
+        this.isEnabled = settings.enabled;
+        this.contents = settings.contents;
+    }
+}
+
+// Drops ids the loaded options no longer hold, leaving the filter untouched when nothing is dropped.
+export function retainKnownIds(filter: OptionalFilter<string[]>, known: ReadonlySet<string>): void {
+    const contents = filter.contents ?? [];
+
+    const kept = contents.filter(id => known.has(id));
+
+    if (kept.length !== contents.length) {
+        runInAction(() => filter.contents = kept);
+    }
+}
+
+export const BrightnessBounds: [number, number] = [0, 5000];
+
+export const VolumeBounds: [number, number] = [0, 100000];
+
+export type CandidateFilterSettings = {
+    includedStatuses: AnnotationStatus[];
+    specimens: OptionalFilterSettings<string[]>;
+    atlasStructures: OptionalFilterSettings<string[]>;
+    keywords: OptionalFilterSettings<string>;
+    genotypes: OptionalFilterSettings<string[]>;
+    brightness: RangeFilterSettings;
+    volume: RangeFilterSettings;
+}
+
+export const DefaultCandidateFilterSettings: CandidateFilterSettings = {
+    includedStatuses: numberList<AnnotationStatus>(),
+    specimens: {enabled: false, contents: stringList()},
+    atlasStructures: {enabled: false, contents: stringList()},
+    keywords: {enabled: false, contents: ""},
+    genotypes: {enabled: false, contents: stringList()},
+    brightness: {enabled: false, min: BrightnessBounds[0], max: BrightnessBounds[1]},
+    volume: {enabled: false, min: VolumeBounds[0], max: VolumeBounds[1]}
+};
+
+export function sanitizeRangeFilter(range: RangeFilterSettings, bounds: [number, number]): RangeFilterSettings {
+    if (bounds[0] <= range.min && range.min <= range.max && range.max <= bounds[1]) {
+        return range;
+    }
+
+    return {enabled: range.enabled, min: bounds[0], max: bounds[1]};
 }
 
 // Mirrors CandidateExcludedStatuses in ../nmcp-api/src/models/reconstruction.ts, the API's default for
@@ -28,6 +96,15 @@ export const CandidateExcludedStatuses: AnnotationStatus[] = [
 
 export const CandidateIncludeOptions: AnnotationStatus[] = [AnnotationStatus.InProgress, ...CandidateExcludedStatuses];
 
+export function sanitizeCandidateFilterSettings(settings: CandidateFilterSettings): CandidateFilterSettings {
+    return {
+        ...settings,
+        includedStatuses: settings.includedStatuses.filter(s => CandidateIncludeOptions.includes(s)),
+        brightness: sanitizeRangeFilter(settings.brightness, BrightnessBounds),
+        volume: sanitizeRangeFilter(settings.volume, VolumeBounds)
+    };
+}
+
 export class CandidateFilter {
     public atlasId: string = null;
 
@@ -38,14 +115,42 @@ export class CandidateFilter {
     public tagFilter: OptionalFilter<string> = new OptionalFilter("");
     public genotypeFilter: OptionalFilter<string[]> = new OptionalFilter([]);
     public limitBrightness: boolean = false;
-    public brightnessRange: [number, number] = [0, 5000];
+    public brightnessRange: [number, number] = [...BrightnessBounds];
     public limitVolume: boolean = false;
-    public volumeRange: [number, number] = [0, 100000];
+    public volumeRange: [number, number] = [...VolumeBounds];
 
     public constructor(atlasId: string = null) {
         this.atlasId = atlasId;
 
         makeAutoObservable(this);
+    }
+
+    public get settings(): CandidateFilterSettings {
+        return {
+            includedStatuses: toJS(this.includedStatuses),
+            specimens: this.samplesFilter.settings,
+            atlasStructures: {enabled: this.atlasStructureFilter.isEnabled, contents: this.atlasStructureFilter.contents.map(s => s.id)},
+            keywords: this.tagFilter.settings,
+            genotypes: this.genotypeFilter.settings,
+            brightness: {enabled: this.limitBrightness, min: this.brightnessRange[0], max: this.brightnessRange[1]},
+            volume: {enabled: this.limitVolume, min: this.volumeRange[0], max: this.volumeRange[1]}
+        };
+    }
+
+    // The atlas is not part of the settings: no page lets the user change it.
+    public applySettings(settings: CandidateFilterSettings, findStructure: (id: string) => AtlasStructureShape | undefined) {
+        this.includedStatuses = settings.includedStatuses;
+        this.samplesFilter.apply(settings.specimens);
+        this.atlasStructureFilter.apply({
+            enabled: settings.atlasStructures.enabled,
+            contents: settings.atlasStructures.contents.map(findStructure).filter(s => s != null)
+        });
+        this.tagFilter.apply(settings.keywords);
+        this.genotypeFilter.apply(settings.genotypes);
+        this.limitBrightness = settings.brightness.enabled;
+        this.brightnessRange = [settings.brightness.min, settings.brightness.max];
+        this.limitVolume = settings.volume.enabled;
+        this.volumeRange = [settings.volume.min, settings.volume.max];
     }
 
     // The structure filter holds structures of the previous atlas.
