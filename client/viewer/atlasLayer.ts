@@ -18,6 +18,39 @@ export function createAtlasLayerSource(atlas: Atlas): NeuroglancerLayerSource {
     };
 }
 
+function mapAtlasLayer(state: any, update: (layer: any) => any): any {
+    if (!state?.layers?.some((layer: any) => layer.name === AtlasLayerName)) {
+        return state;
+    }
+
+    return {...state, layers: state.layers.map((layer: any) => layer.name === AtlasLayerName ? update(layer) : layer)};
+}
+
+// The atlas layer's structure colors are the atlas defaults unless changed in the viewer, so a saved state need keep
+// only the changed ones; withDefaultStructureColors supplies the rest again.
+export function withoutDefaultStructureColors(state: any, atlas: Atlas | null): any {
+    if (!atlas) {
+        return state;
+    }
+
+    const defaults = atlas.StructureColors;
+
+    return mapAtlasLayer(state, ({segmentColors, ...layer}) => {
+        // Compared without case: Neuroglancer writes colors in lowercase, the atlas keeps them as the API sends them.
+        const changed = Object.entries(segmentColors ?? {}).filter(([id, color]) => String(color).toLowerCase() !== defaults[id]?.toLowerCase());
+
+        return changed.length > 0 ? {...layer, segmentColors: Object.fromEntries(changed)} : layer;
+    });
+}
+
+export function withDefaultStructureColors(state: any, atlas: Atlas | null): any {
+    if (!atlas) {
+        return state;
+    }
+
+    return mapAtlasLayer(state, layer => ({...layer, segmentColors: {...atlas.StructureColors, ...layer.segmentColors}}));
+}
+
 // CCFv3-only until the API supplies a per-atlas mirror transform.
 export function ccfMirrorTransform(atlas: Atlas) {
     return atlas?.atlasKind?.kind === AtlasKindId.Mouse ? mirrorCCFv3Transform : null;

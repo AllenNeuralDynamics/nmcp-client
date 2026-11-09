@@ -1,5 +1,5 @@
 import {NeuroglancerViewer} from "./neuroglancerViewer";
-import {AtlasLayerName, createAtlasLayerSource} from "./atlasLayer";
+import {AtlasLayerName, createAtlasLayerSource, withDefaultStructureColors} from "./atlasLayer";
 import {AtlasViewModel} from "../viewmodel/atlasViewModel";
 import {Atlas} from "../models/atlas";
 
@@ -15,6 +15,10 @@ export class AtlasViewer extends NeuroglancerViewer {
 
     protected get atlas(): Atlas {
         return this._atlasViewModel?.atlas ?? null;
+    }
+
+    public updateState(state?: object | null) {
+        super.updateState(state ? withDefaultStructureColors(state, this.atlas) : state);
     }
 
     protected get defaultState() {

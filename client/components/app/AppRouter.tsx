@@ -10,6 +10,7 @@ import {ManageNeurons} from "../neurons/ManageNeurons";
 import {Admin} from "../admin/Admin";
 import {Specimen} from "../specimens/Specimen";
 import {Neuron} from "../neurons/Neuron";
+import {Support} from "../support/Support";
 
 // Replaces the history entry so a signed-out visit to a restricted route leaves no trace to navigate back to.
 const RequireAuthentication = ({children}: { children: React.ReactElement }) => {
@@ -26,6 +27,7 @@ export const AppRouter = () => {
             <Route path="/admin" element={<RequireAuthentication><Admin/></RequireAuthentication>}/>
             <Route path="/neuron/:neuronId/:versionId?" element={<Neuron/>}/>
             <Route path="/specimen/:specimenId?" element={<Specimen/>}/>
+            <Route path="/support" element={<Support/>}/>
             <Route path="/" element={<Home/>}/>
         </Routes>
     );

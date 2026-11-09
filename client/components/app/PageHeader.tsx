@@ -95,6 +95,7 @@ export const PageHeader = () => {
                 {reviewItem}
                 {neuronsItem}
                 {adminItem}
+                <TextNavLink text="Documentation and Access" to="/support"/>
             </Group>
             <Group>
                 <Text size="sm" c="white">{totalMessage}</Text>

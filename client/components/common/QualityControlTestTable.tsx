@@ -8,12 +8,12 @@ export const QualityControlTestTable = ({tests, kind}: { tests: QualityControlTe
         return;
     }
 
-    const color = kind == QualityControlTestKind.Passed ? "green.8" : (kind == QualityControlTestKind.Error ? "red.8" : "yellow.8");
+    const color = kind == QualityControlTestKind.Passed ? "green" : (kind == QualityControlTestKind.Error ? "red" : "yellow");
     const name = kind == QualityControlTestKind.Passed ? "Passed" : (kind == QualityControlTestKind.Error ? "Errors" : "Warnings");
 
     return (
         <Card withBorder>
-            <Card.Section bg={color} p={8}>
+            <Card.Section bg={`var(--mantine-color-${color}-light)`} p={8}>
                 <Text fw={500}>{name}</Text>
             </Card.Section>
             <Card.Section>

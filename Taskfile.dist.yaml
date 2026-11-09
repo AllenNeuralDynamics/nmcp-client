@@ -26,11 +26,11 @@ tasks:
   compile:
     cmds:
       - task: clean
-      - tsc -p tsconfig.prod.json
+      - npx tsc -p tsconfig.prod.json
   build:
     cmds:
       - task: compile
-      - webpack -c webpack.config.cjs --progress
+      - npx webpack -c webpack.config.cjs --progress
       - cp index.html dist/public/
       # Referenced by index.html as /favicon.ico.  Not imported by any client source, so webpack will not emit it.
       - cp assets/favicon.ico dist/public/

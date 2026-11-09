@@ -23,7 +23,7 @@ const S = AnnotationStatus;
 
 const owner = makeUser(UserPermissions.AnnotateAll, "owner");
 
-const CLOSE = "Close...";
+const CLOSE = "Close";
 const REQUEST_REVIEW = "Request Review...";
 const PEER_REVIEW = "Peer Review...";
 const PUBLISH_REVIEW = "Publish Review...";

@@ -33,7 +33,6 @@ jobs:
           # the Chromium download one of them (Playwright) would otherwise make on every run.
           PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
         run: |
-          npm i -g typescript@5.9
           npm ci
           chmod +x docker-entry.sh
           task release

@@ -1,77 +1,14 @@
 import gql from "graphql-tag";
 
-import {QualityControl} from "../models/qualityControl";
-
-export const QualityControlFieldsFragment = gql`fragment QualityControlFields on QualityControl {
-    id
-    status
-}`;
-
-const QualityControlTestFieldsFragment = gql`fragment QualityControlTestFields on QualityControlTest {
-    name
-    safeName
-    description
-    nodes
-}`;
-
-const QualityOutputFieldsFragment = gql`fragment QualityOutputFields on QualityOutput {
+export const QualityOutputCommonFieldsFragment = gql`fragment QualityOutputCommonFields on QualityOutput {
     serviceVersion
     toolVersion
-    score
-    passed {
-        ...QualityControlTestFields
-    }
-    warnings {
-        ...QualityControlTestFields
-    }
-    errors {
-        ...QualityControlTestFields
-    }
-    toolError {
-        kind
-        description
-        info
-    }
     when
-}
-${QualityControlTestFieldsFragment}
-`;
-
-export const QUALITY_CONTROL_DETAIL_QUERY = gql`
-    query QualityControlDetail($id: String!) {
-        qualityControl(id: $id) {
-            id
-            status
-            current {
-                ...QualityOutputFields
-            }
-            history {
-                ...QualityOutputFields
-            }
-        }
-    }
-    ${QualityOutputFieldsFragment}
-`;
-
-export type QualityControlDetailVariables = {
-    id: string;
-}
-
-export type QualityControlDetailResponse = {
-    qualityControl: QualityControl;
-}
-
-export const REASSESS_QUALITY_CONTROL_MUTATION = gql`mutation ReassessQualityControl($annotationId: String!) {
-    requestQualityControlReassessment(annotationId: $annotationId) {
-        id
-        status
-    }
 }`;
 
-export type ReassessQualityControlVariables = {
-    annotationId: string;
+export const QualityOutputFieldsFragment = gql`fragment QualityOutputFields on QualityOutput {
+    ...QualityOutputCommonFields
+    data
 }
-
-export type ReassessQualityControlResponse = {
-    requestQualityControlReassessment: QualityControl;
-}
+${QualityOutputCommonFieldsFragment}
+`;

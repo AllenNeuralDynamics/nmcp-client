@@ -160,7 +160,7 @@ export const ReconstructionActions = (props: ReconstructionPanelProps) => {
         <Menu returnFocus={false}>
             <Menu.Target>
                 <Button variant="light" color="gray" leftSection={<IconFolderX size={18}/>} rightSection={<IconChevronDown size={16}/>}
-                        disabled={!anyEnabled(visibleCloseGroups.flat())}>Close...</Button>
+                        disabled={!anyEnabled(visibleCloseGroups.flat())}>Close</Button>
             </Menu.Target>
             <Menu.Dropdown>
                 {visibleCloseGroups.map((group, index) => (

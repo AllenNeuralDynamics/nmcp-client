@@ -9,7 +9,7 @@ import {AnnotationStatus} from "../models/annotationStatus";
 import {AtlasReconstructionStatus} from "../models/atlasReconstructionStatus";
 import {AtlasReconstruction} from "../models/atlasReconstruction";
 import {AtlasReconstructionFieldsFragment} from "./atlasReconstruction";
-import {QualityControlFieldsFragment} from "./qualityControl";
+import {AtlasQualityControlFieldsFragment} from "./atlasQualityControl";
 
 export const NodeCountFieldsFragment = gql`fragment NodeCountFieldsFragment on NodeCount {
     total
@@ -41,13 +41,13 @@ export const AnnotationRelationshipsFragment = gql`fragment AnnotationRelationsh
             ...NodeCountsFields
         }
         qualityControl {
-            ...QualityControlFields
+            ...AtlasQualityControlFields
         }
     }
 }
 ${AtlasReconstructionFieldsFragment}
 ${NodeCountsFieldsFragment}
-${QualityControlFieldsFragment}
+${AtlasQualityControlFieldsFragment}
 ${NEURON_BASE_FIELDS_FRAGMENT}
 ${NEURON_RELATIONSHIP_FIELDS_FRAGMENT}
 `;
@@ -124,6 +124,8 @@ export const ANNOTATIONS_QUERY = gql`
                     sourceFilename
                     format
                     failureMessage
+                    qcTag
+                    qualityControlUrl
                     createdAt
                     updatedAt
                     user {

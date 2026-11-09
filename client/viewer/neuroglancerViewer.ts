@@ -96,7 +96,8 @@ export class NeuroglancerViewer {
             }
             this.restoreState(this.defaultState);
         } else {
-            this.restoreState(state ? withDimensions(state, this.defaultDimensions) : this.defaultState);
+            // A saved or shared state carries the background of the scheme it was saved under.
+            this.restoreState(state ? this.updateStateForColorScheme({...withDimensions(state, this.defaultDimensions)}) : this.defaultState);
         }
 
         this._stateInitialized = true;

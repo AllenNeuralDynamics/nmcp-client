@@ -15,6 +15,14 @@ export class AccessRequest implements AccessRequestShape {
         makeAutoObservable(this);
     }
 
+    public clear() {
+        this.firstName = "";
+        this.lastName = "";
+        this.emailAddress = "";
+        this.affiliation = "";
+        this.purpose = "";
+    }
+
     public get isValidEmailAddress(): boolean {
         return emailValidationPattern.test(this.emailAddress);
     }

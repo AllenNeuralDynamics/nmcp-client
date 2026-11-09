@@ -11,7 +11,7 @@ import {RawReconstructionUpload, RawReconstructionUploadStatus} from "../../mode
 
 const counts = (total: number) => ({total, soma: 1, path: 0, branch: 0, end: 0});
 
-function attempt(status: RawReconstructionUploadStatus, failureMessage: string = null): RawReconstructionUpload {
+function attempt(status: RawReconstructionUploadStatus, failureMessage: string = null, qualityControlUrl: string = null): RawReconstructionUpload {
     return {
         id: "attempt-2",
         attemptNumber: 2,
@@ -19,6 +19,7 @@ function attempt(status: RawReconstructionUploadStatus, failureMessage: string =
         user: makeUser(0, "annotator"),
         sourceFilename: "raw.swc",
         failureMessage,
+        qualityControlUrl,
         createdAt: new Date(2026, 10, 5, 9, 30),
         updatedAt: new Date(2026, 10, 5, 9, 45)
     };
@@ -50,19 +51,41 @@ describe("RawReconstructionDetails", () => {
         expect(screen.getByText("raw.swc")).toBeTruthy();
         expect(screen.getByText("Test User")).toBeTruthy();
         expect(screen.queryByText("Reason")).toBeNull();
+        expect(screen.queryByText("QC Report")).toBeNull();
     });
 
-    it("shows why the latest attempt failed", () => {
-        render({rawReconstruction: null, latestRawReconstructionUpload: attempt(RawReconstructionUploadStatus.FailedUpload, "A soma was not found in the uploaded file.")});
+    it.each([
+        [RawReconstructionUploadStatus.FailedUpload, "Failed Upload"],
+        [RawReconstructionUploadStatus.FailedPrecomputed, "Failed Precomputed Generation"],
+        [RawReconstructionUploadStatus.FailedQualityControl, "Failed QC"],
+        [RawReconstructionUploadStatus.ErroredQualityControl, "QC Error"],
+        [RawReconstructionUploadStatus.FailedQualityControlService, "QC Service Failure"]
+    ])("shows why the latest attempt failed at %s", (status, name) => {
+        render({rawReconstruction: null, latestRawReconstructionUpload: attempt(status, "The upload did not pass.")});
 
-        expect(screen.getByText("Failed Upload")).toBeTruthy();
-        expect(screen.getByText("A soma was not found in the uploaded file.")).toBeTruthy();
+        expect(screen.getByText(name)).toBeTruthy();
+        expect(screen.getByText("The upload did not pass.")).toBeTruthy();
+        expect(screen.getByText("Finished")).toBeTruthy();
     });
 
-    it("leaves out the finish time while uploading", () => {
-        render({rawReconstruction: null, latestRawReconstructionUpload: attempt(RawReconstructionUploadStatus.Uploading)});
+    it.each([
+        [RawReconstructionUploadStatus.Uploading, "Uploading"],
+        [RawReconstructionUploadStatus.PendingQualityControl, "Pending QC"]
+    ])("leaves out the finish time at %s", (status, name) => {
+        render({rawReconstruction: null, latestRawReconstructionUpload: attempt(status)});
 
-        expect(screen.getByText("Uploading")).toBeTruthy();
+        expect(screen.getByText(name)).toBeTruthy();
         expect(screen.queryByText("Finished")).toBeNull();
+    });
+
+    it("links the QC report when the attempt has one", () => {
+        const url = "https://metadata.example.org/quality_control?name=nmcp-qc-tag";
+
+        render({rawReconstruction: null, latestRawReconstructionUpload: attempt(RawReconstructionUploadStatus.PendingQualityControl, null, url)});
+
+        const link = screen.getByRole("link", {name: "Open in metadata portal"});
+
+        expect(link.getAttribute("href")).toBe(url);
+        expect(link.getAttribute("target")).toBe("_blank");
     });
 });

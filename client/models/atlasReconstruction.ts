@@ -1,7 +1,7 @@
 import {User} from "./user";
 import {Precomputed} from "./precomputed";
 import {NodeCounts} from "./annotation";
-import {QualityControl} from "./qualityControl";
+import {AtlasQualityControl} from "./atlasQualityControl";
 import {AtlasNode} from "./atlasNode";
 
 export interface AtlasReconstruction {
@@ -10,7 +10,7 @@ export interface AtlasReconstruction {
     status: number;
     nodeCounts: NodeCounts;
     soma: AtlasNode;
-    qualityControl: QualityControl;
+    qualityControl: AtlasQualityControl;
     reviewerId: string;
     reviewer: User;
     precomputed?: Precomputed;

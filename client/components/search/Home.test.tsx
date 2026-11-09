@@ -1,6 +1,6 @@
 import * as React from "react";
 import {afterEach, beforeEach, describe, expect, it, vi} from "vitest";
-import {renderHook} from "@testing-library/react";
+import {cleanup, renderHook} from "@testing-library/react";
 import {ApolloClient, ApolloProvider} from "@apollo/client";
 
 import {Home} from "./Home";
@@ -13,6 +13,7 @@ import {warningNotification} from "../common/NotificationHelper";
 import {UserPreferences} from "../../util/userPreferences";
 import {PredicateType} from "../../viewmodel/queryPredicateKind";
 import {QueryStatus} from "../../viewmodel/queryResponseViewModel";
+import {parseShareFragment, ShareState, shareUrl, ShareStateVersion} from "../../util/shareLink";
 
 vi.mock("./QueryPage", () => ({QueryPage: () => null}));
 vi.mock("./Footer", () => ({Footer: () => null}));
@@ -33,12 +34,10 @@ function predicate(atlasStructureIds: string[], option = PredicateType.Anatomica
     return {id: "p", index: 0, brainAreaFilterTypeOption: option, filter: {atlasStructureIds, ...fields}};
 }
 
-function setShare(predicates: object[], response: object = null, viewerState: object = null) {
-    const share = {timestamp: Date.now(), version: 1, query: {predicates, limitCollections: false, collectionIds: [], atlasKindIds: ["kind-mouse"]}, response};
+function setShare(predicates: object[], response: object = {neurons: []}, viewerState: object = null) {
+    const query = {predicates, limitCollections: false, collectionIds: [], atlasKindIds: ["kind-mouse"]};
 
-    const hash = viewerState ? `#!${btoa(JSON.stringify(viewerState))}` : "";
-
-    window.history.replaceState({}, "", `/?q=${btoa(JSON.stringify(share))}${hash}`);
+    window.history.replaceState({}, "", shareUrl("/", {timestamp: Date.now(), version: ShareStateVersion, query, response, layout: null, viewer: viewerState} as ShareState));
 }
 
 async function renderHome() {
@@ -74,6 +73,50 @@ describe("Home query restore", () => {
 
         expect(client.query).toHaveBeenCalledTimes(1);
         expect(warningNotification).not.toHaveBeenCalled();
+    });
+
+    it("applies a shared viewer state after running the shared query, then records the page in the URL", async () => {
+        const viewer = {updateState: vi.fn(), currentState: null};
+        singletons.viewerRef.register(viewer as any);
+
+        const viewerState = {layers: [{name: "CCF", segments: ["997"]}]};
+
+        setShare([predicate(["atlas-ccf-315"])], {neurons: []}, viewerState);
+
+        await renderHome();
+
+        expect(client.query).toHaveBeenCalledTimes(1);
+        expect(viewer.updateState).toHaveBeenCalledWith(viewerState);
+        expect(parseShareFragment(window.location.hash)).toMatchObject({response: {neurons: []}, query: {predicates: [{filter: {atlasStructureIds: ["atlas-ccf-315"]}}]}});
+
+        singletons.viewerRef.unregister();
+    });
+
+    it("restores a share without results but does not run its query", async () => {
+        setShare([predicate(["atlas-ccf-315"])], null);
+
+        await renderHome();
+
+        expect(client.query).not.toHaveBeenCalled();
+        expect(restoredNames()).toEqual(["Isocortex"]);
+    });
+
+    it("does not restore the page's own fragment again when the page mounts again", async () => {
+        setShare([predicate(["atlas-ccf-315"])], {neurons: [{neuronId: "remount"}]});
+
+        await renderHome();
+        cleanup();
+        await renderHome();
+
+        expect(client.query).toHaveBeenCalledTimes(1);
+    });
+
+    it("ignores a malformed share link", async () => {
+        window.history.replaceState({}, "", "/#!not-json");
+
+        await renderHome();
+
+        expect(client.query).not.toHaveBeenCalled();
     });
 
     it("keeps the known structure of a partially restored share, warns and does not run it", async () => {
