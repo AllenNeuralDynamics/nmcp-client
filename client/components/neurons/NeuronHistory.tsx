@@ -17,8 +17,8 @@ import {SettingsChange} from "../../util/pageSettings";
 import {NeuronHistorySettings} from "./neuronSettings";
 
 const objectPrefixes: [string, string][] = [
-    ["AtlasReconstruction", "Atlas Reconstruction"],
-    ["SpecimenSpaceReconstruction", "Specimen Space Reconstruction"],
+    ["AtlasReconstruction", "Atlas-Space Reconstruction"],
+    ["SpecimenSpaceReconstruction", "Specimen-Space Reconstruction"],
     ["SpecimenPrecomputed", "Specimen Precomputed"],
     ["AtlasQualityControl", "Quality Control"],
     // Event rows written before nmcp-api renamed the kinds still store the old QualityControl* names.

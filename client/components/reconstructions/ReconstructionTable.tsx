@@ -29,7 +29,7 @@ export const ReconstructionTable = ({reconstructions, selectedId, onSelected}: R
                     <Table.Th rowSpan={3}>Neuron</Table.Th>
                     <Table.Th rowSpan={3}>Specimen</Table.Th>
                     <Table.Th colSpan={5} ta="center">Specimen-Space</Table.Th>
-                    <Table.Th rowSpan={2} colSpan={4} ta="center">Atlas Soma</Table.Th>
+                    <Table.Th rowSpan={2} colSpan={4} ta="center">Atlas-Space Soma</Table.Th>
                     <Table.Th rowSpan={3}>Annotator</Table.Th>
                     <Table.Th rowSpan={3}>Status</Table.Th>
                 </Table.Tr>

@@ -22,7 +22,7 @@ const statusOptions = [
     {value: "published", label: "Published"},
     {value: "in-progress", label: "In Progress"},
     {value: "publishable", label: "Ready to Publish"},
-    {value: "finalizing", label: "Waiting for Atlas Reconstruction"},
+    {value: "finalizing", label: "Waiting for Atlas-Space Reconstruction"},
     {value: "publish-failed", label: "Publish Failed"}
 ]
 

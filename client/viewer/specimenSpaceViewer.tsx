@@ -1,7 +1,7 @@
 import {TomographyViewer} from "./tomographyViewer";
 import {LayerType} from "./neuroglancerLayer";
 
-const LAYER_NAME = "Specimen Space Reconstruction"
+const LAYER_NAME = "Specimen-Space Reconstruction"
 
 export class SpecimenSpaceViewer extends TomographyViewer {
     private readonly _precomputedUrl: string;

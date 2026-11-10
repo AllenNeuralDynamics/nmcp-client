@@ -114,8 +114,8 @@ export const CandidatesTable = forwardRef<CandidatesTableHandle, CandidatesTable
                         <Table.Th rowSpan={2}>Specimen</Table.Th>
                         <Table.Th rowSpan={2}>Genotype</Table.Th>
                         <Table.Th rowSpan={2}>Keywords</Table.Th>
-                        <Table.Th colSpan={4} ta="center">Atlas Soma</Table.Th>
-                        <Table.Th rowSpan={2} colSpan={1} ta="center">Specimen Soma (X, Y, Z)</Table.Th>
+                        <Table.Th colSpan={4} ta="center">Atlas-Space Soma</Table.Th>
+                        <Table.Th rowSpan={2} colSpan={1} ta="center">Specimen-Space Soma (X, Y, Z)</Table.Th>
                         {props.showAnnotators ? <Table.Th rowSpan={2}>Annotator(s)</Table.Th> : null}
                     </Table.Tr>
                     <Table.Tr style={headerRowStyle}>

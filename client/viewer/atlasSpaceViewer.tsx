@@ -2,7 +2,7 @@ import {AtlasViewer} from "./atlasViewer";
 import {AtlasViewModel} from "../viewmodel/atlasViewModel";
 import {LayerType} from "./neuroglancerLayer";
 
-const LAYER_NAME = "Atlas Space Reconstruction"
+const LAYER_NAME = "Atlas-Space Reconstruction"
 
 export type PositionSelectionDelegate = {
     (position: number[]): void;

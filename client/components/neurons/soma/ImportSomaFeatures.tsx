@@ -30,7 +30,7 @@ export const ImportSomaFeatures = observer(({importData}: { importData: ImportSo
 
     return (
         <Stack gap="sm">
-            <Text>Specimen Soma Default Features</Text>
+            <Text>Specimen-Space Soma Default Features</Text>
 
             <Dropzone onDrop={onSomaFileDropped} accept={["application/json"]}>
                 <Group justify="start" gap="sm" mih={120} style={{pointerEvents: 'none'}}>

@@ -9,7 +9,7 @@ describe("formatEventName", () => {
         ["AtlasQualityControlFailed", "Quality Control: Failed"],
         ["QualityControlCreate", "Quality Control: Created"],
         ["QualityControlPassed", "Quality Control: Passed"],
-        ["AtlasReconstructionQualityControlRequest", "Atlas Reconstruction: Quality Control Requested"]
+        ["AtlasReconstructionQualityControlRequest", "Atlas-Space Reconstruction: Quality Control Requested"]
     ])("labels %s as %s", (name, label) => {
         expect(formatEventName(name)).toBe(label);
     });
