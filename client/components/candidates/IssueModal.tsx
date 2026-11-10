@@ -6,7 +6,7 @@ import {IconExclamationCircle} from "@tabler/icons-react";
 
 import {OPEN_ISSUE_MUTATION, OPEN_ISSUES_QUERY, OpenIssueResponse, OpenIssueVariables} from "../../graphql/issue";
 import {errorNotification, successNotification} from "../common/NotificationHelper";
-import {NeuronShape} from "../../models/neuron";
+import {formatNeuron, NeuronShape} from "../../models/neuron";
 import {IssueKind, IssueReferenceKind} from "../../models/issue";
 
 type IssueModelProps = {
@@ -68,7 +68,7 @@ export const IssueModal = (props: IssueModelProps) => {
             </Alert>);
     }
 
-    const label = `Please describe the issue with neuron ${props.neuron.label}`;
+    const label = `Please describe the issue with candidate ${formatNeuron(props.neuron)}`;
 
     return (
         <Modal size="lg" centered opened={props.show} onClose={props.onClose} title="Report an Issue">

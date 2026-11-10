@@ -121,6 +121,19 @@ export function readPageSettings<T extends VersionedSettings>(definition: PageSe
     return definition.sanitize ? definition.sanitize(normalized) : normalized;
 }
 
+// For handing settings to a page before navigating to it.  The page's usePageSettings reads storage when it mounts, so
+// this must run before the navigation, not after.
+export function writeStoredPageSettings<T extends VersionedSettings>(definition: PageSettingsDefinition<T>, change: (current: T) => T,
+                                                                     getStorage: () => Pick<Storage, "getItem" | "setItem"> = () => window.localStorage): void {
+    try {
+        const storage = getStorage();
+
+        storage.setItem(definition.key, JSON.stringify(change(readPageSettings(definition, storage.getItem(definition.key)))));
+    } catch {
+        // Blocked storage only loses the hand-off; the page opens with what it would otherwise have restored.
+    }
+}
+
 export function sectionOf<T, K extends keyof T>(update: SettingsChange<T>, key: K): SettingsChange<T[K]> {
     return change => update(current => ({...current, [key]: change(current[key])}) as T);
 }

@@ -49,7 +49,7 @@ export const Reconstructions = observer(() => {
 
     const {offset, limit} = settings.pagination;
 
-    const userOnly = settings.filters.userOnly;
+    const userOnly = settings.filters.myReconstructionsOnly;
 
     const selection = settings.selectedId;
 
@@ -107,7 +107,7 @@ export const Reconstructions = observer(() => {
     }
 
     const onUserOnlyChange = (userOnly: boolean) => {
-        update(s => ({...s, filters: {...s.filters, userOnly}}));
+        update(s => ({...s, filters: {...s.filters, myReconstructionsOnly: userOnly}}));
     }
 
     const onSelected = (reconstruction: Annotation) => {
@@ -119,7 +119,7 @@ export const Reconstructions = observer(() => {
     const resetFilters = () => {
         specimenFilter.apply(ReconstructionsSettings.defaults.filters.specimens);
         statusFilter.apply(ReconstructionsSettings.defaults.filters.statuses);
-        update(s => ({...s, filters: {...s.filters, userOnly: false}, pagination: {...s.pagination, offset: 0}}));
+        update(s => ({...s, filters: {...s.filters, myReconstructionsOnly: ReconstructionsSettings.defaults.filters.myReconstructionsOnly}, pagination: {...s.pagination, offset: 0}}));
     }
 
     let selectedReconstruction = null;

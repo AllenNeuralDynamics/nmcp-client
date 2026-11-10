@@ -32,6 +32,11 @@ import {successNotification} from "../common/NotificationHelper";
 import {usePageSettings} from "../../hooks/usePageSettings";
 import {sectionOf} from "../../util/pageSettings";
 import {NeuronSettings} from "./neuronSettings";
+import {useUser} from "../../hooks/useUser";
+import {hasPermission} from "../../models/user";
+import {UserPermissions} from "../../graphql/user";
+import {CreateRevisionPopover} from "../reconstructions/CreateRevisionPopover";
+import {focusReconstructionsOnRevision} from "../reconstructions/reconstructionsSettings";
 
 // Each level down to the active tab panel fills the remaining page height, so the Neuroglancer views can grow into it.
 const FillColumn: React.CSSProperties = {flexGrow: 1, display: "flex", flexDirection: "column"};
@@ -120,6 +125,8 @@ export const Neuron = () => {
 
     const isAuthenticated = useIsAuthenticated();
 
+    const user = useUser();
+
     const systemConfiguration = useSystemConfiguration();
 
     const {neuron, error} = useNeuronPageData(neuronId, isAuthenticated);
@@ -171,6 +178,15 @@ export const Neuron = () => {
 
     const published = isPublished ? `Published ${dayjs(data.neuron.published.atlasReconstruction.searchIndexedAt).format("YYYY-MM-DD")}` : "Unpublished";
 
+    // AnnotateAll rather than any annotate bit: Manage Neurons, where a new revision is worked on, requires it.
+    const canRevise = isAuthenticated && isPublished && user != null && hasPermission(user.permissions, UserPermissions.AnnotateAll);
+
+    const onRevisionCreated = (revision: Annotation) => {
+        focusReconstructionsOnRevision(data.neuron.specimen.id, revision.id);
+
+        navigate("/reconstructions");
+    };
+
     const qualityControlId = selectedReconstruction?.atlasReconstruction?.qualityControl?.id;
 
     const showAnnotation = isAuthenticated || selectedReconstruction != null;
@@ -196,27 +212,32 @@ export const Neuron = () => {
                             </Group>
                             <Text size="sm" c="dimmed">Specimen {data.neuron.specimen.label}</Text>
                         </Stack>
-                        <Stack gap={2} align="flex-end">
-                            <Badge bg={isPublished ? "green" : "orange"}>{published}</Badge>
-                            {isPublished && data.neuron.canonicalDoi ?
-                                <Group gap={2}>
-                                    <Text size="sm">Canonical DOI:</Text>
-                                    <Text size="sm" c="dimmed" td="underline" style={{cursor: "pointer"}}
-                                          onClick={() => {
-                                              clipboard.copy(`${systemConfiguration.doiHandler}/${data.neuron.canonicalDoi}`);
-                                              successNotification("DOI", "DOI copied to clipboard");
-                                          }}>{`${systemConfiguration.doiHandler}/${data.neuron.canonicalDoi}`}</Text>
-                                </Group> : null}
-                            {isPublished && data.neuron.published.doi ?
-                                <Group gap={2}>
-                                    <Text size="sm">Version-Specific DOI:</Text>
-                                    <Text size="sm" c="dimmed" td="underline" style={{cursor: "pointer"}}
-                                          onClick={() => {
-                                              clipboard.copy(`${systemConfiguration.doiHandler}/${data.neuron.published.doi}`);
-                                              successNotification("DOI", "DOI copied to clipboard");
-                                          }}>{`${systemConfiguration.doiHandler}/${data.neuron.published.doi}`}</Text>
-                                </Group> : null}
-                        </Stack>
+                        <Group gap={16} align="center">
+                            <Stack gap={2} align="flex-end">
+                                {isPublished && data.neuron.canonicalDoi ?
+                                    <Group gap={2}>
+                                        <Text size="sm">Canonical DOI:</Text>
+                                        <Text size="sm" c="dimmed" td="underline" style={{cursor: "pointer"}}
+                                              onClick={() => {
+                                                  clipboard.copy(`${systemConfiguration.doiHandler}/${data.neuron.canonicalDoi}`);
+                                                  successNotification("DOI", "DOI copied to clipboard");
+                                              }}>{`${systemConfiguration.doiHandler}/${data.neuron.canonicalDoi}`}</Text>
+                                    </Group> : null}
+                                {isPublished && data.neuron.published.doi ?
+                                    <Group gap={2}>
+                                        <Text size="sm">Version-Specific DOI:</Text>
+                                        <Text size="sm" c="dimmed" td="underline" style={{cursor: "pointer"}}
+                                              onClick={() => {
+                                                  clipboard.copy(`${systemConfiguration.doiHandler}/${data.neuron.published.doi}`);
+                                                  successNotification("DOI", "DOI copied to clipboard");
+                                              }}>{`${systemConfiguration.doiHandler}/${data.neuron.published.doi}`}</Text>
+                                    </Group> : null}
+                            </Stack>
+                            <Stack gap={8} align="flex-end">
+                                <Badge bg={isPublished ? "green" : "orange"}>{published}</Badge>
+                                {canRevise ? <CreateRevisionPopover id={data.neuron.published.id} size="xs" onCreated={onRevisionCreated}/> : null}
+                            </Stack>
+                        </Group>
                     </Group>
                     <Divider orientation="horizontal"/>
                 </Card.Section>

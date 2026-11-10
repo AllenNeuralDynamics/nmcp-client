@@ -1,7 +1,7 @@
 import * as React from "react";
 import {useState} from "react";
 import {useMutation} from "@apollo/client";
-import {Button, Group, Popover, Select, Stack, Text} from "@mantine/core";
+import {Button, Group, MantineSize, Popover, Select, Stack, Text} from "@mantine/core";
 import {IconVersions} from "@tabler/icons-react";
 
 import {
@@ -10,7 +10,7 @@ import {
     OpenAnnotationRevisionVariables,
     ANNOTATIONS_QUERY,
 } from "../../graphql/annotation";
-import {ReconstructionRevisionKind} from "../../models/annotation";
+import {Annotation, ReconstructionRevisionKind} from "../../models/annotation";
 import {actionColor, actionName, ReconstructionAction} from "../../models/reconstructionAction";
 import {errorNotification} from "../common/NotificationHelper";
 
@@ -29,7 +29,14 @@ function mapRevisionKind(value: string): ReconstructionRevisionKind {
     return value == SpecimenSpace ? ReconstructionRevisionKind.SpecimenSpace : ReconstructionRevisionKind.AtlasSpace;
 }
 
-export const CreateRevisionPopover = ({id}: { id: string }) => {
+export type CreateRevisionPopoverProps = {
+    id: string;
+    size?: MantineSize;
+
+    onCreated?(revision: Annotation): void;
+}
+
+export const CreateRevisionPopover = ({id, size = "sm", onCreated}: CreateRevisionPopoverProps) => {
     const [opened, setOpened] = useState(false);
     const [inProgress, setInProgress] = useState(false);
 
@@ -38,7 +45,7 @@ export const CreateRevisionPopover = ({id}: { id: string }) => {
     const [openAnnotationRevision] = useMutation<OpenAnnotationRevisionResponse, OpenAnnotationRevisionVariables>(OPEN_ANNOTATION_REVISION_MUTATION,
         {
             refetchQueries: [ANNOTATIONS_QUERY],
-            onError: (e) => console.log(e)
+            onError: (e) => errorNotification("Error Creating Revision", e.message)
         });
 
     const open = () => {
@@ -49,13 +56,16 @@ export const CreateRevisionPopover = ({id}: { id: string }) => {
     const openRevision = async () => {
         setInProgress(true);
         const response = await openAnnotationRevision({variables: {annotationId: id, revisionKind: mapRevisionKind(revisionKind)}});
-        if (response?.data) {
-            if (!response.data.openAnnotationRevision) {
-                errorNotification("Revision not Opened", "The revision could not be opened.  You may have an existing open reconstruction for this neuron.")
-            }
-        }
         setOpened(false);
         setInProgress(false);
+
+        const revision = response?.data?.openAnnotationRevision;
+
+        if (revision) {
+            onCreated?.(revision);
+        } else if (response?.data) {
+            errorNotification("Revision not Opened", "The revision could not be opened.  You may have an existing open reconstruction for this neuron.")
+        }
     }
 
     const revisionText = revisionKind ? (revisionKind == SpecimenSpace ? specimenHint : atlasHint) : null;
@@ -63,7 +73,7 @@ export const CreateRevisionPopover = ({id}: { id: string }) => {
 
     return <Popover opened={opened} onChange={setOpened} trapFocus>
         <Popover.Target>
-            <Button variant="light" leftSection={<IconVersions size={18}/>} color={actionColor(action)}
+            <Button variant="light" size={size} leftSection={<IconVersions size={size == "xs" ? 14 : 18}/>} color={actionColor(action)}
                     onClick={() => open()}>{actionName(action)}</Button>
         </Popover.Target>
         <Popover.Dropdown>

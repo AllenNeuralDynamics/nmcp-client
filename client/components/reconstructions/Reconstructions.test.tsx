@@ -4,13 +4,13 @@ import {screen, waitFor} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import {renderWithProviders} from "../../test/render";
-import {makeUser} from "../../test/fixtures";
+import {makeReconstruction, makeUser} from "../../test/fixtures";
 import {Reconstructions} from "./Reconstructions";
 import {ANNOTATIONS_QUERY} from "../../graphql/annotation";
 import {UserPermissions} from "../../graphql/user";
 import {AnnotationStatus} from "../../models/annotationStatus";
 import {PageSettingsKeys} from "../../util/pageSettings";
-import {ReconstructionsSettings} from "./reconstructionsSettings";
+import {focusReconstructionsOnRevision, ReconstructionsSettings} from "./reconstructionsSettings";
 
 // The preview hosts a three.js viewer and imports client/index.tsx; the specimen filter has its own query.
 vi.mock("../common/ReconstructionFilePreview", () => ({ReconstructionFilePreview: () => null}));
@@ -19,7 +19,7 @@ vi.mock("../common/filters/SpecimenFilter", () => ({SpecimenFilter: () => null})
 const storedEntry = {
     version: 1,
     filters: {
-        userOnly: true,
+        myReconstructionsOnly: true,
         specimens: {enabled: true, contents: ["sp-1"]},
         statuses: {enabled: true, contents: [AnnotationStatus.InProgress]}
     },
@@ -27,10 +27,12 @@ const storedEntry = {
     selectedId: "rec-9"
 };
 
-function renderPage(total: number) {
-    localStorage.setItem(PageSettingsKeys.reconstructions, JSON.stringify(storedEntry));
+function renderPage(total: number, annotations: object[] = [], seedStorage = true) {
+    if (seedStorage) {
+        localStorage.setItem(PageSettingsKeys.reconstructions, JSON.stringify(storedEntry));
+    }
 
-    const result = vi.fn((_variables: any) => ({data: {annotations: {__typename: "AnnotationQueryResponse", total, offset: 0, annotations: []}}}));
+    const result = vi.fn((_variables: any) => ({data: {annotations: {__typename: "AnnotationQueryResponse", total, offset: 0, annotations}}}));
 
     const mocks = [{request: {query: ANNOTATIONS_QUERY}, variableMatcher: () => true, maxUsageCount: 5, result}];
 
@@ -84,5 +86,39 @@ describe("Reconstructions settings", () => {
         await userEvent.keyboard("{ArrowRight}");
 
         await waitFor(() => expect(stored().pagination).toEqual({offset: 20, limit: 25}));
+    });
+});
+
+describe("Reconstructions opened on a new revision", () => {
+    beforeEach(() => {
+        localStorage.clear();
+        localStorage.setItem(PageSettingsKeys.reconstructions, JSON.stringify({
+            ...storedEntry,
+            filters: {...storedEntry.filters, myReconstructionsOnly: false}
+        }));
+
+        focusReconstructionsOnRevision("sp-2", "rec-new");
+    });
+
+    it("queries the user's reconstructions for the specimen from the first page, keeping the status filter", async () => {
+        const result = renderPage(1, [], false);
+
+        await screen.findByRole("button", {name: "Reset filters"});
+
+        expect(result.mock.calls[0][0].queryArgs).toEqual({offset: 0, limit: 20, userOnly: true, status: [AnnotationStatus.InProgress], specimenIds: ["sp-2"]});
+    });
+
+    it("selects the revision when it is in the table", async () => {
+        renderPage(1, [makeReconstruction({id: "rec-new", status: AnnotationStatus.InProgress})], false);
+
+        await screen.findByRole("button", {name: "Reset filters"});
+
+        expect(screen.queryByText("No Reconstruction Selected")).not.toBeInTheDocument();
+    });
+
+    it("selects nothing when the revision is not in the table", async () => {
+        renderPage(1, [makeReconstruction({id: "rec-other", status: AnnotationStatus.InProgress})], false);
+
+        expect(await screen.findByText("No Reconstruction Selected")).toBeInTheDocument();
     });
 });

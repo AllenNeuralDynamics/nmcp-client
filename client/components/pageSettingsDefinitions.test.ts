@@ -85,6 +85,25 @@ describe("page settings definitions", () => {
         expect(settings.filters.statuses.contents).toEqual([AnnotationStatus.InProgress]);
     });
 
+    it("turn my reconstructions only on over a value saved under the retired userOnly name", () => {
+        const {myReconstructionsOnly: _, ...filters} = ReconstructionsSettings.defaults.filters;
+
+        const settings = readWith(ReconstructionsSettings, d => ({
+            ...d,
+            filters: {...filters, userOnly: false, statuses: {enabled: true, contents: [AnnotationStatus.InProgress]}}
+        }));
+
+        expect(settings.filters.myReconstructionsOnly).toBe(true);
+        expect(settings.filters.statuses).toEqual({enabled: true, contents: [AnnotationStatus.InProgress]});
+        expect(settings.filters).not.toHaveProperty("userOnly");
+    });
+
+    it("keep my reconstructions only off once chosen under the current name", () => {
+        const settings = readWith(ReconstructionsSettings, d => ({...d, filters: {...d.filters, myReconstructionsOnly: false}}));
+
+        expect(settings.filters.myReconstructionsOnly).toBe(false);
+    });
+
     it("fall back for an unknown neuron status", () => {
         const settings = readWith(AddSpecimensSettings, d => ({
             ...d,

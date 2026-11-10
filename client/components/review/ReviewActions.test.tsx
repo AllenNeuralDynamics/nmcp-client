@@ -163,65 +163,30 @@ describe("ReviewActions retry", () => {
     });
 });
 
-describe("ReviewActions phase-failure notification", () => {
-    const failed = (id: string, failedAt: number, reason: string = "r") => makeReconstruction({
+describe("ReviewActions with a phase failure", () => {
+    const failed = (id: string) => makeReconstruction({
         id,
         status: S.WaitingForAtlasReconstruction,
         childStatus: A.FailedPrecomputed,
-        phaseFailure: {phase: A.FailedPrecomputed, reason, failedAt: failedAt as unknown as Date}
+        phaseFailure: {phase: A.FailedPrecomputed, reason: "r", failedAt: 1000 as unknown as Date}
     });
 
-    it("notifies once, with the phase label and reason", () => {
-        renderWithProviders(<ReviewActions reconstruction={failed("rec-1", 1000)}/>, {user: publisher});
+    // The status badge reports the failure; a notification here fired again on every visit to a failure long past.
+    it("does not notify", () => {
+        const {rerender} = renderWithProviders(<ReviewActions reconstruction={failed("rec-1")}/>, {user: publisher});
 
-        expect(errorNotification).toHaveBeenCalledTimes(1);
-        expect(errorNotification).toHaveBeenCalledWith("Failed Precomputed Generation", "r");
-    });
-
-    it("does not notify again for a polled copy with the same id and failedAt", () => {
-        const {rerender} = renderWithProviders(<ReviewActions reconstruction={failed("rec-1", 1000)}/>, {user: publisher});
-
-        rerender(<ReviewActions reconstruction={failed("rec-1", 1000)}/>);
-
-        expect(errorNotification).toHaveBeenCalledTimes(1);
-    });
-
-    it("notifies again when the same reconstruction fails again", () => {
-        const {rerender} = renderWithProviders(<ReviewActions reconstruction={failed("rec-1", 1000)}/>, {user: publisher});
-
-        rerender(<ReviewActions reconstruction={failed("rec-1", 2000)}/>);
-
-        expect(errorNotification).toHaveBeenCalledTimes(2);
-    });
-
-    it("notifies again for a different failed reconstruction", () => {
-        const {rerender} = renderWithProviders(<ReviewActions reconstruction={failed("rec-1", 1000)}/>, {user: publisher});
-
-        rerender(<ReviewActions reconstruction={failed("rec-2", 1000)}/>);
-
-        expect(errorNotification).toHaveBeenCalledTimes(2);
-    });
-
-    it("never notifies without a phase failure", () => {
-        renderBar(publisher, S.WaitingForAtlasReconstruction, A.InPrecomputed);
+        rerender(<ReviewActions reconstruction={failed("rec-2")}/>);
 
         expect(errorNotification).not.toHaveBeenCalled();
     });
 
-    it("falls back to a default message when no reason was recorded", () => {
-        renderWithProviders(<ReviewActions reconstruction={failed("rec-1", 1000, null)}/>, {user: publisher});
-
-        expect(errorNotification).toHaveBeenCalledWith("Failed Precomputed Generation", "No reason was recorded.");
-    });
-
-    it("renders and notifies after moving from no selection to a failed reconstruction", () => {
+    it("renders after moving from no selection to a failed reconstruction", () => {
         const {rerender} = renderWithProviders(<ReviewActions reconstruction={null}/>, {user: publisher});
 
         expect(screen.getByText("No Reconstruction Selected")).toBeInTheDocument();
 
-        rerender(<ReviewActions reconstruction={failed("rec-1", 1000)}/>);
+        rerender(<ReviewActions reconstruction={failed("rec-1")}/>);
 
         expect(button(ReconstructionAction.RetryPhase)).toBeEnabled();
-        expect(errorNotification).toHaveBeenCalledTimes(1);
     });
 });

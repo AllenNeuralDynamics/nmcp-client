@@ -77,7 +77,7 @@ export const PageHeader = () => {
 
     const candidates = "Find Candidate Neurons";
 
-    const viewItem = isAuthenticated && userCanView ? <TextNavLink text="Reconstruct Neurons" to="/reconstructions"/> : null;
+    const viewItem = isAuthenticated && userCanView ? <TextNavLink text="Manage Neurons" to="/reconstructions"/> : null;
 
     const neuronsItem = isAuthenticated && userCanEdit ? <TextNavLink text="Add Specimens" to="/specimens"/> : null;
 

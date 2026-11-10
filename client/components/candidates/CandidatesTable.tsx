@@ -92,20 +92,25 @@ export const CandidatesTable = forwardRef<CandidatesTableHandle, CandidatesTable
 
     const headerRowStyle = {height: CandidateRowHeight};
 
+    // Tuned by eye at ~1600px; Structure (and Annotator(s)) stay unsized and take whatever remains.
+    const columnWidths = props.showAnnotators ?
+        {neuron: "6.6%", specimen: "6%", genotype: "7.2%", keywords: "14.5%"} :
+        {neuron: "7.7%", specimen: "7%", genotype: "8.4%", keywords: "21%"};
+
     return (
         <div ref={containerRef} style={{height: (HeaderRowCount + viewportRows) * CandidateRowHeight, overflowY: "auto"}}
              onScroll={e => setScrollTop(e.currentTarget.scrollTop)}>
             <Table withColumnBorders layout="fixed" stickyHeader>
                 <colgroup>
-                    <col/>
-                    <col/>
-                    <col/>
-                    <col/>
+                    <col style={{width: columnWidths.neuron}}/>
+                    <col style={{width: columnWidths.specimen}}/>
+                    <col style={{width: columnWidths.genotype}}/>
+                    <col style={{width: columnWidths.keywords}}/>
                     <col/>
                     <col style={{width: 80}}/>
                     <col style={{width: 80}}/>
                     <col style={{width: 80}}/>
-                    <col style={{width: 200}}/>
+                    <col style={{width: 204}}/>
                     {props.showAnnotators ? <col/> : null}
                 </colgroup>
                 <Table.Thead bg="table-header">
@@ -115,7 +120,7 @@ export const CandidatesTable = forwardRef<CandidatesTableHandle, CandidatesTable
                         <Table.Th rowSpan={2}>Genotype</Table.Th>
                         <Table.Th rowSpan={2}>Keywords</Table.Th>
                         <Table.Th colSpan={4} ta="center">Atlas-Space Soma</Table.Th>
-                        <Table.Th rowSpan={2} colSpan={1} ta="center">Specimen-Space Soma (X, Y, Z)</Table.Th>
+                        <Table.Th rowSpan={2} colSpan={1} ta="center">Specimen-Space Soma<br/>(X, Y, Z)</Table.Th>
                         {props.showAnnotators ? <Table.Th rowSpan={2}>Annotator(s)</Table.Th> : null}
                     </Table.Tr>
                     <Table.Tr style={headerRowStyle}>

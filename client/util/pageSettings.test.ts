@@ -11,7 +11,8 @@ import {
     sanitizePagination,
     sectionOf,
     SettingsChange,
-    stringList
+    stringList,
+    writeStoredPageSettings
 } from "./pageSettings";
 
 type Sample = {
@@ -147,6 +148,32 @@ describe("removeRetiredSettings", () => {
                 throw new Error("blocked");
             }
         }))).not.toThrow();
+    });
+});
+
+describe("writeStoredPageSettings", () => {
+    beforeEach(() => localStorage.clear());
+
+    it("applies the change to what is stored", () => {
+        localStorage.setItem(definition.key, JSON.stringify({...defaults, name: "stored", count: 5}));
+
+        writeStoredPageSettings(definition, s => ({...s, count: 9}));
+
+        expect(JSON.parse(localStorage.getItem(definition.key))).toEqual({...defaults, name: "stored", count: 9});
+    });
+
+    it("applies the change to the defaults when nothing usable is stored", () => {
+        localStorage.setItem(definition.key, "{oops");
+
+        writeStoredPageSettings(definition, s => ({...s, count: 9}));
+
+        expect(JSON.parse(localStorage.getItem(definition.key))).toEqual({...defaults, count: 9});
+    });
+
+    it("tolerates blocked storage", () => {
+        expect(() => writeStoredPageSettings(definition, s => s, () => {
+            throw new Error("blocked");
+        })).not.toThrow();
     });
 });
 

@@ -1,5 +1,5 @@
 import * as React from "react";
-import {useEffect, useState} from "react";
+import {useState} from "react";
 import {useMutation} from "@apollo/client";
 import {Badge, Divider, Group, Stack, Text} from "@mantine/core";
 import {useClipboard} from "@mantine/hooks";
@@ -24,7 +24,6 @@ import {ReconstructionAction} from "../../models/reconstructionAction";
 import {gateFor} from "../../models/reconstructionGates";
 import {ReconstructionActionButton} from "../common/ReconstructionAction";
 import {AnnotationStatus} from "../../models/annotationStatus";
-import {atlasStatusName} from "../../models/atlasReconstructionStatus";
 import {useAppLayout} from "../../hooks/useAppLayout";
 import {useUser} from "../../hooks/useUser";
 import {useRetryPhase} from "../../hooks/useRetryPhase";
@@ -80,15 +79,6 @@ export const ReviewActions = ({reconstruction}: { reconstruction: Annotation }) 
             refetchQueries: [ANNOTATIONS_QUERY],
             onError: (e) => errorNotification("Error Replaying Pipeline", e.message)
         });
-
-    // Keyed on primitives: the reconstructions query polls, replacing the object every few seconds.
-    useEffect(() => {
-        const failure = reconstruction?.phaseFailure;
-
-        if (failure) {
-            errorNotification(atlasStatusName(failure.phase), failure.reason ?? "No reason was recorded.");
-        }
-    }, [reconstruction?.id, reconstruction?.phaseFailure?.failedAt]);
 
     if (!reconstruction) {
         return <NoSelection/>;
