@@ -97,6 +97,15 @@ function devServer() {
             }
         ],
         allowedHosts: "all",
+        client: {
+            overlay: {
+                // Neuroglancer throws this from its draw loop when the 3D panel's picking framebuffer is incomplete
+                // (36054, FRAMEBUFFER_INCOMPLETE_ATTACHMENT). Only that frame is lost; the check reruns next frame and the
+                // viewer recovers, so keep it out of the overlay. It is still logged to the console.  The function is
+                // serialized into the client bundle, so it cannot reference anything outside itself.
+                runtimeErrors: (error: Error) => !error?.message?.startsWith("Framebuffer configuration not supported")
+            }
+        },
         setupMiddlewares: (middlewares, devServer) => {
             if (!devServer) {
                 throw new Error('webpack-dev-server is not defined');

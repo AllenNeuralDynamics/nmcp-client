@@ -63,7 +63,9 @@ export class NeuroglancerViewer {
 
     private _stateInitialized: boolean = false;
     private _stateChangeHandler: any = null;
+    private _pendingStateChange: ReturnType<typeof debounce> | null = null;
     private _positionCallback: any = null;
+    private _disposed: boolean = false;
 
     public constructor(elementId: string, isDarkColorScheme: boolean = false) {
         const target = document.getElementById(elementId)
@@ -106,6 +108,8 @@ export class NeuroglancerViewer {
     public set stateListener(listener: StateListener) {
         if (listener != null && this.viewer) {
             const throttledSetUrlHash = debounce(() => listener(this.currentState), 500)
+
+            this._pendingStateChange = throttledSetUrlHash;
 
             this._stateChangeHandler = this.viewer.state.changed.add(throttledSetUrlHash);
         }
@@ -199,6 +203,37 @@ export class NeuroglancerViewer {
                 this._positionCallback();
             }
         }
+
+        this._stateChangeHandler = null;
+        this._positionCallback = null;
+
+        // A change within the last 500 ms would otherwise still call the listener, reading state from a disposed viewer.
+        this._pendingStateChange?.cancel();
+        this._pendingStateChange = null;
+
+        this.disposeViewer();
+    }
+
+    private disposeViewer(): void {
+        if (this._disposed || !this._viewer) {
+            return;
+        }
+
+        this._disposed = true;
+
+        const display = this._viewer.display;
+
+        this._viewer.dispose();
+
+        // makeMinimalViewer creates the DisplayContext but the Viewer does not take ownership of it, so disposing the
+        // viewer leaves the display's resize observer running and its canvas in the container.
+        display.dispose();
+
+        // Release the WebGL context now rather than whenever the canvas is collected; browsers cap live contexts per page
+        // and force-lose the oldest past the cap, which repeated remounts would otherwise reach.
+        display.gl.getExtension("WEBGL_lose_context")?.loseContext();
+
+        display.canvas.remove();
     }
 
     protected get viewer() {
@@ -262,7 +297,7 @@ export class NeuroglancerViewer {
     protected removeLayer(name: string, state: any): any {
         const current = this.findLayer(name, state);
 
-        if (current && current >= 0) {
+        if (current != null && current >= 0) {
             state.layers.splice(current, 1);
         }
     }
@@ -270,7 +305,7 @@ export class NeuroglancerViewer {
     protected ensureLayer(layerSource: NeuroglancerLayerSource, state: any, exclusive: boolean = false): any {
         const current = this.findLayer(layerSource.name, state);
 
-        if (current && current >= 0) {
+        if (current != null && current >= 0) {
             return;
         }
 

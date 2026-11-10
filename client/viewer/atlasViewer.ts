@@ -46,6 +46,10 @@ export class AtlasViewer extends NeuroglancerViewer {
 
         const layerIndex = this.findLayer(AtlasLayerName, state);
 
+        if (layerIndex == null || layerIndex < 0) {
+            return state;
+        }
+
         state.layers[layerIndex].segments = segments;
 
         return state;

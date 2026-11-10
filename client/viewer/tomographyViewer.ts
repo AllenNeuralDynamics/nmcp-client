@@ -82,7 +82,9 @@ export class TomographyViewer extends NeuroglancerViewer {
     }
 
     protected get defaultState() {
-        const state: any = defaultTomographyViewerState;
+        // Must be a copy: SpecimenSpaceViewer adds its reconstruction layer to the returned state, which would otherwise
+        // leak into every TomographyViewer created later in the session (e.g. the Specimen page).
+        const state: any = structuredClone(defaultTomographyViewerState);
 
         state.title = "Specimen";
 

@@ -262,7 +262,7 @@ export class SearchViewer extends AtlasViewer {
     private updateReconstructionLayer(name: string, neurons: NeuronViewModel[], state: any): any {
         const layerIdx = this.findLayer(name, state);
 
-        if (layerIdx == null) {
+        if (layerIdx == null || layerIdx < 0) {
             return state;
         }
 

@@ -151,7 +151,7 @@ export const Specimen = observer(() => {
                             </Table.Tr>
                         </Table>
                         <Divider orientation="vertical"/>
-                        {specimen.tomography?.url ? <SpecimenTomographyView specimen={specimen}/> : <Center style={{flexGrow: 1}} m={20}>Tomography is not defined for this specimen.</Center>}
+                        {specimen.tomography?.url ? <SpecimenTomographyView key={specimen.id} specimen={specimen}/> : <Center style={{flexGrow: 1}} m={20}>Tomography is not defined for this specimen.</Center>}
                     </Group>
                 </Card.Section>
             </Card>

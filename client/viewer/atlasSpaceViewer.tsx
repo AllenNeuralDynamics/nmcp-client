@@ -37,7 +37,7 @@ export class AtlasSpaceViewer extends AtlasViewer {
 
         const layerIdx = this.findLayer(LAYER_NAME, state);
 
-        if (layerIdx == null) {
+        if (layerIdx == null || layerIdx < 0) {
             return state;
         }
 
