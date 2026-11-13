@@ -93,7 +93,7 @@ export const Support = () => {
     return (
         <Stack m={20}>
             <SupportCard title="Documentation">
-                <Text size="sm">Neuron Morphology Community Portal documentation coming soon.</Text>
+                <a href="https://dx.doi.org/10.17504/protocols.io.1wgb1dkqyvpk/v1">Neuron Morphology Community Portal Getting Started Guide.</a>
             </SupportCard>
             {isAuthenticated ? (
                 <SupportCard title="Access">
