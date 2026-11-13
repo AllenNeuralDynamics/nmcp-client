@@ -38,10 +38,12 @@ const HomeNavLink = () => {
 const IssueNavLink = ({text, to}: { text: string, to: string }) => {
     const notifications = useContext(NotificationContext);
 
+    const needsAttention = notifications.issueCount > 0 || notifications.openAccessRequestCount > 0 || notifications.openFeedbackCount > 0;
+
     return (
         <NavLink to={to} className="header-menu-item">
             {({isActive}: { isActive: boolean }) => (
-                <Indicator inline color="red" size={16} label="!" disabled={notifications.issueCount == 0}>
+                <Indicator inline color="red" size={16} label="!" disabled={!needsAttention}>
                     <Group bdrs={4} bg={isActive ? "#343536" : "transparent"} gap={0}>
                         <Text p={8} size="md">{text}</Text>
                     </Group>
@@ -77,7 +79,7 @@ export const PageHeader = () => {
 
     const candidates = "Find Candidate Neurons";
 
-    const viewItem = isAuthenticated && userCanView ? <TextNavLink text="Manage Neurons" to="/reconstructions"/> : null;
+    const viewItem = isAuthenticated && userCanView ? <TextNavLink text="Manage Reconstructions" to="/reconstructions"/> : null;
 
     const neuronsItem = isAuthenticated && userCanEdit ? <TextNavLink text="Add Specimens" to="/specimens"/> : null;
 

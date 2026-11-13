@@ -110,6 +110,10 @@ export class CandidateFilter {
 
     public includedStatuses: AnnotationStatus[] = [];
 
+    // Not part of the settings.  Signed out, the include options are hidden and the stored selection is ignored rather
+    // than cleared, so it applies again after signing back in.
+    public isAuthenticated: boolean = false;
+
     public samplesFilter: OptionalFilter<string[]> = new OptionalFilter([]);
     public atlasStructureFilter: OptionalFilter<AtlasStructureShape[]> = new OptionalFilter([]);
     public tagFilter: OptionalFilter<string> = new OptionalFilter("");
@@ -163,22 +167,30 @@ export class CandidateFilter {
         this.atlasStructureFilter.contents = [];
     }
 
+    public setAuthenticated(isAuthenticated: boolean) {
+        this.isAuthenticated = isAuthenticated;
+    }
+
+    public get activeIncludedStatuses(): AnnotationStatus[] {
+        return this.isAuthenticated ? this.includedStatuses : [];
+    }
+
     public get anyEnabled(): boolean {
-        return this.includedStatuses.length > 0 || this.samplesFilter.isEnabled || this.atlasStructureFilter.isEnabled || this.tagFilter.isEnabled || this.genotypeFilter.isEnabled || this.limitBrightness || this.limitVolume
+        return this.activeIncludedStatuses.length > 0 || this.samplesFilter.isEnabled || this.atlasStructureFilter.isEnabled || this.tagFilter.isEnabled || this.genotypeFilter.isEnabled || this.limitBrightness || this.limitVolume
     }
 
     public get includeInProgress(): boolean {
-        return this.includedStatuses.includes(AnnotationStatus.InProgress);
+        return this.activeIncludedStatuses.includes(AnnotationStatus.InProgress);
     }
 
     // Undefined rather than the full list when none is included, so the request omits the argument and the API's
     // default applies.
     public get excludedAnnotationStatuses(): AnnotationStatus[] {
-        if (!CandidateExcludedStatuses.some(s => this.includedStatuses.includes(s))) {
+        if (!CandidateExcludedStatuses.some(s => this.activeIncludedStatuses.includes(s))) {
             return undefined;
         }
 
-        return CandidateExcludedStatuses.filter(s => !this.includedStatuses.includes(s));
+        return CandidateExcludedStatuses.filter(s => !this.activeIncludedStatuses.includes(s));
     }
 
     public get specimenIds(): string[] {

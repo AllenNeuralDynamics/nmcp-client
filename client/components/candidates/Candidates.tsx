@@ -1,6 +1,7 @@
 import * as React from "react";
 import {useEffect, useMemo, useRef, useState} from "react";
 import {useApolloClient} from "@apollo/client";
+import {useIsAuthenticated} from "@azure/msal-react";
 import {observer} from "mobx-react-lite";
 import {ActionIcon, Box, Card, Center, Collapse, Divider, Group, Loader, Slider, Stack, Text, Tooltip} from "@mantine/core";
 import {IconChevronDown, IconChevronUp, IconRefresh} from "@tabler/icons-react";
@@ -38,12 +39,16 @@ export const Candidates = observer(() => {
     const client = useApolloClient();
     const constants = useConstants();
 
+    const isAuthenticated = useIsAuthenticated();
+
     const findStructure = (id: string) => constants.findAtlasStructure(id);
 
     const {filtersExpanded, tableExpanded, visibleRowCount, viewerPinned: pinned} = settings.layout;
 
     const [candidateFilter] = useState(() => {
         const filter = new CandidateFilter(constants.DefaultAtlas?.id ?? null);
+
+        filter.setAuthenticated(isAuthenticated);
 
         filter.applySettings(settings.filters, findStructure);
 
@@ -97,6 +102,8 @@ export const Candidates = observer(() => {
             locationLoader.cancel();
         }
     }, []);
+
+    useEffect(() => candidateFilter.setAuthenticated(isAuthenticated), [isAuthenticated]);
 
     useSettingsMirror(() => candidateFilter.settings, filters => update(s => ({...s, filters})));
 

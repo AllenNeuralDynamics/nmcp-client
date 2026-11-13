@@ -1,13 +1,13 @@
-import React, {useState} from "react";
+import React, {useContext, useEffect, useRef, useState} from "react";
 import {Navigate} from "react-router-dom";
 import {useMutation, useQuery} from "@apollo/client";
 import {observer} from "mobx-react-lite";
 import {Badge, Button, Card, Center, Divider, Group, SimpleGrid, Table, Text} from "@mantine/core";
-import {IconCheck, IconX} from "@tabler/icons-react";
+import {IconCheck, IconMessageCheck, IconX} from "@tabler/icons-react";
 import dayjs from "dayjs";
 
 import {PaginationHeader} from "../../common/PaginationHeader";
-import {AccessRequestStatusFilter} from "../../common/filters/AccessRequestStatusFilter";
+import {AccessRequestStatusFilter, AccessRequestStatusFilterOptions, FeedbackStatusFilterOptions} from "../../common/filters/AccessRequestStatusFilter";
 import {GraphQLErrorAlert} from "../../common/GraphQLErrorAlert";
 import {AppLoading} from "../../app/AppLoading";
 import {errorNotification} from "../../common/NotificationHelper";
@@ -17,18 +17,73 @@ import {UserPermissions} from "../../../graphql/user";
 import {
     ACCESS_REQUESTS_QUERY,
     AccessRequestsQueryResponse,
+    OPEN_REQUEST_COUNT_QUERY,
     AccessRequestsQueryVariables,
     UPDATE_ACCESS_REQUEST_STATUS_MUTATION,
     UpdateAccessRequestStatusResponse,
     UpdateAccessRequestStatusVariables
 } from "../../../graphql/accessRequest";
-import {AccessRequest, AccessRequestStatus, accessRequestStatusColor, accessRequestStatusName} from "../../../models/accessRequest";
+import {AccessRequest, AccessRequestKind, AccessRequestStatus, accessRequestStatusColor, accessRequestStatusName} from "../../../models/accessRequest";
 import {formatUser} from "../../../models/user";
 import {AdminAccessRequestsSettings, AdminTabProps} from "../adminSettings";
 import {useSettingsMirror} from "../../../hooks/useSettingsMirror";
 import {useOffsetReset} from "../../../hooks/useOffsetReset";
+import {NotificationContext} from "../../app/NotificationsApp";
 
-export const AccessRequests = observer(({settings, onSettingsChange}: AdminTabProps<AdminAccessRequestsSettings>) => {
+type ReviewAction = {
+    label: string;
+    color: string;
+    icon: React.ReactNode;
+    status: AccessRequestStatus;
+}
+
+type RequestKindView = {
+    kind: AccessRequestKind;
+    title: string;
+    noun: string;
+    purposeHeader: string;
+    reviewerHeader: string;
+    createdHeader: string;
+    statusOptions: AccessRequestStatus[];
+    actions: ReviewAction[];
+}
+
+const AccessRequestView: RequestKindView = {
+    kind: AccessRequestKind.Access,
+    title: "Access Requests",
+    noun: "requests",
+    purposeHeader: "Purpose",
+    reviewerHeader: "Reviewed By",
+    createdHeader: "Requested",
+    statusOptions: AccessRequestStatusFilterOptions,
+    actions: [
+        {label: "Accept", color: "teal", icon: <IconCheck size={18}/>, status: AccessRequestStatus.Accepted},
+        {label: "Deny", color: "red", icon: <IconX size={18}/>, status: AccessRequestStatus.Denied}
+    ]
+};
+
+const FeedbackView: RequestKindView = {
+    kind: AccessRequestKind.Feedback,
+    title: "Feedback & Messages",
+    noun: "messages",
+    purposeHeader: "Message",
+    reviewerHeader: "Responded By",
+    createdHeader: "Received",
+    statusOptions: FeedbackStatusFilterOptions,
+    actions: [
+        {label: "Mark as Responded", color: "teal", icon: <IconMessageCheck size={18}/>, status: AccessRequestStatus.Accepted}
+    ]
+};
+
+export const AccessRequests = (props: AdminTabProps<AdminAccessRequestsSettings>) => <RequestQueue view={AccessRequestView} {...props}/>;
+
+export const Feedback = (props: AdminTabProps<AdminAccessRequestsSettings>) => <RequestQueue view={FeedbackView} {...props}/>;
+
+type RequestQueueProps = AdminTabProps<AdminAccessRequestsSettings> & {
+    view: RequestKindView;
+}
+
+const RequestQueue = observer(({view, settings, onSettingsChange}: RequestQueueProps) => {
     const user = useUser();
 
     if ((user?.permissions & UserPermissions.Admin) == 0) {
@@ -49,37 +104,55 @@ export const AccessRequests = observer(({settings, onSettingsChange}: AdminTabPr
 
     const status = statusFilter.isEnabled ? statusFilter.contents : [];
 
-    const {data, previousData, loading, error} = useQuery<AccessRequestsQueryResponse, AccessRequestsQueryVariables>(ACCESS_REQUESTS_QUERY, {
-        variables: {input: {offset: offset, limit: limit, status: status}},
-        pollInterval: 10000
+    // The table does not poll on its own.  It follows the open count that drives this tab's badge, refetching whenever
+    // that count changes, so the two cannot drift apart on separate timers.  Any arrival or status change of an open
+    // request moves the count.  It is fetched fresh on mount, as a cached table may be older than the badge.
+    const {data, previousData, loading, error, refetch} = useQuery<AccessRequestsQueryResponse, AccessRequestsQueryVariables>(ACCESS_REQUESTS_QUERY, {
+        variables: {input: {offset: offset, limit: limit, status: status, requestKind: view.kind}},
+        fetchPolicy: "cache-and-network"
     });
 
+    const notifications = useContext(NotificationContext);
+
+    const openCount = view.kind === AccessRequestKind.Feedback ? notifications.openFeedbackCount : notifications.openAccessRequestCount;
+
+    const lastOpenCount = useRef(openCount);
+
+    useEffect(() => {
+        if (openCount !== lastOpenCount.current) {
+            lastOpenCount.current = openCount;
+            refetch();
+        }
+    }, [openCount]);
+
     const [updateStatus, {loading: updating}] = useMutation<UpdateAccessRequestStatusResponse, UpdateAccessRequestStatusVariables>(UPDATE_ACCESS_REQUEST_STATUS_MUTATION, {
-        refetchQueries: [ACCESS_REQUESTS_QUERY],
+        // The open counts behind the badges poll slowly, so they are refreshed with the table rather than lagging behind it.
+        refetchQueries: [ACCESS_REQUESTS_QUERY, OPEN_REQUEST_COUNT_QUERY],
         awaitRefetchQueries: true,
         onCompleted: (data) => {
             if (!data.updateAccessRequestStatus) {
-                errorNotification("Access Request", "There was an unknown error updating the status.");
+                errorNotification(view.title, "There was an unknown error updating the status.");
                 return;
             }
 
             // The default filter only shows unreviewed requests, so a reviewed request typically leaves the table.
             setSelectionId(null);
         },
-        onError: (e) => errorNotification("Access Request", e.message)
+        onError: (e) => errorNotification(view.title, e.message)
     });
 
     useOffsetReset(offset, data?.accessRequests?.totalCount, () => setOffset(0));
 
     if (error) {
-        return <GraphQLErrorAlert title="Access Requests Could not be Loaded" error={error}/>;
+        return <GraphQLErrorAlert title={`${view.title} Could not be Loaded`} error={error}/>;
     }
 
-    if (loading && !previousData) {
-        return <AppLoading message={"loading access requests..."}/>;
-    }
+    // Cached rows are shown while a fresh copy loads, falling back to the previous page while new variables load.
+    const source = data ?? previousData;
 
-    const source = loading ? previousData : data;
+    if (loading && !source) {
+        return <AppLoading message={`loading ${view.title.toLowerCase()}...`}/>;
+    }
 
     const requests: AccessRequest[] = source?.accessRequests?.items ?? [];
     const totalCount = source?.accessRequests?.totalCount ?? 0;
@@ -106,22 +179,20 @@ export const AccessRequests = observer(({settings, onSettingsChange}: AdminTabPr
         <Card withBorder>
             <Card.Section bg="segment">
                 <Group p={12}>
-                    <Text size="lg" fw={500}>Access Requests</Text>
+                    <Text size="lg" fw={500}>{view.title}</Text>
                 </Group>
                 <Divider orientation="horizontal"/>
             </Card.Section>
             <Card.Section bg="segment">
                 <Group p={8} justify="space-between">
-                    <AccessRequestStatusFilter w={300} filter={statusFilter}/>
+                    <AccessRequestStatusFilter w={300} filter={statusFilter} allowedValues={view.statusOptions} kind={view.kind}/>
                     <Group>
-                        <Button variant="light" color="teal" leftSection={<IconCheck size={18}/>} disabled={!canReview} loading={updating}
-                                onClick={() => updateStatus({variables: {id: selected.id, status: AccessRequestStatus.Accepted}})}>
-                            Accept
-                        </Button>
-                        <Button variant="light" color="red" leftSection={<IconX size={18}/>} disabled={!canReview} loading={updating}
-                                onClick={() => updateStatus({variables: {id: selected.id, status: AccessRequestStatus.Denied}})}>
-                            Deny
-                        </Button>
+                        {view.actions.map(a => (
+                            <Button key={a.label} variant="light" color={a.color} leftSection={a.icon} disabled={!canReview} loading={updating}
+                                    onClick={() => updateStatus({variables: {id: selected.id, status: a.status}})}>
+                                {a.label}
+                            </Button>
+                        ))}
                     </Group>
                 </Group>
                 <Divider orientation="horizontal"/>
@@ -133,14 +204,14 @@ export const AccessRequests = observer(({settings, onSettingsChange}: AdminTabPr
             </Card.Section>
             <Card.Section>
                 {requests.length > 0 ?
-                    <AccessRequestTable requests={requests} selectionId={selectionId} onSelect={setSelectionId}/> :
-                    <Center p={24}><Text c="dimmed">There are no matching access requests.</Text></Center>}
+                    <AccessRequestTable view={view} requests={requests} selectionId={selectionId} onSelect={setSelectionId}/> :
+                    <Center p={24}><Text c="dimmed">{`There are no matching ${view.noun}.`}</Text></Center>}
             </Card.Section>
             {requests.length > 0 ?
                 <Card.Section bg="segment">
                     <SimpleGrid cols={2} p={8}>
                         <Text size="sm">
-                            {`Showing ${start} to ${end} of ${totalCount} requests`}
+                            {`Showing ${start} to ${end} of ${totalCount} ${view.noun}`}
                         </Text>
                         <Text size="sm" ta="end">{`Page ${activePage} of ${pageCount}`}</Text>
                     </SimpleGrid>
@@ -149,7 +220,14 @@ export const AccessRequests = observer(({settings, onSettingsChange}: AdminTabPr
     );
 });
 
-const AccessRequestTable = ({requests, selectionId, onSelect}: { requests: AccessRequest[], selectionId: string, onSelect: (id: string) => void }) => {
+type AccessRequestTableProps = {
+    view: RequestKindView;
+    requests: AccessRequest[];
+    selectionId: string;
+    onSelect: (id: string) => void;
+}
+
+const AccessRequestTable = ({view, requests, selectionId, onSelect}: AccessRequestTableProps) => {
     const rows = requests.map(r => <AccessRequestRow key={r.id} request={r} selected={r.id === selectionId} onSelect={onSelect}/>);
 
     return (
@@ -159,10 +237,10 @@ const AccessRequestTable = ({requests, selectionId, onSelect}: { requests: Acces
                     <Table.Th>Name</Table.Th>
                     <Table.Th>Contact</Table.Th>
                     <Table.Th>Affiliation</Table.Th>
-                    <Table.Th>Purpose</Table.Th>
+                    <Table.Th>{view.purposeHeader}</Table.Th>
                     <Table.Th>Status</Table.Th>
-                    <Table.Th>Reviewed By</Table.Th>
-                    <Table.Th>Requested</Table.Th>
+                    <Table.Th>{view.reviewerHeader}</Table.Th>
+                    <Table.Th>{view.createdHeader}</Table.Th>
                     <Table.Th>Updated</Table.Th>
                 </Table.Tr>
             </Table.Thead>
@@ -183,7 +261,7 @@ const AccessRequestRow = ({request, selected, onSelect}: { request: AccessReques
             <Table.Td>{request.affiliation}</Table.Td>
             <Table.Td>{request.purpose}</Table.Td>
             <Table.Td>
-                <Badge variant="light" color={accessRequestStatusColor(request.status)}>{accessRequestStatusName(request.status)}</Badge>
+                <Badge variant="light" color={accessRequestStatusColor(request.status)}>{accessRequestStatusName(request.status, request.requestKind)}</Badge>
             </Table.Td>
             <Table.Td><Text size="sm" style={{whiteSpace: "nowrap"}}>{formatUser(request.admin, "-")}</Text></Table.Td>
             <Table.Td><Text size="sm" style={{whiteSpace: "nowrap"}}>{dayjs(request.createdAt).format("YYYY-MM-DD")}</Text></Table.Td>

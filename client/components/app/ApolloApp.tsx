@@ -1,5 +1,5 @@
 import * as React from "react";
-import {useEffect} from "react";
+import {useEffect, useRef} from "react";
 import {ApolloClient, InMemoryCache, ApolloProvider, concat} from "@apollo/client";
 import {setContext} from "@apollo/client/link/context";
 import createUploadLink from "apollo-upload-client/createUploadLink.mjs";
@@ -22,6 +22,8 @@ export const ApolloApp = () => {
     const {instance, accounts, inProgress} = useMsal();
 
     const isAuthenticated = useIsAuthenticated();
+
+    const wasAuthenticated = useRef(isAuthenticated);
 
     const account = useAccount(accounts[0] || {});
 
@@ -58,7 +60,9 @@ export const ApolloApp = () => {
 
     useEffect(() => {
         if (inProgress == "none") {
-            if (!isAuthenticated) {
+            if (!isAuthenticated && wasAuthenticated.current) {
+                // Only on an actual sign-out.  On a signed-out page load the cache is already empty, and clearStore()
+                // would cancel the in-flight user query, making UserApp render the page and then remount it.
                 (async () => {
                     await client.clearStore() //clear Apollo cache when user logs off
                 })()
@@ -79,6 +83,12 @@ export const ApolloApp = () => {
             }
         }
     }, [isAuthenticated, instance, account, inProgress]);
+
+    useEffect(() => {
+        if (inProgress == "none") {
+            wasAuthenticated.current = isAuthenticated;
+        }
+    }, [isAuthenticated, inProgress]);
 
     if (inProgress != "none") {
         return <AppLoading message="authenticating"/>

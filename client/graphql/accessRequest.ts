@@ -1,6 +1,13 @@
 import gql from "graphql-tag";
 
-import {AccessRequest, AccessRequestShape, AccessRequestStatus, RequestAccessResponse} from "../models/accessRequest";
+import {
+    AccessRequest,
+    AccessRequestKind,
+    AccessRequestShape,
+    AccessRequestStatus,
+    OpenAccessRequestStatuses,
+    RequestAccessResponse
+} from "../models/accessRequest";
 
 //
 // Open
@@ -30,6 +37,7 @@ const ACCESS_REQUEST_FIELDS_FRAGMENT = gql`fragment AccessRequestFields on Acces
     purpose
     notes
     status
+    requestKind
     admin {
         id
         firstName
@@ -59,6 +67,7 @@ ${ACCESS_REQUEST_FIELDS_FRAGMENT}
 export type AccessRequestsQueryVariables = {
     input: {
         status?: AccessRequestStatus[];
+        requestKind?: AccessRequestKind;
         offset?: number;
         limit?: number;
     }
@@ -69,6 +78,24 @@ export type AccessRequestsQueryResponse = {
         totalCount: number;
         offset: number;
         items: AccessRequest[];
+    }
+}
+
+export const OPEN_REQUEST_COUNT_QUERY = gql`query OpenRequestCount($input: AccessRequestQueryInput) {
+    accessRequests(input: $input) {
+        totalCount
+    }
+}
+`;
+
+// The API still loads a page of items even when none are selected, and a zero limit means no limit, so one is the cheapest page.
+export const openRequestCountVariables = (requestKind: AccessRequestKind): AccessRequestsQueryVariables => ({
+    input: {status: OpenAccessRequestStatuses, requestKind, limit: 1}
+});
+
+export type OpenRequestCountResponse = {
+    accessRequests: {
+        totalCount: number;
     }
 }
 

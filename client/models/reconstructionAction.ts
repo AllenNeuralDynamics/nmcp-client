@@ -131,7 +131,7 @@ export const actionTooltip = (status: ReconstructionAction): string => {
         case ReconstructionAction.RetryPhase:
             return "Re-run the automated phase that failed for this reconstruction.";
         case ReconstructionAction.ResetPipeline:
-            return "Discard the current atlas-space pipeline run and start it again from the beginning.";
+            return "Discard the current atlas-space finalization run and start it again from the beginning.";
         case ReconstructionAction.MarkIncomplete:
             return "The reconstruction will be set aside as incomplete and not considered in progress.  It can be reopened later.";
         case ReconstructionAction.MarkDuplicate:

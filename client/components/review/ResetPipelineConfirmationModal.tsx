@@ -15,8 +15,8 @@ export const ResetPipelineConfirmationModal = (props: ResetPipelineConfirmationM
     const fromReady = props.sourceStatus == AnnotationStatus.ReadyToPublish;
 
     const message = fromReady ?
-        "This reconstruction completed every automated phase and is ready to publish.  Replaying the pipeline discards that run, and it cannot be recovered by any other action." :
-        "The current run stopped at a failed phase.  The atlas-space pipeline will start again from its first automated phase.";
+        "This reconstruction completed every automated phase and is ready to publish.  Replaying finalization discards that run, and it cannot be recovered by any other action." :
+        "The current run stopped at a failed phase.  The atlas-space finalization run will start again from its first automated phase.";
 
     return (
         <Modal.Root opened={props.show} onClose={() => props.onClose(false)} size="lg" centered>

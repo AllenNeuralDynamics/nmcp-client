@@ -7,7 +7,7 @@ import {useUser} from "../../hooks/useUser";
 import {UserPermissions} from "../../graphql/user";
 import {hasPermission} from "../../models/user";
 import {RequestAccessResponse} from "../../models/accessRequest";
-import {RequestAccessForm, requestAccessResponseMessage} from "../common/RequestAccess";
+import {ContactPortalForm, contactPortalResponseMessage, RequestAccessForm, requestAccessResponseMessage} from "../common/RequestAccess";
 import {MessageBox} from "../common/MessageBox";
 
 const authorizations: [UserPermissions, string][] = [
@@ -52,8 +52,20 @@ const AccessRequest = () => {
 
     return (
         <>
-            <RequestAccessForm onResponse={(response: RequestAccessResponse) => setMessage(requestAccessResponseMessage(response))}/>
+            <RequestAccessForm wide onResponse={(response: RequestAccessResponse) => setMessage(requestAccessResponseMessage(response))}/>
             {message ? <MessageBox message={message} opened={true} centered={true} cancellable={false} title="Access Request"
+                                   onConfirm={() => setMessage(null)}/> : null}
+        </>
+    );
+}
+
+const ContactPortal = () => {
+    const [message, setMessage] = useState<string>(null);
+
+    return (
+        <>
+            <ContactPortalForm wide onResponse={(response: RequestAccessResponse) => setMessage(contactPortalResponseMessage(response))}/>
+            {message ? <MessageBox message={message} opened={true} centered={true} cancellable={false} title="Contact Portal Team"
                                    onConfirm={() => setMessage(null)}/> : null}
         </>
     );
@@ -92,6 +104,9 @@ export const Support = () => {
                     <AccessRequest/>
                 </SupportCard>
             )}
+            <SupportCard title="Contact Portal Team">
+                <ContactPortal/>
+            </SupportCard>
         </Stack>
     );
 }

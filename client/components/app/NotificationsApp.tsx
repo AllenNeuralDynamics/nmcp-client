@@ -1,21 +1,25 @@
 import * as React from "react";
+import {useEffect} from "react";
 import {useQuery} from "@apollo/client";
 import {Stack} from "@mantine/core";
 
 import {ISSUE_COUNT_QUERY, IssueCountResponse} from "../../graphql/issue";
+import {OPEN_REQUEST_COUNT_QUERY, openRequestCountVariables, OpenRequestCountResponse} from "../../graphql/accessRequest";
+import {AccessRequestKind} from "../../models/accessRequest";
 import {UserPermissions} from "../../graphql/user";
 import {useUser} from "../../hooks/useUser";
-import {GraphQLErrorAlert} from "../common/GraphQLErrorAlert";
 
 export interface Notifications {
     issueCount: number;
+    openFeedbackCount: number;
+    openAccessRequestCount: number;
 }
 
 type NotificationsAppProps = {
     children?: any;
 }
 
-export const NotificationContext = React.createContext<Notifications>({issueCount: 0});
+export const NotificationContext = React.createContext<Notifications>({issueCount: 0, openFeedbackCount: 0, openAccessRequestCount: 0});
 
 export const NotificationsApp = (props: NotificationsAppProps) => {
     const user = useUser();
@@ -31,25 +35,42 @@ export const NotificationsApp = (props: NotificationsAppProps) => {
     }
 }
 
+// Always the provider, so the count arriving never changes the element type above the page and remounts it.  A failed
+// poll keeps the last count rather than replacing the page with an error.
 const Notifications = (props: NotificationsAppProps) => {
-    const {loading, error, data} = useQuery<IssueCountResponse>(ISSUE_COUNT_QUERY, {
+    const {error, data, previousData} = useQuery<IssueCountResponse>(ISSUE_COUNT_QUERY, {
         fetchPolicy: "no-cache", pollInterval: 10000
     });
 
-    if (error) {
-        return <GraphQLErrorAlert title="Issue Counts Could not be Loaded" error={error}/>;
-    }
+    useEffect(() => {
+        if (error) {
+            console.log(error);
+        }
+    }, [error]);
 
-    if (!error && !loading && data) {
-        return (<NotificationContext.Provider value={{issueCount: data.issueCount}}>
-                {props.children}
-            </NotificationContext.Provider>
-        );
-    } else {
-        return (
-            <div>
-                {props.children}
-            </div>
-        );
-    }
+    const issueCount = (data ?? previousData)?.issueCount ?? 0;
+
+    const openFeedbackCount = useOpenRequestCount(AccessRequestKind.Feedback);
+
+    const openAccessRequestCount = useOpenRequestCount(AccessRequestKind.Access);
+
+    return (
+        <NotificationContext.Provider value={{issueCount, openFeedbackCount, openAccessRequestCount}}>
+            {props.children}
+        </NotificationContext.Provider>
+    );
+}
+
+function useOpenRequestCount(kind: AccessRequestKind): number {
+    const {error, data, previousData} = useQuery<OpenRequestCountResponse>(OPEN_REQUEST_COUNT_QUERY, {
+        variables: openRequestCountVariables(kind), fetchPolicy: "no-cache", pollInterval: 10000
+    });
+
+    useEffect(() => {
+        if (error) {
+            console.log(error);
+        }
+    }, [error]);
+
+    return (data ?? previousData)?.accessRequests?.totalCount ?? 0;
 }

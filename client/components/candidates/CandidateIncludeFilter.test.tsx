@@ -21,6 +21,7 @@ describe("CandidateIncludeFilter", () => {
 
     it("stores selections as status numbers", async () => {
         const filter = new CandidateFilter();
+        filter.setAuthenticated(true);
 
         renderWithProviders(<CandidateIncludeFilter candidateFilter={filter}/>);
 

@@ -41,9 +41,19 @@ describe("Support", () => {
         renderWithProviders(<Support/>);
 
         expect(screen.getByText("Request Access")).toBeTruthy();
-        expect(screen.getByRole("textbox", {name: "Institution"})).toBeTruthy();
+        expect(screen.getByRole("textbox", {name: "Proposed Use"})).toBeTruthy();
         expect(screen.getByRole("button", {name: "Request"})).toBeDisabled();
         expect(screen.queryByText("You are authorized for")).toBeNull();
+    });
+
+    it.each([false, true])("offers the contact form when signed in is %s", isAuthenticated => {
+        authentication.isAuthenticated = isAuthenticated;
+
+        renderWithProviders(<Support/>, {user: makeUser(UserPermissions.None)});
+
+        expect(screen.getByText("Contact Portal Team")).toBeTruthy();
+        expect(screen.getByRole("textbox", {name: "Message"})).toBeTruthy();
+        expect(screen.getByRole("button", {name: "Send Message"})).toBeDisabled();
     });
 
     it("lists what a signed-in user is authorized for", () => {

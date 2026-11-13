@@ -12,9 +12,11 @@ import {CandidateFilter} from "../../viewmodel/candidateFilter";
 export const CandidateFilters = observer(({candidateFilter}: { candidateFilter: CandidateFilter }) => {
     return (
         <Group p={12} justify="left" align="center">
-            <CandidateIncludeFilter candidateFilter={candidateFilter}/>
+            {candidateFilter.isAuthenticated && <>
+                <CandidateIncludeFilter candidateFilter={candidateFilter}/>
 
-            <Divider orientation="vertical"/>
+                <Divider orientation="vertical"/>
+            </>}
 
             <SpecimenFilter w={160} filter={candidateFilter.samplesFilter}/>
 

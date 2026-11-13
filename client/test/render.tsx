@@ -30,11 +30,12 @@ type ProviderOptions = {
     user?: User;
     mocks?: ReadonlyArray<MockedResponse>;
     constants?: DataConstants;
+    route?: string;
 };
 
-export function Providers({user = null, mocks = [], constants = null, children}: ProviderOptions & { children: React.ReactNode }) {
+export function Providers({user = null, mocks = [], constants = null, route = "/", children}: ProviderOptions & { children: React.ReactNode }) {
     return (
-        <MemoryRouter>
+        <MemoryRouter initialEntries={[route]}>
             <MockedProvider mocks={mocks}>
                 <MantineProvider theme={testTheme}>
                     <UserContext.Provider value={user}>

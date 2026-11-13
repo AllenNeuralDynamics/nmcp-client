@@ -51,6 +51,7 @@ describe("CandidateFilter include selection", () => {
 
     it.each(rows)("%s → includeInProgress and excluded statuses", (_, selected, includeInProgress, excluded) => {
         const filter = new CandidateFilter();
+        filter.setAuthenticated(true);
         filter.includedStatuses = selected;
 
         expect(filter.includeInProgress).toBe(includeInProgress);
@@ -59,6 +60,7 @@ describe("CandidateFilter include selection", () => {
 
     it("counts any selection as filtering, not only In Progress", () => {
         const filter = new CandidateFilter();
+        filter.setAuthenticated(true);
         expect(filter.anyEnabled).toBe(false);
 
         filter.includedStatuses = [S.Duplicate];
@@ -67,6 +69,46 @@ describe("CandidateFilter include selection", () => {
 
     it("mirrors the API's default excluded statuses", () => {
         expect([...CandidateExcludedStatuses].sort()).toEqual([S.Duplicate, S.Incomplete, S.Untraceable].sort());
+    });
+});
+
+describe("CandidateFilter included statuses when signed out", () => {
+    const all = [AnnotationStatus.InProgress, AnnotationStatus.Duplicate, AnnotationStatus.Incomplete, AnnotationStatus.Untraceable];
+
+    it("is signed out until told otherwise", () => {
+        expect(new CandidateFilter().isAuthenticated).toBe(false);
+    });
+
+    it("ignores a stored selection in the query variables and the filtered state", () => {
+        const filter = new CandidateFilter("atlas-ccf");
+        filter.applySettings({...DefaultCandidateFilterSettings, includedStatuses: all}, () => undefined);
+
+        expect(filter.queryVariables.includeInProgress).toBe(false);
+        expect(filter.queryVariables.excludedAnnotationStatuses).toBeUndefined();
+        expect(filter.anyEnabled).toBe(false);
+    });
+
+    it("keeps the stored selection in the settings so it returns on sign-in", () => {
+        const filter = new CandidateFilter("atlas-ccf");
+        filter.includedStatuses = [AnnotationStatus.InProgress, AnnotationStatus.Duplicate];
+
+        expect(filter.settings.includedStatuses).toEqual([AnnotationStatus.InProgress, AnnotationStatus.Duplicate]);
+
+        filter.setAuthenticated(true);
+
+        expect(filter.queryVariables.includeInProgress).toBe(true);
+        expect(filter.queryVariables.excludedAnnotationStatuses).toEqual([AnnotationStatus.Incomplete, AnnotationStatus.Untraceable]);
+    });
+
+    it("drops the selection from the query again on sign-out", () => {
+        const filter = new CandidateFilter("atlas-ccf");
+        filter.setAuthenticated(true);
+        filter.includedStatuses = [AnnotationStatus.InProgress];
+
+        filter.setAuthenticated(false);
+
+        expect(filter.queryVariables.includeInProgress).toBe(false);
+        expect(filter.includedStatuses).toEqual([AnnotationStatus.InProgress]);
     });
 });
 
@@ -83,6 +125,7 @@ describe("CandidateFilter query variables", () => {
 
     it("carries each enabled filter", () => {
         const filter = new CandidateFilter("atlas-ccf");
+        filter.setAuthenticated(true);
 
         filter.samplesFilter.isEnabled = true;
         filter.samplesFilter.contents = ["s1"];

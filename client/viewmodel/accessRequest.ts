@@ -1,6 +1,7 @@
 import {makeAutoObservable} from "mobx";
 
-import {AccessRequestShape} from "../models/accessRequest";
+import {AccessRequestKind, AccessRequestShape} from "../models/accessRequest";
+import {User} from "../models/user";
 
 const emailValidationPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -10,8 +11,11 @@ export class AccessRequest implements AccessRequestShape {
     public emailAddress: string = "";
     public affiliation: string = "";
     public purpose: string = "";
+    public readonly requestKind: AccessRequestKind;
 
-    public constructor() {
+    public constructor(requestKind: AccessRequestKind = AccessRequestKind.Access) {
+        this.requestKind = requestKind;
+
         makeAutoObservable(this);
     }
 
@@ -21,6 +25,14 @@ export class AccessRequest implements AccessRequestShape {
         this.emailAddress = "";
         this.affiliation = "";
         this.purpose = "";
+    }
+
+    // Blanks only, so details typed before the user record arrives are kept.
+    public fillBlanksFrom(user: Pick<User, "firstName" | "lastName" | "emailAddress" | "affiliation">) {
+        this.firstName ||= user.firstName ?? "";
+        this.lastName ||= user.lastName ?? "";
+        this.emailAddress ||= user.emailAddress ?? "";
+        this.affiliation ||= user.affiliation ?? "";
     }
 
     public get isValidEmailAddress(): boolean {

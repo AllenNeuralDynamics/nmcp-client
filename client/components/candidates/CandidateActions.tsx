@@ -50,7 +50,7 @@ export const CandidateActions = ({neuron, showAnnotators, onReconstructionStarte
         } actions={isAuthenticated ? null : <RequestAccess onResponse={onRequestAccessResponse}/>} modal={modal}/>
     }
 
-    const isUser = isUserAnnotation(user.id, neuron.annotations);
+    const isUser = user != null && isUserAnnotation(user.id, neuron.annotations);
 
     const canAnnotate = !loading && !isUser;
 

@@ -1,7 +1,7 @@
-import React, {useContext} from "react"
-import {Navigate} from "react-router-dom";
+import React, {useContext, useEffect} from "react"
+import {Navigate, useSearchParams} from "react-router-dom";
 import {Indicator, Tabs} from "@mantine/core";
-import {IconBook, IconFlagExclamation, IconKey, IconPackage, IconUserPlus, IconUsers} from "@tabler/icons-react";
+import {IconBook, IconFlagExclamation, IconKey, IconMessages, IconPackage, IconUserPlus, IconUsers} from "@tabler/icons-react";
 
 import {NotificationContext} from "../app/NotificationsApp";
 import {Users} from "./users/Users";
@@ -9,12 +9,12 @@ import {Collections} from "./system/Collections";
 import {Published} from "./published/Published";
 import {Issues} from "./issues/Issues";
 import {ApiKeys} from "./apiKeys/ApiKeys";
-import {AccessRequests} from "./accessRequests/AccessRequests";
+import {AccessRequests, Feedback} from "./accessRequests/AccessRequests";
 import {useUser} from "../../hooks/useUser";
 import {UserPermissions} from "../../graphql/user";
 import {usePageSettings} from "../../hooks/usePageSettings";
 import {sectionOf} from "../../util/pageSettings";
-import {AdminSettings} from "./adminSettings";
+import {AdminSettings, AdminTabs} from "./adminSettings";
 
 const iconSize = 24;
 
@@ -29,6 +29,24 @@ export const Admin = () => {
 
     const notifications = useContext(NotificationContext);
 
+    const [searchParams, setSearchParams] = useSearchParams();
+
+    const requestedTab = searchParams.get("tab");
+
+    const linkedTab = AdminTabs.includes(requestedTab) ? requestedTab : null;
+
+    // A linked tab becomes the stored one and leaves the URL, so later tab changes and reloads behave as if it had been
+    // clicked.  It is selected from the first render rather than after the effect, so the stored tab never flashes first.
+    useEffect(() => {
+        if (linkedTab) {
+            update(s => ({...s, tab: linkedTab}));
+            setSearchParams(params => {
+                params.delete("tab");
+                return params;
+            }, {replace: true});
+        }
+    }, [linkedTab]);
+
     const onChangeTab = (tab: string | null) => {
         if (tab) {
             update(s => ({...s, tab}));
@@ -36,7 +54,7 @@ export const Admin = () => {
     }
 
     return (
-        <Tabs m={20} value={settings.tab} onChange={onChangeTab}>
+        <Tabs m={20} value={linkedTab ?? settings.tab} onChange={onChangeTab}>
             <Tabs.List>
                 <Tabs.Tab value="users" leftSection={<IconUsers size={iconSize}/>}>
                     Users
@@ -52,8 +70,15 @@ export const Admin = () => {
                                                    ml={-2} mt={-12}/>}>
                     Issues
                 </Tabs.Tab>
-                <Tabs.Tab value="accessrequests" leftSection={<IconUserPlus size={iconSize}/>}>
+                <Tabs.Tab value="accessrequests" leftSection={<IconUserPlus size={iconSize}/>}
+                          rightSection={<Indicator label={notifications.openAccessRequestCount} inline color="yellow" autoContrast
+                                                   disabled={notifications.openAccessRequestCount == 0} size={16} ml={-2} mt={-12}/>}>
                     Access Requests
+                </Tabs.Tab>
+                <Tabs.Tab value="feedback" leftSection={<IconMessages size={iconSize}/>}
+                          rightSection={<Indicator label={notifications.openFeedbackCount} inline color="blue" disabled={notifications.openFeedbackCount == 0}
+                                                   size={16} ml={-2} mt={-12}/>}>
+                    Feedback & Messages
                 </Tabs.Tab>
                 <Tabs.Tab value="apikeys" leftSection={<IconKey size={iconSize}/>}>
                     API Keys
@@ -78,6 +103,10 @@ export const Admin = () => {
 
             <Tabs.Panel value="accessrequests" mt={16}>
                 <AccessRequests settings={settings.accessRequests} onSettingsChange={sectionOf(update, "accessRequests")}/>
+            </Tabs.Panel>
+
+            <Tabs.Panel value="feedback" mt={16}>
+                <Feedback settings={settings.feedback} onSettingsChange={sectionOf(update, "feedback")}/>
             </Tabs.Panel>
 
             <Tabs.Panel value="apikeys" mt={16}>

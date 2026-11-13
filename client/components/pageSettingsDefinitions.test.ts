@@ -57,12 +57,14 @@ describe("page settings definitions", () => {
             ...d,
             tab: "nope",
             publishing: {...d.publishing, filters: {status: "nope"}},
-            accessRequests: {...d.accessRequests, filters: {statuses: {enabled: true, contents: [AccessRequestStatus.Pending, AccessRequestStatus.Denied]}}}
+            accessRequests: {...d.accessRequests, filters: {statuses: {enabled: true, contents: [AccessRequestStatus.Pending, AccessRequestStatus.Denied]}}},
+            feedback: {...d.feedback, filters: {statuses: {enabled: true, contents: [AccessRequestStatus.Accepted, AccessRequestStatus.Denied]}}}
         }));
 
         expect(settings.tab).toBe("users");
         expect(settings.publishing.filters.status).toBe("published");
         expect(settings.accessRequests.filters.statuses.contents).toEqual([AccessRequestStatus.Denied]);
+        expect(settings.feedback.filters.statuses.contents).toEqual([AccessRequestStatus.Accepted]);
     });
 
     it("fall back for unknown review and neuron tabs", () => {

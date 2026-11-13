@@ -3,27 +3,31 @@ import {observer} from "mobx-react-lite";
 import {Group, MultiSelect, Switch} from "@mantine/core";
 
 import {OptionalFilter} from "../../../viewmodel/candidateFilter";
-import {AccessRequestStatus, accessRequestStatusName} from "../../../models/accessRequest";
+import {AccessRequestKind, AccessRequestStatus, accessRequestStatusName} from "../../../models/accessRequest";
 
 // Pending is omitted while nothing in the workflow puts a request into that state.
 export const AccessRequestStatusFilterOptions = [AccessRequestStatus.Unreviewed, AccessRequestStatus.Accepted, AccessRequestStatus.Denied];
 
-function createOptions(allowed: AccessRequestStatus[]): { label: string, value: string }[] {
+// A message is only ever marked as responded, so Denied has no way in.
+export const FeedbackStatusFilterOptions = [AccessRequestStatus.Unreviewed, AccessRequestStatus.Accepted];
+
+function createOptions(allowed: AccessRequestStatus[], kind: AccessRequestKind): { label: string, value: string }[] {
     return allowed.map(a => {
-        return {label: accessRequestStatusName(a), value: a.toString()}
+        return {label: accessRequestStatusName(a, kind), value: a.toString()}
     });
 }
 
 type AccessRequestStatusFilterProps = {
     filter: OptionalFilter<AccessRequestStatus[]>,
     allowedValues?: AccessRequestStatus[],
+    kind?: AccessRequestKind,
     w?: number
 }
 
-export const AccessRequestStatusFilter = observer(({filter, allowedValues = AccessRequestStatusFilterOptions, w = null}: AccessRequestStatusFilterProps) => {
+export const AccessRequestStatusFilter = observer(({filter, allowedValues = AccessRequestStatusFilterOptions, kind = AccessRequestKind.Access, w = null}: AccessRequestStatusFilterProps) => {
     const props = w ? {w: w} : {miw: 200};
 
-    const options = createOptions(allowedValues);
+    const options = createOptions(allowedValues, kind);
 
     const value = filter.contents.map(s => s.toString());
 

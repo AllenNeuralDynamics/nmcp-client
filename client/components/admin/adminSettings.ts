@@ -11,9 +11,9 @@ import {
 import {OptionalFilterSettings} from "../../viewmodel/candidateFilter";
 import {AccessRequestStatus} from "../../models/accessRequest";
 import {StatusFilterType, StatusFilterTypes} from "./published/usePublishedQueueState";
-import {AccessRequestStatusFilterOptions} from "../common/filters/AccessRequestStatusFilter";
+import {AccessRequestStatusFilterOptions, FeedbackStatusFilterOptions} from "../common/filters/AccessRequestStatusFilter";
 
-export const AdminTabs = ["users", "accessrequests", "collections", "published", "issues", "apikeys"];
+export const AdminTabs = ["users", "accessrequests", "feedback", "collections", "published", "issues", "apikeys"];
 
 export type AdminTabProps<T> = {
     settings: T;
@@ -50,6 +50,30 @@ export type AdminPageSettings = {
     publishing: AdminPublishingSettings;
     issues: AdminSelectionSettings;
     accessRequests: AdminAccessRequestsSettings;
+    feedback: AdminAccessRequestsSettings;
+}
+
+// Unreviewed requests are the ones that require action, so they are what is shown until the user asks for something else.
+// Each call makes its own list, since numberList tags the instance with its element type.
+function unreviewedRequestDefaults(): AdminAccessRequestsSettings {
+    return {
+        filters: {statuses: {enabled: true, contents: numberList(AccessRequestStatus.Unreviewed)}},
+        pagination: DefaultPagination,
+        selectedId: null
+    };
+}
+
+function sanitizeRequests(settings: AdminAccessRequestsSettings, allowed: AccessRequestStatus[]): AdminAccessRequestsSettings {
+    return {
+        ...settings,
+        filters: {
+            statuses: {
+                ...settings.filters.statuses,
+                contents: settings.filters.statuses.contents.filter(s => allowed.includes(s))
+            }
+        },
+        pagination: sanitizePagination(settings.pagination)
+    };
 }
 
 export const AdminSettings: PageSettingsDefinition<AdminPageSettings> = {
@@ -61,12 +85,8 @@ export const AdminSettings: PageSettingsDefinition<AdminPageSettings> = {
         collections: {selectedId: null},
         publishing: {filters: {status: "published"}, pagination: DefaultPagination, selectedId: null},
         issues: {selectedId: null},
-        // Unreviewed requests are the ones that require action, so they are what is shown until the user asks for something else.
-        accessRequests: {
-            filters: {statuses: {enabled: true, contents: numberList(AccessRequestStatus.Unreviewed)}},
-            pagination: DefaultPagination,
-            selectedId: null
-        }
+        accessRequests: unreviewedRequestDefaults(),
+        feedback: unreviewedRequestDefaults()
     },
     sanitize: settings => ({
         ...settings,
@@ -77,15 +97,7 @@ export const AdminSettings: PageSettingsDefinition<AdminPageSettings> = {
             filters: {status: oneOf(settings.publishing.filters.status, StatusFilterTypes, "published")},
             pagination: sanitizePagination(settings.publishing.pagination)
         },
-        accessRequests: {
-            ...settings.accessRequests,
-            filters: {
-                statuses: {
-                    ...settings.accessRequests.filters.statuses,
-                    contents: settings.accessRequests.filters.statuses.contents.filter(s => AccessRequestStatusFilterOptions.includes(s))
-                }
-            },
-            pagination: sanitizePagination(settings.accessRequests.pagination)
-        }
+        accessRequests: sanitizeRequests(settings.accessRequests, AccessRequestStatusFilterOptions),
+        feedback: sanitizeRequests(settings.feedback, FeedbackStatusFilterOptions)
     })
 };

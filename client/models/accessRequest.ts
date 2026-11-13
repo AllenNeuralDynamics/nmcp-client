@@ -6,7 +6,13 @@ export enum RequestAccessResponse {
     DuplicateOpen = 200,
     DuplicateApproved = 220,
     DuplicateDenied = 240,
+    TooManyOpenFeedback = 260,
     Throttled = 300
+}
+
+export enum AccessRequestKind {
+    Access = 0,
+    Feedback = 100
 }
 
 export enum AccessRequestStatus {
@@ -16,14 +22,18 @@ export enum AccessRequestStatus {
     Denied = 300
 }
 
-export const accessRequestStatusName = (status: AccessRequestStatus): string => {
+// Mirrors the API's open statuses, the ones its per-address feedback limit counts.
+export const OpenAccessRequestStatuses = [AccessRequestStatus.Unreviewed, AccessRequestStatus.Pending];
+
+// Feedback has no acceptance; marking a message as responded stores the same Accepted status an access request gets.
+export const accessRequestStatusName = (status: AccessRequestStatus, kind: AccessRequestKind = AccessRequestKind.Access): string => {
     switch (status) {
         case AccessRequestStatus.Unreviewed:
             return "Unreviewed";
         case AccessRequestStatus.Pending:
             return "Pending";
         case AccessRequestStatus.Accepted:
-            return "Accepted";
+            return kind === AccessRequestKind.Feedback ? "Responded" : "Accepted";
         case AccessRequestStatus.Denied:
             return "Denied";
         default:
@@ -52,6 +62,7 @@ export interface AccessRequestShape {
     emailAddress: string;
     affiliation: string;
     purpose: string;
+    requestKind: AccessRequestKind;
 }
 
 export interface AccessRequest extends AccessRequestShape {

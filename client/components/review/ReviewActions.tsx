@@ -77,7 +77,7 @@ export const ReviewActions = ({reconstruction}: { reconstruction: Annotation }) 
     const [resetPipeline] = useMutation<ResetReconstructionPipelineResponse, AnnotationStatusModifierArgs>(RESET_RECONSTRUCTION_PIPELINE_MUTATION,
         {
             refetchQueries: [ANNOTATIONS_QUERY],
-            onError: (e) => errorNotification("Error Replaying Pipeline", e.message)
+            onError: (e) => errorNotification("Error Replaying Finalization", e.message)
         });
 
     if (!reconstruction) {
