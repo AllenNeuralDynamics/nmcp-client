@@ -1,7 +1,7 @@
 import * as React from "react";
 import {Link} from "react-router-dom";
 import {observer} from "mobx-react-lite";
-import {ActionIcon, Button, ColorPicker, ColorSwatch, Divider, Group, Popover, Stack, Table, Text, Tooltip} from "@mantine/core";
+import {ActionIcon, Anchor, Button, ColorPicker, ColorSwatch, Divider, Group, Popover, Stack, Table, Text, Tooltip} from "@mantine/core";
 import {useDisclosure} from "@mantine/hooks";
 import {IconSquare, IconSquareCheck} from "@tabler/icons-react";
 
@@ -71,8 +71,8 @@ export const NeuronRow = observer((props: NeuronRowProps) => {
             </Table.Td>
             <Table.Td style={{verticalAlign: "middle"}}>
                 <Stack gap={0}>
-                    <Link to={`/neuron/${v.neuron.id}`}>{v.Label}</Link>
-                    <Text size="xs" c="dimmed">{v.neuron.specimen.label}</Text>
+                    <Anchor component={Link} to={`/neuron/${v.neuron.id}`} inherit>{v.Label}</Anchor>
+                    <Anchor component={Link} to={`/specimen/${v.neuron.specimen.id}`} size="xs" c="dimmed">{v.neuron.specimen.label}</Anchor>
                 </Stack>
             </Table.Td>
             <Table.Td>

@@ -1,6 +1,6 @@
 import * as React from "react";
 import {useEffect, useMemo} from "react";
-import {Navigate, useLocation, useNavigate, useParams} from "react-router-dom";
+import {Link, Navigate, useLocation, useNavigate, useParams} from "react-router-dom";
 import {ApolloError, useQuery} from "@apollo/client";
 import {Alert, Anchor, Badge, Card, Divider, Group, Stack, Tabs, Text} from "@mantine/core";
 import {useClipboard} from "@mantine/hooks";
@@ -210,7 +210,7 @@ export const Neuron = () => {
                                 <Text size="lg" fw={500}>Neuron {data.neuron.label}</Text>
                                 {info}
                             </Group>
-                            <Text size="sm" c="dimmed">Specimen {data.neuron.specimen.label}</Text>
+                            <Text size="sm" c="dimmed">Specimen <Anchor component={Link} to={`/specimen/${data.neuron.specimen.id}`} inherit c="dimmed">{data.neuron.specimen.label}</Anchor></Text>
                         </Stack>
                         <Group gap={16} align="center">
                             <Stack gap={2} align="flex-end">
