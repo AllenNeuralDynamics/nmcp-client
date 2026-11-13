@@ -34,7 +34,7 @@ describe("Support", () => {
 
         expect(screen.queryByText("Documentation and Access")).toBeNull();
         expect(screen.getByText("Documentation")).toBeTruthy();
-        expect(screen.getByText("Neuron Morphology Community Portal documentation coming soon.")).toBeTruthy();
+        expect(screen.getByRole("link", {name: "Neuron Morphology Community Portal Getting Started Guide"})).toHaveAttribute("href", "https://dx.doi.org/10.17504/protocols.io.1wgb1dkqyvpk/v1");
     });
 
     it("embeds the access request form when signed out", () => {
